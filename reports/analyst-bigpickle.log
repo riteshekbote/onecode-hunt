@@ -1,0 +1,38 @@
+===== ANALYST bigpickle 2026-09-03 16:16:20 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "**/*onecode*"[90m 1 match[0m
+[0m✱ [0mGlob "**/*api*"[90m 0 matches[0m
+[0m✱ [0mGlob "**/*scope*"[90m 1 match[0m
+[0m→ [0mRead inventory/onecode.md
+[0m→ [0mRead scope.yml
+**STEP 1 — DELTA**
+NO_DELTA. Inventory shows 3 live HTTP hosts, no API endpoints documented yet.
+
+**STEP 2 — PRIORITIZE**
+No API assets identified. All 3 live hosts are web surfaces only (kurs.onecode.de Railway app, www.onecode.de Webflow, mta-sts.onecode.de redirect).
+
+**STEP 3 — HYPOTHESES**
+[HYP] Railway app API discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/, GET https://kurs.onecode.de/v1/, GET https://kurs.onecode.de/graphql, GET https://kurs.onecode.de/swagger
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+
+**STEP 4 — SELF-CRITIQUE**
+[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+
+**STEP 5 — NEXT ACTION**
+[NEXT] PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+
+**STEP 6 — LEARNING**
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+
+**STEP 7 — RISK**
+[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
