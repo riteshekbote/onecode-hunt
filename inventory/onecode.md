@@ -55,3 +55,6 @@ www.onecode.de
 ## 2026-09-03 16:16:20 UTC
 
 ## 2026-09-03 19:28:15 UTC
+
+## 2026-09-03 21:54:04 UTC
+- NEW Probe completed: GET https://kurs.onecode.de/login returns 200 with Next.js login form (email/password), no Set-Cookie header, no visible CSRF token in form. Root /, /api, /graphql, /dashboard all 307

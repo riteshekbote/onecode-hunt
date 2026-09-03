@@ -94,3 +94,1007 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+===== ANALYST bigpickle 2026-09-03 21:54:04 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/onecode-hunt/onecode-hunt 2>/dev/null; echo "---"; ls -la /home/runner/work/onecode-hunt/onecode-hunt/art 2>/dev/null; echo "---LEADS bigpickle---"; cat /home/runner/work/onecode-hunt/onecode-hunt/art/lead_bigpickle.txt 2>/dev/null | tail -30
+total 116
+drwxr-xr-x 12 runner runner  4096 Sep  3 21:47 .
+drwxr-xr-x  3 runner runner  4096 Sep  3 21:46 ..
+drwxr-xr-x  7 runner runner  4096 Sep  3 21:47 .git
+drwxr-xr-x  3 runner runner  4096 Sep  3 21:46 .github
+-rw-r--r--  1 runner runner  1692 Sep  3 21:46 README.md
+-rw-r--r--  1 runner runner    32 Sep  3 21:47 analyst-out.txt
+-rw-r--r--  1 runner runner 13825 Sep  3 21:47 analyst-prompt.txt
+-rw-r--r--  1 runner runner  9976 Sep  3 21:47 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 leads
+-rw-r--r--  1 runner runner   203 Sep  3 21:46 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 reports
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 reposcan-raw
+-rw-r--r--  1 runner runner  3268 Sep  3 21:46 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 scripts
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_bigpickle.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_laguna.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_ling3.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  3 21:46 state_mimo.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 triage
+---
+---LEADS bigpickle---
+[0m
+I'll analyze the security hypotheses for the OneCode GmbH program, focusing on my current target of the Railway-hosted kurs.onecode.de API.
+
+Let me first check the current state of the workspace files.
+[0m$ [0mcat /home/runner/work/onecode-hunt/onecode-hunt/scope.yml 2>/dev/null; echo "---"; ls -la /home/runner/work/onecode-hunt/onecode-hunt/inventory 2>/dev/null
+programs:
+  onecode:
+    name: OneCode GmbH Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "*.onecode.de, kurs.onecode.de; All company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH"
+        priority: In
+    out_of_scope:
+      - "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+  passive_first: false          # deep-hunt agent: active probes allowed when scoped
+  max_requests_per_second: 1    # never hammer live infra
+  no_doom: true                 # no DoS/DDoS, no account-lockout attacks
+  account_creation: restricted  # only on test/sandbox assets, never live customer data
+  no_data_modification: true    # no writes/deletes on live customer data
+  no_pre_disclosure: true       # never disclose before program response
+  poc_required: true            # scanner output alone is REJECTED
+  redact_secrets_in_commits: true
+
+models:
+  - { id: opencode/big-pickle, name: bigpickle }
+  - { id: opencode/nemotron-3-ultra-free, name: nemotron3 }
+  - { id: opencode/longcat-2.0-free, name: longcat }
+  - { id: opencode/ling-3.0-flash-free, name: ling3 }
+  - { id: opencode/laguna-s-2.1-free, name: laguna }
+---
+total 12
+drwxr-xr-x  2 runner runner 4096 Sep  3 21:46 .
+drwxr-xr-x 12 runner runner 4096 Sep  3 21:47 ..
+-rw-r--r--  1 runner runner 2437 Sep  3 21:46 onecode.md
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "===state==="; cat state_bigpickle.json; echo; echo "===analyst-out==="; cat analyst-out.txt; echo; echo "===leads dir==="; ls -la leads/; echo "===knowledge dir==="; ls -la knowledge/; echo "===reports==="; ls -la reports/ 2>/dev/null
+===state===
+{"phase": "HYPOTHESIS", "target": "api"}
+===analyst-out===
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/onecode-hunt/onecode-hunt 2>/dev/null; echo "---"; ls -la /home/runner/work/onecode-hunt/onecode-hunt/art 2>/dev/null; echo "---LEADS bigpickle---"; cat /home/runner/work/onecode-hunt/onecode-hunt/art/lead_bigpickle.txt 2>/dev/null | tail -30
+total 116
+drwxr-xr-x 12 runner runner  4096 Sep  3 21:47 .
+drwxr-xr-x  3 runner runner  4096 Sep  3 21:46 ..
+drwxr-xr-x  7 runner runner  4096 Sep  3 21:47 .git
+drwxr-xr-x  3 runner runner  4096 Sep  3 21:46 .github
+-rw-r--r--  1 runner runner  1692 Sep  3 21:46 README.md
+-rw-r--r--  1 runner runner    32 Sep  3 21:47 analyst-out.txt
+-rw-r--r--  1 runner runner 13825 Sep  3 21:47 analyst-prompt.txt
+-rw-r--r--  1 runner runner  9976 Sep  3 21:47 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 leads
+-rw-r--r--  1 runner runner   203 Sep  3 21:46 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 reports
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 reposcan-raw
+-rw-r--r--  1 runner runner  3268 Sep  3 21:46 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 scripts
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_bigpickle.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_laguna.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_ling3.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  3 21:46 state_mimo.json
+-rw-r--r--  1 runner runner    40 Sep  3 21:46 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 triage
+---
+---LEADS bigpickle---
+[0m
+I'll analyze the security hypotheses for the OneCode GmbH program, focusing on my current target of the Railway-hosted kurs.onecode.de API.
+
+Let me first check the current state of the workspace files.
+[0m$ [0mcat /home/runner/work/onecode-hunt/onecode-hunt/scope.yml 2>/dev/null; echo "---"; ls -la /home/runner/work/onecode-hunt/onecode-hunt/inventory 2>/dev/null
+programs:
+  onecode:
+    name: OneCode GmbH Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "*.onecode.de, kurs.onecode.de; All company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH"
+        priority: In
+    out_of_scope:
+      - "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+  passive_first: false          # deep-hunt agent: active probes allowed when scoped
+  max_requests_per_second: 1    # never hammer live infra
+  no_doom: true                 # no DoS/DDoS, no account-lockout attacks
+  account_creation: restricted  # only on test/sandbox assets, never live customer data
+  no_data_modification: true    # no writes/deletes on live customer data
+  no_pre_disclosure: true       # never disclose before program response
+  poc_required: true            # scanner output alone is REJECTED
+  redact_secrets_in_commits: true
+
+models:
+  - { id: opencode/big-pickle, name: bigpickle }
+  - { id: opencode/nemotron-3-ultra-free, name: nemotron3 }
+  - { id: opencode/longcat-2.0-free, name: longcat }
+  - { id: opencode/ling-3.0-flash-free, name: ling3 }
+  - { id: opencode/laguna-s-2.1-free, name: laguna }
+---
+total 12
+drwxr-xr-x  2 runner runner 4096 Sep  3 21:46 .
+drwxr-xr-x 12 runner runner 4096 Sep  3 21:47 ..
+-rw-r--r--  1 runner runner 2437 Sep  3 21:46 onecode.md
+[0m
+
+===leads dir===
+total 44
+drwxr-xr-x  2 runner runner 4096 Sep  3 21:46 .
+drwxr-xr-x 12 runner runner 4096 Sep  3 21:47 ..
+-rw-r--r--  1 runner runner 3211 Sep  3 21:46 lead-bigpickle.md
+-rw-r--r--  1 runner runner  102 Sep  3 21:46 lead-laguna.md
+-rw-r--r--  1 runner runner  100 Sep  3 21:46 lead-ling3.md
+-rw-r--r--  1 runner runner  104 Sep  3 21:46 lead-longcat.md
+-rw-r--r--  1 runner runner   18 Sep  3 21:46 lead-mimo.md
+-rw-r--r--  1 runner runner 8643 Sep  3 21:46 lead-nemotron3.md
+-rw-r--r--  1 runner runner  594 Sep  3 21:46 reposcan-onecode.md
+===knowledge dir===
+total 12
+drwxr-xr-x  2 runner runner 4096 Sep  3 21:46 .
+drwxr-xr-x 12 runner runner 4096 Sep  3 21:47 ..
+-rw-r--r--  1 runner runner  908 Sep  3 21:46 index.md
+===reports===
+total 76
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 .
+drwxr-xr-x 12 runner runner  4096 Sep  3 21:47 ..
+-rw-r--r--  1 runner runner  4513 Sep  3 21:46 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   434 Sep  3 21:46 analyst-laguna.log
+-rw-r--r--  1 runner runner   432 Sep  3 21:46 analyst-ling3.log
+-rw-r--r--  1 runner runner   436 Sep  3 21:46 analyst-longcat.log
+-rw-r--r--  1 runner runner 15471 Sep  3 21:46 analyst-nemotron3.log
+-rw-r--r--  1 runner runner  2240 Sep  3 21:46 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner    51 Sep  3 21:46 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner    50 Sep  3 21:46 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner    52 Sep  3 21:46 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner  4200 Sep  3 21:46 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  3248 Sep  3 21:46 hypotheses.md
+-rw-r--r--  1 runner runner    39 Sep  3 21:46 valid-bugs.md
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "===probe-results==="; cat probe-results.md; echo "===inventory==="; cat inventory/onecode.md
+===probe-results===
+
+## 2026-09-02 21:41:05 UTC
+
+
+## 2026-09-02 23:34:10 UTC
+
+
+## 2026-09-03 01:27:20 UTC
+
+
+## 2026-09-03 06:31:56 UTC
+
+
+## 2026-09-03 11:43:44 UTC
+
+
+## 2026-09-03 16:16:20 UTC
+
+
+## 2026-09-03 19:28:15 UTC
+
+===inventory===
+# OneCode GmbH inventory (discovered 2026-09-02)
+
+cto.onecode.de
+hostmaster.hostmaster.onecode.de
+hostmaster.hostmaster.www.onecode.de
+hostmaster.onecode.de
+hostmaster.www.onecode.de
+kurs.onecode.de
+mail.onecode.de
+mta-sts.onecode.de
+onecode.de
+www.onecode.de
+
+## PASSIVE RECON 2026-09-02 (read-only, non-intrusive)
+
+> Recon observations only. These are NOT confirmed vulnerabilities; ownership/in-scope of each host must be confirmed against the program scope before any active testing. Hosts resolve + serve HTTP — investigation requires scoped authorization.
+
+**Probed:** 10 hosts | **Live HTTP:** 3
+
+| Host | Status | Server/Tech |
+|---|---|---|
+| `kurs.onecode.de` | 307 | Server: railway-hikari -> /login |
+| `www.onecode.de` | 200 | Server: cloudflare |
+| `mta-sts.onecode.de` | 301 | Server: cloudflare -> https://www.onecode.de/ |
+
+**CNAME review signals (3):**
+- `kurs.onecode.de` -> `tgk4io5m.up.railway.app`
+- `www.onecode.de` -> `cdn.webflow.com`
+- `mta-sts.onecode.de` -> `cdn.webflow.com`
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `kurs.onecode.de` | **Ports:** [80, 443]
+**Web surface only:** [80, 443]
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `mta-sts.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+**Non-web ports observed:** [2082, 2083, 2086, 2087, 8080, 8443]
+> NOTE: repeated identical non-web port sets (e.g. 2082,2083,2086,2087,8080,8443) across many hosts and wide port sets are likely a shared edge/proxy answering EOF, NOT confirmed real services. Verify with a proper port scanner (e.g. nmap) under authorization before treating as real. These are surface-map hints only, not findings.
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `www.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+**Non-web ports observed:** [2082, 2083, 2086, 2087, 8080, 8443]
+> NOTE: repeated identical non-web port sets (e.g. 2082,2083,2086,2087,8080,8443) across many hosts and wide port sets are likely a shared edge/proxy answering EOF, NOT confirmed real services. Verify with a proper port scanner (e.g. nmap) under authorization before treating as real. These are surface-map hints only, not findings.
+
+## 2026-09-02 21:41:05 UTC
+
+## 2026-09-02 23:34:10 UTC
+
+## 2026-09-03 01:27:20 UTC
+
+## 2026-09-03 06:31:56 UTC
+
+## 2026-09-03 11:43:43 UTC
+
+## 2026-09-03 16:16:20 UTC
+
+## 2026-09-03 19:28:15 UTC
+[0m
+Let me examine the current state, leads, and knowledge base to understand where I am in the hunt cycle.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "===hypotheses-bigpickle==="; cat reports/hypotheses-bigpickle.txt; echo; echo "===hypotheses.md==="; cat reports/hypotheses.md
+===hypotheses-bigpickle===
+## 2026-09-03 19:20:17 UTC [target] (model bigpickle)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+
+===hypotheses.md===
+# Hypotheses (ranked)
+
+## RANKED HYPOTHESES 2026-09-02 21:41:05 UTC
+
+## RANKED HYPOTHESES 2026-09-02 23:34:10 UTC
+
+## RANKED HYPOTHESES 2026-09-03 01:27:20 UTC
+
+## RANKED HYPOTHESES 2026-09-03 06:31:56 UTC
+
+## RANKED HYPOTHESES 2026-09-03 11:43:43 UTC
+
+## RANKED HYPOTHESES 2026-09-03 16:16:20 UTC
+- [65] kurs.onecode.de: Railway-hosted auth bypass via session fixation on kurs.onecode.de (from art/lead_nemotron3.txt)
+- [40] kurs.onecode.de: Railway app API discovery (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resoluti
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+
+## RANKED HYPOTHESES 2026-09-03 19:28:15 UTC
+- [65] kurs.onecode.de: Session fixation via pre-auth cookie reuse on Railway-hosted kurs.onecode.de (from art/lead_nemotron3.txt)
+- [65] kurs.onecode.de: Session fixation on Railway-hosted kurs.onecode.de (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resoluti
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface (from bigpickle).
+[0m
+Let me review my previous hypotheses and the other analysts' leads to understand where the aggregate stands.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "===lead-bigpickle==="; cat leads/lead-bigpickle.md; echo "===reposcan-onecode==="; cat leads/reposcan-onecode.md; echo "===knowledge index==="; cat knowledge/index.md
+===lead-bigpickle===
+## 2026-09-03 16:10:54 UTC [target] (model bigpickle)
+[HYP] Railway app API discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/, GET https://kurs.onecode.de/v1/, GET https://kurs.onecode.de/graphql, GET https://kurs.onecode.de/swagger
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+[NEXT] PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+## 2026-09-03 19:20:17 UTC [target] (model bigpickle)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+===reposcan-onecode===
+## REPOSCAN 2026-09-03 16:11:05 UTC
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-03 19:20:30 UTC
+[HYP] No repo audit candidates
+class: OTHER
+asset: N/A
+confidence: 100
+reasoning: github_orgs is set to none-configured; cands.txt lists no org candidates; the only GitHub OneCode repo (hello-guide) is an empty test repo with zero code.
+impact: None
+verify_steps: Confirm with program maintainer whether any public GitHub orgs should be added to scope.yml github_orgs for reposcan.
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
+===knowledge index===
+# Knowledge Base (seed)
+- 2026-09-03 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-09-03 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-09-03 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution against provider APIs; parked for future re-evaluation if CNAME targets identified.
+- 2026-09-03 ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API).
+- 2026-09-03 ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible).
+- 2026-09-03 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface (from bigpickle).
+[0m
+Now I have a full picture. The aggregate hypotheses have converged on `kurs.onecode.de`. My state is `HYPOTHESIS` targeting `api`. The last run proposed probing `/login` and `/api/`. Since I'm the analyst agent, my job is the 8-step analysis. The `[NEXT] PROBE` actions are for other agents to execute.
+
+Let me run the analysis. There's no delta in the inventory — same 10 hosts. Let me think about prioritization and whether I should emit the PROBE for additional API discovery on kurs.onecode.de (my target is `api`).
+
+Let me output structured blocks per my role.
+
+STEP 1 — DELTA: No new/changed assets since last cycle. The inventory is static (10 hosts, 3 live). NO_DELTA in surface; the only change is the aggregate hypothesis convergence on kurs.onecode.de (session fixation @65, IDOR @60, API discovery @40).
+
+STEP 2 — PRIORITIZE: Focus on kurs.onecode.de since it's the only non-Webflow interactive app. Score:
+- kurs.onecode.de: attack_surface=6 (single Railway app, but interactive/auth'd), business_value=8 (course platform, PII), tech_exposure=8 (Railway, auth flow, possible API), gate_ease=5 (login required for deep stuff, but /login and API paths reachable), cloud_surface=7 (Railway-hosted), freshness=3 (already heavily probed). priority = 0.25*6 + 0.25*8 + 0.15*8 + 0.15*5 + 0.10*7 + 0.10*3 = 1.5+2.0+1.2+0.75+0.7+0.3 = 6.45.
+- www.onecode.de (Webflow): attack_surface=3, business_value=5, tech_exposure=2, gate_ease=10, cloud_surface=2 (CDN), freshness=4 → lower.
+- OneCode repos: none (empty repo).
+
+STEP 3 — HYPOTHESES: top-3 assets but only kurs.onecode.de and www are meaningful. Given my target=api and the convergence, I'll keep the API discovery hypothesis focused and elevate path enumeration beyond just /api/. Since the session-fixation and IDOR are already ACCEPTED by others, I should add fresh differentiated value rather than duplicate. My distinct angle: GraphQL introspect + API path verb semantics on kurs.onecode.de, since my target is `api` and GraphQL hasn't been explicitly probed.
+
+Let me write one hypothesis (max 1 per asset) for kurs.onecode.de targeting the API surface (my assignment).
+
+STEP 4/5/6/7 accordingly.
+
+Let me write the output to the hypotheses-bigpickle.txt and a log, per the repo's conventions. Let me check how outputs are committed.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "===reports dir==="; ls -la reports/; echo "===git log==="; git log --oneline -8; echo "===git status==="; git status
+===reports dir===
+total 76
+drwxr-xr-x  2 runner runner  4096 Sep  3 21:46 .
+drwxr-xr-x 12 runner runner  4096 Sep  3 21:47 ..
+-rw-r--r--  1 runner runner  4513 Sep  3 21:46 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   434 Sep  3 21:46 analyst-laguna.log
+-rw-r--r--  1 runner runner   432 Sep  3 21:46 analyst-ling3.log
+-rw-r--r--  1 runner runner   436 Sep  3 21:46 analyst-longcat.log
+-rw-r--r--  1 runner runner 15471 Sep  3 21:46 analyst-nemotron3.log
+-rw-r--r--  1 runner runner  2240 Sep  3 21:46 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner    51 Sep  3 21:46 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner    50 Sep  3 21:46 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner    52 Sep  3 21:46 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner  4200 Sep  3 21:46 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  3248 Sep  3 21:46 hypotheses.md
+-rw-r--r--  1 runner runner    39 Sep  3 21:46 valid-bugs.md
+===git log===
+545561f hunt cycle 2026-09-03-19-28
+===git status===
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	analyst-out.txt
+	analyst-prompt.txt
+	ctx.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; wc -l analyst-prompt.txt ctx.txt; echo "===ctx==="; cat ctx.txt
+183 analyst-prompt.txt
+  154 ctx.txt
+  337 total
+===ctx===
+=== KNOWLEDGE BASE ===
+# Knowledge Base (seed)
+- 2026-09-03 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-09-03 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-09-03 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution against provider APIs; parked for future re-evaluation if CNAME targets identified.
+- 2026-09-03 ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API).
+- 2026-09-03 ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible).
+- 2026-09-03 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface (from bigpickle).
+=== MY STATE ===
+{"phase": "HYPOTHESIS", "target": "api"}=== MY LAST LEADS (tail) ===
+## 2026-09-03 16:10:54 UTC [target] (model bigpickle)
+[HYP] Railway app API discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/, GET https://kurs.onecode.de/v1/, GET https://kurs.onecode.de/graphql, GET https://kurs.onecode.de/swagger
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+[NEXT] PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+## 2026-09-03 19:20:17 UTC [target] (model bigpickle)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+=== AGGREGATED HYPOTHESES (tail) ===
+# Hypotheses (ranked)
+
+## RANKED HYPOTHESES 2026-09-02 21:41:05 UTC
+
+## RANKED HYPOTHESES 2026-09-02 23:34:10 UTC
+
+## RANKED HYPOTHESES 2026-09-03 01:27:20 UTC
+
+## RANKED HYPOTHESES 2026-09-03 06:31:56 UTC
+
+## RANKED HYPOTHESES 2026-09-03 11:43:43 UTC
+
+## RANKED HYPOTHESES 2026-09-03 16:16:20 UTC
+- [65] kurs.onecode.de: Railway-hosted auth bypass via session fixation on kurs.onecode.de (from art/lead_nemotron3.txt)
+- [40] kurs.onecode.de: Railway app API discovery (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resoluti
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+
+## RANKED HYPOTHESES 2026-09-03 19:28:15 UTC
+- [65] kurs.onecode.de: Session fixation via pre-auth cookie reuse on Railway-hosted kurs.onecode.de (from art/lead_nemotron3.txt)
+- [65] kurs.onecode.de: Session fixation on Railway-hosted kurs.onecode.de (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resoluti
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface (from bigpickle).
+=== INVENTORY onecode ===
+# OneCode GmbH inventory (discovered 2026-09-02)
+
+cto.onecode.de
+hostmaster.hostmaster.onecode.de
+hostmaster.hostmaster.www.onecode.de
+hostmaster.onecode.de
+hostmaster.www.onecode.de
+kurs.onecode.de
+mail.onecode.de
+mta-sts.onecode.de
+onecode.de
+www.onecode.de
+
+## PASSIVE RECON 2026-09-02 (read-only, non-intrusive)
+
+> Recon observations only. These are NOT confirmed vulnerabilities; ownership/in-scope of each host must be confirmed against the program scope before any active testing. Hosts resolve + serve HTTP — investigation requires scoped authorization.
+
+**Probed:** 10 hosts | **Live HTTP:** 3
+
+| Host | Status | Server/Tech |
+|---|---|---|
+| `kurs.onecode.de` | 307 | Server: railway-hikari -> /login |
+| `www.onecode.de` | 200 | Server: cloudflare |
+| `mta-sts.onecode.de` | 301 | Server: cloudflare -> https://www.onecode.de/ |
+
+**CNAME review signals (3):**
+- `kurs.onecode.de` -> `tgk4io5m.up.railway.app`
+- `www.onecode.de` -> `cdn.webflow.com`
+- `mta-sts.onecode.de` -> `cdn.webflow.com`
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `kurs.onecode.de` | **Ports:** [80, 443]
+**Web surface only:** [80, 443]
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `mta-sts.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+**Non-web ports observed:** [2082, 2083, 2086, 2087, 8080, 8443]
+> NOTE: repeated identical non-web port sets (e.g. 2082,2083,2086,2087,8080,8443) across many hosts and wide port sets are likely a shared edge/proxy answering EOF, NOT confirmed real services. Verify with a proper port scanner (e.g. nmap) under authorization before treating as real. These are surface-map hints only, not findings.
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `www.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+**Non-web ports observed:** [2082, 2083, 2086, 2087, 8080, 8443]
+> NOTE: repeated identical non-web port sets (e.g. 2082,2083,2086,2087,8080,8443) across many hosts and wide port sets are likely a shared edge/proxy answering EOF, NOT confirmed real services. Verify with a proper port scanner (e.g. nmap) under authorization before treating as real. These are surface-map hints only, not findings.
+
+## 2026-09-02 21:41:05 UTC
+
+## 2026-09-02 23:34:10 UTC
+
+## 2026-09-03 01:27:20 UTC
+
+## 2026-09-03 06:31:56 UTC
+
+## 2026-09-03 11:43:43 UTC
+
+## 2026-09-03 16:16:20 UTC
+
+## 2026-09-03 19:28:15 UTC
+[0m
+Let me review the full analyst prompt to follow the exact workflow of this pipeline (what the runner expects, where to write output, whether to probe live).
+[0m→ [0mRead analyst-prompt.txt
+Now I understand the full context. The pipeline runs the analyst agent with a prompt, I produce structured blocks, and results are logged/committed. Let me look at the full analyst-prompt to be sure about output delivery expectations (analyst-out.txt).
+I now have complete context. My role is the analyst; I should run the 8 steps and produce structured output. I have the option to do read-only probes to gather facts, but mutation/auth-bypass tests are forbidden. Let me carefully consider whether to run a passive probe myself.
+
+My target is `api` — I've been iterating on API discovery. The aggregate has already converged heavily on kurs.onecode.de with session-fixation/IDOR/API-discovery hypotheses at 65/60/40. The probe steps (`GET /login`, `GET /api/`) are emitted as NEXT actions for the probe agent.
+
+Given my role as analyst producing hypothesis blocks (not the probe executor for others' NEXT actions), and given the CRITICAL program rule forbidding testing against live customer data and requiring authorization — but passive recon GET/HEAD of a public `/login` redirect and API path checks are within the scope rules (passive-first, <=1 rps, in-scope asset, read-only) — I could run a couple of low-risk HEAD/GET probes myself to move my `api` target forward with facts rather than repeating hypotheses.
+
+Let me run a small set of read-only API-discovery probes (GET/HEAD, single requests) on kurs.onecode.de to convert the APT ridge from 40 to fact-based. This is aligned with my target and is passive. I'll keep it minimal (<=1 rps).
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+for p in "/" "/login" "/api" "/api/" "/api/v1/" "/v1/" "/graphql" "/swagger" "/swagger.json" "/openapi.json"; do
+  echo "=== GET https://kurs.onecode.de$p (status,redirect,server) ==="
+  curl -s -o /dev/null -w "code=%{http_code} redirect=%{redirect_url} server=%header{server}\n" \
+    --max-time 15 -A "Mozilla/5.0 recon" "https://kurs.onecode.de$p" 2>&1
+  sleep 1
+done
+=== GET https://kurs.onecode.de/ (status,redirect,server) ===
+code=307 redirect=https://kurs.onecode.de/login server=railway-hikari
+=== GET https://kurs.onecode.de/login (status,redirect,server) ===
+code=200 redirect= server=railway-hikari
+=== GET https://kurs.onecode.de/api (status,redirect,server) ===
+code=307 redirect=https://kurs.onecode.de/login server=railway-hikari
+=== GET https://kurs.onecode.de/api/ (status,redirect,server) ===
+code=308 redirect=https://kurs.onecode.de/api server=railway-hikari
+=== GET https://kurs.onecode.de/api/v1/ (status,redirect,server) ===
+code=308 redirect=https://kurs.onecode.de/api/v1 server=railway-hikari
+=== GET https://kurs.onecode.de/v1/ (status,redirect,server) ===
+code=308 redirect=https://kurs.onecode.de/v1 server=railway-hikari
+=== GET https://kurs.onecode.de/graphql (status,redirect,server) ===
+code=307 redirect=https://kurs.onecode.de/login server=railway-hikari
+=== GET https://kurs.onecode.de/swagger (status,redirect,server) ===
+code=307 redirect=https://kurs.onecode.de/login server=railway-hikari
+=== GET https://kurs.onecode.de/swagger.json (status,redirect,server) ===
+code=307 redirect=https://kurs.onecode.de/login server=railway-hikari
+=== GET https://kurs.onecode.de/openapi.json (status,redirect,server) ===
+code=307 redirect=https://kurs.onecode.de/login server=railway-hikari
+[0m
+Key facts established:
+- Root `/` → 307 → /login
+- `/login` → **200** (real page, not redirect)
+- `/api` → 307 → /login (auth-gated via 307 reroute — matches the app's auth middleware catch-all)
+- `/api/` and `/api/v1/` and `/v1/` → **308** (trailing-slash redirects to non-slash form). This 308-to-non-slash is significant: it means the router treats `/api` and `/v1` as real **existing routes** (308 preserving method on a known route), whereas truly-unknown paths like `/graphql`, `/swagger`, `/swagger.json`, `/openapi.json` all get 307→login.
+
+So `/api` and `/v1` are distinct routed paths (confirmed route existence), while `/graphql`, `/swagger`, `/openapi.json` are NOT routed (fall through to the auth middleware 307). This is concrete evidence that the API surface lives under `/api` and/or `/v1`.
+
+Let me follow the 308 redirects to get the actual status code returned by those routed endpoints (following redirects), which will reveal whether they need auth (307 to login) or respond directly.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+for p in "/api" "/api/v1" "/v1" "/api/v2" "/v2" "/api/auth" "/api/users" "/api/health" "/health" "/healthz" "/api/courses" "/api/enrollments" "/docs"; do
+  echo "=== GET https://kurs.onecode.de$p -> final ==="
+  curl -s -o /dev/null -w "final_code=%{http_code} final_url=%{url_effective} type=%{content_type}\n" \
+    --max-time 15 -A "Mozilla/5.0 recon" -L "https://kurs.onecode.de$p" 2>&1
+  sleep 1
+done
+=== GET https://kurs.onecode.de/api -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/v1 -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/v1 -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/v2 -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/v2 -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/auth -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/users -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/health -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/health -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/healthz -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/courses -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/api/enrollments -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+=== GET https://kurs.onecode.de/docs -> final ===
+final_code=200 final_url=https://kurs.onecode.de/login type=text/html; charset=utf-8
+[0m
+Important nuance: everything eventually 307→/login → 200. The 308-vs-307 distinction for `/api` and `/v1` (vs `/graphql`, `/swagger`, `/openapi.json`) is meaningful — the 308 implies the framework routed these as real paths (trailing-slash normalization only fires on registered routes); the 307 catch-all (auth middleware) applies to unauthenticated access regardless. So the API surface is authenticated — every endpoint 307→login without a session.
+
+Let me examine the `/login` page itself (it returned 200) to capture the tech stack — framework fingerprints, Set-Cookie behavior, CSRF token presence. This is critical evidence: it tells me the auth mechanism (needed for session-fixation hypothesis), the framework (needed for API routing logic), and whether there's a registration/SSO path that could allow test-account creation (gate_ease).
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+echo "=== headers /login ==="
+curl -s -D - -o /tmp/login_body.html --max-time 15 -A "Mozilla/5.0 recon" "https://kurs.onecode.de/login" 2>&1 | head -40
+echo "=== body size ==="
+wc -c /tmp/login_body.html
+echo "=== Set-Cookie count ==="
+grep -ci "set-cookie" /tmp/login_body.html 2>/dev/null
+curl -s -D - -o /dev/null --max-time 15 -A "Mozilla/5.0 recon" "https://kurs.onecode.de/login" 2>&1 | grep -i "set-cookie"
+=== headers /login ===
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Thu, 03 Sep 2026 21:48:15 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: 7djWw5sXQcu3_kUUs_GTAg
+x-railway-edge: iad1
+x-hikari-trace: iad1.fp5t
+
+=== body size ===
+18702 /tmp/login_body.html
+=== Set-Cookie count ===
+0
+[0m
+Key technology fingerprint established:
+- **Next.js** (`x-powered-by: Next.js`, `/_next/static/media/*.woff2`, `vary: rsc, next-router-*`) — this is a **Next.js App Router / RSC** app on Railway.
+- `/login` returns 200 with **no Set-Cookie pre-auth** (framework `cache-control: private, no-cache, no-store` — Next.js default for dynamic routes).
+- No CSRF token in headers; need to inspect body for login form structure.
+
+This Next.js fingerprint is highly actionable. Next.js App Router apps commonly expose:
+- `/_next/` static/build paths
+- Next.js **Server Actions** (`Next-Action` header, or `.next` RPC) — a known mass-assignment/privilege-escalation surface
+- Versioned RSC payloads
+
+Let me inspect the login body and enumerate Next.js-specific paths (which are framework routing, not auth-gated in the same way). Also check for RSC/action endpoints.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+echo "=== login body text ==="
+python3 -c "
+import re,html
+b=open('/tmp/login_body.html').read()
+t=re.sub(r'<[^>]+>',' ',b)
+t=html.unescape(t)
+t=re.sub(r'\s+',' ',t)
+print(t[:1200])
+"
+echo "=== form/action refs ==="
+grep -oiE 'action=\"[^\"]*\"|formAction|/login[^\"]*|/_next/[a-z]+/[^\"]*' /tmp/login_body.html | sort -u | head -40
+=== login body text ===
+ Rich Dev Poor Dev (function () { try { var stored = localStorage.getItem("kr-theme"); var theme = stored === "dark" || stored === "light" ? stored : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); document.documentElement.setAttribute("data-theme", theme); } catch (e) {} })(); Rich Dev Poor Dev Willkommen zurück Melde dich mit der E-Mail an, an die deine Einladung ging. E-Mail Passwort Vergessen? Anmelden Kein Zugang? Rich Dev Poor Dev ist nur auf Einladung. Rich Dev Poor Dev Impressum Datenschutz Rechtliches (self.__next_f=self.__next_f||[]).push([0]) self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[40264,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"QueryProvider\"]\n3:I[39756,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"default\"]\n4:I[58298,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/2n1zydk_92chn.js\"],\"default\"]\n5:I[37457,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_
+=== form/action refs ===
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2n8375xih-hg0.css
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+/_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2
+[0m
+Excellent — major new facts:
+- The app is named **"Rich Dev Poor Dev"** — an **invite-only** course/content platform ("ist nur auf Einladung" = "is by invitation only"). Contains login (E-Mail/Passwort), "Vergessen?" (forgot password), Impressum, Datenschutz, Rechtliches.
+- Built on **Next.js App Router** with **Turbopack** (`turbopack-2a8cgfwu75lsu.js`) — a fairly current Next.js.
+- **Invite-only registration** — no self-registration. This raises gate_ease for account-based testing (AUTH_HELPED becomes harder; no public signup). But there may be a "forgot password" flow and potentially an SSO.
+
+Critically for `api` target: Next.js App Router apps use **Server Actions** (the `Next-Action` header + `/_next/...` RPC). Also, the login form (Anmelden) likely posts to a server action endpoint. The auth is fully gated (307→login on all non-public routes, no Set-Cookie pre-auth), which **weakens** the session-fixation hypothesis (no pre-auth cookie → nothing to fix). That's an important decider.
+
+Let me harvest more concrete routing/action surfaces: fetch the main JS chunks and check for server-action references, and test whether the Next.js RSC/action endpoint is reachable pre-auth. Also check `/_next/image` and `/_next/data` patterns. But I should be careful about scope — these are legit observations on the in-scope asset.
+
+Let me look at the login form's actual submission target and any Next-Action IDs in the chunks. Let me also confirm the app is fully behind auth (test a typical App-Router public asset).
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+echo "=== server:action / Next-Action hints in login body ==="
+grep -oiE 'next-action[^,;\"\x27]*|server action|"action"[^,}]*|SERVER_ACTION_ID|createServerReference|/[a-z0-9_-]+/action|action_id[^,}]*' /tmp/login_body.html | sort -u | head -30
+echo "=== login form method/action ==="
+grep -oiE '<form[^>]*>' /tmp/login_body.html
+echo "=== fetch one JS chunk for server action ids ==="
+curl -s --max-time 15 -A "Mozilla/5.0 recon" "https://kurs.onecode.de/_next/static/chunks/1ymt1shyhmu-4.js" -o /tmp/chunk1.js 2>&1
+wc -c /tmp/chunk1.js
+grep -oiE 'next-action/action:[0-9a-f]{10,30}|createServerReference\([^)]*\)|"[0-9a-f]{10,}"' /tmp/chunk1.js | sort -u | head -20
+=== server:action / Next-Action hints in login body ===
+=== login form method/action ===
+<form class="kr-shadow flex flex-col gap-5 rounded-lg border border-border bg-card p-7">
+=== fetch one JS chunk for server action ids ===
+27433 /tmp/chunk1.js
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+echo "=== endpoint strings in chunk1 ==="
+grep -oiE '"/[a-z0-9_/\-]*"|`/[a-z0-9_/\-]*`|fetch\([^)]*|url:"[^"]*"|"/api/[a-z0-9_/\-]*"' /tmp/chunk1.js | sort -u | head -40
+echo "=== next-auth / action refs ==="
+grep -oiE 'next[a-z]*auth[^,;\"]*|signIn|signOut|session|jwt|token|authorize|credentials' /tmp/chunk1.js | sort -u | head -30
+=== endpoint strings in chunk1 ===
+"/"
+=== next-auth / action refs ===
+[0m
+The login form has no `action=`/`method=` attribute visible — it's a client component using a server action or fetch handler within JS. The form is empty `action` → handled via JS/Server Action. Let me look at the chunk to find auth endpoints / action IDs, and also check `/api/auth` style Next-Auth endpoints since Next.js + invite-only + login strongly suggests next-auth or a custom JWT flow.
+
+Let me scan the JS for endpoint strings (fetch URLs, api paths, action IDs).
+The chunk I fetched is a small generic chunk. The real auth logic is in the other chunks. Rather than fetch all chunks (breadth), let me focus: my target is `api` and the aggregate already has strong AUTH/IDOR hypotheses. My distinct value-add here is the **API/route discovery and framework fingerprint** — which I've now established: Next.js App Router/Turbopack, invite-only, fully auth-gated (307→login), no pre-auth Set-Cookie.
+
+Let me make one more targeted check on the actual auth/API plumbing — the login submission endpoint and whether `/api/auth` type endpoints respond differently (which would confirm the API routing behind auth). Then I'll run the 8 steps. I've done enough probing to convert hypotheses into fact-based findings without escalation or data-modification.
+
+Let me check a couple of auth-relevant routes quickly and the RSC endpoint.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+for p in "/api/auth" "/api/auth/providers" "/api/auth/session" "/api/auth/csrf" "/api/auth/callback" "/next-auth" "/api/trpc" "/trpc" "/_next/data" "/favicon.ico" "/robots.txt" "/api/graphql"; do
+  # use -I HEAD first, no follow, to see the raw 3xx target (distinguish 307 vs 308 vs 200/404)
+  echo "=== HEAD $p ==="
+  curl -s -I --max-time 15 -A "Mozilla/5.0 recon" "https://kurs.onecode.de$p" -w " code=%{http_code}\n" 2>&1 | grep -iE "^HTTP|^location|code=" | head -4
+  sleep 1
+done
+=== HEAD /api/auth ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /api/auth/providers ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /api/auth/session ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /api/auth/csrf ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /api/auth/callback ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /next-auth ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /api/trpc ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /trpc ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /_next/data ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /favicon.ico ===
+HTTP/2 200 
+ code=200
+=== HEAD /robots.txt ===
+HTTP/2 307 
+location: /login
+ code=307
+=== HEAD /api/graphql ===
+HTTP/2 307 
+location: /login
+ code=307
+[0m
+All non-asset routes (`/api/auth/providers`, `/api/auth/session`, etc.) return 307→login, meaning the auth-gating middleware catches **everything** except `/login` (200), `/favicon.ico` (200), and the `/_next/static` space (Next.js public assets). There is no pre-auth API surface; the entire app is behind a session gate.
+
+This is a comprehensive fact set. Now I can run the 8 steps with confidence. Key conclusions:
+
+**Delta from my probes:**
+- kurs.onecode.de is **Next.js App Router + Turbopack** app named "Rich Dev Poor Dev", invite-only, on Railway (railway-hikari/edge iad1).
+- Whole app auth-gated: ALL non-login routes → 307→/login; `/api`, `/v1` (308 trailing-slash implies they're *registered routes*) but still auth-gated. No pre-auth API/GraphQL/next-auth/trpc surface.
+- No Set-Cookie on `/login` (no pre-auth session cookie). This **contradicts/weakens the session-fixation** hypothesis (no pre-auth cookie to fix) — session fixation via pre-auth cookie not supported by evidence. Should be demoted/parked, though a *post-auth* session-management flaw remains possible but needs a valid account.
+- Invite-only → no self-registration → gate_ease for IDOR/account-based testing is LOW (HUMAN/cooperation needed). IDOR hypothesis is structurally plausible (course/enrollment semantics) but **untestable passively** and hard without an invite.
+- API surface exists (registered `/api`, `/v1` routes) but fully behind auth → API endpoint discovery pre-auth is a dead end; post-auth IDOR/BOLA becomes the realistic high-value chain, requiring an invite.
+
+Now I write the 8-step structured output. My target=`api`, stems from bigpickle.
+
+Let me also update the report files per repo convention (hypotheses-bigpickle.txt) with this cycle's output.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+TS=$(date -u +%Y-%m-%dT%H:%M:%S)
+cat >> reports/hypotheses-bigpickle.txt <<EOF
+
+## $TS UTC [target=api] (model bigpickle) - live probe cycle
+[OBS] kurs.onecode.de = Next.js App Router + Turbopack app "Rich Dev Poor Dev" (invite-only course/content platform), Railway railway-hikari/edge iad1. x-powered-by: Next.js, vary: rsc,next-router-*, /_next/static/chunks/turbopack-*.js
+[OBS] Auth gate: ALL non-auth routes -> 307 -> /login. /login=200, /favicon.ico=200, /_next/static=public. /api,/v1 registered (308 trailing-slash normalize) but still 307->login. /graphql,/swagger,/openapi.json,/api/auth/*,/api/trpc,/trpc,/next-auth -> 307->login (not routed / behind gate).
+[OBS] No Set-Cookie on GET /login (no pre-auth session cookie). cache-control: private,no-cache,no-store (Next.js dynamic default).
+[OBS] Login form has no HTML action/method (client-side server-action/fetch). "Rich Dev Poor Dev ist nur auf Einladung" -> invite-only, no self-registration.
+[HYP] Post-auth BOLA on course/enrollment API under /api,/v1
+class: IDOR
+asset: kurs.onecode.de (/api,/v1 registered routes)
+confidence: 55
+reasoning: Next.js/RSC app with real registered /api and /v1 routers; course-platform semantics (enrollments, resources) predict object-ID enumeration; whole app auth-gated so only post-auth BOLA is exploitable; invite-only raises gate but a valid invite/test account unlocks breadth.
+evidence_needed: response delta when enumerating id params on authenticated /api & /v1 resources across two accounts
+verify_steps: (post-auth) GET /api/courses/{id}, /api/resources/{id}, /api/enrollments/{id} with session; compare 200-vs-403/404 across tenant accounts
+impact: cross-tenant course/resource/PII disclosure (High)
+testability: AUTH_HELPED
+[PARKED] Session fixation on kurs.onecode.de: no pre-auth Set-Cookie observed on /login; nothing to fix pre-auth => mechanism not supported by current evidence. Re-open only if a post-auth cookie-fixation vector (URL-parameterized session on login redirect) appears.
+[PARKED] Pre-auth API/GraphQL endpoint discovery on kurs.onecode.de: /api,/v1 are auth-gated 307->login, no pre-auth API/GraphQL/next-auth/trpc surface; pre-auth discovery exhausted.
+[NEXT] PROBE: none pre-auth (surface fully gated). Escalate: obtain test/invite account to test post-auth BOLA + Server-Action mass-assignment on /api,/v1.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: no pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+[LEARN] REJECTED IDOR(pre-auth) @ api: no pre-auth endpoints found; only post-auth BOLA testable which needs account.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: registered /api,/v1 routers + course semantics => BOLA chain plausible; gate_ease=LOW (invite-only).
+[RISK] onecode: 32 (surface fully auth-gated; Next.js invite-only platform; highest-value = post-auth BOLA requires invited account; limited reachable pre-auth surface)
+EOF
+echo "written"; tail -30 reports/hypotheses-bigpickle.txt
+written
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+
+## 2026-09-03T21:49:08 UTC [target=api] (model bigpickle) - live probe cycle
+[OBS] kurs.onecode.de = Next.js App Router + Turbopack app "Rich Dev Poor Dev" (invite-only course/content platform), Railway railway-hikari/edge iad1. x-powered-by: Next.js, vary: rsc,next-router-*, /_next/static/chunks/turbopack-*.js
+[OBS] Auth gate: ALL non-auth routes -> 307 -> /login. /login=200, /favicon.ico=200, /_next/static=public. /api,/v1 registered (308 trailing-slash normalize) but still 307->login. /graphql,/swagger,/openapi.json,/api/auth/*,/api/trpc,/trpc,/next-auth -> 307->login (not routed / behind gate).
+[OBS] No Set-Cookie on GET /login (no pre-auth session cookie). cache-control: private,no-cache,no-store (Next.js dynamic default).
+[OBS] Login form has no HTML action/method (client-side server-action/fetch). "Rich Dev Poor Dev ist nur auf Einladung" -> invite-only, no self-registration.
+[HYP] Post-auth BOLA on course/enrollment API under /api,/v1
+class: IDOR
+asset: kurs.onecode.de (/api,/v1 registered routes)
+confidence: 55
+reasoning: Next.js/RSC app with real registered /api and /v1 routers; course-platform semantics (enrollments, resources) predict object-ID enumeration; whole app auth-gated so only post-auth BOLA is exploitable; invite-only raises gate but a valid invite/test account unlocks breadth.
+evidence_needed: response delta when enumerating id params on authenticated /api & /v1 resources across two accounts
+verify_steps: (post-auth) GET /api/courses/{id}, /api/resources/{id}, /api/enrollments/{id} with session; compare 200-vs-403/404 across tenant accounts
+impact: cross-tenant course/resource/PII disclosure (High)
+testability: AUTH_HELPED
+[PARKED] Session fixation on kurs.onecode.de: no pre-auth Set-Cookie observed on /login; nothing to fix pre-auth => mechanism not supported by current evidence. Re-open only if a post-auth cookie-fixation vector (URL-parameterized session on login redirect) appears.
+[PARKED] Pre-auth API/GraphQL endpoint discovery on kurs.onecode.de: /api,/v1 are auth-gated 307->login, no pre-auth API/GraphQL/next-auth/trpc surface; pre-auth discovery exhausted.
+[NEXT] PROBE: none pre-auth (surface fully gated). Escalate: obtain test/invite account to test post-auth BOLA + Server-Action mass-assignment on /api,/v1.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: no pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+[LEARN] REJECTED IDOR(pre-auth) @ api: no pre-auth endpoints found; only post-auth BOLA testable which needs account.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: registered /api,/v1 routers + course semantics => BOLA chain plausible; gate_ease=LOW (invite-only).
+[RISK] onecode: 32 (surface fully auth-gated; Next.js invite-only platform; highest-value = post-auth BOLA requires invited account; limited reachable pre-auth surface)
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+cp reports/hypotheses-bigpickle.txt /tmp/hyp_backup.txt && echo "saved" failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+I've completed my analysis with live facts. Let me present the structured 8-step output to the user, summarizing what I probed and concluded.
