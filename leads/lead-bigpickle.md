@@ -415,3 +415,23 @@ testability: PASSIVE
 [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap highest value (conf 62-65) — requires test accounts.
 [LEARN] REJECTED Realtime (conf 35): speculative without live probe — parked below threshold.
 [RISK] onecode: 64 — Supabase-backed Next.js solid defaults pre-auth (signup disabled, REST PGRST002, no OAuth, mail confirm on). New vector: direct Supabase service endpoints (storage, functions) bypass app middleware and are probeable with anon key. If a storage bucket is public or edge function lacks auth, pre-auth data/code access achievable. Post-auth BOLA via RLS gap (conf 65) remains highest-value but needs test accounts. Risk increased from 62→64 due to concrete probeable service endpoints.
+## 2026-09-04 17:14:26 UTC [target] (model bigpickle)
+[HYP] Post-auth BOLA via Supabase RLS gap
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Publishable key IS accepted for table-level REST queries (503 PGRST002, not 401). If/when schema cache recovers, tables with missing RLS policies allowing cross-tenant SELECT become directly queryable. Course platform semantics (enrollments, resources, profiles) predict multiple tenant-sensitive tables. UUID PKs weaken guessable-ID BOLA; realistic target is missing RLS filter on cross-tenant queries.
+evidence_needed: Two invited test accounts with different email domains; query /rest/v1/{table}?select=*&limit=1 for tenant-bound tables (profiles, enrollments, course_access); cross-tenant ID access without RLS filtering.
+verify_steps: 1) Obtain two invited accounts. 2) Login via Supabase signInWithOtp or email/password to get access tokens. 3) Query /rest/v1/profiles?select=* with Account-A token, verify Account-B's record is visible. 4) Repeat for enrollments, course_materials, and any other tenant-bound tables.
+impact: Cross-tenant PII/enrollment data exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Post-auth server-side API BOLA via Next.js routes
+class: IDOR
+asset: kurs.onecode.de/api/*, /v1/*
+confidence: 62
+reasoning: Next.js/Turbopack App Router with registered /api + /v1 routers confirmed (auth-gated at 307). Course platform semantics predict API endpoints for enrollment data, course content, user profiles. If server-side route handlers don't enforce tenant isolation (relying on client-side filtering), cross-tenant data access is possible via parameter manipulation.
+evidence_needed: Authenticated session; fuzz /api/* and /v1/* routes with parameter variations (id, user_id, course_id); observe response bodies for cross-tenant data.
+verify_steps: 1) Obtain authenticated session. 2) Enumerate /api/* routes (Next.js RSC flight data, bundle analysis). 3) Test each endpoint with valid + invalid tenant IDs. 4) Compare response data across two accounts.
+impact: Cross-tenant data access — HIGH to CRITICAL depending on data sensitivity.
+testability: AUTH_HELPED
+[RISK] onecode: 66 — Supabase-backed Next.js app with solid pre-auth defaults (signup disabled, publishable key has no public buckets, no edge functions, no OAuth, schema cache blocks REST enumeration). Risk increased from 64→66 because: 1) confirmed publishable key is valid for table-level REST (schema cache currently blocks, but if it recovers, RLS misconfig becomes testable), 2) pre-auth surface is fully exhausted with no findings (clean), 3) post-auth BOLA via RLS gap (conf 65) remains highest-value path requiring AUTH_HELPED. Overall: good pre-auth hygiene, but post-auth surface unexplored and likely contains findings given course platform semantics and single-tenant Supabase backend.

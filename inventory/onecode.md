@@ -100,3 +100,11 @@ www.onecode.de
 - CHANGED Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing.
 - CHANGED Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates.
 - CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).
+
+## 2026-09-04 17:14:36 UTC
+- NEW Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) confirmed as unprobed pre-auth surface bypassing Next.js middleware entirely — accessible with anon key (from bigpickle 08:47,
+- NEW Supabase Storage public bucket exposure hypothesis elevated to confidence 55 (bigpickle 55→58, nemotron3 55) — course platform semantics + separate storage service = realistic pre-auth vector
+- NEW Supabase Edge Functions unauthenticated invocation hypothesis at confidence 45-48 — deployed functions without verifySession/verifyJwt directly invocable
+- CHANGED Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5-8.0 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates
+- CHANGED Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing
+- CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED)
