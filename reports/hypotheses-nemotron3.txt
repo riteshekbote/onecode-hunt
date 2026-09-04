@@ -1,14 +1,4 @@
-## 2026-09-04 03:58:54 UTC [target] (model nemotron3)
-[NEW] Supabase auth stack fully characterized: project `aygnpacdkgtsfnhgcyjc`, publishable key sha256 `870cf518...`, email-only, signup disabled, confirmation required, no external OAuth, magic-link handoff via URL fragment with fixed redirect whitelist `{invite:/einladung, recovery:/passwort-neu}`.
-[NEW] Pre-auth surface exhausted: only `/login` (200) and `/passwort-vergessen` (200) accessible; all `/api/*`, `/v1`, `/dashboard`, `/kurse`, `/einladung`, `/passwort-neu` return 307.
-[NEW] Supabase REST anon exposure blocked: `/rest/v1/*` returns 503 PGRST002 with publishable key.
-[NEW] Next.js/Turbopack App Router confirmed with registered `/api` + `/v1` routers (auth-gated) — post-auth BOLA surface concretely exists.
-[NEW] UUID primary keys in Supabase weaken guessable-ID enumeration; highest-value post-auth target is missing RLS filter enabling cross-tenant SELECT.
-[NEW] Realtime `/api/broadcast` channel endpoint identified in client bundle (307 pre-auth, post-auth channel-auth gap possible).
-[CHANGED] Session fixation hypothesis confidence reduced to 60→0 (parked): no pre-auth Set-Cookie on GET `/login`; Next.js session gate on all routes; Supabase `setSession` flow uses URL hash, not pre-auth cookie fixation.
-[CHANGED] GraphQL introspection hypothesis parked at 45: `/graphql` returns 307→`/login`; no evidence GraphQL exists without auth.
-[CHANGED] Subdomain takeover hypotheses (hostmaster.*, cto.onecode.de) remain at confidence 45 < 50 — passive-only verification cannot confirm claimability without active DNS resolution against provider APIs.
-[CHANGED] Rate-limiting on login hypothesis parked: verification requires POST (mutating) which violates passive probe rules; needs AUTH_HELPED.
+## 2026-09-04 08:47:23 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de,8.6,a=9,b=9,t=9,g=1,c=7,f=7
 [PRIO] onecode.de,4.2,a=5,b=6,t=3,g=5,c=4,f=4
 [PRIO] www.onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
