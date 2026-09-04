@@ -126,3 +126,55 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app has API surface (all /api/*, /graphql, /dashboard gated by 307).
 [LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution.
 [RISK] onecode: 75 — Primary asset (kurs.onecode.de) is Railway-hosted Next.js customer portal with auth, payments, PII; two high-confidence hypotheses (AUTH session fixation, IDOR) with clear verify paths requiring test credentials; unprobed subdomains (5) add takeover surface; wildcard DNS limits enumeration but focuses attack on known live assets.
+## 2026-09-03 23:59:11 UTC [target] (model nemotron3)
+[NEW] Probe confirmed: GET https://kurs.onecode.de/login returns 200 with Next.js login form (email/password), no Set-Cookie header, no visible CSRF token. Root /, /api, /graphql, /dashboard all 307→/login (auth-gated). Branding: "Rich Dev Poor Dev" (invite-only course platform).
+[CHANGED] Session fixation hypothesis confidence reduced 65→60: no pre-auth cookie observed on GET /login; Next.js session gate on all routes.
+[CHANGED] GraphQL introspection hypothesis parked (confidence 45 < 50): /graphql returns 307→/login; no evidence GraphQL exists without auth.
+[CHANGED] AUTH learning updated: no pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+[PRIO] kurs.onecode.de,7.9,a=9,b=9,t=8,g=6,c=7,f=6
+[PRIO] onecode.de,5.8,a=6,b=7,t=4,g=6,c=5,f=5
+[PRIO] www.onecode.de,4.3,a=4,b=5,t=3,g=5,c=4,f=4
+[PRIO] mail.onecode.de,4.3,a=5,b=6,t=2,g=4,c=3,f=3
+[PRIO] cto.onecode.de,3.4,a=4,b=5,t=2,g=3,c=2,f=2
+[PRIO] mta-sts.onecode.de,2.4,a=2,b=2,t=1,g=5,c=2,f=2
+[HYP] Post-auth BOLA/IDOR on course enrollment via /api/v1 routes
+class: IDOR
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated). Course platform semantics (enrollments, resources, dashboard, invite-only multi-tenant) strongly predict IDOR/BOLA on predictable resource IDs (course_id, enrollment_id, user_id). Gate_ease=LOW (invite-only, needs test account).
+evidence_needed: Authenticated session; API endpoints under /api/v1/* accepting id/uid/course_id/enrollment_id params; cross-tenant access to enrollments/content
+verify_steps: Authenticated GET /api/v1/courses (enumerate via JS source/Network); authenticated GET /api/v1/courses/{other_user_id} to test cross-tenant access; check for /api/v1/enrollments, /api/v1/resources patterns
+impact: Cross-tenant PII dump, unauthorized course access, enrollment manipulation — HIGH
+testability: AUTH_HELPED
+[HYP] Missing rate limiting on login endpoint enabling credential stuffing
+class: AUTH
+asset: kurs.onecode.de
+confidence: 50
+reasoning: Login form at /login accepts email/password POST. No rate-limit headers observed (Retry-After, X-RateLimit-*) on GET /login or in response headers. Railway/Next.js default configs often lack brute-force protection. Invite-only platform makes valid email enumeration valuable.
+evidence_needed: Multiple failed POST /login attempts without 429/lockout; absence of rate-limit headers; account lockout threshold
+verify_steps: POST https://kurs.onecode.de/login with invalid creds 10x rapidly (observe status/headers); check for CAPTCHA, delays, or account lockout
+impact: Credential stuffing → ATO on invite-only platform — MEDIUM
+testability: PASSIVE
+[HYP] Subdomain takeover via dangling CNAME on unprobed hostmaster.* hosts
+class: MISCONFIG
+asset: hostmaster.onecode.de, hostmaster.www.onecode.de, hostmaster.hostmaster.onecode.de, hostmaster.hostmaster.www.onecode.de, cto.onecode.de
+confidence: 45
+reasoning: 5 hosts unprobed in passive recon; hostmaster.* often point to DNS/mail providers (Cloudflare, Google Workspace); cto.onecode.de could point to personal/dev infra. Wildcard-dominated zone increases takeover surface.
+evidence_needed: CNAME targets for each unprobed host; verify if target service allows claim (GitHub Pages, Heroku, Railway, AWS S3)
+verify_steps: dig +short CNAME hostmaster.onecode.de; dig +short CNAME cto.onecode.de; check each CNAME target for claimability
+impact: Full subdomain control → phishing, credential harvest, brand damage — CRITICAL
+testability: PASSIVE
+[PARKED] Subdomain takeover via dangling CNAME on unprobed hostmaster.* hosts: confidence 45 < 50 threshold; REJECTED in knowledge base (passive-only verification cannot confirm takeover without active DNS resolution against provider APIs); parked for future re-evaluation if CNAME targets identified.
+[PARKED] Missing rate limiting on login endpoint: verify_steps requires POST (mutating) which violates GET/HEAD/OPTIONS-only passive probe rule; cannot confirm without AUTH_HELPED or program-provided test credentials.
+[FINAL] 
+[NEXT] PROBE: GET https://kurs.onecode.de/api/auth/providers — check for NextAuth.js unauthenticated provider config endpoint (common in Next.js apps) to enumerate auth mechanisms and potential OAuth misconfigurations. Single read-only request, <=1 rps.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted Next.js app with 307 login redirect confirmed; tech_exposure=8 (Railway, Next.js, auth flow, likely API surface).
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics confirmed (Rich Dev Poor Dev, invite-only, dashboard/enrollments); gate_ease=9 (test account feasible).
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app has API surface (all /api/*, /graphql, /dashboard gated by 307).
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: no pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+[LEARN] REJECTED IDOR(pre-auth) @ api: no pre-auth endpoints found; only post-auth BOLA testable which needs account.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: registered /api,/v1 routers + course semantics => BOLA chain plausible; gate_ease=LOW (invite-only).
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution.
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet.
+[RISK] onecode: 75 — Primary asset (kurs.onecode.de) is Railway-hosted Next.js customer portal with auth, payments, PII; high-confidence post-auth BOLA/IDOR hypothesis with clear verify path requiring test credentials; unprobed subdomains (5) add takeover surface; wildcard DNS limits enumeration but focuses attack on known live assets.
