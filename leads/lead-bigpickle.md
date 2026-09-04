@@ -476,3 +476,4 @@ testability: PASSIVE
 [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap highest value (conf 62-65) — requires test accounts.
 [LEARN] REJECTED Realtime (conf 35): speculative without live probe — parked below threshold.
 [RISK] onecode: 64 — Supabase-backed Next.js solid defaults pre-auth (signup disabled, REST PGRST002, no OAuth, mail confirm on). New vector: direct Supabase service endpoints (storage, functions) bypass app middleware and are probeable with anon key. If a storage bucket is public or edge function lacks auth, pre-auth data/code access achievable. Post-auth BOLA via RLS gap (conf 65) remains highest-value but needs test accounts. Risk increased from 62→64 due to concrete probeable service endpoints.
+## 2026-09-04 22:16:05 UTC [target] (model bigpickle)

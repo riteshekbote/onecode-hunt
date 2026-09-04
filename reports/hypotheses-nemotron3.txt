@@ -1,1 +1,56 @@
-## 2026-09-04 20:01:38 UTC [target] (model nemotron3)
+## 2026-09-04 22:27:17 UTC [target] (model nemotron3)
+[NEW] Supabase Storage `/storage/v1/bucket` returns 200 with empty array `[]` using publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — endpoint directly accessible, bypasses Next.js middleware (sb-gateway-mode: direct)
+[NEW] Supabase Functions `/functions/v1/` returns 404 (no deployed functions or not listable)
+[NEW] Supabase Realtime `/realtime/v1/` returns 401 — requires auth, no unauthenticated access
+[NEW] Supabase REST `/rest/v1/` returns 401 with publishable key — anon REST blocked
+[NEW] Auth settings confirmed: email-only, `disable_signup=true`, `mailer_autoconfirm=false`, all external OAuth `false`
+[CHANGED] Storage public bucket hypothesis confidence adjusted: endpoint probeable (PASSIVE) but zero buckets exist → exposure risk lowered from MEDIUM-HIGH to LOW
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,6.5,a=7,b=5,t=6,g=9,c=6,f=6
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,4.0,a=5,b=4,t=5,g=8,c=4,f=4
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/,3.5,a=4,b=4,t=4,g=2,c=4,f=4
+[PRIO] kurs.onecode.de (post-auth BOLA),7.0,a=7,b=9,t=8,g=1,c=7,f=7 (AUTH_HELPED)
+[PRIO] onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
+[PRIO] www.onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
+[PRIO] mail.onecode.de,3.8,a=5,b=6,t=2,g=4,c=3,f=3
+[PRIO] cto.onecode.de,2.8,a=4,b=5,t=2,g=3,c=2,f=2
+[PRIO] mta-sts.onecode.de,1.8,a=2,b=2,t=1,g=5,c=2,f=2
+[HYP] Supabase Edge Functions undeployed or unlistable
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/
+confidence: 40
+reasoning: Functions endpoint returns 404 on GET/POST with publishable key; no function names found in client bundles; if functions exist without verifySession/verifyJwt they would be unauthenticated-invocable
+evidence_needed: HTTP 200 from GET /functions/v1/ listing deployed functions, or known function name returning non-404 on invocation
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/ with apikey header; POST to common function names (send-email, webhook, process-upload) with apikey header
+impact: Unprivileged server-side code execution or data extraction if vulnerable functions exist — HIGH
+testability: PASSIVE
+[HYP] Supabase Realtime publication RLS gap allowing cross-tenant subscription
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/
+confidence: 35
+reasoning: Realtime endpoint exists (401 with anon key); course platform likely uses realtime for live updates; if publications lack RLS filters, anon key could subscribe to cross-tenant channels
+evidence_needed: WebSocket handshake success with anon key followed by successful channel subscription to tenant-specific topic (e.g., `course:123:resources`)
+verify_steps: WebSocket connection to wss://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket with apikey param; send phx_join to suspected channel patterns
+impact: Real-time cross-tenant data leakage (course progress, chat, notifications) — MEDIUM
+testability: PASSIVE
+[HYP] Post-auth BOLA via Supabase RLS policy gap across course tenants
+class: IDOR
+asset: kurs.onecode.de (/api,/v1 proxied to Supabase)
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
+verify_steps: (AUTH_HELPED) With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
+testability: AUTH_HELPED
+[PARKED] Supabase Realtime publication RLS gap: confidence 35 < 40; WebSocket probe complexity, no evidence of realtime publications beyond /api/broadcast client reference
+[PARKED] Supabase Edge Functions undeployed: confidence 40; 404 on listing endpoint, no function names in bundles; speculative without deployed function evidence
+[FINAL] 1. Post-auth BOLA via Supabase RLS policy gap across tenants (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Supabase Storage endpoint accessible but zero buckets (confidence 55→adjusted 45, MISCONFIG, PASSIVE) — probeable but no exposure found
+[NEXT] SCAN: Enumerate kurs.onecode.de post-auth API surface via JS bundle route extraction — find all /api/* and /v1/* route handlers in client chunks to map BOLA targets for AUTH_HELPED testing
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with publishable key — returns 200 with empty bucket list (zero buckets)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404; no deployed functions or not listable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401; requires auth, no pre-auth access
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. Unprobed subdomains (5) add theoretical takeover surface but confidence < 50.

@@ -110,3 +110,11 @@ www.onecode.de
 - CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED)
 
 ## 2026-09-04 20:01:49 UTC
+
+## 2026-09-04 22:27:30 UTC
+- NEW Supabase Storage `/storage/v1/bucket` returns 200 with empty array `[]` using publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — endpoint directly accessible, bypasses Next.js middlewa
+- NEW Supabase Functions `/functions/v1/` returns 404 (no deployed functions or not listable)
+- NEW Supabase Realtime `/realtime/v1/` returns 401 — requires auth, no unauthenticated access
+- NEW Supabase REST `/rest/v1/` returns 401 with publishable key — anon REST blocked
+- NEW Auth settings confirmed: email-only, `disable_signup=true`, `mailer_autoconfirm=false`, all external OAuth `false`
+- CHANGED Storage public bucket hypothesis confidence adjusted: endpoint probeable (PASSIVE) but zero buckets exist → exposure risk lowered from MEDIUM-HIGH to LOW
