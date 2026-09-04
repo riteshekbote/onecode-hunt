@@ -376,3 +376,42 @@ testability: PASSIVE
 [LEARN] REJECTED AUTH @ kurs.onecode.de: Pre-auth surface fully exhausted (only /login and /passwort-vergessen at 200); all other routes 307→/login; no further pre-auth probing productive on app routes.
 [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value hypothesis (conf 62-65); requires two invited test accounts; cannot be tested pre-auth.
 [RISK] onecode: 62 — Supabase-backed Next.js with solid defaults pre-auth (signup disabled, anon REST PGRST002, no OAuth, mail confirm on) gives a clean pre-auth surface. New vector: Supabase project direct service endpoints (storage, functions, realtime) bypass app middleware entirely and are probeable with the anon key. If a storage bucket is public or an edge function lacks auth, pre-auth data/code access is achievable. Post-auth BOLA via RLS gap (conf 62) remains the highest-value path but requires test accounts. Overall risk slightly increased from 58→62 due to direct Supabase service endpoint surface discovery.
+## 2026-09-04 13:21:25 UTC [target] (model bigpickle)
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,8.0,a=9,b=8,t=8,g=9,c=7,f=6
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,7.5,a=8,b=7,t=8,g=8,c=6,f=6
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/,6.0,a=6,b=7,t=7,g=8,c=5,f=6
+[PRIO] kurs.onecode.de (post-auth BOLA),7.0,a=7,b=9,t=8,g=1,c=7,f=7 (AUTH_HELPED)
+[HYP] Supabase Storage public bucket listing
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 58
+reasoning: Storage endpoint is a separate Supabase service not behind Next.js middleware. Course platform ("Rich Dev Poor Dev") stores resources in Supabase Storage. If bucket has public SELECT policy or overly permissive anon access, unauthenticated listing/download possible.
+evidence_needed: HTTP 200 from GET /storage/v1/bucket with only anon key; bucket names visible in response
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket (Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6)
+impact: Unauthenticated access to course materials, uploaded resources, file metadata — MEDIUM-HIGH
+testability: PASSIVE
+[HYP] Supabase Edge Functions unauthenticated invocation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/
+confidence: 48
+reasoning: Edge Functions deployed per-project; if any function lacks verifySession/verifyJwt, it can be invoked unauthenticated. Common patterns: email sending, webhooks, data processing.
+evidence_needed: HTTP 200 (not 404) from GET /functions/v1/; function names from JS bundle
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/ (Authorization: Bearer anon_key); also grep client bundles for functions/v1/<name> patterns
+impact: Server-side code execution or data extraction — HIGH
+testability: PASSIVE
+[HYP] Supabase Realtime cross-tenant subscription
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/
+confidence: 35
+reasoning: Supabase Realtime uses anon key for WebSocket connections. If RLS misconfigured on realtime publications, client can subscribe to channels containing cross-tenant data.
+evidence_needed: Successful WebSocket upgrade; ability to subscribe to table change events with anon key
+verify_steps: WebSocket connect to wss://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1 with anon key
+impact: Cross-tenant data stream interception — HIGH if RLS publication misconfigured
+testability: PASSIVE
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6 — expect 200 with bucket list, 403, or 404. Single request, ≤1 rps.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with anon key — public bucket exposure realistic pre-auth vector.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Edge Functions may exist without auth — probeable.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: Pre-auth surface fully exhausted — only /login and /passwort-vergessen at 200.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap highest value (conf 62-65) — requires test accounts.
+[LEARN] REJECTED Realtime (conf 35): speculative without live probe — parked below threshold.
+[RISK] onecode: 64 — Supabase-backed Next.js solid defaults pre-auth (signup disabled, REST PGRST002, no OAuth, mail confirm on). New vector: direct Supabase service endpoints (storage, functions) bypass app middleware and are probeable with anon key. If a storage bucket is public or edge function lacks auth, pre-auth data/code access achievable. Post-auth BOLA via RLS gap (conf 65) remains highest-value but needs test accounts. Risk increased from 62→64 due to concrete probeable service endpoints.

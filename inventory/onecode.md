@@ -84,3 +84,19 @@ www.onecode.de
 ## 2026-09-04 08:47:33 UTC
 - NEW Supabase direct service endpoints (`aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/`, `/functions/v1/`, `/realtime/v1/`) not yet probed — these bypass app-level auth gates and may expose public storage b
 - CHANGED Phase=POC, target=api — all kurs.onecode.de pre-auth app surface exhausted; only remaining unexplored pre-auth attack surface is the Supabase project's own service endpoints and deeper JS bundle route
+
+## 2026-09-04 13:36:00 UTC
+- NEW Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) identified as unprobed pre-auth surface — bypass Next.js middleware entirely, accessible with anon key.
+- NEW Supabase Storage public bucket exposure hypothesis (confidence 55) — course platform semantics suggest resources stored in Supabase Storage; public/overly-permissive bucket policies are common.
+- NEW Supabase Edge Functions unauthenticated invocation hypothesis (confidence 45) — deployed functions without explicit auth checks are directly invocable.
+- NEW Supabase Realtime channel impersonation via anon key hypothesis (confidence 35) — RLS misconfiguration on realtime publications could allow cross-tenant data stream access.
+- CHANGED Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing.
+- CHANGED Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates.
+- CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).
+- NEW Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) identified as unprobed pre-auth surface — bypass Next.js middleware entirely, accessible with anon key.
+- NEW Supabase Storage public bucket exposure hypothesis (confidence 55) — course platform semantics suggest resources stored in Supabase Storage; public/overly-permissive bucket policies are common.
+- NEW Supabase Edge Functions unauthenticated invocation hypothesis (confidence 45) — deployed functions without explicit auth checks are directly invocable.
+- NEW Supabase Realtime channel impersonation via anon key hypothesis (confidence 35) — RLS misconfiguration on realtime publications could allow cross-tenant data stream access.
+- CHANGED Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing.
+- CHANGED Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates.
+- CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).

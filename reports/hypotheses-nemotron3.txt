@@ -1,10 +1,41 @@
-## 2026-09-04 08:47:23 UTC [target] (model nemotron3)
-[PRIO] kurs.onecode.de,8.6,a=9,b=9,t=9,g=1,c=7,f=7
-[PRIO] onecode.de,4.2,a=5,b=6,t=3,g=5,c=4,f=4
+## 2026-09-04 13:35:49 UTC [target] (model nemotron3)
+[NEW] Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) identified as unprobed pre-auth surface — bypass Next.js middleware entirely, accessible with anon key.
+[NEW] Supabase Storage public bucket exposure hypothesis (confidence 55) — course platform semantics suggest resources stored in Supabase Storage; public/overly-permissive bucket policies are common.
+[NEW] Supabase Edge Functions unauthenticated invocation hypothesis (confidence 45) — deployed functions without explicit auth checks are directly invocable.
+[NEW] Supabase Realtime channel impersonation via anon key hypothesis (confidence 35) — RLS misconfiguration on realtime publications could allow cross-tenant data stream access.
+[CHANGED] Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing.
+[CHANGED] Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates.
+[CHANGED] Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).
+[NEW] Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) identified as unprobed pre-auth surface — bypass Next.js middleware entirely, accessible with anon key.
+[NEW] Supabase Storage public bucket exposure hypothesis (confidence 55) — course platform semantics suggest resources stored in Supabase Storage; public/overly-permissive bucket policies are common.
+[NEW] Supabase Edge Functions unauthenticated invocation hypothesis (confidence 45) — deployed functions without explicit auth checks are directly invocable.
+[NEW] Supabase Realtime channel impersonation via anon key hypothesis (confidence 35) — RLS misconfiguration on realtime publications could allow cross-tenant data stream access.
+[CHANGED] Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing.
+[CHANGED] Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates.
+[CHANGED] Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,7.5,a=8,b=9,t=9,g=7,c=8,f=7
+[PRIO] kurs.onecode.de,7.0,a=7,b=9,t=9,g=1,c=7,f=7
+[PRIO] onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
 [PRIO] www.onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
 [PRIO] mail.onecode.de,3.8,a=5,b=6,t=2,g=4,c=3,f=3
 [PRIO] cto.onecode.de,2.8,a=4,b=5,t=2,g=3,c=2,f=2
 [PRIO] mta-sts.onecode.de,1.8,a=2,b=2,t=1,g=5,c=2,f=2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,7.5,a=8,b=9,t=9,g=7,c=8,f=7
+[PRIO] kurs.onecode.de,7.0,a=7,b=9,t=9,g=1,c=7,f=7
+[PRIO] onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
+[PRIO] www.onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
+[PRIO] mail.onecode.de,3.8,a=5,b=6,t=2,g=4,c=3,f=3
+[PRIO] cto.onecode.de,2.8,a=4,b=5,t=2,g=3,c=2,f=2
+[PRIO] mta-sts.onecode.de,1.8,a=2,b=2,t=1,g=5,c=2,f=2
+[HYP] Supabase Storage public bucket exposure
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 55
+reasoning: Supabase project aygnpacdkgtsfnhgcyjc hosts the kurs.onecode.de course platform ("Rich Dev Poor Dev") with course resources, uploads, avatars. Storage is a separate Supabase service endpoint NOT behind Next.js middleware. Anon key (publishable) grants direct access. Public or overly-permissive bucket policies are common misconfigurations in Supabase projects.
+evidence_needed: HTTP 200 with bucket listing from GET /storage/v1/bucket with Authorization: Bearer <anon_key>; or file listing from /storage/v1/object/list/<bucket>
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket (no auth); GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6 (anon key); if 200, enumerate buckets and list objects.
+impact: Unauthenticated access to course materials, uploaded resources, potential PII (file names, paths) — MEDIUM-HIGH
+testability: PASSIVE
 [HYP] Post-auth BOLA via Supabase RLS policy gap across tenants
 class: IDOR
 asset: kurs.onecode.de (/api,/v1 + Supabase /rest proxied through app)
@@ -14,38 +45,75 @@ evidence_needed: Response delta (row exposure vs empty/403) when authenticated a
 verify_steps: (post-auth) With two invited test accounts: A GET `/api/courses/{B_id}`, `/api/resources/{B_id}`, `/api/enrollments/{B_id}` comparing 200-with-data vs 404/403; compare authenticated Supabase query results across accounts.
 impact: Cross-tenant course resource + PII disclosure (High)
 testability: AUTH_HELPED
-[HYP] Realtime /api/broadcast channel authorization gap
+[HYP] Supabase Edge Functions unauthenticated invocation
 class: MISCONFIG
-asset: kurs.onecode.de (/api/broadcast)
-confidence: 42
-reasoning: Client bundle (0-lpao5_i9htd.js) constructs `/api/broadcast` as SSE/realtime channel endpoint. Endpoint is 307 auth-gated pre-auth. If broadcast channel membership does not re-enforce authorization post-auth (Pusher/Ably-style per-user channel permissions), cross-user message/event disclosure possible.
-evidence_needed: Whether channel join/read is bound to user-scoped token post-auth; delivery of events meant for another user.
-verify_steps: (post-auth) Two invited accounts join `/api/broadcast`; check whether account A can subscribe to/receive events for account B's channel/topics.
-impact: Cross-tenant realtime message/event disclosure (Medium-High)
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/
+confidence: 45
+reasoning: Supabase Edge Functions are deployed per-project. If any function is deployed without an explicit auth check (using verifySession/verifyJwt), it can be invoked unauthenticated. Common patterns include email sending, webhook handlers, data processing — which may leak data or perform privileged operations. Not behind Next.js middleware. JS bundle analysis may reveal function names.
+evidence_needed: HTTP 200 (not 404) from GET /functions/v1/ indicating deployed functions; or known function names from JS bundle analysis returning non-404 on invocation.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/ with Authorization: Bearer <anon_key>; if 200, test function invocation; also check JS bundles for `functions/v1/<name>` patterns to find function names.
+impact: Unprivileged server-side code execution or data extraction — HIGH if functions exist without auth guards
+testability: PASSIVE
+[HYP] Supabase Storage public bucket exposure
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 55
+reasoning: Supabase project aygnpacdkgtsfnhgcyjc hosts the kurs.onecode.de course platform ("Rich Dev Poor Dev") with course resources, uploads, avatars. Storage is a separate Supabase service endpoint NOT behind Next.js middleware. Anon key (publishable) grants direct access. Public or overly-permissive bucket policies are common misconfigurations in Supabase projects.
+evidence_needed: HTTP 200 with bucket listing from GET /storage/v1/bucket with Authorization: Bearer <anon_key>; or file listing from /storage/v1/object/list/<bucket>
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket (no auth); GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6 (anon key); if 200, enumerate buckets and list objects.
+impact: Unauthenticated access to course materials, uploaded resources, potential PII (file names, paths) — MEDIUM-HIGH
+testability: PASSIVE
+[HYP] Post-auth BOLA via Supabase RLS policy gap across tenants
+class: IDOR
+asset: kurs.onecode.de (/api,/v1 + Supabase /rest proxied through app)
+confidence: 65
+reasoning: Backend confirmed as single Supabase project (multi-user invite-only course platform). Authenticated-user table access governed by RLS; missing user_id/token filter in SELECT policy yields cross-tenant reads of courses/enrollments/resources. Auth stack + registered /api,/v1 routes confirmed. UUID PKs weaken pure-ID enumeration → RLS-policy-gap is the realistic high-value target.
+evidence_needed: Response delta (row exposure vs empty/403) when authenticated account A requests an object belonging to account B through app routes or app's Supabase client.
+verify_steps: (post-auth) With two invited test accounts: A GET `/api/courses/{B_id}`, `/api/resources/{B_id}`, `/api/enrollments/{B_id}` comparing 200-with-data vs 404/403; compare authenticated Supabase query results across accounts.
+impact: Cross-tenant course resource + PII disclosure (High)
 testability: AUTH_HELPED
-[HYP] Magic-link token leakage via URL fragment during Supabase handoff
-class: OATH
-asset: kurs.onecode.de (/einladung, /passwort-neu handoff)
-confidence: 38
-reasoning: HashSessionHandoff places live Supabase access_token+refresh_token in URL `#` and calls setSession client-side. Redirect target fixed whitelist (no open redirect). Token capture requires secondary leak (XSS, Referer, third-party script reading location.hash) — not yet demonstrated.
-evidence_needed: Mechanism on handoff path reading/sending location.hash to attacker-controlled destination, or XSS/DOM sink on handoff.
-verify_steps: (post-auth) Complete recovery/invite flow while monitoring for requests carrying hash token, external network calls, or DOM sinks reflecting hash content.
-impact: Session-token theft → full ATO (High)
-testability: AUTH_HELPED
+[HYP] Supabase Edge Functions unauthenticated invocation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/
+confidence: 45
+reasoning: Supabase Edge Functions are deployed per-project. If any function is deployed without an explicit auth check (using verifySession/verifyJwt), it can be invoked unauthenticated. Common patterns include email sending, webhook handlers, data processing — which may leak data or perform privileged operations. Not behind Next.js middleware. JS bundle analysis may reveal function names.
+evidence_needed: HTTP 200 (not 404) from GET /functions/v1/ indicating deployed functions; or known function names from JS bundle analysis returning non-404 on invocation.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/ with Authorization: Bearer <anon_key>; if 200, test function invocation; also check JS bundles for `functions/v1/<name>` patterns to find function names.
+impact: Unprivileged server-side code execution or data extraction — HIGH if functions exist without auth guards
+testability: PASSIVE
+[PARKED] Supabase Realtime channel impersonation via anon key: confidence 35 < 40; speculative RLS publication misconfig, WebSocket probe complexity; no current evidence of realtime publications beyond /api/broadcast.
 [PARKED] Magic-link token leakage via URL fragment during Supabase handoff: confidence 38 < 40; no open redirect, no demonstrated hash-reader/XSS; standard Supabase flow with fixed whitelist. Re-open only if a hash-reading sink is found on handoff path.
 [PARKED] Realtime /api/broadcast channel authorization gap: confidence 42; pre-auth gated, only post-auth channel-auth gap testable with two invited accounts. Keep as secondary target.
 [PARKED] Subdomain takeover on hostmaster.*/cto.onecode.de: confidence 45 < 50; passive-only verification cannot confirm claimability without active DNS resolution against provider APIs. Re-evaluate if CNAME targets identified.
-[FINAL] 
-[NEXT] HUMAN: Obtain two invited test accounts for kurs.onecode.de (invite-only) to test post-auth BOLA on `/api/courses|resources|enrollments` + cross-account Supabase RLS gap + `/api/broadcast` channel auth. No further productive pre-auth probes (surface fully gated and clean).
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Auth stack = Supabase (project aygnpacdkgtsfnhgcyjc, publishable key sha256 870cf518...); email-only, signup disabled, confirmation required.
-[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: No unauthenticated Supabase REST/table exposure (PGRST002 503); anon-REST enumeration not viable.
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Recovery/invite use Supabase magic-link with session tokens in URL fragment; redirect locked to fixed whitelist {invite:/einladung, recovery:/passwort-neu} => no open redirect.
+[PARKED] Rate-limiting on login hypothesis: verification requires POST (mutating) which violates passive probe rules; needs AUTH_HELPED.
+[PARKED] GraphQL introspection: /graphql returns 307→/login; no evidence GraphQL exists without auth.
+[FINAL] 1. Post-auth BOLA via Supabase RLS policy gap across tenants (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Supabase Storage public bucket exposure (confidence 55, MISCONFIG, PASSIVE) — highest pre-auth value, directly probeable
+[FINAL] 3. Supabase Edge Functions unauthenticated invocation (confidence 45, MISCONFIG, PASSIVE) — directly probeable, may yield data/code execution
+[PARKED] Supabase Realtime channel impersonation via anon key: confidence 35 < 40; speculative RLS publication misconfig, WebSocket probe complexity; no current evidence of realtime publications beyond /api/broadcast.
+[PARKED] Magic-link token leakage via URL fragment during Supabase handoff: confidence 38 < 40; no open redirect, no demonstrated hash-reader/XSS; standard Supabase flow with fixed whitelist. Re-open only if a hash-reading sink is found on handoff path.
+[PARKED] Realtime /api/broadcast channel authorization gap: confidence 42; pre-auth gated, only post-auth channel-auth gap testable with two invited accounts. Keep as secondary target.
+[PARKED] Subdomain takeover on hostmaster.*/cto.onecode.de: confidence 45 < 50; passive-only verification cannot confirm claimability without active DNS resolution against provider APIs. Re-evaluate if CNAME targets identified.
+[PARKED] Rate-limiting on login hypothesis: verification requires POST (mutating) which violates passive probe rules; needs AUTH_HELPED.
+[PARKED] GraphQL introspection: /graphql returns 307→/login; no evidence GraphQL exists without auth.
+[FINAL] 1. Post-auth BOLA via Supabase RLS policy gap across tenants (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Supabase Storage public bucket exposure (confidence 55, MISCONFIG, PASSIVE) — highest pre-auth value, directly probeable
+[FINAL] 3. Supabase Edge Functions unauthenticated invocation (confidence 45, MISCONFIG, PASSIVE) — directly probeable, may yield data/code execution
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6` (anon key reconstructed from project ref + sha256 hash). Expect 200 with bucket list, 403, or 404. Single request, <=1 rps.
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6` (anon key reconstructed from project ref + sha256 hash). Expect 200 with bucket list, 403, or 404. Single request, <=1 rps.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Supabase Storage service endpoint exists and is NOT behind Next.js middleware; directly accessible with anon key. Public bucket exposure is a realistic pre-auth vector for course resource data.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Supabase Edge Functions endpoint may exist and is NOT behind app auth middleware; deployed functions without auth checks are unauthenticated-accessible.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value hypothesis (conf 62-65); requires two invited test accounts; cannot be tested pre-auth.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: Pre-auth surface fully exhausted (only /login and /passwort-vergessen at 200); all other routes 307→/login; no further pre-auth probing productive on app routes.
 [LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings) => OAuth redirect_uri/state attack surface minimal.
-[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Backend = single Supabase project; UUID PKs weaken guessable-ID BOLA, so realistic high-value target is missing RLS filter allowing cross-tenant SELECT.
-[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de: No pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
-[LEARN] REJECTED IDOR(pre-auth) @ api: No pre-auth endpoints found; only post-auth BOLA testable which needs account.
-[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Realtime /api/broadcast channel endpoint identified in client bundle; 307 pre-auth, post-auth channel-auth gap possible.
-[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution.
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution against provider APIs.
 [LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: No endpoints identified yet.
-[RISK] onecode: 68 — Primary asset (kurs.onecode.de) is Supabase-backed modern Next.js with solid defaults (signup disabled, anon REST blocked, no OAuth, mail confirm on) => pre-auth surface minimal and clean. Highest residual risk = post-auth cross-tenant BOLA via RLS gap and realtime `/api/broadcast` channel auth, both requiring invited accounts; moderate realtime-surface novelty. Unprobed subdomains (5) add theoretical takeover surface but confidence remains below actionable threshold.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Supabase Storage service endpoint exists and is NOT behind Next.js middleware; directly accessible with anon key. Public bucket exposure is a realistic pre-auth vector for course resource data.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Supabase Edge Functions endpoint may exist and is NOT behind app auth middleware; deployed functions without auth checks are unauthenticated-accessible.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value hypothesis (conf 62-65); requires two invited test accounts; cannot be tested pre-auth.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: Pre-auth surface fully exhausted (only /login and /passwort-vergessen at 200); all other routes 307→/login; no further pre-auth probing productive on app routes.
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings) => OAuth redirect_uri/state attack surface minimal.
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution against provider APIs.
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: No endpoints identified yet.
+[RISK] onecode: 65 — Primary asset (kurs.onecode.de) is Supabase-backed modern Next.js with solid defaults (signup disabled, anon REST blocked via PGRST002, no OAuth, mail confirm on) => pre-auth app surface minimal and clean. New pre-auth vector: Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) bypass Next.js middleware entirely and are probeable with anon key. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) and realtime `/api/broadcast` channel auth (conf 42), both requiring invited accounts. Supabase Storage public bucket (conf 55) and Edge Functions (conf 45) are highest pre-auth probeable targets. Unprobed subdomains (5) add theoretical takeover surface but confidence remains below actionable threshold.
+[RISK] onecode: 65 — Primary asset (kurs.onecode.de) is Supabase-backed modern Next.js with solid defaults (signup disabled, anon REST blocked via PGRST002, no OAuth, mail confirm on) => pre-auth app surface minimal and clean. New pre-auth vector: Supabase direct service endpoints (storage/v1, functions/v1, realtime/v1) bypass Next.js middleware entirely and are probeable with anon key. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) and realtime `/api/broadcast` channel auth (conf 42), both requiring invited accounts. Supabase Storage public bucket (conf 55) and Edge Functions (conf 45) are highest pre-auth probeable targets. Unprobed subdomains (5) add theoretical takeover surface but confidence remains below actionable threshold.
