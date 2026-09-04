@@ -108,3 +108,5 @@ www.onecode.de
 - CHANGED Priority shift: aygnpacdkgtsfnhgcyjc.supabase.co (direct service endpoints) now scores 7.5-8.0 priority vs kurs.onecode.de app routes at 7.0 — direct endpoints bypass auth gates
 - CHANGED Phase=POC, target=api confirmed — all kurs.onecode.de pre-auth app routes exhausted; only Supabase direct service endpoints remain for pre-auth probing
 - CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED)
+
+## 2026-09-04 20:01:49 UTC
