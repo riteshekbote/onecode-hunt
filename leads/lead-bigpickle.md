@@ -308,3 +308,22 @@ verify_steps: (post-auth) two invited accounts; A GET `/api/courses/{B_id}`, `/a
 impact: cross-tenant course resource + PII disclosure (High) | testability: AUTH_HELPED
 [HYP] Recovery/invite magic-link token leakage via URL fragment (OATH, conf 42) — parked (no open redirect, no demonstrated hash-reader/XSS).
 [HYP] /api/broadcast realtime channel auth (MISCONFIG, conf 40) — parked pre-auth; only post-auth channel-auth gap testable.
+## 2026-09-04 03:54:53 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS policy filter
+class: IDOR
+asset: kurs.onecode.de (/api/courses, /api/resources, /api/enrollments via authenticated app client)
+confidence: 62
+reasoning: Backend is a single multi-tenant Supabase project (multi-user, invite-only). Authenticated queries are RLS-governed; a SELECT policy lacking a user_id/token predicate returns cross-tenant rows. UUID PKs weaken guessable-ID BOLA, elevating RLS-policy-gap as the realistic high-value target. Session-gated /api,/v1 routes confirmed registered.
+evidence_needed: response delta (200-with-data vs 404/403) when account A requests an object owned by account B.
+verify_steps: (post-auth) as A, GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id}; compare against an object A owns; also diff the authenticated Supabase /rest query results between the two accounts.
+impact: cross-tenant course-resource + PII disclosure (High)
+testability: AUTH_HELPED
+[HYP] Realtime /api/broadcast channel authorization gap
+class: MISCONFIG
+asset: kurs.onecode.de (/api/broadcast)
+confidence: 40
+reasoning: Realtime client bundle constructs /api/broadcast as its channel endpoint; pre-auth it is 307. If channel membership is not re-bound to the user-scoped session token after auth, cross-user event disclosure is possible (Pusher/Ably channel-permission model).
+evidence_needed: whether channel join/read is bound to user-scoped token post-auth; receipt of an event meant for another user.
+verify_steps: (post-auth) two accounts join /api/broadcast; test cross-user channel/topic subscription.
+impact: cross-tenant realtime message/event disclosure (Medium-High)
+testability: AUTH_HELPED

@@ -2006,3 +2006,124 @@ impact: cross-tenant course resource + PII disclosure (High) | testability: AUTH
 - `[RISK] onecode: 58 — Supabase-backed modern Next.js with solid defaults (signup disabled, anon REST blocked, no OAuth, mail confirm on) → pre-auth surface minimal and clean. Highest residual risk = post-auth cross-tenant BOLA via RLS gap and realtime /api/broadcast channel auth, both requiring an invited account; moderate realtime-surface novelty.`
 
 **Key finding this cycle:** identified the exact auth/backend (Supabase, project + publishable key), confirmed all pre-auth surfaces are clean and gated, and narrowed the realistic attack path to post-auth cross-tenant BOLA via an RLS gap — which now requires an invited test account (HUMAN escalation). State, probe-results, and inventory were updated accordingly.
+===== ANALYST bigpickle 2026-09-04 03:59:02 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll analyze the current state against the knowledge base and leads to produce the structured analyst output.
+
+Let me assess the delta and update my analysis.
+[0m$ [0mls -la /home/runner/work/onecode-hunt/onecode-hunt/art/ 2>/dev/null; echo "---"; ls /home/runner/work/onecode-hunt/onecode-hunt/ 2>/dev/null
+---
+README.md
+analyst-out.txt
+analyst-prompt.txt
+ctx.txt
+inventory
+knowledge
+leads
+probe-results.md
+recon-notes
+reports
+reposcan-raw
+scope.yml
+scripts
+state_bigpickle.json
+state_laguna.json
+state_ling3.json
+state_longcat.json
+state_mimo.json
+state_nemotron3.json
+triage
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; tail -40 probe-results.md 2>/dev/null; echo "===LEADS==="; tail -20 leads 2>/dev/null
+## 2026-09-02 21:41:05 UTC
+
+
+## 2026-09-02 23:34:10 UTC
+
+
+## 2026-09-03 01:27:20 UTC
+
+
+## 2026-09-03 06:31:56 UTC
+
+
+## 2026-09-03 11:43:44 UTC
+
+
+## 2026-09-03 16:16:20 UTC
+
+
+## 2026-09-03 19:28:15 UTC
+
+
+## 2026-09-03 21:54:04 UTC
+
+
+## 2026-09-04 00:01:14 UTC
+
+===LEADS===
+[0m
+Let me review the current probe results and state to establish the delta accurately.
+I have sufficient context from the knowledge base and leads embedded in the prompt. Let me produce the structured analyst output.
+
+Given the deep-hunt engagement and accumulated knowledge, the key reality is: pre-auth surface at kurs.onecode.de is exhausted and clean (Supabase with signup disabled, anon REST blocked, no OAuth, session-gated routes). All remaining high-value hypotheses are post-auth and gated behind invited test accounts (HUMAN_ONLY). My state phase is POC, target api.
+
+The delta since last cycle (2026-09-04 00:01): the current dates and leads show the most recent accepted learnings, but no NEW live probes beyond what's recorded. Let me check if there's anything genuinely new to add.
+
+Looking at the leads, everything converges on `[NEXT] HUMAN: obtain two invited test accounts`. There's no new pre-auth surface. Let me produce the structured output accordingly.
+
+---
+**[STEP 1 — DELTA]**
+- NO_DELTA: pre-auth surface at kurs.onecode.de unchanged since last run (Supabase signup-disabled, PGRST002 anon-block, session-gated routes); no new endpoints/probes recorded in leads.
+- [CHANGED] kurs.onecode.de: all prior leads have fully converged — /api/broadcast, magic-link fragment token, and RLS BOLA all advanced to post-auth/HUMAN gating; no pre-auth lead remains actionable.
+
+**[STEP 2 — PRIORITIZE]**
+- [PRIO] kurs.onecode.de,6.9,axis — attack_surface? No: attack_surface(6) + business_value(8) + tech_exposure(7: Supabase+Next.js+realtime+magic-link) + gate_ease(3: invite-only) + cloud_surface(7: Railway+Supabase) + freshness(7) = 0.25(6)+0.25(8)+0.15(7)+0.15(3)+0.10(7)+0.10(7)=1.5+2.0+1.05+0.45+0.7+0.7=6.4
+
+**[STEP 3 — HYPOTHESES]** (top asset, max 1 each; all empirical live-probe leads already parked — new hypotheses only if fresh reasoning advances a class)
+
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS policy filter
+class: IDOR
+asset: kurs.onecode.de (/api/courses, /api/resources, /api/enrollments via authenticated app client)
+confidence: 62
+reasoning: Backend is a single multi-tenant Supabase project (multi-user, invite-only). Authenticated queries are RLS-governed; a SELECT policy lacking a user_id/token predicate returns cross-tenant rows. UUID PKs weaken guessable-ID BOLA, elevating RLS-policy-gap as the realistic high-value target. Session-gated /api,/v1 routes confirmed registered.
+evidence_needed: response delta (200-with-data vs 404/403) when account A requests an object owned by account B.
+verify_steps: (post-auth) as A, GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id}; compare against an object A owns; also diff the authenticated Supabase /rest query results between the two accounts.
+impact: cross-tenant course-resource + PII disclosure (High)
+testability: AUTH_HELPED
+
+[HYP] Realtime /api/broadcast channel authorization gap
+class: MISCONFIG
+asset: kurs.onecode.de (/api/broadcast)
+confidence: 40
+reasoning: Realtime client bundle constructs /api/broadcast as its channel endpoint; pre-auth it is 307. If channel membership is not re-bound to the user-scoped session token after auth, cross-user event disclosure is possible (Pusher/Ably channel-permission model).
+evidence_needed: whether channel join/read is bound to user-scoped token post-auth; receipt of an event meant for another user.
+verify_steps: (post-auth) two accounts join /api/broadcast; test cross-user channel/topic subscription.
+impact: cross-tenant realtime message/event disclosure (Medium-High)
+testability: AUTH_HELPED
+
+No fresh pre-auth hypothesis: surface confirmed clean (signup disabled, anon REST blocked, mail confirm on, no OAuth). Magic-link fragment token (OATH 42) remains parked — no demonstrated hash-reader.
+
+**[STEP 4 — SELF-CRITIQUE]**
+- [PARKED] Recovery/invite magic-link token-in-fragment (OATH 42): no open redirect, no demonstrated hash-reading sink/XSS on handoff; standard Supabase flow. Re-open only if a hash-reading sink is found.
+- [PARKED] Session fixation: Supabase setSession + no pre-auth cookie; unsupported.
+- [PARKED] Pre-auth API/GraphQL/REST discovery: PGRST002 503 (no anon exposure); all routes 307; pre-auth exhausted.
+- [PARKED] /api/broadcast pre-auth (MISCONFIG 40): auth-gated; only post-auth channel-auth gap testable with accounts.
+- [FINAL] Post-auth BOLA via Supabase RLS gap (IDOR, AUTH_HELPED) — top; backend concretely known.
+- [FINAL] /api/broadcast post-auth channel-auth gap (MISCONFIG 40, AUTH_HELPED) — secondary.
+
+**[STEP 5 — NEXT ACTION]**
+- [NEXT] HUMAN: obtain two invited test accounts for kurs.onecode.de (invite-only Rich Dev Poor Dev) to test post-auth BOLA on /api/courses|resources|enrollments + cross-account Supabase RLS gap + /api/broadcast channel auth. No further productive pre-auth probes — surface clean and exhausted.
+
+**[STEP 6 — LEARNING]**
+- [LEARN] ACCEPTED IDOR @ kurs.onecode.de: backend = single Supabase project; UUID PKs weaken guessable-ID BOLA; realistic target = missing RLS filter allowing cross-tenant SELECT.
+- [LEARN] REJECTED OATH @ kurs.onecode.de: no external OAuth providers (all false in /auth/v1/settings); no pre-auth API surface; magic-link fragment-token leak has no demonstrated sink.
+- [LEARN] ACCEPTED AUTH @ kurs.onecode.de: Supabase-backed; signup disabled, mail confirm on, anon REST blocked; pre-auth surface minimal and clean.
+
+**[STEP 7 — RISK]**
+- [RISK] onecode: 58 — Supabase-backed modern Next.js with solid defaults (signup disabled, anon REST blocked, no OAuth, mail confirm on) => pre-auth surface minimal and clean. Highest residual risk = post-auth cross-tenant BOLA via RLS gap and realtime /api/broadcast channel auth, both requiring invited account (HUMAN gate); moderate realtime-surface novelty.
+
+---
+Action required from a human operator now — no further pre-auth probing is productive.

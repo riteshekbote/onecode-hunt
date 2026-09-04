@@ -178,3 +178,64 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution.
 [LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet.
 [RISK] onecode: 75 — Primary asset (kurs.onecode.de) is Railway-hosted Next.js customer portal with auth, payments, PII; high-confidence post-auth BOLA/IDOR hypothesis with clear verify path requiring test credentials; unprobed subdomains (5) add takeover surface; wildcard DNS limits enumeration but focuses attack on known live assets.
+## 2026-09-04 03:58:54 UTC [target] (model nemotron3)
+[NEW] Supabase auth stack fully characterized: project `aygnpacdkgtsfnhgcyjc`, publishable key sha256 `870cf518...`, email-only, signup disabled, confirmation required, no external OAuth, magic-link handoff via URL fragment with fixed redirect whitelist `{invite:/einladung, recovery:/passwort-neu}`.
+[NEW] Pre-auth surface exhausted: only `/login` (200) and `/passwort-vergessen` (200) accessible; all `/api/*`, `/v1`, `/dashboard`, `/kurse`, `/einladung`, `/passwort-neu` return 307.
+[NEW] Supabase REST anon exposure blocked: `/rest/v1/*` returns 503 PGRST002 with publishable key.
+[NEW] Next.js/Turbopack App Router confirmed with registered `/api` + `/v1` routers (auth-gated) — post-auth BOLA surface concretely exists.
+[NEW] UUID primary keys in Supabase weaken guessable-ID enumeration; highest-value post-auth target is missing RLS filter enabling cross-tenant SELECT.
+[NEW] Realtime `/api/broadcast` channel endpoint identified in client bundle (307 pre-auth, post-auth channel-auth gap possible).
+[CHANGED] Session fixation hypothesis confidence reduced to 60→0 (parked): no pre-auth Set-Cookie on GET `/login`; Next.js session gate on all routes; Supabase `setSession` flow uses URL hash, not pre-auth cookie fixation.
+[CHANGED] GraphQL introspection hypothesis parked at 45: `/graphql` returns 307→`/login`; no evidence GraphQL exists without auth.
+[CHANGED] Subdomain takeover hypotheses (hostmaster.*, cto.onecode.de) remain at confidence 45 < 50 — passive-only verification cannot confirm claimability without active DNS resolution against provider APIs.
+[CHANGED] Rate-limiting on login hypothesis parked: verification requires POST (mutating) which violates passive probe rules; needs AUTH_HELPED.
+[PRIO] kurs.onecode.de,8.6,a=9,b=9,t=9,g=1,c=7,f=7
+[PRIO] onecode.de,4.2,a=5,b=6,t=3,g=5,c=4,f=4
+[PRIO] www.onecode.de,4.0,a=4,b=5,t=3,g=5,c=4,f=4
+[PRIO] mail.onecode.de,3.8,a=5,b=6,t=2,g=4,c=3,f=3
+[PRIO] cto.onecode.de,2.8,a=4,b=5,t=2,g=3,c=2,f=2
+[PRIO] mta-sts.onecode.de,1.8,a=2,b=2,t=1,g=5,c=2,f=2
+[HYP] Post-auth BOLA via Supabase RLS policy gap across tenants
+class: IDOR
+asset: kurs.onecode.de (/api,/v1 + Supabase /rest proxied through app)
+confidence: 65
+reasoning: Backend confirmed as single Supabase project (multi-user invite-only course platform). Authenticated-user table access governed by RLS; missing user_id/token filter in SELECT policy yields cross-tenant reads of courses/enrollments/resources. Auth stack + registered /api,/v1 routes confirmed. UUID PKs weaken pure-ID enumeration → RLS-policy-gap is the realistic high-value target.
+evidence_needed: Response delta (row exposure vs empty/403) when authenticated account A requests an object belonging to account B through app routes or app's Supabase client.
+verify_steps: (post-auth) With two invited test accounts: A GET `/api/courses/{B_id}`, `/api/resources/{B_id}`, `/api/enrollments/{B_id}` comparing 200-with-data vs 404/403; compare authenticated Supabase query results across accounts.
+impact: Cross-tenant course resource + PII disclosure (High)
+testability: AUTH_HELPED
+[HYP] Realtime /api/broadcast channel authorization gap
+class: MISCONFIG
+asset: kurs.onecode.de (/api/broadcast)
+confidence: 42
+reasoning: Client bundle (0-lpao5_i9htd.js) constructs `/api/broadcast` as SSE/realtime channel endpoint. Endpoint is 307 auth-gated pre-auth. If broadcast channel membership does not re-enforce authorization post-auth (Pusher/Ably-style per-user channel permissions), cross-user message/event disclosure possible.
+evidence_needed: Whether channel join/read is bound to user-scoped token post-auth; delivery of events meant for another user.
+verify_steps: (post-auth) Two invited accounts join `/api/broadcast`; check whether account A can subscribe to/receive events for account B's channel/topics.
+impact: Cross-tenant realtime message/event disclosure (Medium-High)
+testability: AUTH_HELPED
+[HYP] Magic-link token leakage via URL fragment during Supabase handoff
+class: OATH
+asset: kurs.onecode.de (/einladung, /passwort-neu handoff)
+confidence: 38
+reasoning: HashSessionHandoff places live Supabase access_token+refresh_token in URL `#` and calls setSession client-side. Redirect target fixed whitelist (no open redirect). Token capture requires secondary leak (XSS, Referer, third-party script reading location.hash) — not yet demonstrated.
+evidence_needed: Mechanism on handoff path reading/sending location.hash to attacker-controlled destination, or XSS/DOM sink on handoff.
+verify_steps: (post-auth) Complete recovery/invite flow while monitoring for requests carrying hash token, external network calls, or DOM sinks reflecting hash content.
+impact: Session-token theft → full ATO (High)
+testability: AUTH_HELPED
+[PARKED] Magic-link token leakage via URL fragment during Supabase handoff: confidence 38 < 40; no open redirect, no demonstrated hash-reader/XSS; standard Supabase flow with fixed whitelist. Re-open only if a hash-reading sink is found on handoff path.
+[PARKED] Realtime /api/broadcast channel authorization gap: confidence 42; pre-auth gated, only post-auth channel-auth gap testable with two invited accounts. Keep as secondary target.
+[PARKED] Subdomain takeover on hostmaster.*/cto.onecode.de: confidence 45 < 50; passive-only verification cannot confirm claimability without active DNS resolution against provider APIs. Re-evaluate if CNAME targets identified.
+[FINAL] 
+[NEXT] HUMAN: Obtain two invited test accounts for kurs.onecode.de (invite-only) to test post-auth BOLA on `/api/courses|resources|enrollments` + cross-account Supabase RLS gap + `/api/broadcast` channel auth. No further productive pre-auth probes (surface fully gated and clean).
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Auth stack = Supabase (project aygnpacdkgtsfnhgcyjc, publishable key sha256 870cf518...); email-only, signup disabled, confirmation required.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: No unauthenticated Supabase REST/table exposure (PGRST002 503); anon-REST enumeration not viable.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Recovery/invite use Supabase magic-link with session tokens in URL fragment; redirect locked to fixed whitelist {invite:/einladung, recovery:/passwort-neu} => no open redirect.
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings) => OAuth redirect_uri/state attack surface minimal.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Backend = single Supabase project; UUID PKs weaken guessable-ID BOLA, so realistic high-value target is missing RLS filter allowing cross-tenant SELECT.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: No pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+[LEARN] REJECTED IDOR(pre-auth) @ api: No pre-auth endpoints found; only post-auth BOLA testable which needs account.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Realtime /api/broadcast channel endpoint identified in client bundle; 307 pre-auth, post-auth channel-auth gap possible.
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence below threshold (45), passive-only verification cannot confirm takeover without active DNS resolution.
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: No endpoints identified yet.
+[RISK] onecode: 68 — Primary asset (kurs.onecode.de) is Supabase-backed modern Next.js with solid defaults (signup disabled, anon REST blocked, no OAuth, mail confirm on) => pre-auth surface minimal and clean. Highest residual risk = post-auth cross-tenant BOLA via RLS gap and realtime `/api/broadcast` channel auth, both requiring invited accounts; moderate realtime-surface novelty. Unprobed subdomains (5) add theoretical takeover surface but confidence remains below actionable threshold.
