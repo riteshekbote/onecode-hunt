@@ -172,3 +172,5 @@ www.onecode.de
 - NEW Supabase REST `/rest/v1/` returns 401 (Secret API key required) — anon REST blocked
 - CHANGED Pre-auth surface on `kurs.onecode.de` fully exhausted — only `/login` and `/passwort-vergessen` return 200; all `/api/*`, `/v1`, `/dashboard`, `/kurse`, `/einladung`, `/passwort-neu` return 307→/login
 - CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value hypothesis (conf 65); requires two invited test accounts (AUTH_HELPED)
+
+## 2026-09-05 17:42:22 UTC
