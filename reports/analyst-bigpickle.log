@@ -3444,3 +3444,209 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
+===== ANALYST bigpickle 2026-09-05 04:43:56 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la && echo "---" && ls -la art 2>/dev/null && echo "---" && ls hypothesis* 2>/dev/null; ls *.md *.yml *.txt 2>/dev/null
+total 164
+drwxr-xr-x 12 runner runner  4096 Sep  5 04:41 .
+drwxr-xr-x  3 runner runner  4096 Sep  5 04:40 ..
+drwxr-xr-x  7 runner runner  4096 Sep  5 04:41 .git
+drwxr-xr-x  3 runner runner  4096 Sep  5 04:40 .github
+-rw-r--r--  1 runner runner  1692 Sep  5 04:40 README.md
+-rw-r--r--  1 runner runner    32 Sep  5 04:41 analyst-out.txt
+-rw-r--r--  1 runner runner 39309 Sep  5 04:41 analyst-prompt.txt
+-rw-r--r--  1 runner runner 35460 Sep  5 04:41 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 leads
+-rw-r--r--  1 runner runner   464 Sep  5 04:40 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 reports
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 reposcan-raw
+-rw-r--r--  1 runner runner  3268 Sep  5 04:40 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 scripts
+-rw-r--r--  1 runner runner    33 Sep  5 04:40 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  5 04:40 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  5 04:40 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  5 04:40 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  5 04:40 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  5 04:40 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  5 04:40 triage
+---
+README.md
+analyst-out.txt
+analyst-prompt.txt
+ctx.txt
+probe-results.md
+scope.yml
+[0m
+[0m✱ [0mGlob "**/*.{md,yml,txt}"[90m 41 matches[0m
+[0m→ [0mRead probe-results.md
+[0m→ [0mRead analyst-out.txt
+[0m→ [0mRead knowledge/index.md
+[0m→ [0mRead triage/run-2026-09-05-03-36.md
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/hypotheses-nemotron3.txt
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead reports/hypotheses.md
+[0m
+[0m$ [0mcurl -s -o /tmp/rest_probe.txt -w "HTTP %{http_code}\n" --max-time 25 \
+  -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" \
+  -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" \
+  -H "Accept: application/json" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1"; echo "---"; head -c 600 /tmp/rest_probe.txt
+HTTP 503
+---
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-09-05 04:42:38 UTC
+[0m
+[0m← [0mEdit probe-results.md
+Index: /home/runner/work/onecode-hunt/onecode-hunt/probe-results.md
+===================================================================
+--- /home/runner/work/onecode-hunt/onecode-hunt/probe-results.md
++++ /home/runner/work/onecode-hunt/onecode-hunt/probe-results.md
+@@ -45,4 +45,9 @@
+ 
+ 
+ ## 2026-09-05 00:17:17 UTC
+ 
++
++## 2026-09-05 04:42:38 UTC
++- PROBE GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + `Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` → HTTP 503 {"code":"PGRST002","message":"Could not query the database for the schema cache. Retrying."}
++- INTERPRETATION: publishable key PASSES the REST auth gate (503 = schema-cache outage, NOT 401 auth denial). Root `/rest/v1/` 401 (nemotron3 00:17) is path-specific; table queries authorize fine. Anon ACL on tables remains masked by persistent cache failure → RLS-gap BOLA + latent anon-REST exposure both remain untestable until cache recovers.
++
+
+[0m
+[0m← [0mEdit reports/hypotheses-bigpickle.txt
+Index: /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
+===================================================================
+--- /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
++++ /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
+@@ -27,4 +27,48 @@
+ impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise
+ testability: PASSIVE
+ [NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` and `Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — expected 503 PGRST002; any non-503/401 response means the schema cache recovered and immediately escalates to full table/RLS enumeration. ≤1 rps. Parallel: HUMAN escalation to obtain two invited test accounts for the RLS-gap BOLA (65) and GraphQL introspection (48) hypotheses.
+ [RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
++
++## 2026-09-05 04:42:38 UTC [target] (model bigpickle)
++[NEW] PROBE 04:42 UTC: GET /rest/v1/profiles?select=*&limit=1 with apikey+Authorization Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 → HTTP 503 {"code":"PGRST002"} (schema cache down). Publishable key PASSES the REST auth gate — 503 is cache-level, not auth-denial. Root /rest/v1/ 401 (nemotron3 00:17) is a path artifact; table queries authorize the anon key.
++[CHANGED] REST 401-vs-503 conflict resolved: anon/publishable key is authorized against table endpoints; the anon role's true ACL remains masked solely by the persistent PostgREST schema-cache outage. Both RLS-gap BOLA verification and latent anon REST exposure remain zipped until the cache recovers.
++[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.0,a=5,b=9,t=7,g=9,c=6,f=5
++[PRIO] kurs.onecode.de (/api,/v1 post-auth),6.9,a=7,b=9,t=8,g=2,c=7,f=7
++[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1,5.9,a=5,b=8,t=8,g=2,c=6,f=5
++[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
++class: IDOR
++asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
++confidence: 65
++reasoning: Publishable key authorizes against REST (503 PGRST002, not 401); single Supabase project backs invite-only platform; any SELECT policy lacking a user_id/tenant predicate yields cross-tenant rows; UUID PKs make guessable-id BOLA impractical, so RLS-gap is the realistic target. Cache outage persists but masks rather than denies the anon ACL.
++evidence_needed: Two invited accounts (different email domains); Account A retrieving rows owned by Account B via authenticated REST or app routes.
++verify_steps: (AUTH_HELPED) Login via POST /auth/v1/token?grant_type=password for A; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 as A; also GET /api/courses/{B_id}; diff A-vs-B row sets for non-self rows.
++impact: Cross-tenant PII, enrollment and course-resource exfiltration — CRITICAL
++testability: AUTH_HELPED
++[HYP] Publishable-key direct REST exposure on schema-cache recovery
++class: IDOR
++asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
++confidence: 51
++reasoning: Fresh 503 PGRST002 confirms the publishable key authorizes at the PostgREST layer (auth passes; cache fails). If the schema cache recovers and any anon-grantable table lacks a row-level guard, the publishable key alone may SELECT tenant rows with no session — an untested pre-auth path until cache comes back.
++evidence_needed: Non-503/401 (200 rows, 400 valid-query error, or 402) from any table query with only the publishable key.
++verify_steps: GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with apikey+Authorization Bearer sb_publishable_... every ≥24h; any non-503/401 is an immediate full table/RLS enumeration trigger.
++impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only while 503
++testability: PASSIVE
++[HYP] Supabase GraphQL endpoint post-auth introspection/mutation
++class: MISCONFIG
++asset: aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1
++confidence: 48
++reasoning: Same cache state 503s GraphQL pre-auth (service present, schema cache down). Post-auth, if cache is healthy, __schema introspection can expose tables, RPCs, and mutation fields not reachable via REST.
++evidence_needed: 200 with __schema data, or a working cross-tenant mutation, using a valid user access_token.
++verify_steps: (AUTH_HELPED) POST /graphql/v1 {"query":"{__schema{types{name}}}"} with Bearer <access_token>; enumerate types; attempt read/mutation against a second account's rows.
++impact: Cross-tenant data read/write via GraphQL mutations — HIGH
++testability: AUTH_HELPED
++[PARKED] Supabase Edge Functions: 404 on listing, no names in bundles — dropped below threshold.
++[PARKED] Supabase Realtime: 401 pre-auth, 35 < 40.
++[PARKED] Supabase Storage: 200 empty bucket list, zero buckets.
++[PARKED] Subdomain takeover hostmaster.*/cto.onecode.de: 45 < 50 passive-only.
++[FINAL] 1. Post-auth RLS-gap BOLA (65, IDOR, AUTH_HELPED) 2. Publishable-key REST recovery monitor (51, IDOR, PASSIVE) 3. GraphQL post-auth introspection (48, MISCONFIG, AUTH_HELPED)
++[NEXT] HUMAN: Obtain two invited kurs.onecode.de test accounts (different email domains) to execute the RLS-gap BOLA chain — the single highest-value unblockable action; all pre-auth surface is exhausted and REST monitor is ≤1/day.
++[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Publishable key passes the REST auth gate (table query → 503 PGRST002, not 401); root /rest/v1/ 401 is path-specific. Anon ACL masked by persistent schema-cache outage — cache recovery would re-open anon-REST enumeration.
++[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface remains exhausted; only /login and /passwort-vergessen at 200; REST cache outage blocks all pre-auth table probing.
++[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA (conf 65) remains highest value; blocked solely on invited test accounts.
++[RISK] onecode: 66 — stable. Pre-auth verified clean except the latent publishable-key REST path (51) that is untestable while PGRST002 persists; residual risk fully concentrated post-auth (RLS BOLA 65, GraphQL 48). Risk would rise to low-70s immediately if the schema cache recovers and any 200/400 row response appears with the publishable key alone.
+
+[0m
+Now I append the run output to the report and knowledge base.
+[0m← [0mEdit knowledge/index.md
+Index: /home/runner/work/onecode-hunt/onecode-hunt/knowledge/index.md
+===================================================================
+--- /home/runner/work/onecode-hunt/onecode-hunt/knowledge/index.md
++++ /home/runner/work/onecode-hunt/onecode-hunt/knowledge/index.md
+@@ -65,4 +65,7 @@
+ - 2026-09-05 ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+ - 2026-09-05 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+ - 2026-09-05 REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+ - 2026-09-05 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
++- 2026-09-05 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Publishable key passes REST auth gate (table query → 503 PGRST002, not 401); root /rest/v1/ 401 is path-specific. Anon ACL masked by persistent schema-cache outage; cache recovery would re-open anon-REST enumeration.
++- 2026-09-05 ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface remains exhausted; REST schema-cache outage (PGRST002) blocks all pre-auth table probing.
++- 2026-09-05 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA (conf 65) remains highest value; blocked solely on invited test accounts.
+
+[0m
+Probe executed (GET `/rest/v1/profiles?select=*&limit=1` with publishable key → HTTP 503 PGRST002, cache down). Output:
+
+STEP 1 — DELTA
+- [NEW] REST auth-gate truth established: publishable key authorizes table queries (503 = schema-cache outage, NOT 401 auth denial); root `/rest/v1/` 401 (nemotron3 00:17) is a path artifact.
+- [CHANGED] SoP `rest/v1` labeled "anon REST blocked" corrected → anon ACL is merely masked by persistent cache failure; any schema-cache recovery re-opens anon REST enumeration.
+
+STEP 2 — PRIORITIZE
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.0,a=5,b=9,t=7,g=9,c=6,f=5
+- [PRIO] kurs.onecode.de (/api,/v1 post-auth),6.9,a=7,b=9,t=8,g=2,c=7,f=7
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1,5.9,a=5,b=8,t=8,g=2,c=6,f=5
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Publishable key authorizes REST (503 PGRST002, not 401); single Supabase project; SELECT policies lacking user_id/tenant predicate yield cross-tenant rows; UUID PKs rule out guessable-id BOLA.
+evidence_needed: Two invited accounts; Account A retrieving rows owned by Account B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password for A; GET /rest/v1/profiles?select=*&limit=1, /rest/v1/enrollments?select=*&limit=1, /api/courses/{B_id}; diff A-vs-B rows.
+impact: Cross-tenant PII, enrollment, course-resource exfiltration — CRITICAL
+testability: AUTH_HELPED
+
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 51
+reasoning: Fresh 503 PGRST002 proves key passes PostgREST auth; on cache recovery any weakly-guarded anon table may SELECT with no session.
+evidence_needed: Non-503/401 (200 rows, 400, 402) on a table query with only the publishable key.
+verify_steps: GET /rest/v1/profiles and /enrollments?select=*&limit=1 with apikey+Authorization Bearer sb_publishable_... every ≥24h; any non-503/401 → full enumeration.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL; monitoring-only while 503
+testability: PASSIVE
+
+[HYP] Supabase GraphQL endpoint post-auth introspection/mutation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1
+confidence: 48
+reasoning: Same cache outage 503s GraphQL pre-auth; post-auth introspection may expose tables/RPCs/mutations not reachable via REST.
+evidence_needed: 200 __schema, or working cross-tenant mutation with a valid access_token.
+verify_steps: (AUTH_HELPED) POST /graphql/v1 {"query":"{__schema{types{name}}}"} with Bearer <token>; enumerate; attempt cross-account read/mutation.
+impact: Cross-tenant data read/write via GraphQL mutations — HIGH
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] Edge Functions (404, no names), Realtime (401, conf 35<40), Storage (200 empty), hostmaster/cto takeover (45<50 passive-only).
+- [FINAL] 1. RLS-gap BOLA (65) 2. Publishable-key REST recovery monitor (51) 3. GraphQL post-auth introspection (48).
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: Obtain two invited kurs.onecode.de test accounts (different email domains) to execute the RLS-gap BOLA chain — the sole unblockable high-value action; pre-auth is exhausted, REST monitor is ≤1/day.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: publishable key passes REST auth gate (503 PGRST002, not 401); root 401 is path-specific; cache recovery would re-open anon-REST enumeration.
+- [LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface remains exhausted; PGRST002 outage blocks all pre-auth table probing.
+- [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA (conf 65) remains highest value; blocked solely on invited test accounts.
+
+STEP 7 — RISK
+- [RISK] onecode: 66 — stable. Pre-auth clean except latent publishable-key REST path (51); residual risk concentrated post-auth (RLS BOLA 65, GraphQL 48). Risk jumps to low-70s if schema cache recovers and a publishable-key row response appears.

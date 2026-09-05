@@ -1,4 +1,4 @@
-## 2026-09-05 00:17:08 UTC [target] (model nemotron3)
+## 2026-09-05 04:41:46 UTC [target] (model nemotron3)
 [NEW] Supabase Storage `/storage/v1/bucket` returns 200 with empty array `[]` using publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — endpoint directly accessible, bypasses Next.js middleware (sb-gateway-mode: direct)
 [NEW] Supabase Functions `/functions/v1/` returns 404 (no deployed functions or not listable)
 [NEW] Supabase Realtime `/realtime/v1/` returns 401 — requires auth, no unauthenticated access
@@ -17,7 +17,7 @@
 [PRIO] mail.onecode.de,3.5,a=5,b=6,t=2,g=4,c=2,f=2
 [PRIO] cto.onecode.de,2.5,a=4,b=5,t=2,g=3,c=1,f=1
 [PRIO] mta-sts.onecode.de,1.5,a=2,b=2,t=1,g=5,c=1,f=1
-[HYP] Post-auth BOLA via Supabase RLS policy gap across course tenants
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de (/api,/v1 proxied to Supabase)
 confidence: 65
@@ -46,7 +46,7 @@ impact: Unprivileged server-side code execution or data extraction if vulnerable
 testability: PASSIVE
 [PARKED] Supabase Realtime publication RLS gap: confidence 35 < 40; WebSocket probe complexity, no evidence of realtime publications beyond /api/broadcast client reference, 401 on anon key
 [PARKED] Supabase Edge Functions undeployed: confidence 40; 404 on listing endpoint, no function names in bundles; speculative without deployed function evidence
-[FINAL] 1. Post-auth BOLA via Supabase RLS policy gap across tenants (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap across tenants (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Supabase Storage public bucket exposure via direct service endpoint (confidence 45, MISCONFIG, PASSIVE) — probeable but zero buckets currently
 [FINAL] 3. Supabase Edge Functions unauthenticated invocation (confidence 40, MISCONFIG, PASSIVE) — speculative, no deployed functions found
 [NEXT] SCAN: Enumerate `kurs.onecode.de` post-auth API surface via JS bundle route extraction — find all `/api/*` and `/v1/*` route handlers in client chunks to map BOLA targets for AUTH_HELPED testing
