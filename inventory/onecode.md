@@ -178,3 +178,9 @@ www.onecode.de
 ## 2026-09-05 19:35:48 UTC
 
 ## 2026-09-05 21:48:33 UTC
+
+## 2026-09-05 23:43:03 UTC
+- NEW cto.onecode.de re-probed 23:41 UTC: stable 409 Conflict body "error code:1001" (Server:cloudflare, CF-RAY a36915496c750613-IAD), 443 TLS handshake-fail, CNAME cto->cname.perspective-dns.com (104.18.2.
+- NEW Provider identity resolved: cname.perspective-dns.com is the documented "connect your own domain" CNAME value for the Perspective funnel SaaS (intercom.help/perspective-funnels articles confirm arbitr
+- NEW www.onecode.de verified static Webflow marketing (project onecodedev, pageId 69c2...7b4, cf-cache HIT) — no dynamic/web-crawlable surface; mta-sts.onecode.de = CF 301 mail stub (out-of-scope class).
+- NEW mail.onecode.de (95.130.17.37) returns no HTTP — non-web service, no action.

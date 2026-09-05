@@ -2941,3 +2941,227 @@ testability: PASSIVE
 ## STEP 7 — RISK
 
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. Unprobed subdomains (5) add theoretical takeover surface but confidence < 50.
+===== ANALYST nemotron3 2026-09-05 23:43:03 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mcurl -s -I "https://kurs.onecode.de/login" 2>&1 | head -20
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Sat, 05 Sep 2026 23:41:09 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: Dx54saskR2eP1ImiWVMv1w
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -s -I "https://kurs.onecode.de/" 2>&1 | head -20
+HTTP/2 307 
+date: Sat, 05 Sep 2026 23:41:12 GMT
+location: /login
+server: railway-hikari
+x-railway-request-id: lsDK1umGT4O1eN0VYqdHTg
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -s -I "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -20
+HTTP/2 200 
+date: Sat, 05 Sep 2026 23:41:14 GMT
+content-type: application/json; charset=utf-8
+content-length: 2
+cf-ray: a369155f3bd880b1-IAD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a073f2-978c-76cd-933d-5c41776e522a
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=RyA5ivoh_eKoeMcq6n.MDrzrKwGZBDZff8jS4KRdI8o-1788651673.4796746-1.0.1.1-gCUCyedVyvemrS5v.ptxgJZf7yXttkSHf.EtmBjCSaNP22TdTUOkx6w4f5izIH2AKzDGPZV9Y7Hw60tnp7qizSNn_iSTV0_dOtLnhc2kC_5YRJI7BhPitNCa6czV9DAV; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sun, 06 Sep 2026 00:11:14 GMT
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mcurl -s -I "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -20
+HTTP/2 401 
+date: Sat, 05 Sep 2026 23:41:14 GMT
+content-type: application/json;charset=UTF-8
+content-length: 98
+access-control-allow-origin: *
+x-content-type-options: nosniff
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+sb-error-code: UNAUTHORIZED_INVALID_API_KEY_TYPE
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a073f2-9b61-7d9b-aaf7-20ec82be99bc
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=IqNLt_c5rBKx9SrFs84aH8HmydnD65YKLcvtSWuDyZ0-1788651674.4571443-1.0.1.1-pXj_zyCSaew5jLo_ZkQnViEzZzd0IvCoXnILTpINr44LjgZiopEzDx38uWS2UIG4RTS08fiE3RGQR7u_K.TvjoG2Xezwgfia6sN.ojzgMenqV_NK1zwCWF9UyDGoJL7p; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sun, 06 Sep 2026 00:11:14 GMT
+server: cloudflare
+cf-ray: a3691565586c818c-IAD
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mcurl -s -I "https://cto.onecode.de" 2>&1 | head -20
+(no output)
+[0m
+[0m$ [0mcurl -s "https://cto.onecode.de" 2>&1 | head -50
+(no output)
+[0m
+[0m$ [0mcurl -s "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1
+[]
+[0m
+[0m$ [0mcurl -s "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+[0m
+[0m$ [0mcurl -s "https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1
+{"code":"NOT_FOUND","message":"Requested function was not found"}
+[0m
+[0m$ [0mcurl -s "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+[0m
+[0m$ [0mcurl -s -I "https://kurs.onecode.de/api/broadcast" 2>&1 | head -20
+HTTP/2 307 
+date: Sat, 05 Sep 2026 23:41:29 GMT
+location: /login
+server: railway-hikari
+x-railway-request-id: Qqmxh929RNCtceS9ss7a6g
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/api/broadcast" 2>&1
+/login
+[0m
+[0m$ [0mcurl -s -I "https://kurs.onecode.de/passwort-vergessen" 2>&1 | head -20
+HTTP/2 200 
+cache-control: s-maxage=31536000
+content-type: text/html; charset=utf-8
+date: Sat, 05 Sep 2026 23:41:30 GMT
+etag: "cum2qapx21d82"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-nextjs-cache: HIT
+x-nextjs-prerender: 1
+x-nextjs-prerender: 1
+x-nextjs-stale-time: 300
+x-powered-by: Next.js
+x-railway-request-id: Yw2_48NUTjmXwyYw5nX1uw
+content-length: 17144
+x-hikari-trace: iad1.trg5
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -s -I "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -20
+HTTP/2 401 
+date: Sat, 05 Sep 2026 23:41:30 GMT
+content-type: application/json; charset=utf-8
+content-length: 30
+cf-ray: a36915bc7cad0fdd-IAD
+cf-cache-status: DYNAMIC
+cache-control: max-age=0, private, must-revalidate
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: accept-encoding
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a073f2-d1ca-7c22-8e9b-cd20973b02ef
+set-cookie: __cf_bm=E4mC6XVhJEJid9IfTz6oFYEIUq1k0xy.tihmHPrv5m8-1788651688.3910737-1.0.1.1-P8krCdFg9U_8y766gRNIKTWdCizxJM0W02_f52MwQ0U0nvT2Pa.meuUMkqus2oh0kPNSWrgGCVJ4E.0ZK8UVrpXvZlyro0oMlX0z9xIiyvGI5KV3zRcL.vxYfJg_aZV5; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sun, 06 Sep 2026 00:11:30 GMT
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mcurl -s -I "https://aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -20
+HTTP/2 503 
+date: Sat, 05 Sep 2026 23:41:30 GMT
+content-type: application/json; charset=utf-8
+content-length: 119
+cf-ray: a36915c05e1cef65-IAD
+cf-cache-status: DYNAMIC
+retry-after: 0
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Accept-Encoding
+proxy-status: PostgREST; error=PGRST002
+x-content-type-options: nosniff
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a073f2-d43b-7e8f-ab92-84150f782df6
+x-envoy-attempt-count: 6
+x-envoy-upstream-service-time: 1187
+set-cookie: __cf_bm=x7g_Pen.1n7KLgOs2MfJR3NVPCp0ZcKGZBoyYH2msQU-1788651689.0138044-1.0.1.1-1VfCPh5GFINdRHREIJaur.KB6.apK_QSfUK5pVrlr27_WcIMj3dUFpp23XZf041qTI7uK5DVNcjAfayaOXxQKE3k4_q_ihCnjTTtmVwhU2.aune47UoYpZ0x90kBpvCH; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sun, 06 Sep 2026 00:11:30 GMT
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/passwort-vergessen" 2>&1 | head -100
+<!DOCTYPE html><html lang="de" class="archivo_d976246c-module__pvw2IW__variable antialiased"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" href="/_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2" as="font" crossorigin="" type="font/woff2"/><link rel="stylesheet" href="/_next/static/chunks/2n8375xih-hg0.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/3mc6dra1m0098.js"/><script src="/_next/static/chunks/2i51e627rllld.js" async=""></script><script src="/_next/static/chunks/08ttfj81-47mu.js" async=""></script><script src="/_next/static/chunks/0-mbmp1iqb6hj.js" async=""></script><script src="/_next/static/chunks/turbopack-2a8cgfwu75lsu.js" async=""></script><script src="/_next/static/chunks/3fntmmi971322.js" async="" crossorigin=""></script><script src="/_next/static/chunks/4310-_brt1a3g.js" async="" crossorigin=""></script><script src="/_next/static/chunks/1ymt1shyhmu-4.js" async="" crossorigin=""></script><script src="/_next/static/chunks/2n1zydk_92chn.js" async="" crossorigin=""></script><script src="/_next/static/chunks/2ufbqzbeyam3w.js" async="" crossorigin=""></script><script src="/_next/static/chunks/2-fsf9vi38mzv.js" async="" crossorigin=""></script><script src="/_next/static/chunks/0-lpao5_i9htd.js" async="" crossorigin=""></script><title>Rich Dev Poor Dev</title><meta name="description" content="Online-Kursplattform für Video-Lerninhalte."/><link rel="icon" href="/favicon.ico?favicon.2vob68tjqpejf.ico" sizes="256x256" type="image/x-icon"/><meta name="next-size-adjust" content=""/><script>
+(function () {
+  try {
+    var stored = localStorage.getItem("kr-theme");
+    var theme = stored === "dark" || stored === "light"
+      ? stored
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  } catch (e) {}
+})();
+</script><script src="/_next/static/chunks/0cz1d0mv5g_q7.js" noModule=""></script></head><body class="flex min-h-screen flex-col"><div hidden=""><!--$--><!--/$--></div><div class="flex-1"><div class="grid min-h-screen place-items-center px-4 py-8"><div class="flex w-full max-w-110 flex-col gap-6"><div class="flex items-center gap-2.5"><svg viewBox="0 0 32 32" role="img" aria-label="Rich Dev Poor Dev" class="flex-none size-7"><rect width="32" height="32" class="fill-primary"></rect><rect x="7" y="18" width="6" height="7" class="fill-primary-foreground"></rect><rect x="19" y="7" width="6" height="18" class="fill-primary-foreground"></rect></svg><span class="font-extrabold tracking-tight whitespace-nowrap text-xl">Rich Dev<!-- --> <span class="text-muted-foreground">Poor Dev</span></span></div><form class="kr-shadow flex flex-col gap-5 rounded-lg border border-border bg-card p-7"><div><h1 class="mb-1.5 text-[23px] font-extrabold">Passwort vergessen</h1><p class="text-[13.5px] leading-relaxed text-muted-foreground">Gib die E-Mail an, mit der du dich anmeldest. Wir schicken dir einen Link zum Zurücksetzen.</p></div><div class="flex flex-col gap-1.5"><label data-slot="label" class="flex items-center gap-2 font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-[12.5px]" for="reset-email">E-Mail</label><input type="email" data-slot="input" class="w-full min-w-0 border border-input bg-transparent py-1 transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 h-11.5 rounded-[10px] px-3.5 text-[15px]" id="reset-email" required="" autoComplete="email" placeholder="du@beispiel.de" value=""/></div><button data-slot="button" data-variant="default" data-size="default" class="group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&amp;_svg]:pointer-events-none [&amp;_svg]:shrink-0 [&amp;_svg:not([class*=&#x27;size-&#x27;])]:size-4 bg-primary text-primary-foreground hover:bg-primary/80 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 mt-1 h-12 rounded-[10px] text-[15px] font-bold" type="submit">Link anfordern<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right size-4" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button><p class="text-center"><a class="text-[12.5px] font-semibold text-muted-foreground no-underline hover:underline" href="/login">Zurück zur Anmeldung</a></p></form></div></div><!--$--><!--/$--></div><footer class="border-t border-border px-5 py-5"><nav class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground"><span>Rich Dev Poor Dev</span><a href="https://www.onecode.de/imprint" target="_blank" rel="noreferrer noopener" class="hover:text-foreground">Impressum</a><a class="hover:text-foreground" href="/datenschutz">Datenschutz</a><a class="hover:text-foreground" href="/rechtliches">Rechtliches</a></nav></footer><script src="/_next/static/chunks/3mc6dra1m0098.js" id="_R_" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0])</script><script>self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[40264,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"QueryProvider\"]\n3:I[39756,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"default\"]\n4:I[58298,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/2n1zydk_92chn.js\"],\"default\"]\n5:I[37457,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"default\"]\n6:I[5014,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/2ufbqzbeyam3w.js\"],\"default\"]\n7:I[22016,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/2ufbqzbeyam3w.js\"],\"\"]\nd:I[68027,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"default\",1]\n:HL[\"/_next/static/chunks/2n8375xih-hg0.css\",\"style\"]\n:HL[\"/_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2\",\"font\",{\"crossOrigin\":\"\",\"type\":\"font/woff2\"}]\nb:X\n0:{\"P\":null,\"c\":[\"\",\"passwort-vergessen\"],\"q\":\"\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"passwort-vergessen\",{\"children\":[\"__PAGE__\",{},\"$undefined\",\"$undefined\",4608]},\"$undefined\",\"$undefined\",4608]},\"$undefined\",\"$undefined\",4624],[[\"$\",\"$1\",\"c\",{\"children\":[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/chunks/2n8375xih-hg0.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}],[\"$\",\"script\",\"script-0\",{\"src\":\"/_next/static/chunks/3fntmmi971322.js\",\"async\":true,\"nonce\":\"$undefined\"}],[\"$\",\"script\",\"script-1\",{\"src\":\"/_next/static/chunks/4310-_brt1a3g.js\",\"async\":true,\"nonce\":\"$undefined\"}],[\"$\",\"script\",\"script-2\",{\"src\":\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"async\":true,\"nonce\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"de\",\"className\":\"archivo_d976246c-module__pvw2IW__variable antialiased\",\"suppressHydrationWarning\":true,\"children\":[[\"$\",\"head\",null,{\"children\":[\"$\",\"script\",null,{\"dangerouslySetInnerHTML\":{\"__html\":\"\\n(function () {\\n  try {\\n    var stored = localStorage.getItem(\\\"kr-theme\\\");\\n    var theme = stored === \\\"dark\\\" || stored === \\\"light\\\"\\n      ? stored\\n      : (window.matchMedia(\\\"(prefers-color-scheme: dark)\\\").matches ? \\\"dark\\\" : \\\"light\\\");\\n    document.documentElement.setAttribute(\\\"data-theme\\\", theme);\\n  } catch (e) {}\\n})();\\n\"}}]}],[\"$\",\"body\",null,{\"className\":\"flex min-h-screen flex-col\",\"children\":[[\"$\",\"div\",null,{\"className\":\"flex-1\",\"children\":[\"$\",\"$L2\",null,{\"children\":[\"$\",\"$L3\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$4\",\"errorStyles\":[],\"errorScripts\":[[\"$\",\"script\",\"script-0\",{\"src\":\"/_next/static/chunks/2n1zydk_92chn.js\",\"async\":true}]],\"template\":[\"$\",\"$L5\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[\"$\",\"div\",null,{\"className\":\"grid min-h-screen place-items-center px-4 py-8\",\"children\":[\"$\",\"div\",null,{\"className\":\"flex w-full max-w-110 flex-col items-center gap-6\",\"children\":[[\"$\",\"div\",null,{\"className\":\"flex items-center gap-2.5\",\"children\":[[\"$\",\"svg\",null,{\"viewBox\":\"0 0 32 32\",\"role\":\"img\",\"aria-label\":\"Rich Dev Poor Dev\",\"className\":\"flex-none size-7\",\"children\":[[\"$\",\"rect\",null,{\"width\":\"32\",\"height\":\"32\",\"className\":\"fill-primary\"}],[\"$\",\"rect\",null,{\"x\":\"7\",\"y\":\"18\",\"width\":\"6\",\"height\":\"7\",\"className\":\"fill-primary-foreground\"}],[\"$\",\"rect\",null,{\"x\":\"19\",\"y\":\"7\",\"width\":\"6\",\"height\":\"18\",\"className\":\"fill-primary-foreground\"}]]}],[\"$\",\"span\",null,{\"className\":\"font-extrabold tracking-tight whitespace-nowrap text-xl\",\"children\":[\"Rich Dev\",\" \",[\"$\",\"span\",null,{\"className\":\"text-muted-foreground\",\"children\":\"Poor Dev\"}]]}]]}],[\"$\",\"div\",null,{\"className\":\"kr-shadow-sm flex w-full flex-col items-center gap-3 rounded-lg border border-border bg-card px-6 py-9 text-center\",\"children\":[[\"$\",\"div\",null,{\"className\":\"grid size-11 place-items-center rounded-xl bg-(--kr-accent-soft)\",\"children\":[\"$\",\"$L6\",null,{\"ref\":\"$undefined\",\"iconNode\":[[\"circle\",{\"cx\":\"12\",\"cy\":\"12\",\"r\":\"10\",\"key\":\"1mglay\"}],[\"path\",{\"d\":\"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z\",\"key\":\"9ktpf1\"}]],\"className\":\"lucide-compass size-5.25 text-primary\",\"strokeWidth\":2.2}]}],[\"$\",\"h1\",null,{\"className\":\"text-[19px] font-extrabold\",\"children\":\"Diese Seite gibt es nicht\"}],[\"$\",\"p\",null,{\"className\":\"max-w-80 text-[13px] leading-relaxed text-muted-foreground\",\"children\":\"Vielleicht wurde der Kurs entfernt, oder er gehört nicht zu deinem Zugang. Deine freigeschalteten Kurse findest du in der Übersicht.\"}],[\"$\",\"div\",null,{\"className\":\"mt-2 flex flex-wrap items-center justify-center gap-2\",\"children\":[\"$undefined\",[\"$\",\"$L7\",null,{\"href\":\"/dashboard\",\"children\":\"Zu meinen Kursen\",\"data-slot\":\"button\",\"data-variant\":\"default\",\"data-size\":\"default\",\"className\":\"group/button inline-flex shrink-0 items-center justify-center border border-transparent bg-clip-padding whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [\u0026_svg]:pointer-events-none [\u0026_svg]:shrink-0 [\u0026_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground hover:bg-primary/80 gap-1.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 h-11 rounded-[10px] px-4 text-[13.5px] font-bold no-underline\",\"ref\":null}]]}]]}]]}]}],[]],\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]}]}],\"$L8\"]}]]}]]}],{\"children\":[\"$L9\",{\"children\":[\"$La\",{},null,false,null]},null,false,\"$b\"]},null,false,null],\"$Lc\",false]],\"m\":\"$undefined\",\"G\":[\"$d\",[\"$Le\"]],\"S\":true,\"h\":null,\"r\":\"$undefined\",\"s\":\"$undefined\",\"a\":\"$undefined\",\"l\":\"$undefined\",\"p\":\"$undefined\",\"d\":\"$undefined\",\"b\":\"SLKd8JSKRvdtKzez8u3qf\"}\nf:I[94220,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"GlobalLegalFooter\"]\n10:I[19836,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/2-fsf9vi38mzv.js\",\"/_next/static/chunks/0-lpao5_i9htd.js\"],\"RequestResetForm\"]\n11:I[97367,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"OutletBoundary\"]\n12:\"$Sreact.suspense\"\n14:I[97367,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"ViewportBoundary\"]\n16:I[97367,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"MetadataBoundary\"]\n8:[\"$\",\"$Lf\",null,{}]\n9:[\"$\",\"$1\",\"c\",{\"children\":[null,[\"$\",\"$L3\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L5\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":\"$undefined\",\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]]}]\na:[\"$\",\"$1\",\"c\",{\"children\":[[\"$\",\"div\",null,{\"className\":\"grid min-h-screen place-items-center px-4 py-8\",\"children\":[\"$\",\"div\",null,{\"className\":\"flex w-full max-w-110 flex-col gap-6\",\"children\":[[\"$\",\"div\",null,{\"className\":\"flex items-center gap-2.5\",\"children\":[[\"$\",\"svg\",null,{\"viewBox\":\"0 0 32 32\",\"role\":\"img\",\"aria-label\":\"Rich Dev Poor Dev\",\"className\":\"flex-none size-7\",\"children\":[[\"$\",\"rect\",null,{\"width\":\"32\",\"height\":\"32\",\"className\":\"fill-primary\"}],[\"$\",\"rect\",null,{\"x\":\"7\",\"y\":\"18\",\"width\":\"6\",\"height\":\"7\",\"className\":\"fill-primary-foreground\"}],[\"$\",\"rect\",null,{\"x\":\"19\",\"y\":\"7\",\"width\":\"6\",\"height\":\"18\",\"className\":\"fill-primary-foreground\"}]]}],[\"$\",\"span\",null,{\"className\":\"font-extrabold tracking-tight whitespace-nowrap text-xl\",\"children\":[\"Rich Dev\",\" \",[\"$\",\"span\",null,{\"className\":\"text-muted-foreground\",\"children\":\"Poor Dev\"}]]}]]}],[\"$\",\"$L10\",null,{}]]}]}],[[\"$\",\"script\",\"script-0\",{\"src\":\"/_next/static/chunks/2-fsf9vi38mzv.js\",\"async\":true,\"nonce\":\"$undefined\"}],[\"$\",\"script\",\"script-1\",{\"src\":\"/_next/static/chunks/0-lpao5_i9htd.js\",\"async\":true,\"nonce\":\"$undefined\"}]],[\"$\",\"$L11\",null,{\"children\":[\"$\",\"$12\",null,{\"name\":\"Next.MetadataOutlet\",\"children\":\"$@13\"}]}]]}]\nc:[\"$\",\"$1\",\"h\",{\"children\":[null,[\"$\",\"$L14\",null,{\"children\":\"$L15\"}],[\"$\",\"div\",null,{\"hidden\":true,\"children\":[\"$\",\"$L16\",null,{\"children\":[\"$\",\"$12\",null,{\"name\":\"Next.Metadata\",\"children\":\"$L17\"}]}]}],[\"$\",\"meta\",null,{\"name\":\"next-size-adjust\",\"content\":\"\"}]]}]\ne:[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/chunks/2n8375xih-hg0.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]\nb:C\n15:[[\"$\",\"meta\",\"0\",{\"charSet\":\"utf-8\"}],[\"$\",\"meta\",\"1\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}]]\n18:I[27201,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"],\"IconMark\"]\n13:null\n17:[[\"$\",\"title\",\"0\",{\"children\":\"Rich Dev Poor Dev\"}],[\"$\",\"meta\",\"1\",{\"name\":\"description\",\"content\":\"Online-Kursplattform für Video-Lerninhalte.\"}],[\"$\",\"link\",\"2\",{\"rel\":\"icon\",\"href\":\"/favicon.ico?favicon.2vob68tjqpejf.ico\",\"sizes\":\"256x256\",\"type\":\"image/x-icon\"}],[\"$\",\"$L18\",\"3\",{}]]\n"])</script></body></html>
+[0m
+[DELTA] NO_DELTA — inventory unchanged (10 hosts, 3 live HTTP); Supabase direct endpoints identical to last probe (storage 200/empty, functions 404, realtime 401, REST 401, GraphQL 503); kurs.onecode.de pre-auth surface still exhausted (/login 200, /passwort-vergessen 200, all /api/* 307→/login); cto.onecode.de no response
+
+[PRIO] kurs.onecode.de,7.1,a=8,b=9,t=8,g=1,c=7,f=7  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,5.2,a=6,b=5,t=5,g=9,c=3,f=3  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.8,a=6,b=6,t=4,g=8,c=2,f=2  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,4.0,a=5,b=4,t=4,g=8,c=2,f=2  
+[PRIO] cto.onecode.de,3.9,a=4,b=5,t=2,g=4,c=2,f=2  
+[PRIO] www.onecode.de,3.8,a=4,b=5,t=3,g=5,c=2,f=2  
+[PRIO] onecode.de,3.8,a=4,b=5,t=3,g=5,c=2,f=2  
+
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap  
+class: IDOR  
+asset: kurs.onecode.de (/api/broadcast proxied to Supabase)  
+confidence: 65  
+reasoning: Single Supabase project backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources  
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows  
+verify_steps: (AUTH_HELPED) With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client  
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH  
+testability: AUTH_HELPED  
+
+[HYP] Supabase Storage public bucket exposure via direct service endpoint  
+class: MISCONFIG  
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/  
+confidence: 40  
+reasoning: Storage endpoint directly accessible with publishable key (bypasses Next.js middleware); course platform semantics suggest resources stored in Supabase Storage; public/overly-permissive bucket policies are common misconfiguration; currently zero buckets but bucket creation could expose data  
+evidence_needed: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket/<bucket_name> returns 200 with file listing; or POST to create bucket succeeds with anon key  
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with apikey header; enumerate common bucket names (courses, resources, uploads, assets, files); POST to create bucket with anon key  
+impact: Unauthenticated access to course materials, user uploads, sensitive resources — MEDIUM  
+testability: PASSIVE  
+
+[HYP] Supabase REST anon exposure on schema-cache recovery  
+class: MISCONFIG  
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/  
+confidence: 50  
+reasoning: REST endpoint returns 503 PGRST002 (schema cache unavailable) with publishable key; when cache recovers, anon key may expose tables if RLS not enforced at gateway level; schema-cache downtime is transient  
+evidence_needed: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header returns 200 with table list (not 503/401)  
+verify_steps: Periodic GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header; monitor for 200 response with table enumeration  
+impact: Unauthenticated table enumeration and potential data access if RLS policies missing — HIGH  
+testability: PASSIVE  
+
+[PARKED] Supabase Edge Functions unauthenticated invocation: confidence 40 at threshold; speculative without deployed function evidence; 404 on listing endpoint; no function names in bundles; verify_steps are brute-force guesses  
+[PARKED] Supabase Realtime publication RLS gap: confidence 35 < 40; WebSocket probe complexity, no evidence of realtime publications beyond /api/broadcast client reference, 401 on anon key  
+[PARKED] Subdomain takeover (cto.onecode.de, hostmaster.*): confidence 45 < 50; passive-only cannot confirm claimability without active DNS resolution against provider APIs  
+
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value  
+[FINAL] 2. Supabase REST anon exposure on schema-cache recovery (confidence 50, MISCONFIG, PASSIVE) — 503 PGRST002 persists; monitor for cache recovery  
+[FINAL] 3. Supabase Storage public bucket exposure via direct service endpoint (confidence 40, MISCONFIG, PASSIVE) — probeable but zero buckets currently  
+
+[NEXT] HUMAN: Escalate to obtain two invited test accounts for kurs.onecode.de to activate the post-auth BOLA hypothesis (conf 65, CRITICAL impact). Pre-auth surface is exhausted; Supabase direct endpoints probed; only remaining high-value path requires AUTH_HELPED testing.
+
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with publishable key — returns 200 with empty bucket list (zero buckets)  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404; no deployed functions or not listable pre-auth  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401; requires auth, no pre-auth access  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Probed again 2026-09-05 → 401 "Secret API key required" with publishable key; schema-cache down (503 PGRST002 previously), now explicit anon-block; monitor stays active  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1: Probed again → 503 (cache block, same as REST); no pre-auth introspection possible  
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login  
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts  
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)  
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de/hostmaster.*: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution  
+
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. Unprobed subdomains add theoretical takeover surface but confidence < 50.
