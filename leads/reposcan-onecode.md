@@ -42,3 +42,12 @@ TARGET_ORG not configured for onecode; skipping public-org deep scan.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
 ## REPOSCAN 2026-09-05 15:22:43 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 17:40:35 UTC
+[HYP] No repo audit candidates
+class: OTHER
+asset: N/A
+confidence: 100
+reasoning: >
+impact: None — no source code in scope for audit; no hardcoded secrets found.
+verify_steps: >
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
