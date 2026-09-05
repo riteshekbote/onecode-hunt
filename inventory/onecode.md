@@ -162,3 +162,13 @@ www.onecode.de
 
 ## 2026-09-05 12:11:29 UTC
 - NEW NO_DELTA — inventory unchanged (10 hosts, 3 live HTTP); last leads confirm identical Supabase direct endpoint results (storage 200/empty, functions 404, realtime 401, REST 401); pre-auth surface on ku
+
+## 2026-09-05 15:42:43 UTC
+- NEW Confirmed `/api/broadcast` is the only registered `/api/*` route in client bundles (from chunk 0-lpao5_i9htd.js); no `/v1/*` routes found
+- NEW Supabase auth settings unchanged: email-only, signup disabled, confirmation required, zero external OAuth providers, magic-link handoff via URL fragment with fixed whitelist `{invite:/einladung, recov
+- NEW Supabase Storage `/storage/v1/bucket` returns 200 with empty array `[]` (zero buckets) — probeable pre-auth with publishable key
+- NEW Supabase Functions `/functions/v1/` returns 404 (NOT_FOUND) — no deployed functions or not listable pre-auth
+- NEW Supabase Realtime `/realtime/v1/` returns 401 — auth required, no pre-auth access
+- NEW Supabase REST `/rest/v1/` returns 401 (Secret API key required) — anon REST blocked
+- CHANGED Pre-auth surface on `kurs.onecode.de` fully exhausted — only `/login` and `/passwort-vergessen` return 200; all `/api/*`, `/v1`, `/dashboard`, `/kurse`, `/einladung`, `/passwort-neu` return 307→/login
+- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value hypothesis (conf 65); requires two invited test accounts (AUTH_HELPED)

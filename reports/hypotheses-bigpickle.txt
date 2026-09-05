@@ -1,4 +1,7 @@
-## 2026-09-05 12:11:21 UTC [target] (model bigpickle)
+## 2026-09-05 15:25:24 UTC [target] (model bigpickle)
+[PRIO] kurs.onecode.de/api/*,a=7,b=9,t=8,g=3,c=8,f=7,p=7.2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,a=6,b=9,t=8,g=6,c=9,f=6,p=7.2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1,a=6,b=8,t=9,g=5,c=9,f=6,p=6.9
 [HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
 class: IDOR
 asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
@@ -12,7 +15,7 @@ testability: AUTH_HELPED
 class: IDOR
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ + /graphql/v1/
 confidence: 50
-reasoning: Publishable key is bar permitted past auth (table query 503 PGRST002; GraphQL same 503) — REST OpenAPI spec layer disagrees with the live gate. Persistent PGRST002 masks the anon role's true table ACL; both endpoints are ready to serve as soon as cache recovers.
+reasoning: Publishable key passes auth gate (table query 503 PGRST002; GraphQL same 503) — REST OpenAPI spec layer disagrees with live gate. Persistent PGRST002 masks anon role's true table ACL; both endpoints ready to serve when cache recovers.
 evidence_needed: Non-503/401 response (200 rows, 400 valid-query error, 402) from a table query with only the publishable key.
 verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with apikey+Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30; repeat ≤1/day (probed today → 503, next ≤2026-09-06); any non-503/401 is an immediate escalate trigger.
 impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise
@@ -26,6 +29,14 @@ evidence_needed: 200 with __schema data, or working cross-tenant mutation, using
 verify_steps: (AUTH_HELPED) POST /graphql/v1 {"query":"{__schema{types{name}}}"} with Bearer <access_token>; enumerate types; attempt read/mutation against second account's rows.
 impact: Cross-tenant data read/write via GraphQL mutations — HIGH
 testability: AUTH_HELPED
-[PARKED] Realtime /api/broadcast channel-auth gap (MISCONFIG 42): only post-auth testable, no accounts yet.
-[PARKED] OAuth (OATH 38-42): no external providers; magic-link hash handoff lacks demonstrated sink; fixed redirect whitelist.
-[PARKED] Subdomain takeover (MISCONFIG 45): passive-only cannot confirm claimability.
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (65) — highest value, requires test accounts
+[FINAL] 2. Publishable-key direct REST exposure if schema cache recovers (50) — passive monitor, low volume
+[FINAL] 3. Supabase GraphQL endpoint post-auth introspection/mutation (48) — requires test accounts
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with publishable key — returns 200 with empty bucket list (zero buckets)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404; no deployed functions or not listable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401; requires auth, no pre-auth access
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
+[RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.

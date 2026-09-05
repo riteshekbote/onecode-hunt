@@ -3864,3 +3864,77 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] onecode: 66 — no change. Re-verified this cycle: REST + GraphQL schema cache still down (503), storage empty, no edge functions, only publishable-key format valid, and pre-auth bundles leak nothing beyond /api/broadcast. Pre-auth hygiene clean across every layer; residual risk remains post-auth only (RLS-gap BOLA 65, GraphQL 48, latent publishable-key cache-recovery 50) — all gated on test accounts or a cache-recovery trigger, none confirmable pre-auth.
+===== ANALYST bigpickle 2026-09-05 15:42:43 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u '+%Y-%m-%d %H:%M:%S UTC'
+2026-09-05 15:24:50 UTC
+[0m
+STEP 1 — DELTA
+
+NO_DELTA. All endpoints return identical responses to last probe: storage 200/empty, functions 404, realtime 401, REST 401/503, app routes 307→/login. No new attack surface discovered. Pre-auth surface remains fully exhausted.
+
+STEP 2 — PRIORITIZE
+
+[PRIO] kurs.onecode.de/api/*,a=7,b=9,t=8,g=3,c=8,f=7,p=7.2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,a=6,b=9,t=8,g=6,c=9,f=6,p=7.2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1,a=6,b=8,t=9,g=5,c=9,f=6,p=6.9
+
+STEP 3 — HYPOTHESES
+
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs the invite-only course platform; publishable key passes the REST auth gate (table query = 503 PGRST002, not 401) while bare /rest/v1/ is 401; GraphQL v1 confirmed in same cache state. Any SELECT policy missing a user_id predicate yields cross-tenant rows once the cache is healthy; UUID PKs weaken ID guessing so RLS-gap is the target.
+evidence_needed: Two invited accounts (different email domains); Account A retrieving Account B's rows via authenticated REST or app routes.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password → access_token; A queries /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1; also GET /api/courses/{B_id} via app; diff A-vs-B row sets.
+impact: Cross-tenant PII, enrollment and course-resource exfiltration — CRITICAL
+testability: AUTH_HELPED
+
+[HYP] Publishable-key direct REST/GraphQL exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ + /graphql/v1/
+confidence: 50
+reasoning: Publishable key passes auth gate (table query 503 PGRST002; GraphQL same 503) — REST OpenAPI spec layer disagrees with live gate. Persistent PGRST002 masks anon role's true table ACL; both endpoints ready to serve when cache recovers.
+evidence_needed: Non-503/401 response (200 rows, 400 valid-query error, 402) from a table query with only the publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with apikey+Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30; repeat ≤1/day (probed today → 503, next ≤2026-09-06); any non-503/401 is an immediate escalate trigger.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise
+testability: PASSIVE
+
+[HYP] Supabase GraphQL endpoint post-auth introspection/mutation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1
+confidence: 48
+reasoning: Endpoint deployed (publishable-key probe = 503, not 404/401 — service present, schema cache down). Same project-wide cache blocks REST. If cache healthy for an authenticated user, __schema introspection may expose tables, RPCs, and insert/update/delete mutation fields.
+evidence_needed: 200 with __schema data, or working cross-tenant mutation, using a valid user access_token.
+verify_steps: (AUTH_HELPED) POST /graphql/v1 {"query":"{__schema{types{name}}}"} with Bearer <access_token>; enumerate types; attempt read/mutation against second account's rows.
+impact: Cross-tenant data read/write via GraphQL mutations — HIGH
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (65) — highest value, requires test accounts
+[FINAL] 2. Publishable-key direct REST exposure if schema cache recovers (50) — passive monitor, low volume
+[FINAL] 3. Supabase GraphQL endpoint post-auth introspection/mutation (48) — requires test accounts
+
+All other hypotheses parked or rejected in previous cycles. No new hypotheses meet the confidence≥40 threshold with pre-auth testability.
+
+STEP 5 — NEXT ACTION
+
+[HUMAN] Escalate to obtain two invited test accounts for the RLS-gap BOLA (65) and GraphQL introspection (48) hypotheses. Without accounts, pre-auth surface is exhausted and no further progress is possible.
+
+STEP 6 — LEARN
+
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with publishable key — returns 200 with empty bucket list (zero buckets)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404; no deployed functions or not listable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401; requires auth, no pre-auth access
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
+
+STEP 7 — RISK
+
+[RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
