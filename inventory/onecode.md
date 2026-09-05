@@ -159,3 +159,6 @@ www.onecode.de
 - CHANGED Pre-auth surface on `kurs.onecode.de` fully exhausted — only `/login` and `/passwort-vergessen` at 200; all `/api/*`, `/v1`, `/dashboard` 307→/login
 - CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED)
 - CHANGED Subdomain takeover hypotheses (`hostmaster.*`, `cto.onecode.de`) remain at confidence 45 < 50 — passive-only cannot confirm claimability without active DNS resolution
+
+## 2026-09-05 12:11:29 UTC
+- NEW NO_DELTA — inventory unchanged (10 hosts, 3 live HTTP); last leads confirm identical Supabase direct endpoint results (storage 200/empty, functions 404, realtime 401, REST 401); pre-auth surface on ku

@@ -587,3 +587,34 @@ testability: PASSIVE
 [LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)  
 [LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
 [RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
+## 2026-09-05 12:11:21 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs the invite-only course platform; publishable key passes the REST auth gate (table query = 503 PGRST002, not 401) while bare /rest/v1/ is 401; GraphQL v1 confirmed in same cache state. Any SELECT policy missing a user_id predicate yields cross-tenant rows once the cache is healthy; UUID PKs weaken ID guessing so RLS-gap is the target.
+evidence_needed: Two invited accounts (different email domains); Account A retrieving Account B's rows via authenticated REST or app routes.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password → access_token; A queries /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1; also GET /api/courses/{B_id} via app; diff A-vs-B row sets.
+impact: Cross-tenant PII, enrollment and course-resource exfiltration — CRITICAL
+testability: AUTH_HELPED
+[HYP] Publishable-key direct REST/GraphQL exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ + /graphql/v1/
+confidence: 50
+reasoning: Publishable key is bar permitted past auth (table query 503 PGRST002; GraphQL same 503) — REST OpenAPI spec layer disagrees with the live gate. Persistent PGRST002 masks the anon role's true table ACL; both endpoints are ready to serve as soon as cache recovers.
+evidence_needed: Non-503/401 response (200 rows, 400 valid-query error, 402) from a table query with only the publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with apikey+Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30; repeat ≤1/day (probed today → 503, next ≤2026-09-06); any non-503/401 is an immediate escalate trigger.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise
+testability: PASSIVE
+[HYP] Supabase GraphQL endpoint post-auth introspection/mutation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1
+confidence: 48
+reasoning: Endpoint deployed (publishable-key probe = 503, not 404/401 — service present, schema cache down). Same project-wide cache blocks REST. If cache healthy for an authenticated user, __schema introspection may expose tables, RPCs, and insert/update/delete mutation fields.
+evidence_needed: 200 with __schema data, or working cross-tenant mutation, using a valid user access_token.
+verify_steps: (AUTH_HELPED) POST /graphql/v1 {"query":"{__schema{types{name}}}"} with Bearer <access_token>; enumerate types; attempt read/mutation against second account's rows.
+impact: Cross-tenant data read/write via GraphQL mutations — HIGH
+testability: AUTH_HELPED
+[PARKED] Realtime /api/broadcast channel-auth gap (MISCONFIG 42): only post-auth testable, no accounts yet.
+[PARKED] OAuth (OATH 38-42): no external providers; magic-link hash handoff lacks demonstrated sink; fixed redirect whitelist.
+[PARKED] Subdomain takeover (MISCONFIG 45): passive-only cannot confirm claimability.
