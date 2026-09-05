@@ -4141,3 +4141,141 @@ Parking check: No new hypotheses to park. Existing PARKED items (subdomain takeo
 ```
 [RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
 ```
+===== ANALYST bigpickle 2026-09-05 21:48:33 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor t in tgk4io5m.up.railway.app cdn.webflow.com; do echo "== $t =="; dig +short $t A; dig +short $t CNAME; done
+== tgk4io5m.up.railway.app ==
+69.46.46.98
+== cdn.webflow.com ==
+198.202.211.1
+[0m
+[0m$ [0mfor h in cto.onecode.de hostmaster.hostmaster.onecode.de hostmaster.hostmaster.www.onecode.de hostmaster.onecode.de hostmaster.www.onecode.de kurs.onecode.de mail.onecode.de mta-sts.onecode.de onecode.de www.onecode.de; do c=$(dig +short $h CNAME 2>/dev/null | tr '\n' ' '); a=$(dig +short $h A 2>/dev/null | tr '\n' ' '); echo "$h | CNAME=$c | A=$a"; done
+cto.onecode.de | CNAME=cname.perspective-dns.com.  | A=cname.perspective-dns.com. 104.18.2.73 104.18.3.73 
+hostmaster.hostmaster.onecode.de | CNAME= | A=
+hostmaster.hostmaster.www.onecode.de | CNAME= | A=
+hostmaster.onecode.de | CNAME= | A=
+hostmaster.www.onecode.de | CNAME= | A=
+kurs.onecode.de | CNAME=tgk4io5m.up.railway.app.  | A=tgk4io5m.up.railway.app. 69.46.46.98 
+mail.onecode.de | CNAME= | A=95.130.17.37 
+mta-sts.onecode.de | CNAME=cdn.webflow.com.  | A=cdn.webflow.com. 198.202.211.1 
+onecode.de | CNAME= | A=198.202.211.1 
+www.onecode.de | CNAME=cdn.webflow.com.  | A=cdn.webflow.com. 198.202.211.1
+[0m
+[0m$ [0mfor u in "https://cto.onecode.de/" "http://cto.onecode.de/" "https://cto.onecode.de/robots.txt"; do echo "== $u =="; curl -s -o /dev/null -m 12 -w "code=%{http_code} redirect=%{redirect_url} server=%{header_json}" "$u" 2>/dev/null | head -c 400; echo; done
+== https://cto.onecode.de/ ==
+code=000 redirect= server={
+}
+== http://cto.onecode.de/ ==
+code=409 redirect= server={"date":["Sat, 05 Sep 2026 21:45:37 GMT"],
+"content-type":["text/plain; charset=UTF-8"],
+"content-length":["16"],
+"connection":["close"],
+"x-frame-options":["SAMEORIGIN"],
+"referrer-policy":["same-origin"],
+"cache-control":["private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0"],
+"expires":["Thu, 01 Jan 1970 00:00:01 GMT"],
+"server":["cloudfl
+== https://cto.onecode.de/robots.txt ==
+code=000 redirect= server={
+}
+[0m
+New DNS delta found. `cto.onecode.de` now resolves via `cname.perspective-dns.com` → Cloudflare IPs (previously parked/unverifiable), and `mail.onecode.de` resolves to a direct A record. Probing HTTP (read-only) on both new surfaces.
+[0m$ [0mfor u in "https://mail.onecode.de/" "http://mail.onecode.de/" "https://onecode.de/" "https://onecode.de/openapi.json"; do echo "== $u =="; curl -s -o /dev/null -m 12 -w "code=%{http_code} redirect=%{redirect_url} type=%{content_type}" "$u" 2>/dev/null; echo; done
+== https://mail.onecode.de/ ==
+code=000 redirect= type=
+== http://mail.onecode.de/ ==
+code=000 redirect= type=
+== https://onecode.de/ ==
+code=301 redirect=https://www.onecode.de/ type=text/html
+== https://onecode.de/openapi.json ==
+code=301 redirect=https://www.onecode.de/openapi.json type=text/html
+[0m
+`cto.onecode.de` is live via HTTP (409 — Cloudflare Tunnel edge), HTTPS fails. Capturing full 409 body/headers + TLS error, and checking for JSON API paths on the new surface.
+[0m$ [0mecho "== full headers+body http =="; curl -s -i -m 12 "http://cto.onecode.de/" 2>&1 | head -40; echo; echo "== TLS verbose =="; curl -sv -m 12 "https://cto.onecode.de/" -o /dev/null 2>&1 | grep -Ei "ssl|tls|error|alert|subject|issuer" | head -15
+== full headers+body http ==
+HTTP/1.1 409 Conflict
+Date: Sat, 05 Sep 2026 21:45:58 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Expires: Thu, 01 Jan 1970 00:00:01 GMT
+Server: cloudflare
+CF-RAY: a3686c8c0e9d8847-IAD
+
+error code: 1001
+== TLS verbose ==
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+* TLSv1.3 (IN), TLS alert, handshake failure (552):
+* OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+[0m
+`error code: 1001` = Cloudflare TLS/DNS error 1001 — proxied CNAME to `cname.perspective-dns.com` whose origin Cloudflare cannot resolve; 443 gives TLS handshake failure. Strong dangling-origin signal. Checking for sibling subdomains on the same pattern (read-only DNS).
+[0m$ [0mfor h in dev api admin staging beta demo app auth api2 v2 www2 shop store test cms portal status internal; do r=$(dig +short $h.onecode.de CNAME | head -1); a=$(dig +short $h.onecode.de A | head -1); if [ -n "$r$a" ]; then echo "$h.onecode.de | CNAME=${r:-} A=${a:-}"; fi; done; echo "---perspective-dns---"; dig +short perspective-dns.com A; dig +short cname.perspective-dns.com A
+---perspective-dns---
+104.18.2.73
+104.18.3.73
+[0m
+STEP 1 — DELTA
+- [NEW] cto.onecode.de: resolves (CNAME → cname.perspective-dns.com → Cloudflare 104.18.2.73/104.18.3.73); HTTP 80 → 409 `error code: 1001` (Cloudflare DNS-resolution error, server: cloudflare, CF-RAY); HTTPS 443 → TLS handshake failure. Previously classified non-responsive (passive recon 2026-09-02) and parked → now a live, anomalously-broken proxied record.
+- [NEW] mail.onecode.de: direct A 95.130.17.37, no HTTP responder (code 000 on 80/443) — mail-only hostname, not a web/app surface.
+- [CHANGED] hostmaster.*: dig shows zero CNAME/A records (NXDOMAIN) — prior takeover hypothesis (parked conf 45) now closed; no records exist to claim.
+- NO_DELTA: kurs.onecode.de (CNAME→tgk4io5m.up.railway.app, still auth-gated), www/mta-sts→cdn.webflow.com, apex onecode.de→198.202.211.1 301→www, all Supabase service endpoints unchanged.
+
+STEP 2 — PRIORITIZE
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.8,a=9,b=9,t=9,g=9,c=7,f=6 — schema-cache recovery monitor (probed today → 503; next ≤09-06)
+- [PRIO] kurs.onecode.de (post-auth BOLA),7.2,a=8,b=9,t=9,g=1,c=7,f=7 — unchanged, blocked on test accounts
+- [PRIO] cto.onecode.de,6.9,a=6,b=5,t=7,g=10,c=7,f=9 — NEW: proxied CNAME to dead origin (error 1001 + TLS fail), highest gate_ease
+
+STEP 3 — HYPOTHESES
+[HYP] Dangling Cloudflare-proxied CNAME on cto.onecode.de (error 1001)
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 52
+reasoning: CNAME → cname.perspective-dns.com (Cloudflare-fronted, 104.18.2.73/3.73); GET / on port 80 returns 409 with body "error code: 1001" (server: cloudflare, CF-RAY a3686c8c0e9d8847-IAD); 443 fails TLS handshake. CF 1001 = origin unresolvable inside Cloudflare, i.e. stale/dangling proxied CNAME. No sibling subdomains resolve (dev/api/admin/staging… all NXDOMAIN).
+evidence_needed: Confirmation cto.onecode.de is claimable via self-serve registration at cname.perspective-dns.com (provider check, out-of-band).
+verify_steps: PASSIVE: repeat GET http://cto.onecode.de/ ≤1/day → confirm stable 409/1001 (observable without auth). CONFIRM: registry/provider interaction at perspective-dns.com for the cto hostname (HUMAN_ONLY).
+impact: Full control of a *.onecode.de subdomain (phrase: phishing under onecode.de origin, DNS-chained cert issuance) — HIGH if claimable.
+testability: PASSIVE
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Unchanged — single Supabase project backs invite-only course platform; publishable key passes REST auth layer (503 PGRST002); UUID PKs make the realistic hole a missing RLS filter enabling cross-tenant SELECT on profiles/enrollments/course_materials.
+evidence_needed: Account-A token retrieving rows owned by Account-B (two invited accounts, different domains).
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: Unchanged — 503 PGRST002 (not 401) proves publishable key passes auth layer; mask hides anon role's true table ACL; cache recovery could expose missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query with only the publishable key.
+verify_steps: GET /rest/v1/profiles?select=*&limit=1 + apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, ≤1/day, next ≤09-06.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+- [FINAL] 65 IDOR @ kurs.onecode.de post-auth RLS BOLA (AUTH_HELPED) — highest value; blocker = two invited accounts.
+- [FINAL] 52 MISCONFIG @ cto.onecode.de dangling Cloudflare CNAME (error 1001, TLS fail) — new evidence upgrades prior parked 45; claimability still unverified, honest caveat retained; PASSIVE monitor + HUMAN_ONLY confirm.
+- [FINAL] 50 IDOR @ supabase rest/v1 schema-cache monitor (PASSIVE) — probed today, next ≤09-06.
+- [PARKED] hostmaster.*: NXDOMAIN, zero records → conf 45→0, closed (nothing claimable).
+- [PARKED] mail.onecode.de: no HTTP surface (A=95.130.17.37, smtp-only; mail config is REJECTED-class).
+
+STEP 5 — NEXT ACTION
+- [NEXT] PROBE: GET http://cto.onecode.de/ ≤1/day → confirm stable 409 "error code: 1001"; if stable across ≥2 days, escalate [NEXT] HUMAN to check account registration at cname.perspective-dns.com for claimability of cto.onecode.de (takeover proof); parallel HUMAN ask for the two invited kurs.onecode.de test accounts remains the BOLA blocker.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: Cloudflare-proxied CNAME to cname.perspective-dns.com returns 409 "error code: 1001" on :80 and TLS handshake failure on :443 — stale/dangling origin signal on previously non-responsive host; conf 52, claimability pending.
+- [LEARN] REJECTED MISCONFIG @ hostmaster.*: dig confirms NXDOMAIN (no CNAME/A) — dead hostnames, nothing claimable; parked hypothesis closed (was conf 45).
+- [LEARN] REJECTED MISCONFIG @ mail.onecode.de: direct A 95.130.17.37, no HTTP responder — mail-only host; out of web scope.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Publishable-key probe today → 503 PGRST002; monitor next ≤09-06.
+
+STEP 7 — RISK
+- [RISK] onecode: 67 — +1 from the newly confirmed live-but-broken cto.onecode.de proxied record (dangling CNAME, error 1001) indicating zone-hygiene drift with takeover potential; all other layers unchanged (pre-auth app surface clean/empty storage/no functions/graphql+REST cache-blocked). Residual risk remains dominated by post-auth BOLA (65, AUTH_HELPED) plus latent REST recovery (50).

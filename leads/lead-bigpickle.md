@@ -737,3 +737,31 @@ testability: AUTH_HELPED
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404 — no deployed functions.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401 — auth required.
 [RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
+## 2026-09-05 21:47:48 UTC [target] (model bigpickle)
+[HYP] Dangling Cloudflare-proxied CNAME on cto.onecode.de (error 1001)
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 52
+reasoning: CNAME → cname.perspective-dns.com (Cloudflare-fronted, 104.18.2.73/3.73); GET / on port 80 returns 409 with body "error code: 1001" (server: cloudflare, CF-RAY a3686c8c0e9d8847-IAD); 443 fails TLS handshake. CF 1001 = origin unresolvable inside Cloudflare, i.e. stale/dangling proxied CNAME. No sibling subdomains resolve (dev/api/admin/staging… all NXDOMAIN).
+evidence_needed: Confirmation cto.onecode.de is claimable via self-serve registration at cname.perspective-dns.com (provider check, out-of-band).
+verify_steps: PASSIVE: repeat GET http://cto.onecode.de/ ≤1/day → confirm stable 409/1001 (observable without auth). CONFIRM: registry/provider interaction at perspective-dns.com for the cto hostname (HUMAN_ONLY).
+impact: Full control of a *.onecode.de subdomain (phrase: phishing under onecode.de origin, DNS-chained cert issuance) — HIGH if claimable.
+testability: PASSIVE
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Unchanged — single Supabase project backs invite-only course platform; publishable key passes REST auth layer (503 PGRST002); UUID PKs make the realistic hole a missing RLS filter enabling cross-tenant SELECT on profiles/enrollments/course_materials.
+evidence_needed: Account-A token retrieving rows owned by Account-B (two invited accounts, different domains).
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: Unchanged — 503 PGRST002 (not 401) proves publishable key passes auth layer; mask hides anon role's true table ACL; cache recovery could expose missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query with only the publishable key.
+verify_steps: GET /rest/v1/profiles?select=*&limit=1 + apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, ≤1/day, next ≤09-06.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
