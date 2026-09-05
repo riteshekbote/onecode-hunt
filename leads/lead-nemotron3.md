@@ -527,3 +527,63 @@ testability: AUTH_HELPED
 [LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
 [LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. Unprobed subdomains (5) add theoretical takeover surface but confidence < 50.
+## 2026-09-05 00:17:08 UTC [target] (model nemotron3)
+[NEW] Supabase Storage `/storage/v1/bucket` returns 200 with empty array `[]` using publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — endpoint directly accessible, bypasses Next.js middleware (sb-gateway-mode: direct)
+[NEW] Supabase Functions `/functions/v1/` returns 404 (no deployed functions or not listable)
+[NEW] Supabase Realtime `/realtime/v1/` returns 401 — requires auth, no unauthenticated access
+[NEW] Supabase REST `/rest/v1/` returns 401 with publishable key — anon REST blocked
+[NEW] Auth settings confirmed: email-only, `disable_signup=true`, `mailer_autoconfirm=false`, all external OAuth `false`
+[CHANGED] Storage public bucket hypothesis confidence adjusted: endpoint probeable (PASSIVE) but zero buckets exist → exposure risk lowered from MEDIUM-HIGH to LOW
+[CHANGED] Pre-auth surface on `kurs.onecode.de` fully exhausted — only `/login` and `/passwort-vergessen` at 200; all `/api/*`, `/v1`, `/dashboard` 307→/login
+[CHANGED] Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED)
+[CHANGED] Subdomain takeover hypotheses (`hostmaster.*`, `cto.onecode.de`) remain at confidence 45 < 50 — passive-only cannot confirm claimability without active DNS resolution
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,5.5,a=6,b=5,t=6,g=9,c=5,f=5
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,3.8,a=5,b=4,t=5,g=8,c=3,f=3
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/,3.2,a=4,b=4,t=4,g=2,c=3,f=3
+[PRIO] kurs.onecode.de (post-auth BOLA),7.0,a=7,b=9,t=8,g=1,c=7,f=7
+[PRIO] onecode.de,3.8,a=4,b=5,t=3,g=5,c=3,f=3
+[PRIO] www.onecode.de,3.8,a=4,b=5,t=3,g=5,c=3,f=3
+[PRIO] mail.onecode.de,3.5,a=5,b=6,t=2,g=4,c=2,f=2
+[PRIO] cto.onecode.de,2.5,a=4,b=5,t=2,g=3,c=1,f=1
+[PRIO] mta-sts.onecode.de,1.5,a=2,b=2,t=1,g=5,c=1,f=1
+[HYP] Post-auth BOLA via Supabase RLS policy gap across course tenants
+class: IDOR
+asset: kurs.onecode.de (/api,/v1 proxied to Supabase)
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
+verify_steps: (AUTH_HELPED) With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
+testability: AUTH_HELPED
+[HYP] Supabase Storage public bucket exposure via direct service endpoint
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 45
+reasoning: Storage endpoint directly accessible with publishable key (bypasses Next.js middleware); course platform semantics suggest resources stored in Supabase Storage; public/overly-permissive bucket policies are common misconfiguration; currently zero buckets but bucket creation could expose data
+evidence_needed: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket/<bucket_name> returns 200 with file listing; or POST to create bucket succeeds with anon key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with apikey header; enumerate common bucket names (courses, resources, uploads, assets, files); POST to create bucket with anon key
+impact: Unauthenticated access to course materials, user uploads, sensitive resources — MEDIUM
+testability: PASSIVE
+[HYP] Supabase Edge Functions unauthenticated invocation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/
+confidence: 40
+reasoning: Functions endpoint returns 404 on listing; no function names found in client bundles; if functions exist without verifySession/verifyJwt they would be unauthenticated-invocable; deployed functions bypass app auth middleware entirely
+evidence_needed: HTTP 200 from GET /functions/v1/ listing deployed functions, or known function name returning non-404 on invocation with anon key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/ with apikey header; POST to common function names (send-email, webhook, process-upload, generate-pdf, notify) with apikey header
+impact: Unprivileged server-side code execution or data extraction if vulnerable functions exist — HIGH
+testability: PASSIVE
+[PARKED] Supabase Realtime publication RLS gap: confidence 35 < 40; WebSocket probe complexity, no evidence of realtime publications beyond /api/broadcast client reference, 401 on anon key
+[PARKED] Supabase Edge Functions undeployed: confidence 40; 404 on listing endpoint, no function names in bundles; speculative without deployed function evidence
+[FINAL] 1. Post-auth BOLA via Supabase RLS policy gap across tenants (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Supabase Storage public bucket exposure via direct service endpoint (confidence 45, MISCONFIG, PASSIVE) — probeable but zero buckets currently
+[FINAL] 3. Supabase Edge Functions unauthenticated invocation (confidence 40, MISCONFIG, PASSIVE) — speculative, no deployed functions found
+[NEXT] SCAN: Enumerate `kurs.onecode.de` post-auth API surface via JS bundle route extraction — find all `/api/*` and `/v1/*` route handlers in client chunks to map BOLA targets for AUTH_HELPED testing
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with publishable key — returns 200 with empty bucket list (zero buckets)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404; no deployed functions or not listable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401; requires auth, no pre-auth access
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. Unprobed subdomains (5) add theoretical takeover surface but confidence < 50.

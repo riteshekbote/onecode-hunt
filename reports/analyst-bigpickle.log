@@ -2727,3 +2727,720 @@ testability: PASSIVE
 [93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
 [0m✗ [0mKEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Z25wYWRra3RzZm5oZ3N5amNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjUzMzI0MDAsImV4cCI6MjA0MDkwODQwMH0.870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6"; curl -s -o /tmp/storage_bucket.txt -w "HTTP %{http_code}\n" -H "Authorization: Bearer $KEY" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket; echo "---body---"; cat /tmp/storage_bucket.txt failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST bigpickle 2026-09-05 00:17:17 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la && ls -la art 2>/dev/null; ls -la inventory 2>/dev/null; ls -la notes 2>/dev/null
+total 164
+drwxr-xr-x 12 runner runner  4096 Sep  5 00:12 .
+drwxr-xr-x  3 runner runner  4096 Sep  5 00:11 ..
+drwxr-xr-x  7 runner runner  4096 Sep  5 00:12 .git
+drwxr-xr-x  3 runner runner  4096 Sep  5 00:11 .github
+-rw-r--r--  1 runner runner  1692 Sep  5 00:11 README.md
+-rw-r--r--  1 runner runner    32 Sep  5 00:12 analyst-out.txt
+-rw-r--r--  1 runner runner 36917 Sep  5 00:12 analyst-prompt.txt
+-rw-r--r--  1 runner runner 33068 Sep  5 00:12 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 leads
+-rw-r--r--  1 runner runner   435 Sep  5 00:11 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 reports
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 reposcan-raw
+-rw-r--r--  1 runner runner  3268 Sep  5 00:11 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 scripts
+-rw-r--r--  1 runner runner    33 Sep  5 00:11 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  5 00:11 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  5 00:11 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  5 00:11 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  5 00:11 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  5 00:11 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 triage
+total 20
+drwxr-xr-x  2 runner runner  4096 Sep  5 00:11 .
+drwxr-xr-x 12 runner runner  4096 Sep  5 00:12 ..
+-rw-r--r--  1 runner runner 10605 Sep  5 00:11 onecode.md
+[0m
+[0m✱ [0mGlob "**/*.{md,txt,json}"[90m 45 matches[0m
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/hypotheses-nemotron3.txt
+[0m→ [0mRead recon-notes/DEDICATED-DEEP.md
+[0m→ [0mRead knowledge/index.md
+[0m→ [0mRead triage/run-2026-09-04-23-48.md
+[0m→ [0mRead probe-results.md
+[0m→ [0mRead leads/reposcan-onecode.md
+[0m→ [0mRead reposcan-raw/summary.txt
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead leads/lead-ling3.md
+[0m
+[0m$ [0mcurl -s -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" https://kurs.onecode.de/login -o /tmp/opencode/login.html -w "HTTP %{http_code} size=%{size_download}\n" -D /tmp/opencode/login.h && echo "---HEADERS---" && cat /tmp/opencode/login.h
+HTTP 200 size=18702
+---HEADERS---
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Sat, 05 Sep 2026 00:12:32 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: 9gBEZZQzQH6IQmMIjUJq2g
+x-railway-edge: iad1
+x-hikari-trace: iad1.trg5
+[0m
+[0m$ [0mcd /tmp/opencode && grep -oE '/_next/static/[^"]+\.js' login.html | sort -u && echo "---BUILDID---" && grep -oE 'buildId":"[^"]+"' login.html | head -3 && echo "---SCRIPTS---" && grep -oE '<script[^>]*src="[^"]+"' login.html | head -20
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+---BUILDID---
+---SCRIPTS---
+<script src="/_next/static/chunks/2i51e627rllld.js"
+<script src="/_next/static/chunks/08ttfj81-47mu.js"
+<script src="/_next/static/chunks/0-mbmp1iqb6hj.js"
+<script src="/_next/static/chunks/turbopack-2a8cgfwu75lsu.js"
+<script src="/_next/static/chunks/3fntmmi971322.js"
+<script src="/_next/static/chunks/4310-_brt1a3g.js"
+<script src="/_next/static/chunks/1ymt1shyhmu-4.js"
+<script src="/_next/static/chunks/2n1zydk_92chn.js"
+<script src="/_next/static/chunks/2ufbqzbeyam3w.js"
+<script src="/_next/static/chunks/1a4tqdnsy9k1l.js"
+<script src="/_next/static/chunks/0-lpao5_i9htd.js"
+<script src="/_next/static/chunks/0cz1d0mv5g_q7.js"
+<script src="/_next/static/chunks/3mc6dra1m0098.js"
+[0m
+[0m$ [0mcd /tmp/opencode && mkdir -p chunks && for f in 0-lpao5_i9htd 0-mbmp1iqb6hj 08ttfj81-47mu 0cz1d0mv5g_q7 1a4tqdnsy9k1l 1ymt1shyhmu-4 2i51e627rllld 2n1zydk_92chn 2ufbqzbeyam3w 3fntmmi971322 3mc6dra1m0098 4310-_brt1a3g turbopack-2a8cgfwu75lsu; do curl -s -A "Mozilla/5.0" "https://kurs.onecode.de/_next/static/chunks/$f.js" -o "chunks/$f.js"; sleep 1; done; wc -c chunks/*.js
+251775 chunks/0-lpao5_i9htd.js
+154581 chunks/0-mbmp1iqb6hj.js
+229078 chunks/08ttfj81-47mu.js
+112594 chunks/0cz1d0mv5g_q7.js
+ 13880 chunks/1a4tqdnsy9k1l.js
+ 27433 chunks/1ymt1shyhmu-4.js
+ 31346 chunks/2i51e627rllld.js
+ 11147 chunks/2n1zydk_92chn.js
+  1311 chunks/2ufbqzbeyam3w.js
+ 14377 chunks/3fntmmi971322.js
+ 12653 chunks/3mc6dra1m0098.js
+ 37519 chunks/4310-_brt1a3g.js
+  9652 chunks/turbopack-2a8cgfwu75lsu.js
+907346 total
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && echo "=== SECRET PATTERNS ===" && grep -oiE 'service[_]?role[a-zA-Z0-9_:="]{0,40}' *.js | sort -u | head -20; echo; echo "=== supabase keys / publishable ==="; grep -oE 'sb_publishable[a-zA-Z0-9_]+' *.js | sort -u | head; grep -oE 'SUPABASE_[A-Z_]+' *.js | sort -u | head; echo; echo "=== NEXT_PUBLIC / EXPOSE ==="; grep -oE 'NEXT_PUBLIC_[A-Z_]+' *.js | sort -u | head -20; echo; echo "=== key refs ==="; grep -oiE '(api.?key|anon.?key|secreta?)?[a-zA-Z0-9-]{0,12}eyJhbGciOiJIUzI1NiI[a-zA-Z0-9._-]{30}' *.js | sort -u | head
+=== SECRET PATTERNS ===
+
+=== supabase keys / publishable ===
+0-lpao5_i9htd.js:sb_publishable_
+0-lpao5_i9htd.js:sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+
+=== NEXT_PUBLIC / EXPOSE ===
+
+=== key refs ===
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && echo "=== supabase URLs ==="; grep -ohE 'https://[a-z0-9.-]+\.supabase\.co[a-z0-9/]*' *.js | sort -u; echo; echo "=== functions/storage/realtime refs ==="; grep -ohE '(functions|storage|realtime)/v1[a-z0-9/_-]*' *.js | sort -u; echo; echo "=== from( table names ==="; grep -ohE "\.from\([\"'][a-z_]+[\"']\)" *.js | sort -u | head -40
+=== supabase URLs ===
+https://aygnpacdkgtsfnhgcyjc.supabase.co
+
+=== functions/storage/realtime refs ===
+functions/v1
+realtime/v1
+storage/v1
+
+=== from( table names ===
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && echo "=== /api/ strings ==="; grep -ohE '[a-zA-Z0-9_/.-]*/api/[a-zA-Z0-9_/.*{}-]*' *.js | sort -u | head -40; echo; echo "=== /v1/ strings ==="; grep -ohE '[a-zA-Z0-9_/.-]*/v1/[a-zA-Z0-9_/.*{}-]*' *.js | sort -u | head -40; echo; echo "=== broadcast/channel ==="; grep -ohiE '(broadcast|channel[a-z_]*)' *.js | sort -u | head
+=== /api/ strings ===
+/api/broadcast
+
+=== /v1/ strings ===
+
+=== broadcast/channel ===
+BROADCAST
+Broadcast
+CHANNEL_ERROR
+Channel
+ChannelEvent
+Channels
+ChannelsAfterMs
+broadcast
+channel
+channelAdapter
+[0m
+[0m$ [0mcd /tmp/opencode && echo "=== routes in HTML ==="; grep -ohE '"(kurse|dashboard|einladung|passwort|profil|kurs|account|login|logout|api|admin|settings)[a-zA-Z0-9/_]*"' login.html | sort -u | head -40; echo; echo "=== buildId/navigation ==="; grep -ohE '(buildId|/_next/static/[a-zA-Z0-9_]+/)[a-zA-Z0-9_-]{0,20}' login.html | sort -u | head
+=== routes in HTML ===
+
+=== buildId/navigation ===
+/_next/static/chunks/0-lpao5_i9htd
+/_next/static/chunks/0-mbmp1iqb6hj
+/_next/static/chunks/08ttfj81-47mu
+/_next/static/chunks/0cz1d0mv5g_q7
+/_next/static/chunks/1a4tqdnsy9k1l
+/_next/static/chunks/1ymt1shyhmu-4
+/_next/static/chunks/2i51e627rllld
+/_next/static/chunks/2n1zydk_92chn
+/_next/static/chunks/2n8375xih-hg0
+/_next/static/chunks/2ufbqzbeyam3w
+[0m
+[0m$ [0mcd /tmp/opencode && grep -oE "self.__next_f.push\(\[1,\"[^\"]+\"\]\)" login.html | sed 's/self.__next_f.push(\[1,"//;s/"\]);//' | tr '\\' '\n' > flight.txt; wc -l flight.txt; echo "=== interesting strings in flight ==="; grep -oiE '"(kurse|dashboard|einladung|passwort|[a-z-]+)"' flight.txt | sort | uniq -c | sort -rn | head -40
+0 flight.txt
+=== interesting strings in flight ===
+[0m
+[0m$ [0mcd /tmp/opencode && grep -oc "self.__next_f" login.html; grep -oE 'self.__next_f[^<]{0,80}' login.html | head -5
+1
+self.__next_f=self.__next_f||[]).push([0])
+self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[40264,[\"/_next/static/chunks/3fntmmi97132
+[0m
+[0m$ [0mcd /tmp/opencode && python3 -c "
+import re,html
+s=open('login.html',encoding='utf-8').read()
+m=re.findall(r'self\.__next_f\.push\(\[(\d+),(.*?)\]\)', s, re.S)
+out=[]
+for n,js in m:
+    js=js.strip()
+    if js.startswith('\"') and js.endswith('\"'):
+        try:
+            js=html.unescape(js[1:-1]).encode().decode('unicode_escape',errors='replace')
+        except Exception as e:
+            pass
+    out.append((n,js))
+open('flight.txt','w').write('\n'.join(b for _,b in out))
+print('chunks:',len(out))
+"
+chunks: 1
+[0m
+[0m$ [0mcd /tmp/opencode && wc -c flight.txt && grep -oE '"(kurse|dashboard|einladung|passwort|profil|kurs|account|login|logout|api|admin|settings|impressum|datenschutz)[a-zA-Z0-9/_-]*' flight.txt | sort -u | head -40
+6254 flight.txt
+"login
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && echo "=== quoted path segments ==="; grep -ohE '"/[a-z][a-z0-9/_-]{2,40}"' *.js | sort -u | head -60
+=== quoted path segments ===
+"/a/b"
+"/a/i"
+"/admin"
+"/api/broadcast"
+"/courses"
+"/dashboard"
+"/datenschutz"
+"/einladung"
+"/iceberg"
+"/passwort-neu"
+"/passwort-vergessen"
+"/rechtliches"
+"/recovery"
+"/vector"
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && for p in admin iceberg vector courses; do echo "=== $p ==="; grep -ohE '.{80}/'"$p"'.{40}' *.js | head -6; done
+=== admin ===
+==r?void 0:r.newEmail,delete s.newEmail),await rp(this.fetch,"POST",`${this.url}/admin/generate_link`,{body:s,headers:this.hea
+;throw e}}async createUser(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/users`,{body:e,headers:this.headers,xfo
+et l={nextPage:null,lastPage:0,total:0},h=await rp(this.fetch,"GET",`${this.url}/admin/users`,{headers:this.headers,noResolveJ
+ e}}async getUserById(e){ro(e);try{return await rp(this.fetch,"GET",`${this.url}/admin/users/${e}`,{headers:this.headers,xform
+sync updateUserById(e,t){ro(e);try{return await rp(this.fetch,"PUT",`${this.url}/admin/users/${e}`,{body:t,headers:this.header
+nc deleteUser(e,t=!1){ro(e);try{return await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e}`,{headers:this.headers,body:
+=== iceberg ===
+headers:this.headers,fetch:this.fetch})}get analytics(){return new tn(this.url+"/iceberg",this.headers,this.fetch)}};let tf="2.1
+=== vector ===
+ew tr(this.url,this.headers,e,this.fetch)}get vectors(){return new th(this.url+"/vector",{headers:this.headers,fetch:this.fetch
+=== courses ===
+20,e=>{"use strict";var t=e.i(43476),r=e.i(18566),i=e.i(63152);let s=["/admin","/courses"];e.s(["GlobalLegalFooter",0,function()
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && echo "=== which chunk ==="; grep -l 'iceberg' *.js; grep -l 'vector /' *.js; echo; echo "=== base url construction ==="; grep -ohE '(url|baseUrl)[: ]*["'"'"'][a-z0-9:/._-]+supabase["'"'"'][a-z0-9:/._*-]*' *.js | sort -u | head; echo; echo "=== rest/v1 refs ==="; grep -ohE '[a-z0-9:/._-]*/rest/v1[a-z0-9/._*-]*' *.js | sort -u | head
+=== which chunk ===
+0-lpao5_i9htd.js
+
+=== base url construction ===
+
+=== rest/v1 refs ===
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && python3 - <<'EOF'
+import re
+s=open('0-lpao5_i9htd.js',encoding='utf-8',errors='replace').read()
+for key in ['/iceberg','/vector','/admin','this.url']:
+    print('='*20, key)
+    for m in re.finditer(re.escape(key), s):
+        print(s[max(0,m.start()-160):m.start()+160].replace('\n',' ')[:400])
+        print('---')
+EOF
+...output truncated...
+
+Full output saved to: /home/runner/.local/share/opencode/tool-output/tool_06eea0d70001YyHRASVvjooB4w
+
+---
+aders,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async deleteUser(e,t=!1){ro(e);try{return await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e}`,{headers:this.headers,body:{should_soft_delete:t},xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async _listFactors(e
+---
+})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async _listFactors(e){ro(e.userId);try{let{data:t,error:r}=await rp(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/factors`,{headers:this.headers,xform:e=>({data:{factors:e},error:null})});return{data:t,error:r}}catch(e){if(tv(e))return{data:null,err
+---
+r:r}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteFactor(e){ro(e.userId),ro(e.id);try{return{data:await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/factors/${e.id}`,{headers:this.headers}),error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _listOAuthClients(e){va
+---
+n{data:null,error:e};throw e}}async _listOAuthClients(e){var t,r,s,i,n,a,o;try{let l={nextPage:null,lastPage:0,total:0},h=await rp(this.fetch,"GET",`${this.url}/admin/oauth/clients`,{headers:this.headers,noResolveJson:!0,query:{page:null!=(r=null==(t=null==e?void 0:e.page)?void 0:t.toString())?r:"",per_page:null!=(i=nu
+---
+{},u),l),error:null}}catch(e){if(tv(e))return{data:{clients:[]},error:e};throw e}}async _createOAuthClient(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/oauth/clients`,{body:e,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getOAuthClient(e
+---
+xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getOAuthClient(e){try{return await rp(this.fetch,"GET",`${this.url}/admin/oauth/clients/${e}`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateOAuthClient(
+---
+:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateOAuthClient(e,t){try{return await rp(this.fetch,"PUT",`${this.url}/admin/oauth/clients/${e}`,{body:t,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteOAuth
+---
+e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteOAuthClient(e){try{return await rp(this.fetch,"DELETE",`${this.url}/admin/oauth/clients/${e}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _regenerat
+---
+a:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _regenerateOAuthClientSecret(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/oauth/clients/${e}/regenerate_secret`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _
+---
+urn{data:null,error:e};throw e}}async _listCustomProviders(e){try{let t={};return(null==e?void 0:e.type)&&(t.type=e.type),await rp(this.fetch,"GET",`${this.url}/admin/custom-providers`,{headers:this.headers,query:t,xform:e=>{var t;return{data:{providers:null!=(t=null==e?void 0:e.providers)?t:[]},error:null}}})}catch(e)
+---
+,error:null}}})}catch(e){if(tv(e))return{data:{providers:[]},error:e};throw e}}async _createCustomProvider(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/custom-providers`,{body:e,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getCustomProv
+---
+rm:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getCustomProvider(e){try{return await rp(this.fetch,"GET",`${this.url}/admin/custom-providers/${e}`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateCustomPro
+---
+>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateCustomProvider(e,t){try{return await rp(this.fetch,"PUT",`${this.url}/admin/custom-providers/${e}`,{body:t,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteCu
+---
+({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteCustomProvider(e){try{return await rp(this.fetch,"DELETE",`${this.url}/admin/custom-providers/${e}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _adminL
+---
+(e){if(tv(e))return{data:null,error:e};throw e}}async _adminListPasskeys(e){rl(this.experimental),ro(e.userId);try{return await rp(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/passkeys`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _adminDelet
+---
+data:null,error:e};throw e}}async _adminDeletePasskey(e){rl(this.experimental),ro(e.userId),ro(e.passkeyId);try{return await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/passkeys/${e.passkeyId}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};th
+---
+==================== this.url
+,a,o,l,h,u,c,d,f,p,g,y,m=e.i(47167),b=e.i(79841),w=e.i(72378),v=e.i(90571);class _{constructor(e,{headers:t={},customFetch:r,region:s=w.FunctionRegion.Any}={}){this.url=e,this.headers=t,this.region=s,this.fetch=(e=>e?(...t)=>e(...t):(...e)=>fetch(...e))(r)}setAuth(e){this.headers.Authorization=`Bearer ${e}`}invoke(e){r
+---
+nts,void 0,function*(e,t={}){var r,s;let i,n,a;try{let s,{headers:o,method:l,body:h,signal:u,timeout:c}=t,d={},{region:f}=t;f||(f=this.region);let p=new URL(`${this.url}/${e}`);f&&"any"!==f&&(d["x-region"]=f,p.searchParams.set("forceFunctionRegion",f));let g=!!o&&Object.keys(o).some(e=>"content-type"===e.toLowerCase())
+---
+t(s),r()}null==t||t.addEventListener("abort",i)})}var P=class{constructor(e){var t,r,s,i,n;this.shouldThrowOnError=!1,this.retryEnabled=!0,this.method=e.method,this.url=e.url,this.headers=new Headers(e.headers),this.schema=e.schema,this.body=e.body,this.shouldThrowOnError=null!=(t=e.shouldThrowOnError)&&t,this.signal=e
+---
+or=null!=(t=e.shouldThrowOnError)&&t,this.signal=e.signal,this.isMaybeSingle=null!=(r=e.isMaybeSingle)&&r,this.shouldStripNulls=null!=(s=e.shouldStripNulls)&&s,this.urlLengthLimit=null!=(i=e.urlLengthLimit)?i:8e3,this.retryEnabled=null==(n=e.retry)||n,e.fetch?this.fetch=e.fetch:this.fetch=fetch}throwOnError(){return th
+---
+!=(n=null==u?void 0:u.name)?n:"Error"}: ${t}`,a&&(o+=` (${a})`),(null==u?void 0:u.stack)&&(o+=` ${u.stack}`)}else o=null!=(a=null==e?void 0:e.stack)?a:"";let c=this.url.toString().length;return(null==e?void 0:e.name)==="AbortError"||(null==e?void 0:e.code)==="ABORT_ERR"?(h="",l="Request was aborted (timeout or manual c
+---
+g().length;return(null==e?void 0:e.name)==="AbortError"||(null==e?void 0:e.code)==="ABORT_ERR"?(h="",l="Request was aborted (timeout or manual cancellation)",c>this.urlLengthLimit&&(l+=`. Note: Your request URL is ${c} characters, which may exceed server limits. If selecting many fields, consider using views. If filter
+---
+oid 0:u.name)==="HeadersOverflowError"||(null==u?void 0:u.code)==="UND_ERR_HEADERS_OVERFLOW")&&(h="",l="HTTP headers exceeded server limits (typically 16KB)",c>this.urlLengthLimit&&(l+=`. Your request URL is ${c} characters. If selecting many fields, consider using views. If filtering with large arrays (e.g., .in('id',
+---
+nds P{throwOnError(){return super.throwOnError()}select(e){let t=!1,r=(null!=e?e:"*").split("").map(e=>/\s/.test(e)&&!t?"":('"'===e&&(t=!t),e)).join("");return this.url.searchParams.set("select",r),this.headers.append("Prefer","return=representation"),this}order(e,{ascending:t=!0,nullsFirst:r,foreignTable:s,referencedT
+---
+aders.append("Prefer","return=representation"),this}order(e,{ascending:t=!0,nullsFirst:r,foreignTable:s,referencedTable:i=s}={}){let n=i?`${i}.order`:"order",a=this.url.searchParams.get(n);return this.url.searchParams.set(n,`${a?`${a},`:""}${e}.${t?"asc":"desc"}${void 0===r?"":r?".nullsfirst":".nullslast"}`),this}limit
+---
+entation"),this}order(e,{ascending:t=!0,nullsFirst:r,foreignTable:s,referencedTable:i=s}={}){let n=i?`${i}.order`:"order",a=this.url.searchParams.get(n);return this.url.searchParams.set(n,`${a?`${a},`:""}${e}.${t?"asc":"desc"}${void 0===r?"":r?".nullsfirst":".nullslast"}`),this}limit(e,{foreignTable:t,referencedTable:r
+---
+"asc":"desc"}${void 0===r?"":r?".nullsfirst":".nullslast"}`),this}limit(e,{foreignTable:t,referencedTable:r=t}={}){let s=void 0===r?"limit":`${r}.limit`;return this.url.searchParams.set(s,`${e}`),this}range(e,t,{foreignTable:r,referencedTable:s=r}={}){let i=void 0===s?"offset":`${s}.offset`,n=void 0===s?"limit":`${s}.l
+---
+chParams.set(s,`${e}`),this}range(e,t,{foreignTable:r,referencedTable:s=r}={}){let i=void 0===s?"offset":`${s}.offset`,n=void 0===s?"limit":`${s}.limit`;return this.url.searchParams.set(i,`${e}`),this.url.searchParams.set(n,`${t-e+1}`),this}abortSignal(e){return this.signal=e,this}single(){return this.headers.set("Acce
+---
+t,{foreignTable:r,referencedTable:s=r}={}){let i=void 0===s?"offset":`${s}.offset`,n=void 0===s?"limit":`${s}.limit`;return this.url.searchParams.set(i,`${e}`),this.url.searchParams.set(n,`${t-e+1}`),this}abortSignal(e){return this.signal=e,this}single(){return this.headers.set("Accept","application/vnd.pgrst.object+js
+---
+,this.headers.append("Prefer",`max-affected=${e}`),this}};let I=RegExp("[,()]");var $=class extends j{throwOnError(){return super.throwOnError()}eq(e,t){return this.url.searchParams.append(e,`eq.${t}`),this}neq(e,t){return this.url.searchParams.append(e,`neq.${t}`),this}gt(e,t){return this.url.searchParams.append(e,`gt
+---
+=RegExp("[,()]");var $=class extends j{throwOnError(){return super.throwOnError()}eq(e,t){return this.url.searchParams.append(e,`eq.${t}`),this}neq(e,t){return this.url.searchParams.append(e,`neq.${t}`),this}gt(e,t){return this.url.searchParams.append(e,`gt.${t}`),this}gte(e,t){return this.url.searchParams.append(e,`gt
+---
+per.throwOnError()}eq(e,t){return this.url.searchParams.append(e,`eq.${t}`),this}neq(e,t){return this.url.searchParams.append(e,`neq.${t}`),this}gt(e,t){return this.url.searchParams.append(e,`gt.${t}`),this}gte(e,t){return this.url.searchParams.append(e,`gte.${t}`),this}lt(e,t){return this.url.searchParams.append(e,`lt
+---
+e,`eq.${t}`),this}neq(e,t){return this.url.searchParams.append(e,`neq.${t}`),this}gt(e,t){return this.url.searchParams.append(e,`gt.${t}`),this}gte(e,t){return this.url.searchParams.append(e,`gte.${t}`),this}lt(e,t){return this.url.searchParams.append(e,`lt.${t}`),this}lte(e,t){return this.url.searchParams.append(e,`lt
+---
+e,`neq.${t}`),this}gt(e,t){return this.url.searchParams.append(e,`gt.${t}`),this}gte(e,t){return this.url.searchParams.append(e,`gte.${t}`),this}lt(e,t){return this.url.searchParams.append(e,`lt.${t}`),this}lte(e,t){return this.url.searchParams.append(e,`lte.${t}`),this}like(e,t){return this.url.searchParams.append(e,`
+---
+e,`gt.${t}`),this}gte(e,t){return this.url.searchParams.append(e,`gte.${t}`),this}lt(e,t){return this.url.searchParams.append(e,`lt.${t}`),this}lte(e,t){return this.url.searchParams.append(e,`lte.${t}`),this}like(e,t){return this.url.searchParams.append(e,`like.${t}`),this}likeAllOf(e,t){return this.url.searchParams.ap
+---
+`gte.${t}`),this}lt(e,t){return this.url.searchParams.append(e,`lt.${t}`),this}lte(e,t){return this.url.searchParams.append(e,`lte.${t}`),this}like(e,t){return this.url.searchParams.append(e,`like.${t}`),this}likeAllOf(e,t){return this.url.searchParams.append(e,`like(all).{${t.join(",")}}`),this}likeAnyOf(e,t){return t
+---
+`),this}lte(e,t){return this.url.searchParams.append(e,`lte.${t}`),this}like(e,t){return this.url.searchParams.append(e,`like.${t}`),this}likeAllOf(e,t){return this.url.searchParams.append(e,`like(all).{${t.join(",")}}`),this}likeAnyOf(e,t){return this.url.searchParams.append(e,`like(any).{${t.join(",")}}`),this}ilike(
+---
+ this.url.searchParams.append(e,`like.${t}`),this}likeAllOf(e,t){return this.url.searchParams.append(e,`like(all).{${t.join(",")}}`),this}likeAnyOf(e,t){return this.url.searchParams.append(e,`like(any).{${t.join(",")}}`),this}ilike(e,t){return this.url.searchParams.append(e,`ilike.${t}`),this}ilikeAllOf(e,t){return thi
+---
+rchParams.append(e,`like(all).{${t.join(",")}}`),this}likeAnyOf(e,t){return this.url.searchParams.append(e,`like(any).{${t.join(",")}}`),this}ilike(e,t){return this.url.searchParams.append(e,`ilike.${t}`),this}ilikeAllOf(e,t){return this.url.searchParams.append(e,`ilike(all).{${t.join(",")}}`),this}ilikeAnyOf(e,t){retu
+---
+rn this.url.searchParams.append(e,`like(any).{${t.join(",")}}`),this}ilike(e,t){return this.url.searchParams.append(e,`ilike.${t}`),this}ilikeAllOf(e,t){return this.url.searchParams.append(e,`ilike(all).{${t.join(",")}}`),this}ilikeAnyOf(e,t){return this.url.searchParams.append(e,`ilike(any).{${t.join(",")}}`),this}reg
+---
+s.url.searchParams.append(e,`ilike.${t}`),this}ilikeAllOf(e,t){return this.url.searchParams.append(e,`ilike(all).{${t.join(",")}}`),this}ilikeAnyOf(e,t){return this.url.searchParams.append(e,`ilike(any).{${t.join(",")}}`),this}regexMatch(e,t){return this.url.searchParams.append(e,`match.${t}`),this}regexIMatch(e,t){ret
+---
+s.append(e,`ilike(all).{${t.join(",")}}`),this}ilikeAnyOf(e,t){return this.url.searchParams.append(e,`ilike(any).{${t.join(",")}}`),this}regexMatch(e,t){return this.url.searchParams.append(e,`match.${t}`),this}regexIMatch(e,t){return this.url.searchParams.append(e,`imatch.${t}`),this}is(e,t){return this.url.searchParam
+---
+.url.searchParams.append(e,`ilike(any).{${t.join(",")}}`),this}regexMatch(e,t){return this.url.searchParams.append(e,`match.${t}`),this}regexIMatch(e,t){return this.url.searchParams.append(e,`imatch.${t}`),this}is(e,t){return this.url.searchParams.append(e,`is.${t}`),this}isDistinct(e,t){return this.url.searchParams.ap
+---
+exMatch(e,t){return this.url.searchParams.append(e,`match.${t}`),this}regexIMatch(e,t){return this.url.searchParams.append(e,`imatch.${t}`),this}is(e,t){return this.url.searchParams.append(e,`is.${t}`),this}isDistinct(e,t){return this.url.searchParams.append(e,`isdistinct.${t}`),this}in(e,t){let r=Array.from(new Set(t)
+---
+regexIMatch(e,t){return this.url.searchParams.append(e,`imatch.${t}`),this}is(e,t){return this.url.searchParams.append(e,`is.${t}`),this}isDistinct(e,t){return this.url.searchParams.append(e,`isdistinct.${t}`),this}in(e,t){let r=Array.from(new Set(t)).map(e=>"string"==typeof e&&I.test(e)?`"${e}"`:`${e}`).join(",");retu
+---
+s.url.searchParams.append(e,`isdistinct.${t}`),this}in(e,t){let r=Array.from(new Set(t)).map(e=>"string"==typeof e&&I.test(e)?`"${e}"`:`${e}`).join(",");return this.url.searchParams.append(e,`in.(${r})`),this}notIn(e,t){let r=Array.from(new Set(t)).map(e=>"string"==typeof e&&I.test(e)?`"${e}"`:`${e}`).join(",");return 
+---
+this.url.searchParams.append(e,`in.(${r})`),this}notIn(e,t){let r=Array.from(new Set(t)).map(e=>"string"==typeof e&&I.test(e)?`"${e}"`:`${e}`).join(",");return this.url.searchParams.append(e,`not.in.(${r})`),this}contains(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cs.${t}`):Array.isArray(t)?this.url.
+---
+(e=>"string"==typeof e&&I.test(e)?`"${e}"`:`${e}`).join(",");return this.url.searchParams.append(e,`not.in.(${r})`),this}contains(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cs.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cs.{${t.join(",")}}`):this.url.searchParams.append(e,`cs.${JSON.strin
+---
+);return this.url.searchParams.append(e,`not.in.(${r})`),this}contains(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cs.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cs.{${t.join(",")}}`):this.url.searchParams.append(e,`cs.${JSON.stringify(t)}`),this}containedBy(e,t){return"string"==typeof t?t
+---
+`),this}contains(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cs.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cs.{${t.join(",")}}`):this.url.searchParams.append(e,`cs.${JSON.stringify(t)}`),this}containedBy(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cd.${t}`):Array.isArray
+---
+?this.url.searchParams.append(e,`cs.{${t.join(",")}}`):this.url.searchParams.append(e,`cs.${JSON.stringify(t)}`),this}containedBy(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cd.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cd.{${t.join(",")}}`):this.url.searchParams.append(e,`cd.${JSON.strin
+---
+.url.searchParams.append(e,`cs.${JSON.stringify(t)}`),this}containedBy(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cd.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cd.{${t.join(",")}}`):this.url.searchParams.append(e,`cd.${JSON.stringify(t)}`),this}rangeGt(e,t){return this.url.searchParams.a
+---
+this}containedBy(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cd.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cd.{${t.join(",")}}`):this.url.searchParams.append(e,`cd.${JSON.stringify(t)}`),this}rangeGt(e,t){return this.url.searchParams.append(e,`sr.${t}`),this}rangeGte(e,t){return this.url.
+---
+{t}`):Array.isArray(t)?this.url.searchParams.append(e,`cd.{${t.join(",")}}`):this.url.searchParams.append(e,`cd.${JSON.stringify(t)}`),this}rangeGt(e,t){return this.url.searchParams.append(e,`sr.${t}`),this}rangeGte(e,t){return this.url.searchParams.append(e,`nxl.${t}`),this}rangeLt(e,t){return this.url.searchParams.ap
+---
+",")}}`):this.url.searchParams.append(e,`cd.${JSON.stringify(t)}`),this}rangeGt(e,t){return this.url.searchParams.append(e,`sr.${t}`),this}rangeGte(e,t){return this.url.searchParams.append(e,`nxl.${t}`),this}rangeLt(e,t){return this.url.searchParams.append(e,`sl.${t}`),this}rangeLte(e,t){return this.url.searchParams.ap
+---
+his}rangeGt(e,t){return this.url.searchParams.append(e,`sr.${t}`),this}rangeGte(e,t){return this.url.searchParams.append(e,`nxl.${t}`),this}rangeLt(e,t){return this.url.searchParams.append(e,`sl.${t}`),this}rangeLte(e,t){return this.url.searchParams.append(e,`nxr.${t}`),this}rangeAdjacent(e,t){return this.url.searchPar
+---
+is}rangeGte(e,t){return this.url.searchParams.append(e,`nxl.${t}`),this}rangeLt(e,t){return this.url.searchParams.append(e,`sl.${t}`),this}rangeLte(e,t){return this.url.searchParams.append(e,`nxr.${t}`),this}rangeAdjacent(e,t){return this.url.searchParams.append(e,`adj.${t}`),this}overlaps(e,t){return"string"==typeof t
+---
+ngeLt(e,t){return this.url.searchParams.append(e,`sl.${t}`),this}rangeLte(e,t){return this.url.searchParams.append(e,`nxr.${t}`),this}rangeAdjacent(e,t){return this.url.searchParams.append(e,`adj.${t}`),this}overlaps(e,t){return"string"==typeof t?this.url.searchParams.append(e,`ov.${t}`):this.url.searchParams.append(e,
+---
+his.url.searchParams.append(e,`nxr.${t}`),this}rangeAdjacent(e,t){return this.url.searchParams.append(e,`adj.${t}`),this}overlaps(e,t){return"string"==typeof t?this.url.searchParams.append(e,`ov.${t}`):this.url.searchParams.append(e,`ov.{${t.join(",")}}`),this}textSearch(e,t,{config:r,type:s}={}){let i="";"plain"===s?i
+---
+this}rangeAdjacent(e,t){return this.url.searchParams.append(e,`adj.${t}`),this}overlaps(e,t){return"string"==typeof t?this.url.searchParams.append(e,`ov.${t}`):this.url.searchParams.append(e,`ov.{${t.join(",")}}`),this}textSearch(e,t,{config:r,type:s}={}){let i="";"plain"===s?i="pl":"phrase"===s?i="ph":"websearch"===s&
+---
+",")}}`),this}textSearch(e,t,{config:r,type:s}={}){let i="";"plain"===s?i="pl":"phrase"===s?i="ph":"websearch"===s&&(i="w");let n=void 0===r?"":`(${r})`;return this.url.searchParams.append(e,`${i}fts${n}.${t}`),this}match(e){return Object.entries(e).filter(([e,t])=>void 0!==t).forEach(([e,t])=>{this.url.searchParams.ap
+---
+===r?"":`(${r})`;return this.url.searchParams.append(e,`${i}fts${n}.${t}`),this}match(e){return Object.entries(e).filter(([e,t])=>void 0!==t).forEach(([e,t])=>{this.url.searchParams.append(e,`eq.${t}`)}),this}not(e,t,r){return this.url.searchParams.append(e,`not.${t}.${r}`),this}or(e,{foreignTable:t,referencedTable:r=t
+---
+.${t}`),this}match(e){return Object.entries(e).filter(([e,t])=>void 0!==t).forEach(([e,t])=>{this.url.searchParams.append(e,`eq.${t}`)}),this}not(e,t,r){return this.url.searchParams.append(e,`not.${t}.${r}`),this}or(e,{foreignTable:t,referencedTable:r=t}={}){let s=r?`${r}.or`:"or";return this.url.searchParams.append(s,
+---
+{t}`)}),this}not(e,t,r){return this.url.searchParams.append(e,`not.${t}.${r}`),this}or(e,{foreignTable:t,referencedTable:r=t}={}){let s=r?`${r}.or`:"or";return this.url.searchParams.append(s,`(${e})`),this}filter(e,t,r){return this.url.searchParams.append(e,`${t}.${r}`),this}},x=class{constructor(e,{headers:t={},schema
+---
+${t}.${r}`),this}or(e,{foreignTable:t,referencedTable:r=t}={}){let s=r?`${r}.or`:"or";return this.url.searchParams.append(s,`(${e})`),this}filter(e,t,r){return this.url.searchParams.append(e,`${t}.${r}`),this}},x=class{constructor(e,{headers:t={},schema:r,fetch:s,urlLengthLimit:i=8e3,retry:n}){this.url=e,this.headers=n
+---
+his}filter(e,t,r){return this.url.searchParams.append(e,`${t}.${r}`),this}},x=class{constructor(e,{headers:t={},schema:r,fetch:s,urlLengthLimit:i=8e3,retry:n}){this.url=e,this.headers=new Headers(t),this.schema=r,this.fetch=s,this.urlLengthLimit=i,this.retry=n}cloneRequestState(){return{url:new URL(this.url.toString())
+---
+`),this}},x=class{constructor(e,{headers:t={},schema:r,fetch:s,urlLengthLimit:i=8e3,retry:n}){this.url=e,this.headers=new Headers(t),this.schema=r,this.fetch=s,this.urlLengthLimit=i,this.retry=n}cloneRequestState(){return{url:new URL(this.url.toString()),headers:new Headers(this.headers)}}select(e,t){let{head:r=!1,coun
+---
+mit:i=8e3,retry:n}){this.url=e,this.headers=new Headers(t),this.schema=r,this.fetch=s,this.urlLengthLimit=i,this.retry=n}cloneRequestState(){return{url:new URL(this.url.toString()),headers:new Headers(this.headers)}}select(e,t){let{head:r=!1,count:s}=null!=t?t:{},i=!1,n=(null!=e?e:"*").split("").map(e=>/\s/.test(e)&&!i
+---
+searchParams.set("select",n),s&&o.append("Prefer",`count=${s}`),new $({method:r?"HEAD":"GET",url:a,headers:o,schema:this.schema,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}insert(e,{count:t,defaultToNull:r=!0}={}){var s;let{url:i,headers:n}=this.cloneRequestState();if(t&&n.append("Prefer",`co
+---
+earchParams.set("columns",e.join(","))}}return new $({method:"POST",url:i,headers:n,schema:this.schema,body:e,fetch:null!=(s=this.fetch)?s:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}upsert(e,{onConflict:t,ignoreDuplicates:r=!1,count:s,defaultToNull:i=!0}={}){var n;let{url:a,headers:o}=this.cloneRequest
+---
+earchParams.set("columns",e.join(","))}}return new $({method:"POST",url:a,headers:o,schema:this.schema,body:e,fetch:null!=(n=this.fetch)?n:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}update(e,{count:t}={}){var r;let{url:s,headers:i}=this.cloneRequestState();return t&&i.append("Prefer",`count=${t}`),new 
+---
+e();return t&&i.append("Prefer",`count=${t}`),new $({method:"PATCH",url:s,headers:i,schema:this.schema,body:e,fetch:null!=(r=this.fetch)?r:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}delete({count:e}={}){var t;let{url:r,headers:s}=this.cloneRequestState();return e&&s.append("Prefer",`count=${e}`),new $(
+---
+stState();return e&&s.append("Prefer",`count=${e}`),new $({method:"DELETE",url:r,headers:s,schema:this.schema,fetch:null!=(t=this.fetch)?t:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}},N=class e{constructor(e,{headers:t={},schema:r,fetch:s,timeout:i,urlLengthLimit:n=8e3,retry:a}={}){this.url=e,this.head
+---
+etch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}},N=class e{constructor(e,{headers:t={},schema:r,fetch:s,timeout:i,urlLengthLimit:n=8e3,retry:a}={}){this.url=e,this.headers=new Headers(t),this.schemaName=r,this.urlLengthLimit=n;const o=null!=s?s:globalThis.fetch;void 0!==i&&i>0?this.fetch=(e,t)=>{let r=new A
+---
+)}},N=class e{constructor(e,{headers:t={},schema:r,fetch:s,timeout:i,urlLengthLimit:n=8e3,retry:a}={}){this.url=e,this.headers=new Headers(t),this.schemaName=r,this.urlLengthLimit=n;const o=null!=s?s:globalThis.fetch;void 0!==i&&i>0?this.fetch=(e,t)=>{let r=new AbortController,s=setTimeout(()=>r.abort(),i),n=null==t?vo
+---
+his.retry=a}from(e){if(!e||"string"!=typeof e||""===e.trim())throw Error("Invalid relation name: relation must be a non-empty string.");return new x(new URL(`${this.url}/${e}`),{headers:new Headers(this.headers),schema:this.schemaName,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}schema(t){retu
+---
+ust be a non-empty string.");return new x(new URL(`${this.url}/${e}`),{headers:new Headers(this.headers),schema:this.schemaName,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}schema(t){return new e(this.url,{headers:this.headers,schema:t,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:
+---
+/${e}`),{headers:new Headers(this.headers),schema:this.schemaName,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}schema(t){return new e(this.url,{headers:this.headers,schema:t,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}rpc(e,t={},{head:r=!1,get:s=!1,count:i}={}){var n
+---
+this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}schema(t){return new e(this.url,{headers:this.headers,schema:t,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}rpc(e,t={},{head:r=!1,get:s=!1,count:i}={}){var n;let a,o,l=new URL(`${this.url}/rpc/${e}`),h=e=>null!==e&&"object"==type
+---
+.headers,schema:t,fetch:this.fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}rpc(e,t={},{head:r=!1,get:s=!1,count:i}={}){var n;let a,o,l=new URL(`${this.url}/rpc/${e}`),h=e=>null!==e&&"object"==typeof e&&(!Array.isArray(e)||e.some(h)),u=r&&Object.values(t).some(h);u?(a="POST",o=t):r||s?(a=r?"HEAD":"GET",Obj
+---
+eturn=minimal"):i&&c.set("Prefer",`count=${i}`),new $({method:a,url:l,headers:c,schema:this.schemaName,body:o,fetch:null!=(n=this.fetch)?n:fetch,urlLengthLimit:this.urlLengthLimit,retry:this.retry})}};let U=class{static detectEnvironment(){var t;if("u">typeof WebSocket)return{type:"native",wsConstructor:WebSocket};let 
+---
+i,n,s,e)}}let{get:e1,post:e2,put:e5,head:e8,remove:e6}=e0("storage"),e3=e0("vectors");var e4=class{constructor(e,t={},r,s="storage"){this.shouldThrowOnError=!1,this.url=e,this.headers=function(e){let t={};for(let[r,s]of Object.entries(e))t[r.toLowerCase()]=s;return t}(t),this.fetch=(e=>e?(...t)=>e(...t):(...e)=>fetch(.
+---
+rm),(null==t?void 0:t.cacheNonce)!=null&&i.set("cacheNonce",String(t.cacheNonce));let n=i.toString(),a=this._getFinalPath(e);return new e7(()=>e1(this.fetch,`${this.url}/${s}/${a}${n?`?${n}`:""}`,{headers:this.headers,noResolveJson:!0},r),this.shouldThrowOnError)}async info(e){var t=this;let r=t._getFinalPath(e);return
+---
+c()=>eV(await e1(t.fetch,`${t.url}/object/info/${r}`,{headers:t.headers})))}async exists(e){var t;let r=this._getFinalPath(e);try{return await e8(this.fetch,`${this.url}/object/${r}`,{headers:this.headers}),{data:!0,error:null}}catch(e){if(this.shouldThrowOnError)throw e;if(eK(e)){let r=e instanceof ez?e.status:e insta
+---
+"object"==typeof(null==t?void 0:t.transform)&&null!==t.transform&&Object.keys(t.transform).length>0?"render/image":"object";return{data:{publicUrl:encodeURI(`${this.url}/${n}/public/${r}`)+(i?`?${i}`:"")}}}async remove(e){var t=this;return t.handleOperation(async()=>await e6(t.fetch,`${t.url}/object/${t.bucketId}`,{pre
+---
+ket name: File, folder, and bucket names must follow AWS object key naming guidelines and should avoid the use of any other characters.");let r=new eq({baseUrl:this.url,catalogName:e,auth:{type:"custom",getHeaders:async()=>t.headers},fetch:this.fetch}),s=this.shouldThrowOnError;return new Proxy(r,{get(e,t){let r=e[t];r
+---
+leteVectorBucket`,{vectorBucketName:e},{headers:t.headers})||{})}},th=class extends tl{constructor(e,t={}){super(e,t.headers||{},t.fetch)}from(e){return new tu(this.url,this.headers,e,this.fetch)}async createBucket(e){return super.createBucket.call(this,e)}async getBucket(e){return super.getBucket.call(this,e)}async li
+---
+eturn super.getIndex.call(this,this.vectorBucketName,e)}async deleteIndex(e){return super.deleteIndex.call(this,this.vectorBucketName,e)}index(e){return new tc(this.url,this.headers,this.vectorBucketName,e,this.fetch)}},tc=class extends to{constructor(e,t,r,s,i){super(e,t,i),this.vectorBucketName=r,this.indexName=s}asy
+---
+{},e),{},{vectorBucketName:this.vectorBucketName,indexName:this.indexName}))}},td=class extends ti{constructor(e,t={},r,s){super(e,t,r,s)}from(e){return new tr(this.url,this.headers,e,this.fetch)}get vectors(){return new th(this.url+"/vector",{headers:this.headers,fetch:this.fetch})}get analytics(){return new tn(this.u
+---
+indexName}))}},td=class extends ti{constructor(e,t={},r,s){super(e,t,r,s)}from(e){return new tr(this.url,this.headers,e,this.fetch)}get vectors(){return new th(this.url+"/vector",{headers:this.headers,fetch:this.fetch})}get analytics(){return new tn(this.url+"/iceberg",this.headers,this.fetch)}};let tf="2.112.0",tp={"X
+---
+ew tr(this.url,this.headers,e,this.fetch)}get vectors(){return new th(this.url+"/vector",{headers:this.headers,fetch:this.fetch})}get analytics(){return new tn(this.url+"/iceberg",this.headers,this.fetch)}};let tf="2.112.0",tp={"X-Client-Info":`gotrue-js/${tf}`},tg="X-Supabase-Api-Version",ty={"2024-01-01":{timestamp:D
+---
+ification_type"]))},error:null}}function r_(e){return e}let rk=["global","local","others"];class rS{constructor({url:e="",headers:t={},fetch:r,experimental:s}){this.url=e,this.headers=t,this.fetch=tV(r),this.experimental=null!=s?s:{},this.mfa={listFactors:this._listFactors.bind(this),deleteFactor:this._deleteFactor.bin
+---
+ignOut(e,t=rk[0]){if(0>rk.indexOf(t))throw Error(`@supabase/auth-js: Parameter scope must be one of ${rk.join(", ")}`);try{return await rp(this.fetch,"POST",`${this.url}/logout?scope=${t}`,{headers:this.headers,jwt:e,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async in
+---
+eJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async inviteUserByEmail(e,t={}){try{return await rp(this.fetch,"POST",`${this.url}/invite`,{body:{email:e,data:t.data},headers:this.headers,redirectTo:t.redirectTo,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e
+---
+options"]),s=Object.assign(Object.assign({},r),t);return"newEmail"in r&&(s.new_email=null==r?void 0:r.newEmail,delete s.newEmail),await rp(this.fetch,"POST",`${this.url}/admin/generate_link`,{body:s,headers:this.headers,xform:rv,redirectTo:null==t?void 0:t.redirectTo})}catch(e){if(tv(e))return{data:{properties:null,use
+---
+?void 0:t.redirectTo})}catch(e){if(tv(e))return{data:{properties:null,user:null},error:e};throw e}}async createUser(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/users`,{body:e,headers:this.headers,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async listUsers(e){var t,r,s,i,n,a,o;
+---
+v(e))return{data:{user:null},error:e};throw e}}async listUsers(e){var t,r,s,i,n,a,o;try{let l={nextPage:null,lastPage:0,total:0},h=await rp(this.fetch,"GET",`${this.url}/admin/users`,{headers:this.headers,noResolveJson:!0,query:{page:null!=(r=null==(t=null==e?void 0:e.page)?void 0:t.toString())?r:"",per_page:null!=(i=n
+---
+bject.assign({},u),l),error:null}}catch(e){if(tv(e))return{data:{users:[]},error:e};throw e}}async getUserById(e){ro(e);try{return await rp(this.fetch,"GET",`${this.url}/admin/users/${e}`,{headers:this.headers,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async updateUserById(e,t){ro(e);try{ret
+---
+ers:this.headers,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async updateUserById(e,t){ro(e);try{return await rp(this.fetch,"PUT",`${this.url}/admin/users/${e}`,{body:t,headers:this.headers,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async deleteUser(e,t=!1){ro(e);t
+---
+s:this.headers,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async deleteUser(e,t=!1){ro(e);try{return await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e}`,{headers:this.headers,body:{should_soft_delete:t},xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async _list
+---
+,xform:rb})}catch(e){if(tv(e))return{data:{user:null},error:e};throw e}}async _listFactors(e){ro(e.userId);try{let{data:t,error:r}=await rp(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/factors`,{headers:this.headers,xform:e=>({data:{factors:e},error:null})});return{data:t,error:r}}catch(e){if(tv(e))return{data
+---
+ta:t,error:r}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteFactor(e){ro(e.userId),ro(e.id);try{return{data:await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/factors/${e.id}`,{headers:this.headers}),error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _listOAuthClie
+---
+(e))return{data:null,error:e};throw e}}async _listOAuthClients(e){var t,r,s,i,n,a,o;try{let l={nextPage:null,lastPage:0,total:0},h=await rp(this.fetch,"GET",`${this.url}/admin/oauth/clients`,{headers:this.headers,noResolveJson:!0,query:{page:null!=(r=null==(t=null==e?void 0:e.page)?void 0:t.toString())?r:"",per_page:nu
+---
+t.assign({},u),l),error:null}}catch(e){if(tv(e))return{data:{clients:[]},error:e};throw e}}async _createOAuthClient(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/oauth/clients`,{body:e,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getOAut
+---
+.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getOAuthClient(e){try{return await rp(this.fetch,"GET",`${this.url}/admin/oauth/clients/${e}`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateOAu
+---
+ers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateOAuthClient(e,t){try{return await rp(this.fetch,"PUT",`${this.url}/admin/oauth/clients/${e}`,{body:t,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _de
+---
+rs,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteOAuthClient(e){try{return await rp(this.fetch,"DELETE",`${this.url}/admin/oauth/clients/${e}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _
+---
+!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _regenerateOAuthClientSecret(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/oauth/clients/${e}/regenerate_secret`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e
+---
+tv(e))return{data:null,error:e};throw e}}async _listCustomProviders(e){try{let t={};return(null==e?void 0:e.type)&&(t.type=e.type),await rp(this.fetch,"GET",`${this.url}/admin/custom-providers`,{headers:this.headers,query:t,xform:e=>{var t;return{data:{providers:null!=(t=null==e?void 0:e.providers)?t:[]},error:null}}})
+---
+rs)?t:[]},error:null}}})}catch(e){if(tv(e))return{data:{providers:[]},error:e};throw e}}async _createCustomProvider(e){try{return await rp(this.fetch,"POST",`${this.url}/admin/custom-providers`,{body:e,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getC
+---
+aders,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _getCustomProvider(e){try{return await rp(this.fetch,"GET",`${this.url}/admin/custom-providers/${e}`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _update
+---
+,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _updateCustomProvider(e,t){try{return await rp(this.fetch,"PUT",`${this.url}/admin/custom-providers/${e}`,{body:t,headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async 
+---
+xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _deleteCustomProvider(e){try{return await rp(this.fetch,"DELETE",`${this.url}/admin/custom-providers/${e}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,error:e};throw e}}asyn
+---
+ll}}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _adminListPasskeys(e){rl(this.experimental),ro(e.userId);try{return await rp(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/passkeys`,{headers:this.headers,xform:e=>({data:e,error:null})})}catch(e){if(tv(e))return{data:null,error:e};throw e}}async _a
+---
+))return{data:null,error:e};throw e}}async _adminDeletePasskey(e){rl(this.experimental),ro(e.userId),ro(e.passkeyId);try{return await rp(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/passkeys/${e.passkeyId}`,{headers:this.headers,noResolveJson:!0}),{data:null,error:null}}catch(e){if(tv(e))return{data:null,er
+---
+.autoRefreshToken,this.experimental=null!=(r=i.experimental)?r:{},this.admin=new rS({url:i.url,headers:i.headers,fetch:i.fetch,experimental:this.experimental}),this.url=i.url,this.headers=i.headers,this.fetch=tV(i.fetch),this.detectSessionInUrl=i.detectSessionInUrl,this.flowType=i.flowType,this.hasCustomAuthorizationHe
+---
+ this._handleVisibilityChange(),this._debug("#_initialize()","end")}}async signInAnonymously(e){var t,r,s;try{let{data:i,error:n}=await rp(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{data:null!=(r=null==(t=null==e?void 0:e.options)?void 0:t.data)?r:{},gotrue_meta_security:{captcha_token:null==(s=
+---
+ e){let{email:r,password:s,options:a}=e,o=null,l=null;"pkce"===this.flowType&&([o,l,i]=await this._getCodeChallengeAndMethod()),n=await rp(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(null==a?void 0:a.emailRedirectTo,i),body:{email:r,password:s,data:null!=(t=
+---
+0:a.captchaToken},code_challenge:o,code_challenge_method:l},xform:ry})}else if("phone"in e){let{phone:t,password:i,options:a}=e;n=await rp(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{phone:t,password:i,data:null!=(r=null==a?void 0:a.data)?r:{},channel:null!=(s=null==a?void 0:a.channel)?s:"sms",go
+---
+null,session:null},error:e});throw e}}async signInWithPassword(e){try{let t;if("email"in e){let{email:r,password:s,options:i}=e;t=await rp(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{email:r,password:s,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken}},xform:rm
+---
+eta_security:{captcha_token:null==i?void 0:i.captchaToken}},xform:rm})}else if("phone"in e){let{phone:r,password:s,options:i}=e;t=await rp(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{phone:r,password:s,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken}},xform:rm
+---
+arams:[(d=f,"0x"+Array.from(new TextEncoder().encode(d),e=>e.toString(16).padStart(2,"0")).join("")),v]})}try{let{data:t,error:r}=await rp(this.fetch,"POST",`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:"ethereum",message:f,signature:p},(null==(u=e.options)?void 0:u.captchaToken)?{
+---
+ Uint8Array))throw Error("@supabase/auth-js: Wallet signMessage() API returned an recognized value");p=e}}try{let{data:t,error:r}=await rp(this.fetch,"POST",`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:"solana",message:f,signature:tW(p)},(null==(c=e.options)?void 0:c.captchaToken)
+---
+his.storage,this.storageKey,s),[a,o]=(null!=i?i:"").split("/");try{if(!a&&"pkce"===this.flowType)throw new tj;let{data:t,error:r}=await rp(this.fetch,"POST",`${this.url}/token?grant_type=pkce`,{headers:this.headers,body:{auth_code:e,code_verifier:a},xform:ry});if(await rr(this.storage,this.storageKey,n),r)throw r;if(!t
+---
+ll},error:e});throw e}}async signInWithIdToken(e){try{let{options:t,provider:r,token:s,access_token:i,nonce:n}=e,{data:a,error:o}=await rp(this.fetch,"POST",`${this.url}/token?grant_type=id_token`,{headers:this.headers,body:{provider:r,id_token:s,access_token:i,nonce:n,gotrue_meta_security:{captcha_token:null==t?void 0
+---
+ e){let{email:s,options:i}=e,n=null,o=null;"pkce"===this.flowType&&([n,o,a]=await this._getCodeChallengeAndMethod());let{error:l}=await rp(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{email:s,data:null!=(t=null==i?void 0:i.data)?t:{},create_user:null==(r=null==i?void 0:i.shouldCreateUser)||r,gotrue_m
+---
+a)});return this._returnResult({data:{user:null,session:null},error:l})}if("phone"in e){let{phone:t,options:r}=e,{data:a,error:o}=await rp(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{phone:t,data:null!=(s=null==r?void 0:r.data)?s:{},create_user:null==(i=null==r?void 0:r.shouldCreateUser)||i,gotrue_m
+---
+et s,i;"options"in e&&(s=null==(t=e.options)?void 0:t.redirectTo,i=null==(r=e.options)?void 0:r.captchaToken);let{data:n,error:a}=await rp(this.fetch,"POST",`${this.url}/verify`,{headers:this.headers,body:Object.assign(Object.assign({},e),{gotrue_meta_security:{captcha_token:i}}),redirectTo:s,xform:ry});if(a)throw a;if
+---
+O(e){var t,r,s,i;let n=null;try{let a=null,o=null;"pkce"===this.flowType&&([a,o,n]=await this._getCodeChallengeAndMethod());let l=await rp(this.fetch,"POST",`${this.url}/sso`,{body:Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},"providerId"in e?{provider_id:e.providerId}:null),"domain"in e?{do
+---
+nticate(){try{return await this._useSession(async e=>{let{data:{session:t},error:r}=e;if(r)throw r;if(!t)throw new tT;let{error:s}=await rp(this.fetch,"GET",`${this.url}/reauthenticate`,{headers:this.headers,jwt:t.access_token});return this._returnResult({data:{user:null,session:null},error:s})})}catch(e){if(tv(e))retu
+---
+session:null},error:s})})}catch(e){if(tv(e))return this._returnResult({data:{user:null,session:null},error:e});throw e}}async resend(e){let t=null;try{let r=`${this.url}/resend`;if("email"in e){let{email:s,type:i,options:n}=e,a=null,o=null;"pkce"===this.flowType&&([a,o,t]=await this._getCodeChallengeAndMethod());let{er
+---
+>await this._getUser()):await this._getUser()).data.user&&(this.suppressGetSessionWarning=!0),t)}async _getUser(e){try{if(e)return await rp(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:e,xform:rb});return await this._useSession(async e=>{var t,r,s;let{data:i,error:n}=e;if(n)throw n;return(null==(t=i.se
+---
+{var t,r,s;let{data:i,error:n}=e;if(n)throw n;return(null==(t=i.session)?void 0:t.access_token)||this.hasCustomAuthorizationHeader?await rp(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:null!=(s=null==(r=i.session)?void 0:r.access_token)?s:void 0,xform:rb}):{data:{user:null},error:new tT}})}catch(e){if(
+---
+session,o=null,l=null;"pkce"===this.flowType&&null!=e.email&&([o,l,r]=await this._getCodeChallengeAndMethod());let{data:h,error:u}=await rp(this.fetch,"PUT",`${this.url}/user`,{headers:this.headers,redirectTo:this._maybeAppendFlowIdToRedirect(null==t?void 0:t.emailRedirectTo,r),body:Object.assign(Object.assign({},e),{c
+---
+dForEmail(e,t={}){let r=null,s=null,i=null;"pkce"===this.flowType&&([r,s,i]=await this._getCodeChallengeAndMethod(!0));try{return await rp(this.fetch,"POST",`${this.url}/recover`,{body:{email:e,code_challenge:r,code_challenge_method:s,gotrue_meta_security:{captcha_token:t.captchaToken}},headers:this.headers,redirectTo:
+---
+;try{let{data:s,error:i}=await this._useSession(async t=>{var s,i,n,a,o;let{data:l,error:h}=t;if(h)throw h;let{url:u,flowId:c}=await this._getUrlForProvider(`${this.url}/user/identities/authorize`,e.provider,{redirectTo:null==(s=e.options)?void 0:s.redirectTo,scopes:null==(i=e.options)?void 0:i.scopes,queryParams:null=
+---
+ar r;try{let{error:s,data:{session:i}}=t;if(s)throw s;let{options:n,provider:a,token:o,access_token:l,nonce:h}=e,{data:u,error:c}=await rp(this.fetch,"POST",`${this.url}/token?grant_type=id_token`,{headers:this.headers,jwt:null!=(r=null==i?void 0:i.access_token)?r:void 0,body:{provider:a,id_token:o,access_token:l,nonce
+---
+hrow e}})}async unlinkIdentity(e){try{return await this._useSession(async t=>{var r,s;let{data:i,error:n}=t;if(n)throw n;return await rp(this.fetch,"DELETE",`${this.url}/user/identities/${e.identity_id}`,{headers:this.headers,jwt:null!=(s=null==(r=i.session)?void 0:r.access_token)?s:void 0})})}catch(e){if(tv(e))return 
+---
+);try{var r,s;let i=Date.now();return await (r=async r=>(r>0&&await t1(200*Math.pow(2,r-1)),this._debug(t,"refreshing attempt",r),await rp(this.fetch,"POST",`${this.url}/token?grant_type=refresh_token`,{body:{refresh_token:e},headers:this.headers,xform:ry})),s=(e,t)=>{let r=200*Math.pow(2,e);return t&&t$(t)&&Date.now()
+---
+of e&&null!==e&&"access_token"in e&&"refresh_token"in e&&"expires_at"in e}async _handleProviderSignIn(e,t){let{url:r,flowId:s}=await this._getUrlForProvider(`${this.url}/authorize`,e,{redirectTo:t.redirectTo,scopes:t.scopes,queryParams:t.queryParams});return this._debug("#_handleProviderSignIn()","provider",e,"options"
+---
+oll(e){try{return await this._useSession(async t=>{var r;let{data:s,error:i}=t;return i?this._returnResult({data:null,error:i}):await rp(this.fetch,"DELETE",`${this.url}/factors/${e.factorId}`,{headers:this.headers,jwt:null==(r=null==s?void 0:s.session)?void 0:r.access_token})})}catch(e){if(tv(e))return this._returnRes
+---
+ame,factor_type:e.factorType},"phone"===e.factorType?{phone:e.phone}:"totp"===e.factorType?{issuer:e.issuer}:{}),{data:o,error:l}=await rp(this.fetch,"POST",`${this.url}/factors`,{body:a,headers:this.headers,jwt:null==(r=null==i?void 0:i.session)?void 0:r.access_token});return l?this._returnResult({data:null,error:l}):
+---
+reate"===e.webauthn.type?rI(e.webauthn.credential_response):r$(e.webauthn.credential_response)})}:{code:e.code}),{data:a,error:o}=await rp(this.fetch,"POST",`${this.url}/factors/${e.factorId}/verify`,{body:n,headers:this.headers,jwt:null==(r=null==s?void 0:s.session)?void 0:r.access_token});return o?this._returnResult(
+---
+try{return await this._useSession(async t=>{var r;let{data:s,error:i}=t;if(i)return this._returnResult({data:null,error:i});let n=await rp(this.fetch,"POST",`${this.url}/factors/${e.factorId}/challenge`,{body:e,headers:this.headers,jwt:null==(r=null==s?void 0:s.session)?void 0:r.access_token});if(n.error)return n;let{d
+---
+(e){try{return await this._useSession(async t=>{let{data:{session:r},error:s}=t;return s?this._returnResult({data:null,error:s}):r?await rp(this.fetch,"GET",`${this.url}/oauth/authorizations/${e}`,{headers:this.headers,jwt:r.access_token,xform:e=>({data:e,error:null})}):this._returnResult({data:null,error:new tT})})}ca
+---
+s},error:i}=r;if(i)return this._returnResult({data:null,error:i});if(!s)return this._returnResult({data:null,error:new tT});let n=await rp(this.fetch,"POST",`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:s.access_token,body:{action:"approve"},xform:e=>({data:e,error:null})});return n.data&&n.
+---
+s},error:i}=r;if(i)return this._returnResult({data:null,error:i});if(!s)return this._returnResult({data:null,error:new tT});let n=await rp(this.fetch,"POST",`${this.url}/oauth/authorizations/${e}/consent`,{headers:this.headers,jwt:s.access_token,body:{action:"deny"},xform:e=>({data:e,error:null})});return n.data&&n.dat
+---
+s(){try{return await this._useSession(async e=>{let{data:{session:t},error:r}=e;return r?this._returnResult({data:null,error:r}):t?await rp(this.fetch,"GET",`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:t.access_token,xform:e=>({data:e,error:null})}):this._returnResult({data:null,error:new tT})})}catch(e){i
+---
+try{return await this._useSession(async t=>{let{data:{session:r},error:s}=t;return s?this._returnResult({data:null,error:s}):r?(await rp(this.fetch,"DELETE",`${this.url}/user/oauth/grants`,{headers:this.headers,jwt:r.access_token,query:{client_id:e.clientId},noResolveJson:!0}),{data:{},error:null}):this._returnResult({
+---
+e);if(r)return r;let s=Date.now();if((r=this.jwks.keys.find(t=>t.kid===e))&&this.jwks_cached_at+6e5>s)return r;let{data:i,error:n}=await rp(this.fetch,"GET",`${this.url}/.well-known/jwks.json`,{headers:this.headers});if(n)throw n;return i.keys&&0!==i.keys.length&&(this.jwks=i,this.jwks_cached_at=s,r=i.keys.find(t=>t.ki
+---
+if(r)return this._returnResult({data:null,error:r});if(!t)return this._returnResult({data:null,error:new tT});let{data:s,error:i}=await rp(this.fetch,"POST",`${this.url}/passkeys/registration/options`,{headers:this.headers,jwt:t.access_token,body:{}});return i?this._returnResult({data:null,error:i}):this._returnResult(
+---
+if(s)return this._returnResult({data:null,error:s});if(!r)return this._returnResult({data:null,error:new tT});let{data:i,error:n}=await rp(this.fetch,"POST",`${this.url}/passkeys/registration/verify`,{headers:this.headers,jwt:r.access_token,body:{challenge_id:e.challengeId,credential:e.credential}});return n?this._retu
+---
+turnResult({data:null,error:e});throw e}}async _startPasskeyAuthentication(e){var t;rl(this.experimental);try{let{data:r,error:s}=await rp(this.fetch,"POST",`${this.url}/passkeys/authentication/options`,{headers:this.headers,body:{gotrue_meta_security:{captcha_token:null==(t=null==e?void 0:e.options)?void 0:t.captchaTo
+---
+s._returnResult({data:null,error:e});throw e}}async _verifyPasskeyAuthentication(e){rl(this.experimental);try{let{data:t,error:r}=await rp(this.fetch,"POST",`${this.url}/passkeys/authentication/verify`,{headers:this.headers,body:{challenge_id:e.challengeId,credential:e.credential},xform:ry});if(r)return this._returnRes
+---
+;if(r)return this._returnResult({data:null,error:r});if(!t)return this._returnResult({data:null,error:new tT});let{data:s,error:i}=await rp(this.fetch,"GET",`${this.url}/passkeys`,{headers:this.headers,jwt:t.access_token,xform:e=>({data:e,error:null})});return i?this._returnResult({data:null,error:i}):this._returnResul
+---
+f(s)return this._returnResult({data:null,error:s});if(!r)return this._returnResult({data:null,error:new tT});let{data:i,error:n}=await rp(this.fetch,"PATCH",`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:r.access_token,body:{friendly_name:e.friendlyName}});return n?this._returnResult({data:null,error:n
+---
+s}=t;if(s)return this._returnResult({data:null,error:s});if(!r)return this._returnResult({data:null,error:new tT});let{error:i}=await rp(this.fetch,"DELETE",`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:r.access_token,noResolveJson:!0});return i?this._returnResult({data:null,error:i}):this._returnResu
+---
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && python3 - <<'EOF'
+import re
+for fn in ['0-lpao5_i9htd.js','0-mbmp1iqb6hj.js','08ttfj81-47mu.js','4310-_brt1a3g.js']:
+    s=open(fn,encoding='utf-8',errors='replace').read()
+    for key in ['/api/broadcast','.from(','new createClient','createClient(','supabase.co','__data','realTimeChannel','realtimeChannel','functions/v1']:
+        for m in re.finditer(re.escape(key), s):
+            ctx=s[max(0,m.start()-120):m.start()+120].replace('\n',' ')
+            print(f"[{fn}] {key}: ...{ctx}...")
+            break
+EOF
+[0-lpao5_i9htd.js] /api/broadcast: ...et\/websocket$/i,"").replace(/\/socket$/i,"").replace(/\/websocket$/i,""),""===t.pathname||"/"===t.pathname?t.pathname="/api/broadcast":t.pathname=t.pathname+"/api/broadcast",t.href};var Z=e=>"function"==typeof e?e:function(){return e},Q="u...
+[0-lpao5_i9htd.js] .from(: ...lue" argument must not be of type number. Received type number');var u=e.valueOf&&e.valueOf();if(null!=u&&u!==e)return o.from(u,t,r);var p=function(e){if(o.isBuffer(e)){var t=0|d(e.length),r=a(t);return 0===r.length||e.copy(r,0,0,t),r}retur...
+[0-lpao5_i9htd.js] supabase.co: ...spectSamplingDecision)!==!1,u=l?function(e){let t=[];try{let r=new URL(e);t.push(r.hostname)}catch(e){}return t.push("*.supabase.co","*.supabase.in"),t.push("localhost","127.0.0.1","[::1]"),t}(t):null,c=!((null==n?void 0:n.omitApiKeyAsBeare...
+[0-lpao5_i9htd.js] functions/v1: ...place("http","ws"),this.authUrl=new URL("auth/v1",a),this.storageUrl=new URL("storage/v1",a),this.functionsUrl=new URL("functions/v1",a);const o=`sb-${a.hostname.split(".")[0]}-auth-token`,l=function(e,t){var r,s,i,n,a,o;let{db:l,auth:h,rea...
+[0-mbmp1iqb6hj.js] .from(: ...o++)+"_";return h.forEach(function(e,t){M.append(D+t,e)}),"$K"+e.toString(16)}if(h instanceof Map)return e=o++,A=i(Array.from(h),e),null===s&&(s=new FormData),s.append(""+e,A),"$Q"+e.toString(16);if(h instanceof Set)return e=o++,A=i(Array.f...
+[08ttfj81-47mu.js] .from(: ...(n){return t.resolve(e()).then(function(){throw n})})}),Object.fromEntries||(Object.fromEntries=function(e){return Array.from(e).reduce(function(e,t){return e[t[0]]=t[1],e},{})}),Array.prototype.at||(Array.prototype.at=function(e){var t=Mat...
+[4310-_brt1a3g.js] .from(: ...>{this.#C.forEach(e=>{this.notify({type:"removed",mutation:e})}),this.#C.clear(),this.#O.clear()})}getAll(){return Array.from(this.#C)}find(e){let t={exact:!0,...e};return this.getAll().find(e=>(0,i.matchMutation)(t,e))}findAll(e={}){return...
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && grep -ohE '(buildId|build-?id)[^,;]{0,20}' *.js | sort -u | head; echo "=== try known manifest paths ==="; for b in $(grep -ohE 'static/chunks/0-(mbmp1iqb6hj|lpao5_i9htd)' *.js 2>/dev/null | head -1); do :; done; grep -lE "self.__next|__turbopack|globalThis\.__turbopack" *.js | head
+buildId
+buildId)!==(0
+buildId:i.b
+=== try known manifest paths ===
+08ttfj81-47mu.js
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && grep -ohE '.{60}buildId.{60}' 08ttfj81-47mu.js | head -5; echo "===pass2==="; grep -ohE 'self\.__next\.push|self\.__turbopack[A-Za-z]*=|globalThis\.__turbopack[A-Za-z]*=' 08ttfj81-47mu.js | sort -u | head
+ache)(Date.now(),u.FetchStrategy.PPRRuntime,e.flightDatas,e.buildId,e.isResponsePartial,e.headVaryParams,e.rootVaryParamsIterab
+===pass2===
+[0m
+[0m$ [0mcd /tmp/opencode/chunks && echo "=== app/ module paths ==="; grep -ohE 'app/[a-zA-Z0-9_/().-]+' *.js | sort -u | head -40; echo; echo "=== page/layout refs ==="; grep -ohE '[a-zA-Z0-9_./-]+\.(page|layout|route)\.[a-z]+' *.js | sort -u | head -40
+=== app/ module paths ===
+app/api-reference/functions/use-search-params
+
+=== page/layout refs ===
+[0m
+Bundle scan done (13 chunks, ~0.9MB). Key finding: full `@supabase/supabase-js` 2.112.0 SDK bundled client-side, only `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` key present, **no service_role/anon/JWT secret leak**. New routes confirmed: `/courses`, `/admin` + storage sub-services `/storage/v1/vector`, `/storage/v1/iceberg`. Now probing the remaining read-only Supabase surfaces.
+[0m$ [0mcd /tmp/opencode && K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; 
+echo "=== P1 /rest/v1/ OpenAPI ==="; curl -s -o p1.json -w "HTTP %{http_code} size=%{size_download}\n" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Accept: application/openapi+json" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/"; head -c 300 p1.json; echo; sleep 1;
+echo "=== P2 /storage/v1/vector ==="; curl -s -o p2.txt -w "HTTP %{http_code} size=%{size_download}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/vector"; head -c 200 p2.txt; echo; sleep 1;
+echo "=== P3 /storage/v1/iceberg ==="; curl -s -o p3.txt -w "HTTP %{http_code} size=%{size_download}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/iceberg"; head -c 200 p3.txt; echo; sleep 1;
+echo "=== P4 /graphql/v1 ==="; curl -s -o p4.txt -w "HTTP %{http_code} size=%{size_download}\n" -H "apikey: $K" -H "Authorization: Bearer $K" -H "Content-Type: application/json" "https://aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1"; head -c 300 p4.txt; echo;
+=== P1 /rest/v1/ OpenAPI ===
+HTTP 401 size=98
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+=== P2 /storage/v1/vector ===
+HTTP 404 size=104
+{"statusCode":"404","error":"Not Found","message":"Route GET:/vector not found","code":"InvalidRequest"}
+=== P3 /storage/v1/iceberg ===
+HTTP 404 size=79
+{"message":"Route GET:/iceberg not found","error":"Not Found","statusCode":404}
+=== P4 /graphql/v1 ===
+HTTP 503 size=119
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[0m
+Bundle-derived routes need middleware-gap verification: `/courses`, `/admin`, `/recovery`, `/iceberg`, `/vector` were never individually probed — a Next.js middleware matcher gap would leave them 200 pre-auth.
+[0m$ [0mcd /tmp/opencode && for p in courses admin recovery ice cream vector rechtliches datenschutz iceberg; do code=$(curl -s -o /dev/null -w "%{http_code}->%-6{redirect_url}" -A "Mozilla/5.0" "https://kurs.onecode.de/$p"); echo "/$p : $code"; sleep 1; done
+/courses : 307->%-6{redirect_url}
+/admin : 307->%-6{redirect_url}
+/recovery : 307->%-6{redirect_url}
+/ice : 307->%-6{redirect_url}
+/cream : 307->%-6{redirect_url}
+/vector : 307->%-6{redirect_url}
+/rechtliches : 200->%-6{redirect_url}
+/datenschutz : 200->%-6{redirect_url}
+/iceberg : 307->%-6{redirect_url}
+[0m
+Middleware gates `/courses /admin /recovery /vector /iceberg` (307); `/rechtliches`, `/datenschutz` public (200). Now checking canonical Next.js middleware path-normalization bypass on `/admin` (read-only GET).
+[0m$ [0mcd /tmp/opencode && for p in "//admin" "/./admin" "/admin/" "/aadmin"; do code=$(curl -s -o /dev/null -w "%{http_code}" -A "Mozilla/5.0" "https://kurs.onecode.de$p"); echo "$p -> $code"; sleep 1; done; echo "--- admin with RSC header ---"; curl -s -o /dev/null -w "%{http_code}\n" -H "RSC: 1" -A "Mozilla/5.0" "https://kurs.onecode.de/admin"; sleep 1; curl -s -o /dev/null -w "%{http_code}\n" -H "RSC: 1" -H "Next-Router-State-Tree: %5B%22%22%2C%7B%22children%22%3A%5B%22admin%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%5D%7D%5D%7D%2Cnull%2Cnull%2Ctrue%5D" -A "Mozilla/5.0" "https://kurs.onecode.de/admin"
+//admin -> 308
+/./admin -> 307
+/admin/ -> 308
+/aadmin -> 307
+--- admin with RSC header ---
+307
+307
+[0m
+No middleware bypass. Closing the admin-API loop on the Supabase host with the bundled publishable key (read-only).
+[0m$ [0mcd /tmp/opencode && K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30";
+echo "=== /auth/v1/admin/users ==="; curl -s -o p5.txt -w "HTTP %{http_code}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/admin/users"; head -c 200 p5.txt; echo; sleep 1;
+echo "=== /auth/v1/user ==="; curl -s -o p6.txt -w "HTTP %{http_code}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user"; head -c 200 p6.txt; echo; sleep 1;
+echo "=== / (root) ==="; curl -s -o p7.txt -w "HTTP %{http_code}\n" -H "apikey: $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/"; head -c 200 p7.txt; echo
+=== /auth/v1/admin/users ===
+HTTP 401
+{"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+=== /auth/v1/user ===
+HTTP 401
+{"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+=== / (root) ===
+HTTP 404
+{"error":"requested path is invalid"}
+[0m
+STEP 1 — DELTA
+- [NEW] Deep bundle scan (13 chunks, 0.9MB): `@supabase/supabase-js` 2.112.0 SDK; **only** secret = `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (sha256 verified); NO service_role/anon/JWT/env leak; route strings `/courses /admin /recovery` confirmed, plus public `/rechtliches /datenschutz`.
+- [NEW] `/rest/v1/` with `Accept: application/openapi+json` → 401 "Secret API key required" — publishable key can never dump schema.
+- [NEW] `/graphql/v1` deployed → 503 PGRST002 (project-wide schema-cache state blocks REST+GraphQL alike).
+- [NEW] `/storage/v1/vector` + `/storage/v1/iceberg` → 404 (no vector/analytics subsystems mapped).
+- [NEW] `/auth/v1/admin/users` + `/auth/v1/user` → 401 with publishable key (bundled admin client server-side locked).
+- [NEW] No middleware matcher gap: `/courses /admin /recovery /vector /iceberg` all 307; `//admin` 308, `/./admin` 307, `/admin/` 308, `aadmin` 307, RSC-header tricks 307.
+
+STEP 2 — PRIORITIZE
+- [PRIO] kurs.onecode.de (app routes, post-auth BOLA),6.7,a=7,b=9,t=8,g=1,c=7,f=6 (AUTH_HELPED)
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.0,a=6,b=9,t=7,g=7,c=6,f=5
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1/,6.0,a=5,b=7,t=8,g=3,c=8,f=5 — newly confirmed surface
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs the invite-only course platform; publishable key IS accepted for table queries (503 PGRST002, not 401) while the OpenAPI spec demands a secret key; GraphQL v1 confirmed. Persistent PGRST002 currently masks the anon role's real ACL — any SELECT policy missing a user_id predicate yields cross-tenant rows once the cache is healthy. UUID PKs weaken guessable-ID BOLA, so the RLS-policy-gap is the realistic target.
+evidence_needed: Two invited accounts (different email domains); Account A retrieving rows owned by Account B via authenticated REST or app routes.
+verify_steps: (AUTH_HELPED) Login via POST /auth/v1/token?grant_type=password to get access_token; A queries /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1; also GET /api/courses/{B_id} via the app; diff A-vs-B row sets for non-self rows.
+impact: Cross-tenant PII, enrollment and course-resource exfiltration — CRITICAL
+testability: AUTH_HELPED
+[HYP] Supabase GraphQL endpoint post-auth introspection/mutation
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1
+confidence: 48
+reasoning: Endpoint is deployed (pre-auth 503 PGRST002, NOT 404/401 — service present, schema cache down). Same project-wide cache state 503s REST. If cache is healthy for an authenticated user, __schema introspection may expose tables, RPCs, and insert/update/delete mutation fields that bypass per-resource RLS-style checks.
+evidence_needed: 200 with __schema data, or a working cross-tenant mutation, using a valid user access_token.
+verify_steps: (AUTH_HELPED) POST /graphql/v1 {"query":"{__schema{types{name}}}"} with Authorization: Bearer <access_token>; enumerate query/mutation/object types; attempt read/mutation against a second account's rows.
+impact: Cross-tenant data read/write via GraphQL mutations — HIGH
+testability: AUTH_HELPED
+[HYP] Publishable-key direct REST exposure if schema cache recovers
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: Publishable key passes the REST auth gate (503 PGRST002, not 401) but is barred from the OpenAPI spec — the two layers disagree, so the anon role's true table ACL is currently hidden by the cache failure. If PGRST002 clears, the publishable key may SELECT tenant tables without any session.
+evidence_needed: Non-503/401 (200 rows, 400 valid-query error, or 402) from a table query with only the publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with apikey+Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30; repeat ≤1/day (low volume) to detect cache recovery; any non-503/401 is a trigger to escalate immediately.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] Supabase Storage public bucket (58→0): /storage/v1/bucket = 200 `[]` (zero buckets); /vector & /iceberg 404; nothing object-level to list — no exposure to test.
+- [PARKED] Edge Functions (40): listing 404, no function names anywhere in bundles.
+- [PARKED] Realtime (35): 401 with publishable key; full anon JWT (signature) not reconstructible; no live probe possible passively.
+- [PARKED] Middleware bypass on /admin,/courses: empirically REJECTED — 307/308 across normalization and RSC-header variants.
+- [FINAL] 1) RLS-gap BOLA (IDOR 65, AUTH_HELPED) 2) REST schema-cache recovery (IDOR 50, PASSIVE-monitor) 3) GraphQL post-auth introspection (MISCONFIG 48, AUTH_HELPED)
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` and `Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — expected 503 PGRST002; any non-503/401 response means the schema cache recovered and immediately escalates to full table/RLS enumeration. ≤1 rps. Parallel: HUMAN escalation to obtain two invited test accounts for the RLS-gap BOLA (65) and GraphQL introspection (48) hypotheses.
+
+STEP 6 — LEARNING
+- [LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no middleware matcher gap — /courses /admin /recovery /vector /iceberg 307; //admin,/./admin,/admin/,/aadmin,RSC-header variants all gated.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: OpenAPI spec endpoint is secret-key-only (401); publishable key cannot enumerate schema even if cache recovers.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1/: GraphQL service deployed; 503 PGRST002 pre-auth (project-wide schema-cache state).
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/: admin/users and /user reject publishable key (401) — admin client shipped in client bundle is server-side locked.
+- [LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: no secret leakage in client bundles — only sb_publishable key present; no service_role/anon/JWT/env values.
+
+STEP 7 — RISK
+[RISK] onecode: 66 — no change. Pre-auth hygiene now verified clean across every layer: no bundle secret leak, no middleware matcher gap, empty storage, no edge functions, secret-key-gated OpenAPI, admin throttled 401, GraphQL cache-blocked. Residual risk is entirely post-auth: RLS-gap BOLA (65), newly-confirmed deployed GraphQL endpoint (48), latent publishable-key REST recovery (50) — all AUTH_HELPED or low-frequency monitor.
