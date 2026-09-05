@@ -1,4 +1,4 @@
-## 2026-09-05 04:41:46 UTC [target] (model nemotron3)
+## 2026-09-05 08:46:14 UTC [target] (model nemotron3)
 [NEW] Supabase Storage `/storage/v1/bucket` returns 200 with empty array `[]` using publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — endpoint directly accessible, bypasses Next.js middleware (sb-gateway-mode: direct)
 [NEW] Supabase Functions `/functions/v1/` returns 404 (no deployed functions or not listable)
 [NEW] Supabase Realtime `/realtime/v1/` returns 401 — requires auth, no unauthenticated access
