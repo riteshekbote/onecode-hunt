@@ -3248,3 +3248,218 @@ testability: PASSIVE
 
 **STEP 7 — RISK**
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
+===== ANALYST nemotron3 2026-09-06 08:40:13 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mls -la
+total 188
+drwxr-xr-x 12 runner runner  4096 Sep  6 08:35 .
+drwxr-xr-x  3 runner runner  4096 Sep  6 08:35 ..
+drwxr-xr-x  7 runner runner  4096 Sep  6 08:35 .git
+drwxr-xr-x  3 runner runner  4096 Sep  6 08:35 .github
+-rw-r--r--  1 runner runner  1692 Sep  6 08:35 README.md
+-rw-r--r--  1 runner runner    43 Sep  6 08:35 analyst-out.txt
+-rw-r--r--  1 runner runner 51617 Sep  6 08:35 analyst-prompt.txt
+-rw-r--r--  1 runner runner 47768 Sep  6 08:35 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 leads
+-rw-r--r--  1 runner runner   725 Sep  6 08:35 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 reports
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 reposcan-raw
+-rw-r--r--  1 runner runner  3268 Sep  6 08:35 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 scripts
+-rw-r--r--  1 runner runner    33 Sep  6 08:35 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  6 08:35 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  6 08:35 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  6 08:35 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  6 08:35 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  6 08:35 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 triage
+[0m
+[0m→ [0mRead inventory/onecode.md
+[0m→ [0mRead scope.yml
+[0m→ [0mRead state_nemotron3.json
+[0m
+[0m$ [0mls -la knowledge/ leads/ recon-notes/ triage/ reports/ scripts/
+knowledge/:
+total 24
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 .
+drwxr-xr-x 12 runner runner  4096 Sep  6 08:35 ..
+-rw-r--r--  1 runner runner 15359 Sep  6 08:35 index.md
+
+leads/:
+total 252
+drwxr-xr-x  2 runner runner   4096 Sep  6 08:35 .
+drwxr-xr-x 12 runner runner   4096 Sep  6 08:35 ..
+-rw-r--r--  1 runner runner  87434 Sep  6 08:35 lead-bigpickle.md
+-rw-r--r--  1 runner runner   1020 Sep  6 08:35 lead-laguna.md
+-rw-r--r--  1 runner runner   1000 Sep  6 08:35 lead-ling3.md
+-rw-r--r--  1 runner runner   1040 Sep  6 08:35 lead-longcat.md
+-rw-r--r--  1 runner runner     18 Sep  6 08:35 lead-mimo.md
+-rw-r--r--  1 runner runner 135612 Sep  6 08:35 lead-nemotron3.md
+-rw-r--r--  1 runner runner   3160 Sep  6 08:35 reposcan-onecode.md
+
+recon-notes/:
+total 12
+drwxr-xr-x  2 runner runner 4096 Sep  6 08:35 .
+drwxr-xr-x 12 runner runner 4096 Sep  6 08:35 ..
+-rw-r--r--  1 runner runner  816 Sep  6 08:35 DEDICATED-DEEP.md
+
+reports/:
+total 996
+drwxr-xr-x  2 runner runner   4096 Sep  6 08:35 .
+drwxr-xr-x 12 runner runner   4096 Sep  6 08:35 ..
+-rw-r--r--  1 runner runner 385074 Sep  6 08:35 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   4340 Sep  6 08:35 analyst-laguna.log
+-rw-r--r--  1 runner runner   4320 Sep  6 08:35 analyst-ling3.log
+-rw-r--r--  1 runner runner   4360 Sep  6 08:35 analyst-longcat.log
+-rw-r--r--  1 runner runner 516411 Sep  6 08:35 analyst-nemotron3.log
+-rw-r--r--  1 runner runner     54 Sep  6 08:35 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner     51 Sep  6 08:35 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner     50 Sep  6 08:35 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner     52 Sep  6 08:35 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   8263 Sep  6 08:35 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  44344 Sep  6 08:35 hypotheses.md
+-rw-r--r--  1 runner runner    355 Sep  6 08:35 valid-bugs.md
+
+scripts/:
+total 28
+drwxr-xr-x  2 runner runner  4096 Sep  6 08:35 .
+drwxr-xr-x 12 runner runner  4096 Sep  6 08:35 ..
+-rw-r--r--  1 runner runner 16987 Sep  6 08:35 sync-issues.py
+
+triage/:
+total 128
+drwxr-xr-x  2 runner runner 4096 Sep  6 08:35 .
+drwxr-xr-x 12 runner runner 4096 Sep  6 08:35 ..
+-rw-r--r--  1 runner runner   13 Sep  6 08:35 .gitkeep
+-rw-r--r--  1 runner runner  183 Sep  6 08:35 run-2026-09-02-21-38.md
+-rw-r--r--  1 runner runner  176 Sep  6 08:35 run-2026-09-02-23-33.md
+-rw-r--r--  1 runner runner  180 Sep  6 08:35 run-2026-09-03-01-26.md
+-rw-r--r--  1 runner runner  239 Sep  6 08:35 run-2026-09-03-06-29.md
+-rw-r--r--  1 runner runner  152 Sep  6 08:35 run-2026-09-03-11-42.md
+-rw-r--r--  1 runner runner  171 Sep  6 08:35 run-2026-09-03-16-02.md
+-rw-r--r--  1 runner runner  175 Sep  6 08:35 run-2026-09-03-19-19.md
+-rw-r--r--  1 runner runner 5113 Sep  6 08:35 run-2026-09-03-21-46.md
+-rw-r--r--  1 runner runner  148 Sep  6 08:35 run-2026-09-03-23-51.md
+-rw-r--r--  1 runner runner  224 Sep  6 08:35 run-2026-09-04-03-36.md
+-rw-r--r--  1 runner runner  174 Sep  6 08:35 run-2026-09-04-08-13.md
+-rw-r--r--  1 runner runner  175 Sep  6 08:35 run-2026-09-04-12-46.md
+-rw-r--r--  1 runner runner  249 Sep  6 08:35 run-2026-09-04-16-47.md
+-rw-r--r--  1 runner runner  673 Sep  6 08:35 run-2026-09-04-19-20.md
+-rw-r--r--  1 runner runner  161 Sep  6 08:35 run-2026-09-04-21-48.md
+-rw-r--r--  1 runner runner  199 Sep  6 08:35 run-2026-09-04-23-48.md
+-rw-r--r--  1 runner runner  212 Sep  6 08:35 run-2026-09-05-03-36.md
+-rw-r--r--  1 runner runner 8791 Sep  6 08:35 run-2026-09-05-07-54.md
+-rw-r--r--  1 runner runner  240 Sep  6 08:35 run-2026-09-05-11-43.md
+-rw-r--r--  1 runner runner  202 Sep  6 08:35 run-2026-09-05-14-50.md
+-rw-r--r--  1 runner runner  189 Sep  6 08:35 run-2026-09-05-17-12.md
+-rw-r--r--  1 runner runner  184 Sep  6 08:35 run-2026-09-05-19-06.md
+-rw-r--r--  1 runner runner  240 Sep  6 08:35 run-2026-09-05-21-20.md
+-rw-r--r--  1 runner runner  203 Sep  6 08:35 run-2026-09-05-23-16.md
+-rw-r--r--  1 runner runner  225 Sep  6 08:35 run-2026-09-06-01-04.md
+-rw-r--r--  1 runner runner  239 Sep  6 08:35 run-2026-09-06-06-03.md
+[0m
+Now I have full context. Let me execute the 8-step analysis.
+
+---
+
+**STEP 1 — DELTA**
+
+[NEW] Supabase REST `/rest/v1/` behavior changed: now returns 401 "Secret API key required" with publishable key (was 503 PGRST002); explicit anon-block at gateway level confirmed
+[NEW] cto.onecode.de re-probed 2026-09-06: stable 409 Conflict "error code:1001" (Server: cloudflare, CF-RAY), 443 TLS handshake-fail, CNAME → cname.perspective-dns.com (104.18.2.x) — Perspective funnel SaaS custom-domain target docs-confirmed
+[CHANGED] Subdomain takeover hypothesis for cto.onecode.de elevated to confidence 58 (HUMAN confirm required): provider identified, CNAME target documented, hostname currently unbound and plausibly reclaimable
+[CHANGED] Supabase REST anon exposure hypothesis confidence adjusted: explicit 401 anon-block reduces immediate risk but monitor stays active (cache recovery could change gateway behavior)
+[CHANGED] Pre-auth surface on `kurs.onecode.de` remains fully exhausted — only `/login` and `/passwort-vergessen` at 200; all `/api/*`, `/v1`, `/dashboard` 307→/login (no delta since 2026-09-05)
+[CHANGED] Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED) — no delta
+
+---
+
+**STEP 2 — PRIORITIZE**
+
+[PRIO] kurs.onecode.de,7.1,a=8,b=9,t=8,g=1,c=7,f=7
+[PRIO] cto.onecode.de,5.8,a=4,b=5,t=2,g=4,c=7,f=6
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,5.2,a=6,b=5,t=5,g=9,c=3,f=3
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.8,a=6,b=6,t=4,g=8,c=2,f=2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,4.0,a=5,b=4,t=4,g=8,c=2,f=2
+[PRIO] www.onecode.de,3.8,a=4,b=5,t=3,g=5,c=2,f=2
+[PRIO] onecode.de,3.8,a=4,b=5,t=3,g=5,c=2,f=2
+
+---
+
+**STEP 3 — HYPOTHESES**
+
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de (/api/broadcast proxied to Supabase)
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
+verify_steps: (AUTH_HELPED) With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: cto.onecode.de CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns 409 Conflict "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account
+evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
+testability: HUMAN_ONLY
+
+[HYP] Supabase REST anon exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: REST endpoint returns 401 "Secret API key required" with publishable key (was 503 PGRST002); explicit anon-block at gateway level; when schema-cache recovers, behavior may revert to 503 or 200 depending on gateway config; transient state
+evidence_needed: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header returns 200 with table list (not 401/503)
+verify_steps: Periodic GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header; monitor for 200 response with table enumeration
+impact: Unauthenticated table enumeration and potential data access if RLS policies missing — HIGH
+testability: PASSIVE
+
+---
+
+**STEP 4 — SELF-CRITIQUE**
+
+[PARKED] Supabase Storage public bucket exposure via direct service endpoint: confidence 40 at threshold; endpoint probeable but zero buckets exist; no bucket creation vector without auth; verify_steps are speculative (POST bucket creation with anon key unlikely to succeed)
+[PARKED] Supabase Edge Functions unauthenticated invocation: confidence 40 at threshold; 404 on listing endpoint; no function names in bundles; verify_steps are brute-force guesses
+[PARKED] Supabase Realtime publication RLS gap: confidence 35 < 40; WebSocket probe complexity, no evidence of realtime publications beyond /api/broadcast client reference, 401 on anon key
+[PARKED] Subdomain takeover (hostmaster.*): confidence 45 < 50; passive-only cannot confirm claimability without active DNS resolution against provider APIs
+
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
+[FINAL] 3. Supabase REST anon exposure on schema-cache recovery (confidence 50, MISCONFIG, PASSIVE) — monitor daily for cache recovery
+
+---
+
+**STEP 5 — NEXT ACTION**
+
+[NEXT] HUMAN: Escalate to obtain two invited test accounts for kurs.onecode.de to activate the post-auth BOLA hypothesis (conf 65, CRITICAL impact). Pre-auth surface exhausted; Supabase direct endpoints probed; only remaining high-value path requires AUTH_HELPED testing.
+
+---
+
+**STEP 6 — LEARNING**
+
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint exists, NOT behind app middleware, probeable with publishable key — returns 200 with empty bucket list (zero buckets)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: Returns 404; no deployed functions or not listable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: Returns 401; requires auth, no pre-auth access
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Probed again 2026-09-05 → 401 "Secret API key required" with publishable key; schema-cache down (503 PGRST002 previously), now explicit anon-block; monitor stays active
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/graphql/v1: Probed again → 503 (cache block, same as REST); no pre-auth introspection possible
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: Provider identified — cname.perspective-dns.com = Perspective funnel SaaS custom-subdomain CNAME target (docs-confirmed); stable 409/1001 + missing cert = hostname currently unbound and plausibly reclaimable (conf 58, HUMAN confirm required)
+[LEARN] REJECTED MISCONFIG @ www.onecode.de: static Webflow marketing, CF-cached HIT, no dynamic surface — no delta from runs 09-02..09-05
+[LEARN] REJECTED MISCONFIG @ mail.onecode.de: 95.130.17.37 no HTTP; non-web (mail) — out-of-scope class, no action
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de/hostmaster.*: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
+
+---
+
+**STEP 7 — RISK**
+
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.

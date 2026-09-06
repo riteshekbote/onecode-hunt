@@ -92,3 +92,11 @@
 - 2026-09-06 REJECTED MISCONFIG @ www.onecode.de: static Webflow marketing, CF-cached HIT, no dynamic surface — no delta from runs 09-02..09-05
 - 2026-09-06 REJECTED MISCONFIG @ mail.onecode.de: 95.130.17.37 no HTTP; non-web (mail) — out-of-scope class, no action
 - 2026-09-06 REJECTED MISCONFIG @ cto.onecode.de/hostmaster.*: Confidence 45 < 50; passive-only cannot confirm takeover without active DNS resolution
+- 2026-09-06 NO_DELTA @ all: REST 401 anon-block persists; cto 409/1001 persists; storage empty; GraphQL 503 PGRST002 persists; kurs.onecode.de/login 200 unchanged. No state change from 09-05/06.
+- 2026-09-06 ACCEPTED MISCONFIG @ cto.onecode.de: Provider confirmed as Perspective funnel SaaS; stable 409/1001 + missing cert = hostname unbound and reclaimable (conf 58, HUMAN confirm required).
+- 2026-09-06 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires two invited test accounts.
+- 2026-09-06 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery.
+- 2026-09-06 REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured.
+- 2026-09-06 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
+- 2026-09-06 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
+- 2026-09-06 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution.

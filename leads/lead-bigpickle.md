@@ -813,3 +813,49 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 503 PGRST002 as of 09-05; next monitor due <=09-06 (once/day).
 [RISK] onecode: 67 — slight rise (66->67): cto.onecode.de dangling-CNAME risk now provider-evidenced with a concrete claim path (Perspective custom-subdomain binding) + stable stale hostname; residual program risk remains dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50). Monitoring cadence kept <=1/day passive; humidity unchanged elsewhere.
 ## 2026-09-06 03:56:30 UTC [target] (model bigpickle)
+## 2026-09-06 08:36:21 UTC [target] (model bigpickle)
+[PRIO] kurs.onecode.de + Supabase REST,6.95,attack_surface8/business9/tech7/gate7/cloud6/fresh10
+[PRIO] cto.onecode.de,7.30,attack_surface6/business7/tech6/gate9/cloud8/fresh10
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co monitors,6.50,attack_surface6/business6/tech6/gate9/cloud6/fresh7
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; publishable key passes REST auth layer (401 = explicit anon-block, 503 PGRST002 = schema-cache down — both prove publishable key authenticates); UUID PKs weaken guessable-ID BOLA; highest-value hole is missing RLS filter enabling cross-tenant SELECT on profiles/enrollments/course_materials.
+evidence_needed: Account-A token retrieving rows owned by Account-B (two invited accounts, different email domains).
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME cto→cname.perspective-dns.com (104.18.2.73/.3.73) stable across 2+ days; GET / returns stable 409 "error code:1001" (Server:cloudflare); 443 TLS handshake-fail (no cert for hostname); Perspective funnel SaaS docs confirm this exact CNAME value is the custom-subdomain binding mechanism; hostname unbound at provider → reclaimable in fresh Perspective account.
+evidence_needed: A Perspective account binding cto.onecode.de serves attacker funnel content on the hostname (out-of-band claim attempt).
+verify_steps: PASSIVE (done): repeat GET http://cto.onecode.de/ <=1/day to confirm 409/1001 stability. CONFIRM: HUMAN creates Perspective account, attaches custom subdomain cto.onecode.de, observes whether hostname serves foreign content + gets TLS cert.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation under onecode.de origin + TLS issuance via SaaS — HIGH.
+testability: PASSIVE + HUMAN confirm
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 503 PGRST002 (not 401) on 09-05 proved publishable key passes auth layer; today's 401 "Secret API key required" is explicit anon-block — schema-cache recovery may change gateway behavior; if anon role's table ACL is permissive, cache recovery exposes missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET /rest/v1/profiles?select=*&limit=1 + apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, <=1/day, next after 00:00Z 09-07.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+[PARKED] Supabase GraphQL post-auth introspection (conf 48): superseded — same schema-cache block as REST, needs test accounts before REST can even be confirmed; fold into BOLA test.
+[PARKED] Realtime channel auth-gap (conf 35): speculative, no live probe possible pre-auth.
+[FINAL] 1. kurs.onecode.de BOLA/RLS-gap (conf 65, IDOR, AUTH_HELPED) — highest value; blocked on two invited test accounts.
+[FINAL] 2. cto.onecode.de dangling Perspective CNAME (conf 58, MISCONFIG, HUMAN confirm) — provider + stale state evidenced; claim-attempt converts to confirmed HIGH.
+[FINAL] 3. publishable-key REST exposure on cache recovery (conf 50, IDOR, PASSIVE) — monitor only, due 09-07.
+[NEXT] HUMAN: Create a Perspective account and attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com) — if attacker content serves on cto.onecode.de, dangling-CNAME takeover is CONFIRMED (HIGH). In parallel continue escalation for two invited kurs.onecode.de test accounts (unblocks conf-65 BOLA). Passive loop: re-probe REST endpoint at 00:00Z 09-07.
+[LEARN] NO_DELTA @ all: REST 401 anon-block persists; cto 409/1001 persists; storage empty; GraphQL 503 PGRST002 persists; kurs.onecode.de/login 200 unchanged. No state change from 09-05/06.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: Provider confirmed as Perspective funnel SaaS; stable 409/1001 + missing cert = hostname unbound and reclaimable (conf 58, HUMAN confirm required).
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires two invited test accounts.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery.
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured.
+[LEARN] REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
+[LEARN] REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution.
+[RISK] onecode: 67 — unchanged (66→67): cto.onecode.de dangling-CNAME risk now provider-evidenced with concrete claim path + stale hostname stable; residual program risk dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50). Monitoring cadence ≤1/day passive; humidity unchanged.

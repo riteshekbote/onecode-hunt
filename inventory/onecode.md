@@ -192,3 +192,11 @@ www.onecode.de
 - NEW mail.onecode.de (95.130.17.37) returns no HTTP — non-web service, out-of-scope
 - CHANGED Subdomain takeover hypothesis for cto.onecode.de elevated to confidence 58 (HUMAN confirm required): provider identified, CNAME target documented, hostname currently unbound and plausibly reclaimable
 - CHANGED Supabase REST anon exposure hypothesis confidence adjusted: explicit 401 anon-block reduces immediate risk but monitor stays active (cache recovery could change gateway behavior)
+
+## 2026-09-06 08:40:13 UTC
+- NEW Supabase REST `/rest/v1/` behavior changed: now returns 401 "Secret API key required" with publishable key (was 503 PGRST002); explicit anon-block at gateway level confirmed
+- NEW cto.onecode.de re-probed 2026-09-06: stable 409 Conflict "error code:1001" (Server: cloudflare, CF-RAY), 443 TLS handshake-fail, CNAME → cname.perspective-dns.com (104.18.2.x) — Perspective funnel Saa
+- CHANGED Subdomain takeover hypothesis for cto.onecode.de elevated to confidence 58 (HUMAN confirm required): provider identified, CNAME target documented, hostname currently unbound and plausibly reclaimable
+- CHANGED Supabase REST anon exposure hypothesis confidence adjusted: explicit 401 anon-block reduces immediate risk but monitor stays active (cache recovery could change gateway behavior)
+- CHANGED Pre-auth surface on `kurs.onecode.de` remains fully exhausted — only `/login` and `/passwort-vergessen` at 200; all `/api/*`, `/v1`, `/dashboard` 307→/login (no delta since 2026-09-05)
+- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED) — no delta
