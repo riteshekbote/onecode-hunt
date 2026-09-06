@@ -1,6 +1,6 @@
-## 2026-09-06 20:17:28 UTC [target] (model nemotron3)
+## 2026-09-06 22:11:23 UTC [target] (model nemotron3)
 [CHANGED] cto.onecode.de: TLS handshake failure persists (OpenSSL sslv3 alert handshake failure), CNAME → cname.perspective-dns.com stable; HTTP 409 no longer reachable due to TLS failure — consistent with previous "443 TLS handshake-fail" finding
-[PRIO] kurs.onecode.de,7.1,a=8,b=9,t=8,g=1,c=7,f=7
+[PRIO] kurs.onecode.de,7.1,a=7,b=9,t=8,g=1,c=7,f=7
 [PRIO] cto.onecode.de,5.8,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,5.2,a=6,b=5,t=5,g=9,c=3,f=3
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.8,a=6,b=6,t=4,g=8,c=2,f=2

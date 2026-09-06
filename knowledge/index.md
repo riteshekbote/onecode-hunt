@@ -112,3 +112,8 @@
 - 2026-09-06 NO_DELTA @ all: REST/recovery re-probe deferred to 09-07 per <=1/day cadence.
 - 2026-09-06 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Probed again 2026-09-06 → 401 "Secret API key required" with publishable key; schema-cache down (503 PGRST002 previously), now explicit anon-block; monitor stays active
 - 2026-09-06 ACCEPTED MISCONFIG @ cto.onecode.de: Provider confirmed as Perspective funnel SaaS; stable TLS handshake failure + CNAME → cname.perspective-dns.com = hostname unbound/reclaimable; conf 58, HUMAN confirm required
+- 2026-09-06 NO_DELTA @ all: Fresh probes 22:11 UTC confirm identical state to 09-06 20:15 — kurs.onecode.de/login 200, cto 409/1001, storage empty, REST 401 anon-block.
+- 2026-09-06 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 4+ days; 409/1001 + missing cert → hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-06 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint probeable, zero buckets — risk lowered but monitor active.
+- 2026-09-06 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery after 00:00Z 09-07.
+- 2026-09-06 REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings).
