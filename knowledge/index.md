@@ -106,3 +106,9 @@
 - 2026-09-06 NO_DELTA @ all: same-day monitor run — no state change vs 09-06 12:22; REST/recovery re-probe deferred to <=00:00Z 09-07 per <=1/day cadence.
 - 2026-09-06 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 17:42 UTC — http 409 "error code:1001", CNAME → cname.perspective-dns.com (104.18.x) stable; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-06 ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200, /api/broadcast 307 unchanged; pre-auth surface stable, no new cookie/session signal.
+- 2026-09-06 ACCEPTED MISCONFIG @ onecode.de: Live Webflow marketing (different page than www — "AI-native Entwickler" landing). Static, no dynamic surface — no new attack class.
+- 2026-09-06 NO_DELTA @ kurs.onecode.de: 7 paths tested (/login, /passwort-vergessen, /api/broadcast, /api/health, /api/auth/session, /robots.txt, /sitemap.xml) — all unchanged, pre-auth surface confirmed exhausted.
+- 2026-09-06 NO_DELTA @ cto.onecode.de: 409 non-2xx persists; CNAME unbound/reclaimable; conf 58 stable.
+- 2026-09-06 NO_DELTA @ all: REST/recovery re-probe deferred to 09-07 per <=1/day cadence.
+- 2026-09-06 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Probed again 2026-09-06 → 401 "Secret API key required" with publishable key; schema-cache down (503 PGRST002 previously), now explicit anon-block; monitor stays active
+- 2026-09-06 ACCEPTED MISCONFIG @ cto.onecode.de: Provider confirmed as Perspective funnel SaaS; stable TLS handshake failure + CNAME → cname.perspective-dns.com = hostname unbound/reclaimable; conf 58, HUMAN confirm required

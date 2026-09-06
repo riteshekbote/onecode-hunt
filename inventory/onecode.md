@@ -206,3 +206,6 @@ www.onecode.de
 ## 2026-09-06 15:39:14 UTC
 
 ## 2026-09-06 17:44:25 UTC
+
+## 2026-09-06 20:17:37 UTC
+- CHANGED cto.onecode.de: TLS handshake failure persists (OpenSSL sslv3 alert handshake failure), CNAME → cname.perspective-dns.com stable; HTTP 409 no longer reachable due to TLS failure — consistent with prev

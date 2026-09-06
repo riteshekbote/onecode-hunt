@@ -4958,3 +4958,83 @@ None dropped (all ≥50, all have verify paths). BOLA survives: gate blocked but
 
 ## STEP 7 — RISK
 [RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active-confirmation, not on new passive discovery.
+===== ANALYST bigpickle 2026-09-06 20:17:37 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m% [0mWebFetch https://kurs.onecode.de/login
+[0m✗ [0mWebFetch http://cto.onecode.de/ failed
+[91m[1mError: [0mStatusCode: non 2xx status code (409 GET http://cto.onecode.de/)
+[0m% [0mWebFetch https://kurs.onecode.de/passwort-vergessen
+[0m% [0mWebFetch https://kurs.onecode.de/robots.txt
+Now let me check a few supplementary surfaces that might have changed:
+[0m% [0mWebFetch https://kurs.onecode.de/sitemap.xml
+[0m% [0mWebFetch https://kurs.onecode.de/api/broadcast
+[0m% [0mWebFetch https://onecode.de/
+[0m% [0mWebFetch https://kurs.onecode.de/api/health
+[0m% [0mWebFetch https://kurs.onecode.de/api/auth/session
+## 2026-09-06 19:XX:XX UTC [target] (model bigpickle)
+
+### STEP 1 — DELTA
+- NEW `onecode.de` (no www) confirmed live Webflow marketing (different page than www; "AI-native Entwickler" landing) — static, no dynamic surface.
+- NO_DELTA @ kurs.onecode.de: /login 200, /passwort-vergessen 200, /api/broadcast 307, /api/health 307, /api/auth/session 307, /robots.txt 307, /sitemap.xml 307 — all 307→/login as expected. No new accessible endpoint.
+- NO_DELTA @ cto.onecode.de: 409 non-2xx (same "error code:1001" pattern). CNAME unbound. No state change.
+- NO_DELTA @ all other inventory hosts.
+
+### STEP 2 — PRIORITIZE
+No new assets. Existing unchanged:
+| asset | score | axes |
+|---|---|---|
+| kurs.onecode.de | 8.3 | as=9, bv=8, t=8, g=3, c=8, f=7 |
+| aygnpacdkgtsfnhgcyjc.supabase.co | 7.0 | as=7, bv=9, t=7, g=2, c=9, f=5 |
+| cto.onecode.de | 5.8 | as=6, bv=5, t=3, g=9, c=7, f=6 |
+
+### STEP 3 — HYPOTHESES
+
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,* /v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; publishable key passes REST auth layer (503→401→401 evolving gateway); UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT on profiles/enrollments is highest-value target. Unchanged — needs two invited accounts.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets. Passive loop: re-probe /rest/v1 gateway after 00:00Z 09-07 (<=1/day).
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME cto→cname.perspective-dns.com stable 3+ days (dig confirmed 09-06); GET / = 409 "error code:1001" (Server:cloudflare); 443 TLS handshake-fail (no cert); Perspective docs confirm this CNAME is their custom-subdomain binding mechanism; hostname unbound → reclaimable.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE (done): repeat GET http://cto.onecode.de/ <=1/day for 409/1001 stability. CONFIRM: HUMAN binds cto.onecode.de in a Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN confirm
+
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 09-04/05 returned 503 PGRST002 with publishable key (key authenticates); 09-05/06 flipped to 401 explicit anon-block — gateway behavior fluctuates; if anon-role table ACL is permissive, cache recovery exposes missing-RLS tables pre-auth. Monitoring cadence = <=1/day; next probe after 00:00Z 09-07.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET /rest/v1/ + apikey header, <=1/day, next after 00:00Z 09-07.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+
+### STEP 4 — SELF-CRITIQUE
+- [HYP] BOLA (conf 65): Survives — confirmed, highest-value, account-blocked.
+- [HYP] cto takeover (conf 58): Survives — CNAME stable 3+ days, HUMAN-confirm blocked.
+- [HYP] REST exposure (conf 50): Survives — monitoring cadence active, no proof of blocking.
+- [PARKED] Any new pre-auth route on kurs.onecode.de: All routes exhaustively confirmed 307→/login (7 paths tested this cycle including /api/health, /api/auth/session, /robots.txt, /sitemap.xml). No further pre-auth probing productive.
+
+### STEP 5 — NEXT ACTION
+[NEXT] PASSIVE: Re-probe GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header after 00:00Z 09-07 (cadence <=1/day). All other hypotheses blocked on external actions (HUMAN or AUTH_HELPED). No new probe today — all surfaces confirmed unchanged.
+
+### STEP 6 — LEARNING
+[LEARN] ACCEPTED MISCONFIG @ onecode.de: Live Webflow marketing (different page than www — "AI-native Entwickler" landing). Static, no dynamic surface — no new attack class.
+[LEARN] NO_DELTA @ kurs.onecode.de: 7 paths tested (/login, /passwort-vergessen, /api/broadcast, /api/health, /api/auth/session, /robots.txt, /sitemap.xml) — all unchanged, pre-auth surface confirmed exhausted.
+[LEARN] NO_DELTA @ cto.onecode.de: 409 non-2xx persists; CNAME unbound/reclaimable; conf 58 stable.
+[LEARN] NO_DELTA @ all: REST/recovery re-probe deferred to 09-07 per <=1/day cadence.
+
+### STEP 7 — RISK
+[RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active confirmation, not on new passive discovery.
