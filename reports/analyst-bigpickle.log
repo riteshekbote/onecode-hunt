@@ -4868,3 +4868,93 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 67 — unchanged. cto.onecode.de dangling-CNAME remains provider-evidenced but HUMAN-claim-pending; residual risk dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50, monitored daily). No new exposure this cycle; posture stable.
+===== ANALYST bigpickle 2026-09-06 17:44:25 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead scope.yml
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead inventory
+[0m→ [0mRead knowledge
+[0m→ [0mRead leads
+I have the state. This is a continuation run. Let me check the leads and any scripts/state to understand the cadence and what's due.
+[0m
+[0m$ [0mdate -u
+Sun Sep  6 17:42:20 UTC 2026
+[0m
+Now 17:42 UTC on 2026-09-06. The last run was 15:39:14. The REST re-probe was deferred to after 00:00Z 09-07 per the <=1/day cadence. Let me review the current state and determine the delta.
+
+The state shows:
+- Top hypothesis: post-auth BOLA conf 65 (account-blocked, AUTH_HELPED)
+- cto.onecode.de dangling-CNAME conf 58 (HUMAN confirm required, PASSIVE done)
+- Publishable-key REST recovery conf 50 (monitoring, next re-probe after 00:00Z 09-07)
+
+The current time is 17:42 UTC, before 00:00Z 09-07, so no REST re-probe due yet. Passive cto.onecode.de stability check was done today. kurs.onecode.de pre-auth stable.
+
+Let me do a light same-day confirmation that's within cadence — verify cto.onecode.de CNAME stability is not something I've done in this window. Actually per state, the last leads indicate cto confirmed 09-06, and NO_DELTA run at 15:39. This run at 17:42 is a same-day monitor.
+
+Let me check whether there's anything new to probe. The discoverable next steps are all HUMAN or cadence-gated. Let me verify the cto CNAME is still stable (cheap, read-only) since hostname takeover is the most concrete pending HUMAN-action item, and check kurs login.
+
+Actually, per the <=1/day for REST and the stable cadence, and given the 15:39 run already did a NO_DELTA loop at 12:22→15:39, another same-day run at 17:42 likely yields NO_DELTA again. But I should still do a minimal read-only confirmation to detect any change. Let me do one curl check on cto.onecode.de to confirm the 409/1001 stability is still holdng (this is within the passive daily cadence scope).
+
+Let me do a quick read-only check.
+[0m$ [0mcurl -s -o /dev/null -w "cto.onecode.de http: %{http_code}\n" --max-time 15 http://cto.onecode.de/ 2>&1; curl -s --max-time 15 http://cto.onecode.de/ 2>&1 | head -c 200; echo; dig +short cto.onecode.de CNAME 2>&1
+cto.onecode.de http: 409
+error code: 1001
+cname.perspective-dns.com.
+[0m
+Stable: cto.onecode.de still 409 "error code:1001" with CNAME → cname.perspective-dns.com. No delta.
+
+Let me do a quick read-only check on kurs.onecode.de login to confirm pre-auth surface unchanged.
+[0m$ [0mcurl -s -o /dev/null -w "kurs login: %{http_code}\n" --max-time 15 https://kurs.onecode.de/login 2>&1; curl -s -o /dev/null -w "kurs api: %{http_code}\n" --max-time 15 https://kurs.onecode.de/api/broadcast 2>&1
+kurs login: 200
+kurs api: 307
+[0m
+No delta. kurs pre-auth surface stable (/login 200, /api 307). This is a same-day monitor run — no state change. The REST re-probe is deferred to after 00:00Z 09-07 per cadence.
+
+No new findings; the state is unchanged from the 15:39 run. Let me output the structured blocks.
+
+STEP 1 — DELTA: NO_DELTA.
+
+STEP 2 — No new assets.
+
+STEP 3 — Top hypotheses are stable (BOLA 65, CNAME 58, REST 50). No new hypothesis to emit; emitting existing ones would be redundant.
+
+STEP 4 — Self-critique: all three survive; all are account/HUMAN-gated or cadence-deferred.
+
+STEP 5 — NEXT: HUMAN (unblock cto confirm + BOLA accounts), and cadence-gated REST re-probe.
+
+STEP 6/7 — LEARN/RISK.
+
+## STEP 1 — DELTA
+NO_DELTA @ all: same-day monitor run 17:42 UTC. cto.onecode.de still http 409 "error code:1001" + CNAME → cname.perspective-dns.com (dig & GET reconfirmed); kurs.onecode.de /login 200, /api/broadcast 307. REST/graphql re-probe deferred to <=00:00Z 09-07 per <=1/day. No state change vs 15:39.
+
+## STEP 2 — PRIORITIZE
+No new assets. Existing unchanged scores:
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.5, monitoring-only (anon-block assert, cache-recovery latent)
+- [PRIO] kurs.onecode.de, 7.0, post-auth BOLA (account-gated conf 65)
+- [PRIO] cto.onecode.de, 6.5, dangling-CNAME conf 58 (HUMAN-claim pending)
+
+## STEP 3 — HYPOTHESES
+No NEW hypothesis this cycle. Existing ranked survivors (no delta):
+- [HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter — kurs.onecode.de/rest/v1 — conf 65 — AUTH_HELPED
+- [HYP] Dangling Perspective CNAME takeover — cto.onecode.de — conf 58 — PASSIVE+HUMAN
+- [HYP] Publishable-key direct REST exposure on schema-cache recovery — /rest/v1 — conf 50 — PASSIVE (monitoring)
+
+## STEP 4 — SELF-CRITIQUE
+None dropped (all ≥50, all have verify paths). BOLA survives: gate blocked but highest value. CNAME survives: provider-evidenced, awaiting HUMAN bind test. REST survives as low-cost daily monitor.
+[FINAL]
+1. kurs.onecode.de BOLA (65, AUTH_HELPED)
+2. cto.onecode.de CNAME takeover (58, HUMAN)
+3. /rest/v1 cache-recovery exposure (50, PASSIVE monitor)
+
+## STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Two parallel unblocks (1) create a Perspective funnel account, attach custom subdomain cto.onecode.de (CNAME already → cname.perspective-dns.com), observe whether attacker content + TLS cert serve → confirm or downgrade the conf-58 takeover; (2) obtain two invited kurs.onecode.de test accounts to activate post-auth BOLA (conf 65, CRITICAL). Agent-side: re-probe GET aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 after 00:00Z 09-07 (<=1/day).
+
+## STEP 6 — LEARNING
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 17:42 UTC — http 409 "error code:1001", CNAME → cname.perspective-dns.com (104.18.x) stable; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200, /api/broadcast 307 unchanged; pre-auth surface stable, no new cookie/session signal.
+
+## STEP 7 — RISK
+[RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active-confirmation, not on new passive discovery.

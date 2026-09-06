@@ -1,34 +1,6 @@
-## 2026-09-06 15:38:08 UTC [target] (model bigpickle)
-[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
-class: IDOR
-asset: kurs.onecode.de (/api,* /v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
-confidence: 65
-reasoning: Single Supabase project backs invite-only course platform; publishable key passes the REST auth layer (503 PGRST002 earlier, now explicit 401 anon-block); UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT on profiles/enrollments is highest-value. Open needs two invited accounts: unchanged today.
-evidence_needed: Account-A token retrieving rows owned by Account-B.
-verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets. Passive loop: re-probe /rest/v1 gateway after 00:00Z 09-07 (<=1/day).
-impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
-testability: AUTH_HELPED
-[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
-class: MISCONFIG
-asset: cto.onecode.de
-confidence: 58
-reasoning: CNAME cto→cname.perspective-dns.com stable again today (dig confirmed); http 409 "error code:1001" + 443 TLS-fail = hostname unbound at provider; Perspective docs confirm this CNAME is the custom-subdomain bind target → reclaimable.
-evidence_needed: Fresh Perspective account serving attacker funnel content on cto.onecode.de.
-verify_steps: PASSIVE done (CNAME stable 09-06); CONFIRM: HUMAN binds cto.onecode.de in a Perspective account, observes foreign content + TLS issuance.
-impact: Control of a trusted *.onecode.de hostname for phishing/repudiation + TLS via SaaS — HIGH.
-testability: PASSIVE + HUMAN confirm
-[HYP] Publishable-key direct REST exposure on schema-cache recovery
-class: IDOR
-asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
-confidence: 50
-reasoning: 09-04/05 returned 503 PGRST002 with publishable key (key authenticates); 09-05/06 flipped to 401 explicit anon-block — cache recovery can change gateway behavior; if anon-role table ACL is permissive, missing-RLS tables exposed pre-auth.
-evidence_needed: Any non-503/401 response to a table query using only the publishable key.
-verify_steps: GET /rest/v1/ (root) + apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, <=1/day, next > 00:00Z 09-07. Table SELECTs only if gateway response indicates anon allowed (avoid exfil risk).
-impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
-testability: PASSIVE
-[NEXT] HUMAN: Create a Perspective funnel account, attach custom subdomain cto.onecode.de (CNAME already targets cname.perspective-dns.com) and observe whether attacker content + TLS cert serve on the hostname → dangling-CNAME takeover CONFIRMED (HIGH). If content does NOT serve, downgrade to conf<40 and mark cto RESOLVED. In parallel: escalate for two invited kurs.onecode.de test accounts (unblocks conf-65 BOLA); passive loop re-probes /rest/v1 root after 00:00Z 09-07 to watch for anon-block lift.
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable (dig 09-06), 409/1001 + missing cert → hostname unbound and reclaimable; conf 58, HUMAN confirm required.
-[LEARN] REJECTED MISCONFIG @ hostmaster.onecode.de: NXDOMAIN (no A/CNAME) in onecode's controlled zone → not claimable; differs from cto's live provider-CNAME class.
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200 unchanged; pre-auth surface stable; no new session/cookie signal.
-[LEARN] NO_DELTA @ all: same-day monitor run — no state change vs 09-06 12:22; REST/recovery re-probe deferred to <=00:00Z 09-07 per <=1/day cadence.
-[RISK] onecode: 67 — unchanged. cto.onecode.de dangling-CNAME remains provider-evidenced but HUMAN-claim-pending; residual risk dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50, monitored daily). No new exposure this cycle; posture stable.
+## 2026-09-06 17:42:57 UTC [target] (model bigpickle)
+[FINAL]
+[NEXT] HUMAN: Two parallel unblocks (1) create a Perspective funnel account, attach custom subdomain cto.onecode.de (CNAME already → cname.perspective-dns.com), observe whether attacker content + TLS cert serve → confirm or downgrade the conf-58 takeover; (2) obtain two invited kurs.onecode.de test accounts to activate post-auth BOLA (conf 65, CRITICAL). Agent-side: re-probe GET aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 after 00:00Z 09-07 (<=1/day).
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 17:42 UTC — http 409 "error code:1001", CNAME → cname.perspective-dns.com (104.18.x) stable; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200, /api/broadcast 307 unchanged; pre-auth surface stable, no new cookie/session signal.
+[RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active-confirmation, not on new passive discovery.

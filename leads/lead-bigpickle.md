@@ -921,3 +921,9 @@ testability: PASSIVE
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200 unchanged; pre-auth surface stable; no new session/cookie signal.
 [LEARN] NO_DELTA @ all: same-day monitor run — no state change vs 09-06 12:22; REST/recovery re-probe deferred to <=00:00Z 09-07 per <=1/day cadence.
 [RISK] onecode: 67 — unchanged. cto.onecode.de dangling-CNAME remains provider-evidenced but HUMAN-claim-pending; residual risk dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50, monitored daily). No new exposure this cycle; posture stable.
+## 2026-09-06 17:42:57 UTC [target] (model bigpickle)
+[FINAL]
+[NEXT] HUMAN: Two parallel unblocks (1) create a Perspective funnel account, attach custom subdomain cto.onecode.de (CNAME already → cname.perspective-dns.com), observe whether attacker content + TLS cert serve → confirm or downgrade the conf-58 takeover; (2) obtain two invited kurs.onecode.de test accounts to activate post-auth BOLA (conf 65, CRITICAL). Agent-side: re-probe GET aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 after 00:00Z 09-07 (<=1/day).
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 17:42 UTC — http 409 "error code:1001", CNAME → cname.perspective-dns.com (104.18.x) stable; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200, /api/broadcast 307 unchanged; pre-auth surface stable, no new cookie/session signal.
+[RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active-confirmation, not on new passive discovery.
