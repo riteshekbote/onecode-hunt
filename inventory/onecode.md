@@ -202,3 +202,5 @@ www.onecode.de
 - CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED) — no delta
 
 ## 2026-09-06 12:22:06 UTC
+
+## 2026-09-06 15:39:14 UTC
