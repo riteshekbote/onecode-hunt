@@ -812,3 +812,4 @@ testability: PASSIVE
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface still exhausted (/login, /passwort-vergessen only; all /api,/v1,/dashboard 307); no change 09-05.
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 503 PGRST002 as of 09-05; next monitor due <=09-06 (once/day).
 [RISK] onecode: 67 — slight rise (66->67): cto.onecode.de dangling-CNAME risk now provider-evidenced with a concrete claim path (Perspective custom-subdomain binding) + stable stale hostname; residual program risk remains dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50). Monitoring cadence kept <=1/day passive; humidity unchanged elsewhere.
+## 2026-09-06 03:56:30 UTC [target] (model bigpickle)

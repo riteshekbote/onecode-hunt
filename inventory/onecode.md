@@ -184,3 +184,11 @@ www.onecode.de
 - NEW Provider identity resolved: cname.perspective-dns.com is the documented "connect your own domain" CNAME value for the Perspective funnel SaaS (intercom.help/perspective-funnels articles confirm arbitr
 - NEW www.onecode.de verified static Webflow marketing (project onecodedev, pageId 69c2...7b4, cf-cache HIT) — no dynamic/web-crawlable surface; mta-sts.onecode.de = CF 301 mail stub (out-of-scope class).
 - NEW mail.onecode.de (95.130.17.37) returns no HTTP — non-web service, no action.
+
+## 2026-09-06 03:58:05 UTC
+- NEW Supabase REST `/rest/v1/` now returns 401 "Secret API key required" with publishable key (was 503 PGRST002); explicit anon-block confirmed, schema-cache down persists
+- NEW cto.onecode.de re-probed: stable 409 Conflict "error code:1001" (Server: cloudflare, CF-RAY a36915496c750613-IAD), 443 TLS handshake-fail, CNAME cto→cname.perspective-dns.com (104.18.2.x) — Perspectiv
+- NEW www.onecode.de verified static Webflow marketing (project onecodedev, pageId 69c2...7b4, cf-cache HIT) — no dynamic surface; mta-sts.onecode.de = CF 301 mail stub (out-of-scope class)
+- NEW mail.onecode.de (95.130.17.37) returns no HTTP — non-web service, out-of-scope
+- CHANGED Subdomain takeover hypothesis for cto.onecode.de elevated to confidence 58 (HUMAN confirm required): provider identified, CNAME target documented, hostname currently unbound and plausibly reclaimable
+- CHANGED Supabase REST anon exposure hypothesis confidence adjusted: explicit 401 anon-block reduces immediate risk but monitor stays active (cache recovery could change gateway behavior)
