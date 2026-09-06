@@ -200,3 +200,5 @@ www.onecode.de
 - CHANGED Supabase REST anon exposure hypothesis confidence adjusted: explicit 401 anon-block reduces immediate risk but monitor stays active (cache recovery could change gateway behavior)
 - CHANGED Pre-auth surface on `kurs.onecode.de` remains fully exhausted — only `/login` and `/passwort-vergessen` at 200; all `/api/*`, `/v1`, `/dashboard` 307→/login (no delta since 2026-09-05)
 - CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED) — no delta
+
+## 2026-09-06 12:22:06 UTC

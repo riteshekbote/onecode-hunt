@@ -859,3 +859,31 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
 [LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution.
 [RISK] onecode: 67 — unchanged (66→67): cto.onecode.de dangling-CNAME risk now provider-evidenced with concrete claim path + stale hostname stable; residual program risk dominated by post-auth BOLA (65, CRITICAL, account-blocked) and latent publishable-key REST recovery (50). Monitoring cadence ≤1/day passive; humidity unchanged.
+## 2026-09-06 12:21:56 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; publishable key passes REST auth layer; UUID PKs weaken guessable-ID BOLA, so missing-RLS cross-tenant SELECT on profiles/enrollments/course_materials is the highest-value hole.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME cto→cname.perspective-dns.com (104.18.2.73) stable 2+ days; GET / = 409 "error code:1001" (Server:cloudflare); 443 TLS handshake-fail (no cert); Perspective docs confirm this CNAME is their custom-subdomain binding mechanism; hostname unbound → reclaimable.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE (done): repeat GET http://cto.onecode.de/ <=1/day for 409/1001 stability. CONFIRM: HUMAN binds cto.onecode.de in a Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN confirm
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 55
+reasoning: 09-04 and today both show 503 PGRST002 (not 401) with publishable key → anon key authenticates; the 401 observed 09-05/06 was an explicit gateway anon-block that has now been lifted; if anon-role table ACL is permissive, cache standup exposes missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET /rest/v1/profiles?select=*&limit=1 (and /courses?select=*&limit=1) + apikey + Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, <=1/day, next after 00:00Z 09-07.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE

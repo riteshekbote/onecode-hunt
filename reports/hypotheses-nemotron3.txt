@@ -1,17 +1,9 @@
-## 2026-09-06 08:40:04 UTC [target] (model nemotron3)
-[NEW] Supabase REST `/rest/v1/` behavior changed: now returns 401 "Secret API key required" with publishable key (was 503 PGRST002); explicit anon-block at gateway level confirmed
-[NEW] cto.onecode.de re-probed 2026-09-06: stable 409 Conflict "error code:1001" (Server: cloudflare, CF-RAY), 443 TLS handshake-fail, CNAME → cname.perspective-dns.com (104.18.2.x) — Perspective funnel SaaS custom-domain target docs-confirmed
-[CHANGED] Subdomain takeover hypothesis for cto.onecode.de elevated to confidence 58 (HUMAN confirm required): provider identified, CNAME target documented, hostname currently unbound and plausibly reclaimable
-[CHANGED] Supabase REST anon exposure hypothesis confidence adjusted: explicit 401 anon-block reduces immediate risk but monitor stays active (cache recovery could change gateway behavior)
-[CHANGED] Pre-auth surface on `kurs.onecode.de` remains fully exhausted — only `/login` and `/passwort-vergessen` at 200; all `/api/*`, `/v1`, `/dashboard` 307→/login (no delta since 2026-09-05)
-[CHANGED] Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED) — no delta
+## 2026-09-06 12:21:55 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de,7.1,a=8,b=9,t=8,g=1,c=7,f=7
 [PRIO] cto.onecode.de,5.8,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,5.2,a=6,b=5,t=5,g=9,c=3,f=3
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.8,a=6,b=6,t=4,g=8,c=2,f=2
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,4.0,a=5,b=4,t=4,g=8,c=2,f=2
-[PRIO] www.onecode.de,3.8,a=4,b=5,t=3,g=5,c=2,f=2
-[PRIO] onecode.de,3.8,a=4,b=5,t=3,g=5,c=2,f=2
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de (/api/broadcast proxied to Supabase)
