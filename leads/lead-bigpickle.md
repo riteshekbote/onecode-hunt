@@ -1012,3 +1012,54 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
 [LEARN] REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
 [RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active confirmation, not on new passive discovery.
+## 2026-09-07 00:03:33 UTC [target] (model bigpickle)
+[PRIO] kurs.onecode.de (post-auth BOLA),7.0,a=7,b=9,t=9,g=1,c=7,f=7 — fully auth-gated, top hypothesis needs test accounts
+[PRIO] cto.onecode.de,5.8,a=6,b=7,t=3,g=3,c=6,f=6 — CNAME stable, 409/1001 persists, HUMAN-claim pending
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,5.5,a=8,b=8,t=8,g=9,c=5,f=5 — endpoint probeable but zero buckets (confirmed empty); risk lowered
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.0,a=7,b=9,t=9,g=1,c=5,f=5 — 401 anon-block; daily monitor only
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api/*, /v1/*) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; publishable key passes REST auth layer (503→401→401 evolving gateway); UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT on profiles/enrollments is highest-value target. Unchanged — needs two invited accounts.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with each token; diff row sets. Passive loop: re-probe /rest/v1 gateway after 00:00Z 09-08 (<=1/day).
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME cto→cname.perspective-dns.com stable 5+ days (dig confirmed 00:05 UTC); HTTP GET / = 409 "error code:1001" (Server:cloudflare); HTTPS returns TLS handshake failure (no cert); Perspective docs confirm this CNAME is their custom-subdomain binding mechanism; hostname unbound → reclaimable.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE (done): repeat GET http://cto.onecode.de/ <=1/day for 409/1001 stability. CONFIRM: HUMAN binds cto.onecode.de in a Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN confirm
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 09-04/05 returned 503 PGRST002 with publishable key (key authenticates); 09-05/06/07 flipped to 401 explicit anon-block — gateway behavior fluctuates; if anon-role table ACL is permissive, cache recovery exposes missing-RLS tables pre-auth. Monitoring cadence = <=1/day; next probe after 00:00Z 09-08.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET /rest/v1/ + apikey header, <=1/day, next after 00:00Z 09-08.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+[PARKED] Realtime /api/broadcast channel auth (MISCONFIG, conf 42): pre-auth gated; only post-auth testable with two accounts. Keep as secondary.
+[PARKED] Magic-link token leakage (OATH, conf 38): no open redirect, no demonstrated hash-reader/XSS; standard Supabase flow. Re-open only if hash-reading sink found.
+[PARKED] Supabase Storage public bucket (MISCONFIG, conf 55→50): endpoint probeable but zero buckets exist — exposure risk minimal until buckets are created.
+[PARKED] GraphQL introspection (MISCONFIG, conf 45): /graphql returns 307→/login; no evidence GraphQL exists without auth.
+[PARKED] Supabase Realtime impersonation (MISCONFIG, conf 35): speculative, no evidence of realtime publications beyond /api/broadcast.
+[FINAL] 1. Post-auth BOLA via RLS gap (IDOR, 65, AUTH_HELPED) — highest overall value, blocked on test accounts
+[FINAL] 2. Dangling Perspective CNAME takeover (MISCONFIG, 58, PASSIVE+HUMAN) — provider confirmed, reclaimable, needs HUMAN claim
+[FINAL] 3. Publishable-key REST exposure on cache recovery (IDOR, 50, PASSIVE) — daily monitor, next probe 09-08
+[NEXT] PASSIVE: Re-probe GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header after 00:00Z 09-08 (cadence <=1/day). All other hypotheses blocked on external actions (HUMAN or AUTH_HELPED). No new probe today — all surfaces confirmed unchanged.
+[LEARN] NO_DELTA @ all: REST 401 anon-block persists; cto 409/1001 persists; storage empty; kurs.onecode.de/login 200 unchanged. Identical state to 09-06 22:11.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires two invited test accounts.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 5+ days; 409/1001 + missing cert → hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint probeable, zero buckets — risk lowered but monitor active.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery after 00:00Z 09-08.
+[LEARN] REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings).
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution.
+[LEARN] REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
+[LEARN] REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
+[RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active confirmation, not on new passive discovery.
