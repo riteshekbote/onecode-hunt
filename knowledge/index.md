@@ -145,3 +145,6 @@
 - 2026-09-07 NO_DELTA @ all: REST 401 anon-block persists; cto 409/1001 persists; storage empty; kurs.onecode.de/login 200 unchanged. Identical state to 09-07 10:03.
 - 2026-09-07 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 15:55 UTC 09-07 — HTTP 409/1001, HTTPS handshake-fail, CNAME → cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-07 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-07 NO_DELTA @ all: REST 401 anon-block persists (19:47 09-07); cto 409/CNAME→cname.perspective-dns.com persists; kurs /login+/passwort-vergessen 200 unchanged. Identical state to 09-07 15:58.
+- 2026-09-07 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 19:47 UTC 09-07 — HTTP 409, CNAME→cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-07 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal.

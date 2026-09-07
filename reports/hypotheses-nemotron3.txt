@@ -1,4 +1,4 @@
-## 2026-09-07 15:58:21 UTC [target] (model nemotron3)
+## 2026-09-07 19:53:43 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.20,a=6,b=6,t=4,g=8,c=2,f=2
 [PRIO] cto.onecode.de,4.45,a=4,b=5,t=2,g=4,c=7,f=6
@@ -28,12 +28,7 @@ asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
 confidence: 50
 reasoning: REST endpoint returns 401 "Secret API key required" with publishable key (was 503 PGRST002); explicit anon-block at gateway level; when schema-cache recovers, behavior may revert to 503 or 200 depending on gateway config; transient state
 evidence_needed: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header returns 200 with table list (not 401/503)
-verify_steps: PASSIVE: Periodic GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header; monitor for 200 response with table enumeration (cadence ≤1/day, next ≤00:00Z 2026-09-08)
-impact: Unauthenticated table enumeration and potential data access if RLS policies missing — HIGH
-testability: PASSIVE
-[PARKED] Supabase Storage public bucket exposure via direct service endpoint: confidence 40 at threshold; endpoint probeable but zero buckets exist; no bucket creation vector without auth; verify_steps are speculative (POST bucket creation with anon key unlikely to succeed)
-[PARKED] Supabase Edge Functions unauthenticated invocation: confidence 40 at threshold; 404 on listing endpoint; no function names in bundles; verify_steps are brute-force guesses
-[PARKED] Supabase Realtime publication RLS gap: confidence 35 < 40; WebSocket probe complexity, no evidence of realtime publications beyond /api/broadcast client reference, 401 on anon key
+verify_steps: PASSIVE: Periodic GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header; monitor for 200 response with table enumeration (cadence ≤1/day, next ≤00:00Z 202[0m← [0mWrite analyst-out.txt
 [PARKED] Subdomain takeover (hostmaster.*): confidence 45 < 50; passive-only cannot confirm claimability without active DNS resolution against provider APIs
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
