@@ -5753,3 +5753,72 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 67 — unchanged. No new exposure this cycle. Residual risk = post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent publishable-key REST recovery (50, daily monitor). All blocked on account provision or HUMAN action, not on new passive discovery.
+===== ANALYST bigpickle 2026-09-07 22:42:59 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u '+%Y-%m-%d %H:%M:%S UTC'
+2026-09-07 22:40:54 UTC
+[0m
+No probes issued this cycle — all active monitors are at-or-within their 1/day cadence (REST re-probe explicitly due only after 00:00Z 09-08, it is now 22:40Z 09-07; cto + kurs confirmed unchanged at 19:47Z).
+
+STEP 1 — DELTA
+NO_DELTA: every tracked surface identical to 19:47Z run — kurs.onecode.de /login+/passwort-vergessen 200, all /api/*,/v1,/dashboard 307; cto.onecode.de 409/1001 + CNAME→cname.perspective-dns.com; Supabase REST 401 anon-block, storage 200/[], functions 404, realtime 401, graphql 503. No new routes, cookies, or versioned endpoints at cadence limit.
+
+STEP 2 — PRIORITIZE
+[PRIO] cto.onecode.de,6.8,conf=58 dangling-CNAME; gate_ease=10 (no auth); claims escalate if a fresh Perspective account lands on the domain — highest claimable-value/effort ratio.
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1,6.35,IDOR-latent; business_value=9 (cross-tenant PII) but gated by anon-block until cache recovery.
+[PRIO] kurs.onecode.de,6.15,post-auth BOLA 65; gate_ease=2 (307→/login) — value realized only with invited accounts.
+
+STEP 3 — HYPOTHESES
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 09-04/05: 503 PGRST002 (key authenticates); 09-05/06/07: 401 explicit anon-block — gateway fluctuates; if anon-role ACL is permissive, cache recovery exposes missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with apikey: sb_publishable_* header, <=1/day, next after 00:00Z 09-08.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: 19:47Z live re-confirm — HTTP 409 "error code:1001", CNAME → cname.perspective-dns.com (104.18.x), stable 5+ days; docs confirm this CNAME is Perspective's domain-binding target; unbound → reclaimable.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE done (<=1/day GET / for 409). CONFIRM: HUMAN binds domain in Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN confirm
+
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api/*) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT is the highest-value test; needs two invited accounts.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=* per token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] Realtime /api/broadcast channel auth (42): pre-auth gated, post-auth only w/ accounts.
+[PARKED] Magic-link hash leakage (38): no redirect flaw, no hash-reading sink; standard Supabase flow.
+[PARKED] Storage public bucket (50): probeable but zero buckets exist.
+[PARKED] GraphQL introspection (45): no pre-auth GraphQL evidence.
+[PARKED] Realtime impersonation (35): speculative — below threshold.
+[FINAL] 1. Post-auth BOLA via RLS gap (IDOR, 65, AUTH_HELPED) — highest value, account-blocked
+[FINAL] 2. Dangling Perspective CNAME takeover (MISCONFIG, 58, PASSIVE+HUMAN) — live re-confirmed 19:47Z
+[FINAL] 3. Publishable-key REST exposure on cache recovery (IDOR, 50, PASSIVE) — daily monitor, due after 00:00Z 09-08
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: at first cycle after 00:00Z 09-08, GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 with header `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (sha256 870cf518...) — any non-503/401 reply activates the cached-schema exposure hypothesis. All other hypotheses blocked on HUMAN (cto claim) or AUTH_HELPED (test accounts); no new probe warranted before 00:00Z.
+
+STEP 6 — LEARNING
+[LEARN] NO_DELTA @ all: 22:40Z 09-07 — REST 401, cto 409/CNAME, storage empty, kurs /login+/passwort-vergessen 200, identical to 19:47Z run; all monitors at cadence limit.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 5+ days; 409/1001 + missing cert = hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged tonight; pre-auth surface stable and exhausted.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 401 anon-block persists; monitor for schema-cache recovery after 00:00Z 09-08.
+
+STEP 7 — RISK
+[RISK] onecode: 67 — unchanged. Residual risk = post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent publishable-key REST recovery (50, daily monitor). All blocked on account provision or HUMAN action, not on new passive discovery. No new exposure this cycle.

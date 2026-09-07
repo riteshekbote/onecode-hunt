@@ -148,3 +148,8 @@
 - 2026-09-07 NO_DELTA @ all: REST 401 anon-block persists (19:47 09-07); cto 409/CNAME→cname.perspective-dns.com persists; kurs /login+/passwort-vergessen 200 unchanged. Identical state to 09-07 15:58.
 - 2026-09-07 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 19:47 UTC 09-07 — HTTP 409, CNAME→cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-07 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-07 NO_DELTA @ all: 22:40Z 09-07 — REST 401, cto 409/CNAME, storage empty, kurs /login+/passwort-vergessen 200, identical to 19:47Z run; all monitors at cadence limit.
+- 2026-09-07 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 5+ days; 409/1001 + missing cert = hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-07 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged tonight; pre-auth surface stable and exhausted.
+- 2026-09-07 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 401 anon-block persists; monitor for schema-cache recovery after 00:00Z 09-08.
+- 2026-09-07 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery after 00:00Z 2026-09-08
