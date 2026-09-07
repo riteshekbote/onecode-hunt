@@ -1063,3 +1063,48 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
 [LEARN] REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
 [RISK] onecode: 67 — unchanged. No new exposure this cycle. Dominant residual risk: post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + latent publishable-key REST recovery (50, daily monitor) + cto dangling-CNAME (58, HUMAN-claim pending). All blocked on account provision or active confirmation, not on new passive discovery.
+## 2026-09-07 04:55:59 UTC [target] (model bigpickle)
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 09-07 — GET http://cto.onecode.de/ = 409, HTTPS = empty/handshake-fail, CNAME → cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[PRIO] kurs.onecode.de (post-auth BOLA),7.0,a=7,b=9,t=9,g=1,c=7,f=7 — fully auth-gated; top hypothesis blocked on two test accounts
+[PRIO] cto.onecode.de,5.8,a=6,b=7,t=3,g=3,c=6,f=6 — CNAME stable 5+ days, 409/1001 + TLS-fail persist; needs HUMAN claim
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.0,a=7,b=9,t=9,g=1,c=5,f=5 — 401 anon-block; daily monitor only, next probe 09-08
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api/*, /v1/*) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; publishable key authenticates to REST gateway (503→401 evolution); UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT highest-value. Unchanged; needs two invited accounts.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=*&limit=1 and /rest/v1/enrollments?select=*&limit=1 per token; diff row sets. Passive: re-probe REST gateway after 00:00Z 09-08 (<=1/day).
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: Live-confirmed 09-07: HTTP 409 "error code:1001", HTTPS TLS handshake fail (no cert), CNAME → cname.perspective-dns.com (104.18.x/2606:4700::). Perspective docs confirm this CNAME is their domain-binding target; unbound → reclaimable.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE (done): ≤1/day GET http://cto.onecode.de/ for 409/1001 stability. CONFIRM: HUMAN binds cto.onecode.de in a Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN confirm
+[HYP] Publishable-key direct REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 09-04/05: 503 PGRST002 (key authenticates); 09-05/06/07: 401 explicit anon-block — gateway behavior fluctuates; if anon-role table ACL is permissive, cache recovery exposes missing-RLS tables pre-auth. Monitoring cadence <=1/day.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET /rest/v1/ + apikey header, <=1/day, next after 00:00Z 09-08.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+[PARKED] Realtime /api/broadcast channel auth (MISCONFIG, 42): pre-auth gated; post-auth only with accounts.
+[PARKED] Magic-link hash leakage (OATH, 38): no redirect flaw, no hash-reading sink; standard Supabase flow.
+[PARKED] Storage public bucket (MISCONFIG, 55→50): probeable, zero buckets exist.
+[PARKED] GraphQL introspection (MISCONFIG, 45): no pre-auth GraphQL evidence.
+[PARKED] Realtime impersonation (MISCONFIG, 35): speculative.
+[FINAL] 1. Post-auth BOLA via RLS gap (IDOR, 65, AUTH_HELPED) — highest value, account-blocked
+[FINAL] 2. Dangling Perspective CNAME takeover (MISCONFIG, 58, PASSIVE+HUMAN) — live re-confirmed 09-07
+[FINAL] 3. Publishable-key REST exposure on cache recovery (IDOR, 50, PASSIVE) — daily monitor
+[NEXT] PASSIVE: Re-probe GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header after 00:00Z 09-08 (cadence <=1/day). All other hypotheses blocked on HUMAN or AUTH_HELPED; no new probe today.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: live re-probe 09-07 — HTTP 409/1001, HTTPS handshake-fail, CNAME → cname.perspective-dns.com stable; unbound/reclaimable; conf 58, HUMAN pending.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen both 200 today; pre-auth surface stable, exhausted; no new cookie/session signal.
+[LEARN] REJECTED MISCONFIG @ hostmaster.*/www/mail.onecode.de: unchanged classes — NXDOMAIN/static/non-web, no new surface.
+[RISK] onecode: 67 — unchanged. No new exposure this cycle. Residual risk = post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent publishable-key REST recovery (50, daily monitor). All blocked on account provision or HUMAN action, not on new passive discovery.

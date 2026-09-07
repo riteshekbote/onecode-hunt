@@ -138,3 +138,7 @@
 - 2026-09-07 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
 - 2026-09-07 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
 - 2026-09-07 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
+- 2026-09-07 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 09-07 — GET http://cto.onecode.de/ = 409, HTTPS = empty/handshake-fail, CNAME → cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-07 ACCEPTED MISCONFIG @ cto.onecode.de: live re-probe 09-07 — HTTP 409/1001, HTTPS handshake-fail, CNAME → cname.perspective-dns.com stable; unbound/reclaimable; conf 58, HUMAN pending.
+- 2026-09-07 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen both 200 today; pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-07 REJECTED MISCONFIG @ hostmaster.*/www/mail.onecode.de: unchanged classes — NXDOMAIN/static/non-web, no new surface.
