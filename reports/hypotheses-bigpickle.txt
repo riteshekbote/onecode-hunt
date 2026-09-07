@@ -1,5 +1,4 @@
-## 2026-09-07 04:55:59 UTC [target] (model bigpickle)
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 09-07 — GET http://cto.onecode.de/ = 409, HTTPS = empty/handshake-fail, CNAME → cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+## 2026-09-07 10:02:41 UTC [target] (model bigpickle)
 [PRIO] kurs.onecode.de (post-auth BOLA),7.0,a=7,b=9,t=9,g=1,c=7,f=7 — fully auth-gated; top hypothesis blocked on two test accounts
 [PRIO] cto.onecode.de,5.8,a=6,b=7,t=3,g=3,c=6,f=6 — CNAME stable 5+ days, 409/1001 + TLS-fail persist; needs HUMAN claim
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.0,a=7,b=9,t=9,g=1,c=5,f=5 — 401 anon-block; daily monitor only, next probe 09-08
@@ -39,7 +38,7 @@ testability: PASSIVE
 [FINAL] 2. Dangling Perspective CNAME takeover (MISCONFIG, 58, PASSIVE+HUMAN) — live re-confirmed 09-07
 [FINAL] 3. Publishable-key REST exposure on cache recovery (IDOR, 50, PASSIVE) — daily monitor
 [NEXT] PASSIVE: Re-probe GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header after 00:00Z 09-08 (cadence <=1/day). All other hypotheses blocked on HUMAN or AUTH_HELPED; no new probe today.
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: live re-probe 09-07 — HTTP 409/1001, HTTPS handshake-fail, CNAME → cname.perspective-dns.com stable; unbound/reclaimable; conf 58, HUMAN pending.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed live 09-07 — GET http://cto.onecode.de/ = 409, HTTPS = empty/handshake-fail, CNAME → cname.perspective-dns.com stable 5+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen both 200 today; pre-auth surface stable, exhausted; no new cookie/session signal.
 [LEARN] REJECTED MISCONFIG @ hostmaster.*/www/mail.onecode.de: unchanged classes — NXDOMAIN/static/non-web, no new surface.
 [RISK] onecode: 67 — unchanged. No new exposure this cycle. Residual risk = post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent publishable-key REST recovery (50, daily monitor). All blocked on account provision or HUMAN action, not on new passive discovery.
