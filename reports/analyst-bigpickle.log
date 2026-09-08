@@ -5822,3 +5822,38 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 67 — unchanged. Residual risk = post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent publishable-key REST recovery (50, daily monitor). All blocked on account provision or HUMAN action, not on new passive discovery. No new exposure this cycle.
+===== ANALYST bigpickle 2026-09-08 01:08:30 UTC =====
+[0m
+> build · big-pickle
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mecho "=== REST /profiles ==="; curl -s -o /tmp/rest_profiles.txt -w "HTTP %{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1"; cat /tmp/rest_profiles.txt; echo; echo "=== REST /enrollments ==="; curl -s -o /tmp/rest_enroll.txt -w "HTTP %{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*&limit=1"; cat /tmp/rest_enroll.txt; echo; echo "=== REST base ==="; curl -s -o /tmp/rest_base.txt -w "HTTP %{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/"; cat /tmp/rest_base.txt failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+[0m$ [0mecho "=== cto http ==="; curl -s -o /tmp/cto.txt -w "HTTP %{http_code}\n" --max-time 20 "http://cto.onecode.de/"; head -c 500 /tmp/cto.txt; echo; echo "=== cto https ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -k "https://cto.onecode.de/"; echo "=== CNAME ==="; dig +short cto.onecode.de CNAME
+=== cto http ===
+HTTP 409
+error code: 1001
+=== cto https ===
+HTTP 000
+=== CNAME ===
+cname.perspective-dns.com.
+[0m
+[0m$ [0mecho "=== kurs /login HEAD ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -I "https://kurs.onecode.de/login"; echo "=== kurs /passwort-vergessen HEAD ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -I "https://kurs.onecode.de/passwort-vergessen"; echo "=== kurs /api/broadcast ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -I "https://kurs.onecode.de/api/broadcast"; echo "=== kurs /api/health ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -I "https://kurs.onecode.de/api/health"
+=== kurs /login HEAD ===
+HTTP 200
+=== kurs /passwort-vergessen HEAD ===
+HTTP 200
+=== kurs /api/broadcast ===
+HTTP 307
+=== kurs /api/health ===
+HTTP 307
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mecho "=== storage buckets ==="; curl -s -o /tmp/storage.txt -w "HTTP %{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket"; cat /tmp/storage.txt; echo; echo "=== functions ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/"; echo "=== realtime ==="; curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/" failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+I'll start by reviewing the current state and checking the designated probe (REST schema-cache recovery) which is due after 00:00Z 09-08.
+
+The NEXT action specifies: at first cycle after 00:00Z 09-08, probe the Supabase REST endpoint for schema-cache recovery. Today's date is 09-08, so this is due.
+
+Let me run the passive read-only probes.

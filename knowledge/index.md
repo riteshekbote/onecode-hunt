@@ -153,3 +153,12 @@
 - 2026-09-07 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged tonight; pre-auth surface stable and exhausted.
 - 2026-09-07 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 401 anon-block persists; monitor for schema-cache recovery after 00:00Z 09-08.
 - 2026-09-07 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery after 00:00Z 2026-09-08
+- 2026-09-08 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+- 2026-09-08 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 6+ days; 409/1001 + missing cert → hostname unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint probeable, zero buckets — risk lowered but monitor active
+- 2026-09-08 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery after 00:00Z 2026-09-08
+- 2026-09-08 REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+- 2026-09-08 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
+- 2026-09-08 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+- 2026-09-08 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+- 2026-09-08 ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
