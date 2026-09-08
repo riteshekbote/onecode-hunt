@@ -1,11 +1,4 @@
-## 2026-09-08 21:43:40 UTC [target] (model bigpickle)
-[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
-class: IDOR
-asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
-confidence: 65
-reasoning: single Supabase project backs kurs.onecode.de; registered /api + /v1 routers confirmed; course-platform (Rich Dev Poor Dev, enrollments, resources) predicts cross-tenant data; UUID PKs weaken enumeration but a missing RLS SELECT filter is the realistic vector; gateway oscillates 503(PGRST002)→401(anon-block)→503 since 09-04 = unstable schema-cache, never permissive
-evidence_needed: two invited test accounts; authenticated REST query hitting another user's resource IDs; any 200+body from /rest/v1/<table>?id=neq.<own_uuid> with an unrelated user's bearer
-verify_steps: (1) obtain 2 test accounts via kurs.onecode.de invite flow; (2) auth as A, enumerate own resource IDs; (3) auth as B, GET /rest/v1/enrollments?user_id=eq.<A_UUID> with B's bearer; (4) diff row sets
+## 2026-09-08 23:58:10 UTC [target] (model bigpickle)
 impact: CRITICAL — cross-tenant PII/course-data exfiltration via RLS bypass
 testability: AUTH_HELPED
 [HYP] Dangling Perspective CNAME subdomain takeover on cto.onecode.de
@@ -26,3 +19,37 @@ evidence_needed: any 200+body from /rest/v1/<table>?select=*&limit=1 with publis
 verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: <publishable>" -H "Authorization: Bearer <publishable>" — ≤1/day
 impact: HIGH — anonymous cross-table exfiltration if anon-role ACL permissive during recovery
 testability: PASSIVE
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block — now confirmed on 09-08 at 01:10(503)/11:29(503)/21:44(401)/23:57(503); PGRST002 body proves /profiles query is attempted pre-auth; 5 observed states all non-permissive but oscillation frequency rising (4 probes/day 09-08 vs 1-2/day before), so a transient 200+body window is the monitored event
+evidence_needed: any HTTP 200 with row-set body from /rest/v1/<table>?select=*&limit=1 using only publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48..." -H "Authorization: Bearer sb_publishable_g48..." — ≤1/day
+impact: HIGH — anonymous exfiltration of tenant table data if anon-role ACL permissive during a cache-recovery window
+testability: PASSIVE
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project; course-platform semantics (enrollments/resources, Rich Dev Poor Dev, invite-only) predict cross-tenant objects; missing RLS SELECT filter is the realistic vector since UUID PKs defeat enumeration; gateway currently unstable (503↔401) = schema/ACL churn raises miscfg odds
+evidence_needed: two invited test accounts; auth as A get own resource UUIDs; auth as B GET /rest/v1/enrollments?user_id=eq.<A> with B bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de flow, then REST BOLA cross-check with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME subdomain takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME → cname.perspective-dns.com stable 7 days (09-02→09-08); provider docs define this as "connect your own domain" target; HTTP 409/1001 + TLS handshake-fail = hostname unbound in provider, reclaimable
+evidence_needed: bind cto.onecode.de as custom subdomain in a Perspective account → 409→200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → observe status change
+impact: MEDIUM — attacker-controlled content on *.onecode.de; phishing + TLS via SaaS
+testability: HUMAN_ONLY
+[NEXT] PROBE: at 00:00Z 09-09 cadence window (last probe 23:57Z flipped to 503), GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key (apikey + Bearer) — if 200+body escalate CRITICAL; if 503 continue; if 401 re-confirm anon-block. cto.onecode.de HTTP 409/CNAME re-confirm ≤1/day. No other actionable pre-auth probe this cycle.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23:57Z → 503 PGRST002 (flip from 21:44Z 401); 5-state oscillation 503→401→503→401→503 confirmed; never permissive; monitor active ≤1/day.
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains top (conf 65); 2 invited accounts required; pre-auth exhausted.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7 days; 409/1001 + no cert; conf 58, HUMAN confirm pending.
+[LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+[LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+[RISK] onecode: 67 — unchanged. Post-auth BOLA via RLS gap (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). REST gateway flipped 401→503 at 23:57Z — 5-state oscillation since 09-04 with rising probe frequency (4/day on 09-08) but zero permissive states observed; a 200+body window remains the only live escalation trigger. All actionable paths gated on HUMAN step (account provisioning or cto claim). No new exposure this cycle.

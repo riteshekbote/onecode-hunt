@@ -734,3 +734,25 @@
 - LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth
+
+## RANKED HYPOTHESES 2026-09-08 23:58:20 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- [58] cto.onecode.de: Dangling Perspective CNAME subdomain takeover on cto.onecode.de (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: at 00:00Z 09-09 cadence window (last probe 23:57Z flipped to 503), GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with pu
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishabl
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23:57Z → 503 PGRST002 (flip from 21:44Z 401); 5-state oscillation 503→401→503→401→503 confirmed;
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains top (conf 65); 2 invited accounts required; pre-auth exhausted.
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7 days; 409/1001 + no cert; conf 58, HUMAN confirm pending.
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhaust
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 4-state oscillation confirmed (503→401→503→401 since 09-04); NOT permissive on any obser
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com live 21:44Z; HTTP 409/1001 + TLS handshake-fail; hostname unbound/reclaimable; conf 58, HUM
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Empty bucket list — endpoint probeable, zero buckets
+- LEARN: REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured
+- LEARN: REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+- LEARN: REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+- LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth

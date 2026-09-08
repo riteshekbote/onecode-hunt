@@ -252,3 +252,5 @@ www.onecode.de
 ## 2026-09-08 21:47:30 UTC
 - CHANGED Supabase REST `/rest/v1/` flipped from 503 PGRST002 (11:29Z) back to 401 "Secret API key required" (21:44Z) — gateway oscillation confirmed: 503→401→503→401 since 09-04
 - CHANGED cto.onecode.de re-confirmed live 21:44Z — HTTP 409 "error code: 1001", CNAME→cname.perspective-dns.com stable 6+ days
+
+## 2026-09-08 23:58:20 UTC
