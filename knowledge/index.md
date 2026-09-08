@@ -167,3 +167,9 @@
 - 2026-09-08 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 11:29Z 09-08 — HTTP 409 "error code:1001", CNAME→cname.perspective-dns.com stable 6+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-08 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal.
 - 2026-09-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Empty bucket list confirmed — endpoint probeable but zero buckets exist.
+- 2026-09-08 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted
+- 2026-09-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 503 PGRST002 persists; gateway three-state oscillation confirmed (503→401→503); NOT permissive; monitor stays active
+- 2026-09-08 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com live 15:20Z; 409/1001 + missing cert; hostname unbound/reclaimable; conf 58, HUMAN pending
+- 2026-09-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Empty bucket list — endpoint probeable, zero buckets
+- 2026-09-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions
+- 2026-09-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth
