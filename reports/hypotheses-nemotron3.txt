@@ -1,4 +1,6 @@
-## 2026-09-08 06:03:36 UTC [target] (model nemotron3)
+## 2026-09-08 11:30:24 UTC [target] (model nemotron3)
+[NEW] Supabase REST `/rest/v1/` flipped from 401 "Secret API key required" back to 503 PGRST002 "Could not query the database for the schema cache" at 01:10Z 2026-09-08 (probe confirmed)
+[CHANGED] Gateway state unstable — oscillates between explicit anon-block (401) and schema-cache-down (503); neither indicates permissive ACL
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
 [PRIO] cto.onecode.de,4.45,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.10,a=5,b=5,t=3,g=8,c=2,f=2

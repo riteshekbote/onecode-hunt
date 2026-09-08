@@ -1320,3 +1320,48 @@ testability: AUTH_HELPED
 [NEXT] PROBE: Retry GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key 1x more this cycle (<30s gap); if still 503 PGRST002, the REST gateway returned to schema-cache-down mode — re-probe <=1/day watching for any flip to a permissive per-table response (200/body), which would activate the cached-schema exposure hypothesis.
 [LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 probe (01:10Z) — the gateway FLIPPED from 401 anon-block back to 503 PGRST002 "Could not query the database for the schema cache" across /profiles,/enrollments,/users. Confirms REST gateway state is unstable/fluctuating between anon-block and schema-cache-down, NOT indicating permissive ACL on either state. Monitor stays active <=1/day for any 200/body response (which would indicate table ACL exposure).
 [RISK] onecode: 67 — unchanged. The 503↔401 flip on REST is a Bayes-delta strengthening the "cache recovery could change exposure" hypothesis (the gateway demonstrably toggles modes), but no permissive state observed. Residual risk unchanged: post-auth BOLA (65, account-blocked, AUTH_HELPED) + cto dangling-CNAME (58, HUMAN-claim) + latent publishable-key REST recovery (50, daily monitor). All still blocked on account provision or HUMAN action, not on new passive discovery.
+## 2026-09-08 11:29:29 UTC [target] (model bigpickle)
+[PRIO] cto.onecode.de,6.8,MISCONFIG; gate_ease=10 (no auth); business_value=8 (trusted subdomain); CNAME→Perspective stable 6+ days; HUMAN claim pending.
+[PRIO] kurs.onecode.de,6.15,IDOR(post-auth); business_value=9 (cross-tenant course data); gate_ease=2 (invite-only); conf 65 but account-blocked.
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,6.35,IDOR-latent; business_value=9 (cross-tenant PII) but gated by 503 PGRST002; gate_ease=5 (publishable key only); cache recovery fluctuating.
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 09-04/05: 503 PGRST002 (key authenticates); 09-05/06/07: 401 explicit anon-block; 09-08 01:10Z: FLIPPED back to 503 PGRST002. Gateway demonstrably toggles modes. If anon-role table ACL permissive, cache recovery exposes missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: <publishable>" -H "Authorization: Bearer <publishable>" — any 200/body activates hypothesis.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable 6+ days; HTTP 409/1001 + missing cert = hostname unbound and reclaimable; docs confirm this CNAME is Perspective's domain-binding target.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE done (<=1/day GET / for 409). CONFIRM: HUMAN binds domain in Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api/*) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT is the highest-value test; needs two invited accounts.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=* per token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+[PARKED] Realtime /api/broadcast channel auth (42): pre-auth gated, post-auth only w/ accounts.
+[PARKED] Magic-link hash leakage (38): no redirect flaw, no hash-reading sink; standard Supabase flow.
+[PARKED] Storage public bucket (50): probeable but zero buckets exist.
+[PARKED] GraphQL introspection (45): no pre-auth GraphQL evidence.
+[PARKED] Realtime impersonation (35): speculative — below threshold.
+[FINAL] 1. Post-auth BOLA via RLS gap (IDOR, 65, AUTH_HELPED) — highest value, account-blocked
+[FINAL] 2. Dangling Perspective CNAME takeover (MISCONFIG, 58, PASSIVE+HUMAN) — stable 6+ days
+[FINAL] 3. Publishable-key REST exposure on cache recovery (IDOR, 50, PASSIVE) — daily monitor due
+[NEXT] PROBE: <=1/day re-probe REST at next cycle. GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key — 503 PGRST002 persists, continue monitoring. Next actionable probe requires either (a) cache recovery flipping to 200/body, or (b) HUMAN action on cto.onecode.de Perspective claim.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 11:29Z probe — 503 PGRST002 persists (schema-cache-down mode). Gateway has now shown three states: 503→401→503 since 09-04. Confirms unstable/gateway toggling; NOT permissive on any observed state. Monitor stays active.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 11:29Z 09-08 — HTTP 409 "error code:1001", CNAME→cname.perspective-dns.com stable 6+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Empty bucket list confirmed — endpoint probeable but zero buckets exist.
+[RISK] onecode: 67 — unchanged. Residual risk = post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent publishable-key REST recovery (50, daily monitor). All blocked on account provision or HUMAN action, not on new passive discovery. REST gateway demonstrated 503↔401 instability — strengthens "cache recovery could change exposure" hypothesis but no permissive state observed. No new exposure this cycle.

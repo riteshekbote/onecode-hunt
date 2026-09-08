@@ -228,3 +228,7 @@ www.onecode.de
 ## 2026-09-08 01:08:30 UTC
 
 ## 2026-09-08 06:03:48 UTC
+
+## 2026-09-08 11:30:35 UTC
+- NEW Supabase REST `/rest/v1/` flipped from 401 "Secret API key required" back to 503 PGRST002 "Could not query the database for the schema cache" at 01:10Z 2026-09-08 (probe confirmed)
+- CHANGED Gateway state unstable — oscillates between explicit anon-block (401) and schema-cache-down (503); neither indicates permissive ACL

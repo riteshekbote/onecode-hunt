@@ -163,3 +163,7 @@
 - 2026-09-08 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
 - 2026-09-08 ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
 - 2026-09-08 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 probe (01:10Z) — the gateway FLIPPED from 401 anon-block back to 503 PGRST002 "Could not query the database for the schema cache" across /profiles,/enrollments,/users. Confirms REST gateway state is unstable/fluctuating between anon-block and schema-cache-down, NOT indicating permissive ACL on either state. Monitor stays active <=1/day for any 200/body response (which would indicate table ACL exposure).
+- 2026-09-08 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 11:29Z probe — 503 PGRST002 persists (schema-cache-down mode). Gateway has now shown three states: 503→401→503 since 09-04. Confirms unstable/gateway toggling; NOT permissive on any observed state. Monitor stays active.
+- 2026-09-08 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirmed 11:29Z 09-08 — HTTP 409 "error code:1001", CNAME→cname.perspective-dns.com stable 6+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-08 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Empty bucket list confirmed — endpoint probeable but zero buckets exist.
