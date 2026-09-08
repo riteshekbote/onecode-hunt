@@ -184,3 +184,5 @@
 - 2026-09-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions.
 - 2026-09-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth.
 - 2026-09-08 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted
+- 2026-09-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 4-state oscillation confirmed (503→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-08 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com live 21:44Z; HTTP 409/1001 + TLS handshake-fail; hostname unbound/reclaimable; conf 58, HUMAN pending

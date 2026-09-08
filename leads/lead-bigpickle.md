@@ -1468,3 +1468,31 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth.
 [RISK] onecode: 67 — Unchanged. Post-auth BOLA via RLS gap (65, CRITICAL, account-blocked) + cto dangling-CNAME (58, HUMAN-claim pending) + latent REST cache recovery (50, daily monitor). REST gateway 503 PGRST002 persists today; three-state oscillation (503→401→503) confirmed since 09-04 but no permissive state observed. All actionable paths blocked on HUMAN gate (account provision or cto claim). No new exposure this cycle.
+## 2026-09-08 21:43:40 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs kurs.onecode.de; registered /api + /v1 routers confirmed; course-platform (Rich Dev Poor Dev, enrollments, resources) predicts cross-tenant data; UUID PKs weaken enumeration but a missing RLS SELECT filter is the realistic vector; gateway oscillates 503(PGRST002)→401(anon-block)→503 since 09-04 = unstable schema-cache, never permissive
+evidence_needed: two invited test accounts; authenticated REST query hitting another user's resource IDs; any 200+body from /rest/v1/<table>?id=neq.<own_uuid> with an unrelated user's bearer
+verify_steps: (1) obtain 2 test accounts via kurs.onecode.de invite flow; (2) auth as A, enumerate own resource IDs; (3) auth as B, GET /rest/v1/enrollments?user_id=eq.<A_UUID> with B's bearer; (4) diff row sets
+impact: CRITICAL — cross-tenant PII/course-data exfiltration via RLS bypass
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME subdomain takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME → cname.perspective-dns.com stable 7 days (since 09-02, re-confirm 21:43Z); Perspective funnel SaaS documents this as the "connect your own domain" CNAME value; HTTP 409 "error code:1001" (Cloudflare) + no cert = hostname unbound in provider and reclaimable
+evidence_needed: create Perspective account → bind cto.onecode.de as custom subdomain → observe 409→200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status change
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de subdomain; phishing/pharming + TLS via SaaS
+testability: HUMAN_ONLY
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04; PGRST002 body confirms table /profiles is registered in schema-cache (query attempted); if gateway lands in a 200 state on anon-role ACL with the publishable key, pre-auth data exposure results; re-probes today (01:10Z, 11:29Z, 21:43Z) all 503
+evidence_needed: any 200+body from /rest/v1/<table>?select=*&limit=1 with publishable key only
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: <publishable>" -H "Authorization: Bearer <publishable>" — ≤1/day
+impact: HIGH — anonymous cross-table exfiltration if anon-role ACL permissive during recovery
+testability: PASSIVE

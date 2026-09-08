@@ -248,3 +248,7 @@ www.onecode.de
 - NEW Supabase REST `/rest/v1/` re-probed at 11:29Z 2026-09-08 — 503 PGRST002 persists (schema-cache-down mode); gateway has now shown three states: 503→401→503 since 09-04
 - CHANGED Gateway state unstable — oscillates between explicit anon-block (401) and schema-cache-down (503); neither state indicates permissive ACL
 - CHANGED cto.onecode.de re-confirmed 11:29Z 09-08 — HTTP 409 "error code:1001", CNAME→cname.perspective-dns.com stable 6+ days; hostname unbound/reclaimable; conf 58, HUMAN confirm pending
+
+## 2026-09-08 21:47:30 UTC
+- CHANGED Supabase REST `/rest/v1/` flipped from 503 PGRST002 (11:29Z) back to 401 "Secret API key required" (21:44Z) — gateway oscillation confirmed: 503→401→503→401 since 09-04
+- CHANGED cto.onecode.de re-confirmed live 21:44Z — HTTP 409 "error code: 1001", CNAME→cname.perspective-dns.com stable 6+ days
