@@ -624,3 +624,19 @@
 - LEARN: REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
 - LEARN: REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+
+## RANKED HYPOTHESES 2026-09-08 06:03:48 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- [50] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Publishable-key REST exposure on schema-cache recovery (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorizat
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishabl
+- LEARN: ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 probe (01:10Z) — the gateway FLIPPED from 401 anon-block back to 503 PGRST002 "Could not q
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 6+ days; 409/1001 + missing cert → hostname unbound/reclaimable; conf 58, HUMAN co
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint probeable, zero buckets — risk lowered but monitor active
+- LEARN: ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Explicit 401 anon-block with publishable key; monitor for cache recovery after 00:00Z 2026-09-08
+- LEARN: REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured (all false in /auth/v1/settings)
+- LEARN: REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
+- LEARN: REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+- LEARN: REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login

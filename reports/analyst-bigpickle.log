@@ -5857,3 +5857,84 @@ I'll start by reviewing the current state and checking the designated probe (RES
 The NEXT action specifies: at first cycle after 00:00Z 09-08, probe the Supabase REST endpoint for schema-cache recovery. Today's date is 09-08, so this is due.
 
 Let me run the passive read-only probes.
+===== ANALYST bigpickle 2026-09-08 06:03:48 UTC =====
+[0m
+> build · big-pickle
+[0m
+## 2026-09-08 01:09:12 UTC [target] (model bigpickle)
+
+### STEP 1 — DELTA
+NO_DELTA @ all: REST 401 anon-block persists; cto 409/1001 persists; storage empty; kurs /login 200 unchanged. Identical state to 09-07 22:40. Next REST probe due after 00:00Z 09-08 (now).
+
+### STEP 2 — PRIORITIZE
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,6.35,IDOR-latent; business_value=9 (cross-tenant PII) but gated by anon-block; gate_ease=5 (publishable key only); cache recovery due.
+[PRIO] cto.onecode.de,6.8,MISCONFIG; gate_ease=10 (no auth); business_value=8 (trusted subdomain); CNAME→Perspective stable 6+ days; HUMAN claim pending.
+[PRIO] kurs.onecode.de,6.15,IDOR(post-auth); business_value=9 (cross-tenant course data); gate_ease=2 (invite-only); conf 65 but account-blocked.
+
+### STEP 3 — HYPOTHESES
+
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 09-04/05: 503 PGRST002 (key authenticates); 09-05/06/07: 401 explicit anon-block — gateway fluctuates; if anon-role table ACL permissive, cache recovery exposes missing-RLS tables pre-auth.
+evidence_needed: Any non-503/401 response to a table query using only the publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — any 200/body activates hypothesis.
+impact: Unauthenticated cross-tenant row exposure — CRITICAL if realized; monitoring-only otherwise.
+testability: PASSIVE
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable 6+ days; HTTP 409/1001 + missing cert = hostname unbound and reclaimable; docs confirm this CNAME is Perspective's domain-binding target.
+evidence_needed: Fresh Perspective account serving attacker content on cto.onecode.de.
+verify_steps: PASSIVE done (<=1/day GET / for 409). CONFIRM: HUMAN binds domain in Perspective account, observes foreign content + TLS issuance.
+impact: Full control of trusted *.onecode.de subdomain for phishing/repudiation + TLS via SaaS — HIGH.
+testability: PASSIVE + HUMAN
+
+[HYP] Post-auth cross-tenant BOLA via missing Supabase RLS filter
+class: IDOR
+asset: kurs.onecode.de (/api/*) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; UUID PKs weaken guessable-ID BOLA → missing-RLS cross-tenant SELECT is the highest-value test; needs two invited accounts.
+evidence_needed: Account-A token retrieving rows owned by Account-B.
+verify_steps: (AUTH_HELPED) POST /auth/v1/token?grant_type=password per account; GET /rest/v1/profiles?select=* per token; diff row sets.
+impact: Cross-tenant PII/enrollment exfiltration — CRITICAL.
+testability: AUTH_HELPED
+
+### STEP 4 — SELF-CRITIQUE
+[PARKED] Realtime /api/broadcast channel auth (42): pre-auth gated, post-auth only w/ accounts.
+[PARKED] Magic-link hash leakage (38): no redirect flaw, no hash-reading sink; standard Supabase flow.
+[PARKED] Storage public bucket (50): probeable but zero buckets exist.
+[PARKED] GraphQL introspection (45): no pre-auth GraphQL evidence.
+[PARKED] Realtime impersonation (35): speculative — below threshold.
+
+[FINAL] 1. Post-auth BOLA via RLS gap (IDOR, 65, AUTH_HELPED) — highest value, account-blocked
+[FINAL] 2. Dangling Perspective CNAME takeover (MISCONFIG, 58, PASSIVE+HUMAN) — stable 6+ days
+[FINAL] 3. Publishable-key REST exposure on cache recovery (IDOR, 50, PASSIVE) — daily monitor due now
+
+### STEP 5 — NEXT ACTION
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — if non-503/401, cached-schema exposure hypothesis activates; if 401/503, re-confirm anon-block and defer to next cycle.
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code}" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 10
+503
+[0m
+[0m$ [0mcurl -s "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 10
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[0m
+WAIT — that's a change: REST flipped BACK to **503 PGRST002** (was 401 "Secret API key required" throughout 09-05/07). The gateway fluctuated again — back to schema-cache-down mode where the publishable key authenticates but the table layer is unavailable. This is the historical pre-cursor pattern to possible anon exposure on recovery.
+
+### STEP 5 — NEXT ACTION (updated)
+[NEXT] PROBE: Retry GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key 1x more this cycle (<30s gap); if still 503 PGRST002, the REST gateway returned to schema-cache-down mode — re-probe <=1/day watching for any flip to a permissive per-table response (200/body), which would activate the cached-schema exposure hypothesis.
+[0m$ [0mcurl -s -o /dev/null -w "profiles=%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 10; curl -s -o /dev/null -w "enrollments=%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*&limit=1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 10; curl -s -o /dev/null -w "users=%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/users?select=*&limit=1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 10
+profiles=503
+enrollments=503
+users=503
+[0m
+All three return 503 PGRST002 with the publishable key — the REST gateway has returned to schema-cache-down mode (was 401 anon-block all of 09-05/06/07). No per-table ACL exposure surface yet; the gateway is inconsistent, not permissive. This is consistent with known PGRST002 behavior rather than a new exposure.
+
+### STEP 6 — LEARNING
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 probe (01:10Z) — the gateway FLIPPED from 401 anon-block back to 503 PGRST002 "Could not query the database for the schema cache" across /profiles,/enrollments,/users. Confirms REST gateway state is unstable/fluctuating between anon-block and schema-cache-down, NOT indicating permissive ACL on either state. Monitor stays active <=1/day for any 200/body response (which would indicate table ACL exposure).
+
+### STEP 7 — RISK
+[RISK] onecode: 67 — unchanged. The 503↔401 flip on REST is a Bayes-delta strengthening the "cache recovery could change exposure" hypothesis (the gateway demonstrably toggles modes), but no permissive state observed. Residual risk unchanged: post-auth BOLA (65, account-blocked, AUTH_HELPED) + cto dangling-CNAME (58, HUMAN-claim) + latent publishable-key REST recovery (50, daily monitor). All still blocked on account provision or HUMAN action, not on new passive discovery.

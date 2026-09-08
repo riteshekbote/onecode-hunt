@@ -162,3 +162,4 @@
 - 2026-09-08 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
 - 2026-09-08 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
 - 2026-09-08 ACCEPTED AUTH @ kurs.onecode.de: Pre-auth surface exhausted — only /login and /passwort-vergessen at 200; all /api/*, /v1, /dashboard 307→/login
+- 2026-09-08 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 2026-09-08 probe (01:10Z) — the gateway FLIPPED from 401 anon-block back to 503 PGRST002 "Could not query the database for the schema cache" across /profiles,/enrollments,/users. Confirms REST gateway state is unstable/fluctuating between anon-block and schema-cache-down, NOT indicating permissive ACL on either state. Monitor stays active <=1/day for any 200/body response (which would indicate table ACL exposure).
