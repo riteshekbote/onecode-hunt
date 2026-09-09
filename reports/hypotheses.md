@@ -850,3 +850,12 @@
 - LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending
 - LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
 - LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
+
+## RANKED HYPOTHESES 2026-09-09 23:16:20 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: at 00:00Z 09-10 cadence window, GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key (apikey + Bearer) — i
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23:06Z 09-09 probe → 503 PGRST002 (flip from 401); 8-state oscillation 503→401→503→401→503→503→4
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 23:06Z 09-09 — 409/1001, CNAME→cname.perspective-dns.com stable 8 days; unbound/reclaimable; conf 58, HUMAN pend
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible

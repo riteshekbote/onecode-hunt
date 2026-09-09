@@ -5291,3 +5291,8 @@ testability: PASSIVE
 
 ### STEP 7 — RISK
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
+===== ANALYST nemotron3 2026-09-09 23:16:20 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[91m[1mError: [0mError from provider (Console): Upstream request failed: [404] Provider returned error

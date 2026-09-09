@@ -211,3 +211,6 @@
 - 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 20:47Z 09-09 probe → 503 PGRST002; 7-state oscillation confirmed (503→401→503→401→503→401→503 since 09-04); NOT permissive on any observed state; monitor stays active.
 - 2026-09-09 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 20:47Z 09-09 — 409/1001, CNAME→cname.perspective-dns.com stable 7+ days; unbound/reclaimable; conf 58, HUMAN pending.
 - 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 7-state oscillation confirmed (503→401→503→401→503→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23:06Z 09-09 probe → 503 PGRST002 (flip from 401); 8-state oscillation 503→401→503→401→503→503→401→503 since 09-04; NOT permissive on any state; monitor stays active
+- 2026-09-09 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 23:06Z 09-09 — 409/1001, CNAME→cname.perspective-dns.com stable 8 days; unbound/reclaimable; conf 58, HUMAN pending
+- 2026-09-09 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
