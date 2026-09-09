@@ -271,3 +271,7 @@ www.onecode.de
 ## 2026-09-09 17:44:36 UTC
 - NEW Supabase REST `/rest/v1/` cadence window open for re-probe (last 23:57Z 09-08 showed 503 PGRST002); next probe will determine if gateway remains in schema-cache-down or reverts to explicit 401 anon-bl
 - NEW No live probe executed today 2026-09-09; all prior state (cto 409/CNAME, storage empty, kurs /login 200, REST oscillation 503↔401) assumed stable until verified
+
+## 2026-09-09 20:49:39 UTC
+- NEW Supabase REST `/rest/v1/` re-probed 2026-09-09 20:46Z → **401 "Secret API key required"** (was 503 PGRST002 at 23:57Z 09-08); gateway 6-state oscillation confirmed (503→401→503→401→503→503→**401** sin
+- CHANGED No other live probes executed today; all prior state (cto 409/CNAME, storage empty, kurs /login 200) assumed stable until verified

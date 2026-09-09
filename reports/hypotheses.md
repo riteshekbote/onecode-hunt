@@ -828,3 +828,25 @@
 - LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending
 - LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
 - LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
+
+## RANKED HYPOTHESES 2026-09-09 20:49:39 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: at 00:00Z 09-10 cadence window, GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key (apikey + Bearer) — i
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishabl
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhaust
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 6-state oscillation confirmed (503→401→503→401→503→503 since 09-04); NOT permissive on a
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending.
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhaust
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 20:47Z 09-09 probe → 503 PGRST002; 7-state oscillation confirmed (503→401→503→401→503→401→503 si
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 20:47Z 09-09 — 409/1001, CNAME→cname.perspective-dns.com stable 7+ days; unbound/reclaimable; conf 58, HUMAN pen
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhaust
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 7-state oscillation confirmed (503→401→503→401→503→503→401 since 09-04); NOT permissive 
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
