@@ -1,4 +1,4 @@
-## 2026-09-09 13:48:08 UTC [target] (model bigpickle)
+## 2026-09-09 17:44:25 UTC [target] (model bigpickle)
 [PRIO] kurs.onecode.de (post-auth),9.0 — IDOR/BOLA via RLS gap, critical business value, Supabase auth, 307-gated, AUTH_HELPED
 [PRIO] cto.onecode.de,7.5 — dangling CNAME takeover, stable 7+ days, attacker-controlled content on *.onecode.de, HUMAN_ONLY
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,6.0 — REST gateway oscillation monitor (503↔401), latent exposure trigger, PASSIVE
