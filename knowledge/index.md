@@ -207,3 +207,4 @@
 - 2026-09-09 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending.
 - 2026-09-09 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 - 2026-09-09 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- 2026-09-09 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted.
