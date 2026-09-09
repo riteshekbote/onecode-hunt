@@ -8,3 +8,9 @@
 - 2 lead(s) marked VALID at 2026-09-06 21:28:59 UTC
   - **Verdict: VALID**
   - **Verdict: VALID**
+
+- 4 lead(s) marked VALID at 2026-09-09 15:18:55 UTC
+  - **Verdict: VALID**
+  - **Verdict: HOLD** (needs HUMAN claim-attempt to convert to VALID)
+  - **Verdict: HOLD** (monitoring-only; escalates to VALID if cache recovers)
+  - | 1. Post-auth BOLA via RLS Gap | **VALID** | CRITICAL — report when two test accounts obtained |
