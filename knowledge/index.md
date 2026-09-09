@@ -191,3 +191,14 @@
 - 2026-09-08 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7 days; 409/1001 + no cert; conf 58, HUMAN confirm pending.
 - 2026-09-08 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 - 2026-09-08 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- 2026-09-09 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted
+- 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 5-state oscillation confirmed (503→401→503→401→503 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-09 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + TLS handshake-fail; hostname unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-09 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Empty bucket list — endpoint probeable, zero buckets
+- 2026-09-09 REJECTED OATH @ kurs.onecode.de: No external OAuth providers configured
+- 2026-09-09 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+- 2026-09-09 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+- 2026-09-09 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
+- 2026-09-09 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions
+- 2026-09-09 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth

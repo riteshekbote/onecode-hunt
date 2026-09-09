@@ -1551,3 +1551,31 @@ testability: HUMAN_ONLY
 [LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 [LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
 [RISK] onecode: 67 — unchanged. Post-auth BOLA via RLS gap (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). REST gateway flipped 401→503 at 23:57Z — 5-state oscillation since 09-04 with rising probe frequency (4/day on 09-08) but zero permissive states observed; a 200+body window remains the only live escalation trigger. All actionable paths gated on HUMAN step (account provisioning or cto claim). No new exposure this cycle.
+## 2026-09-09 04:27:48 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project; course-platform semantics (enrollments/resources, Rich Dev Poor Dev, invite-only) predict cross-tenant objects; UUID PKs defeat enumeration so the realistic vector is a missing RLS SELECT filter; gateway schema/ACL churn (503↔401) raises miscfg odds but no permissive state yet observed
+evidence_needed: two invited test accounts; auth as A to collect own resource UUIDs; auth as B GET /rest/v1/enrollments?user_id=eq.<A> with B bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de, then REST BOLA cross-check with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04; 04:27Z 09-09 probe = 503; PGRST002 body proves pre-auth /profiles query is attempted; 6+ observed states all non-permissive but a transient 200+body window is the monitored event
+evidence_needed: any HTTP 200 with row-set body from /rest/v1/<table>?select=*&limit=1 using only publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_..." -H "Authorization: Bearer sb_publishable_..." — ≤1/day
+impact: HIGH — anonymous exfiltration of tenant table data if anon-role ACL permissive during cache recovery
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME subdomain takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME → cname.perspective-dns.com stable 7+ days (re-confirm 04:27Z 09-09, resolves 104.18.2.x); provider docs define this as "connect your own domain" target; HTTP 409/1001 + no cert = hostname unbound in provider, reclaimable
+evidence_needed: bind cto.onecode.de as custom subdomain in a Perspective account → observe 409/1001 → 200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status change
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de subdomain; phishing/pharming + TLS via SaaS
+testability: HUMAN_ONLY
