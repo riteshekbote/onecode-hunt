@@ -259,3 +259,7 @@ www.onecode.de
 - NEW Supabase REST gateway state flipped from 503 PGRST002 (2026-09-08 23:57Z) to unknown — next cadence probe due post-00:00Z 2026-09-09 per ≤1/day rule
 - CHANGED No live probe executed yet today; all prior state (cto 409/CNAME, storage empty, kurs /login 200, REST oscillation 503↔401) assumed stable until verified
 - NEW cadence window open for REST re-probe (last 23:57Z 09-08 showed 503); next probe will determine if gateway remains in schema-cache-down or reverts to explicit 401 anon-block
+
+## 2026-09-09 09:12:24 UTC
+- NEW Supabase REST `/rest/v1/` cadence window open for re-probe (last 23:57Z 09-08 showed 503 PGRST002); next probe will determine if gateway remains in schema-cache-down or reverts to explicit 401 anon-bl
+- NEW No live probe executed today 2026-09-09; all prior state (cto 409/CNAME, storage empty, kurs /login 200, REST oscillation 503↔401) assumed stable until verified

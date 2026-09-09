@@ -202,3 +202,8 @@
 - 2026-09-09 REJECTED MISCONFIG @ hostmaster.*/cto.onecode.de: Confidence 45 < 50; passive-only cannot confirm without active DNS resolution
 - 2026-09-09 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404; no deployed functions
 - 2026-09-09 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401; requires auth
+- 2026-09-09 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains top (conf 65); 2 invited accounts required; pre-auth exhausted.
+- 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 6-state oscillation confirmed (503→401→503→401→503→503 since 09-04); NOT permissive on any observed state; monitor stays active.
+- 2026-09-09 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 7+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending.
+- 2026-09-09 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- 2026-09-09 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.

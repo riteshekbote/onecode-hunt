@@ -1,7 +1,6 @@
-## 2026-09-09 04:29:53 UTC [target] (model nemotron3)
-[NEW] Supabase REST gateway state flipped from 503 PGRST002 (2026-09-08 23:57Z) to unknown — next cadence probe due post-00:00Z 2026-09-09 per ≤1/day rule
-[CHANGED] No live probe executed yet today; all prior state (cto 409/CNAME, storage empty, kurs /login 200, REST oscillation 503↔401) assumed stable until verified
-[NEW] cadence window open for REST re-probe (last 23:57Z 09-08 showed 503); next probe will determine if gateway remains in schema-cache-down or reverts to explicit 401 anon-block
+## 2026-09-09 09:12:12 UTC [target] (model nemotron3)
+[NEW] Supabase REST `/rest/v1/` cadence window open for re-probe (last 23:57Z 09-08 showed 503 PGRST002); next probe will determine if gateway remains in schema-cache-down or reverts to explicit 401 anon-block
+[NEW] No live probe executed today 2026-09-09; all prior state (cto 409/CNAME, storage empty, kurs /login 200, REST oscillation 503↔401) assumed stable until verified
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
 [PRIO] cto.onecode.de,4.45,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.10,a=5,b=5,t=3,g=8,c=2,f=2
