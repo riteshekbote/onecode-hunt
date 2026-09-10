@@ -235,3 +235,4 @@
 - 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 9+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-10 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 - 2026-09-10 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 11-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active
