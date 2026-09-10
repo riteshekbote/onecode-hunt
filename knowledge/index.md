@@ -236,3 +236,8 @@
 - 2026-09-10 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 - 2026-09-10 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
 - 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 11-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-10 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical (200/307, railway-hikari); both raw up.railway.app subdomains now return Railway fallback 404 JSON — platform-level migration, no OneCode app change, railway.app out of scope.
+- 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable (dig 21:13Z 09-10); no domain-verification TXT present; conf 58, HUMAN claim-attempt still the only proof path.
+- 2026-09-10 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307 re-confirmed 21:14Z; no new cookie/session signal; pre-auth surface stays exhausted.
+- 2026-09-10 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held this cycle (last 11:34Z 09-10 = 503, 11th sequential); REST gateway monitor stays active post 00:00Z 09-11.
+- 2026-09-10 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete.

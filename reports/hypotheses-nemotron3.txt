@@ -1,9 +1,9 @@
-## 2026-09-10 18:35:54 UTC [target] (model nemotron3)
+## 2026-09-10 21:13:58 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.55,a=5,b=5,t=3,g=8,c=2,f=2
 [PRIO] cto.onecode.de,4.45,a=4,b=5,t=2,g=4,c=7,f=6
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.10,a=5,b=5,t=3,g=8,c=2,f=2
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,3.90,a=5,b=4,t=3,g=9,c=2,f=2
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,3.65,a=4,b=3,t=3,g=8,c=2,f=2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.45,a=5,b=4,t=3,g=9,c=2,f=2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,3.80,a=4,b=3,t=3,g=8,c=2,f=2
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de (/api/* proxied to Supabase)

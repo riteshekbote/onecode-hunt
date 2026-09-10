@@ -1987,3 +1987,45 @@ testability: PASSIVE
 [LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 [LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
 [RISK] onecode: 67 — unchanged. BOLA via RLS gap (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). 11th sequential 503 (06:08Z 09-10 with sb_publishable key); 200+body window remains the only live escalation trigger. All actionable paths gated on HUMAN step (account provisioning or cto claim). No new exposure this cycle.
+## 2026-09-10 21:15:52 UTC [target] (model bigpickle)
+[CHANGED] kurs.onecode.de CNAME: tgk4io5m.up.railway.app → ki8dqcf6.up.railway.app (A 69.46.46.42), verified 21:14Z 09-10. App behavior unchanged (/login 200, / 307→/login, server railway-hikari, x-railway-edge iad1, no Set-Cookie). Both raw up.railway.app hosts (old + new) return Railway fallback `{"status":"error","code":404,"message":"Application not found"}` with x-railway-fallback:true when hit directly — Railway platform-level subdomain migration, not a OneCode redeploy; railway.app domain is out of program scope.
+[NEW] Certspotter CT scan 21:14Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — inventory complete, zero new subdomains from certificate transparency.
+[PRIO] kurs.onecode.de (post-auth BOLA/RLS),8.5,a=9,b=9,t=9,g=9,c=7,f=7
+[PRIO] cto.onecode.de (dangling Perspective CNAME takeover),7.0,a=7,b=7,t=6,g=7,c=8,f=8
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ (REST cache-recovery monitor),5.5,a=5,b=9,t=8,g=7,c=8,f=8
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform (enrollments/resources, Rich Dev Poor Dev); UUID PKs defeat ID enumeration so realistic vector is missing RLS SELECT user_id filter; app re-verified live 21:14Z 09-10 (200/307 stable after Railway CNAME migration tgk4io5m→ki8dqcf6); anon-role true ACL still masked by persistent PGRST002
+evidence_needed: two invited test accounts; auth as A collect own resource UUID, auth as B GET /rest/v1/enrollments?user_id=eq.<A> with B bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung, then REST BOLA cross-check with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME subdomain takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 21:13Z 09-10 — CNAME → cname.perspective-dns.com (104.18.2.73/3.73) stable 9+ days; HTTP 409 "error code:1001" + TLS handshake-fail = hostname unbound in provider; no TXT verification record present on the hostname, so claimability rests on binding the custom subdomain inside a fresh Perspective account
+evidence_needed: bind cto.onecode.de as custom subdomain in a Perspective account → observe 409/1001 → 200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status change
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de subdomain; phishing/pharming + TLS via SaaS
+testability: HUMAN_ONLY
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04; last probe 11:34Z 09-10 = 503 with sb_publishable key on /profiles (11th sequential observation); all observed states non-permissive but transient 200+body window is the monitored event; sb_publishable format still accepted after 09-10 platform key-format change
+evidence_needed: any HTTP 200 with row-set body from /rest/v1/<table>?select=*&limit=1 using only sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — ≤1/day, next window post 00:00Z 09-11
+impact: HIGH — anonymous exfiltration of tenant table data if anon-role ACL permissive during cache recovery
+testability: PASSIVE
+[PARKED] None — all 3 survivors have confidence ≥50 and concrete verify_steps; Railway CNAME migration generated no new in-scope hypothesis (railway.app out of scope), CT confirms no hidden subdomains.
+[FINAL] Survivors ranked: 1) BOLA/RLS (65) 2) cto CNAME (58) 3) REST recovery (50)
+[NEXT] PROBE: at next cadence window (post 00:00Z 09-11), GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers apikey + Authorization Bearer = sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 — if 200+body escalate CRITICAL (anon table ACL exposed); if 503 continue monitor; if 401 re-confirm anon-block. Parallel ≤1/day: dig cto.onecode.de CNAME + HEAD kurs.onecode.de/login.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical (200/307, railway-hikari); both raw up.railway.app subdomains now return Railway fallback 404 JSON — platform-level migration, no OneCode app change, railway.app out of scope.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable (dig 21:13Z 09-10); no domain-verification TXT present; conf 58, HUMAN claim-attempt still the only proof path.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307 re-confirmed 21:14Z; no new cookie/session signal; pre-auth surface stays exhausted.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held this cycle (last 11:34Z 09-10 = 503, 11th sequential); REST gateway monitor stays active post 00:00Z 09-11.
+[LEARN] REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete.
+[RISK] onecode: 67 — unchanged. BOLA via RLS gap (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). Railway platform migrated kurs backend hostname with zero surface delta; cto CNAME stable 9+ days with no TXT verification record; REST still cache-blocked (11th 503). Only live escalation trigger remains the 200+body REST window at next cadence; all other actionable paths gated on HUMAN step (account provisioning or cto claim). No new exposure this cycle.

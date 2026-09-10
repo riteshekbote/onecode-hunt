@@ -294,3 +294,7 @@ www.onecode.de
 ## 2026-09-10 15:13:38 UTC
 
 ## 2026-09-10 18:36:05 UTC
+
+## 2026-09-10 21:16:03 UTC
+- CHANGED kurs.onecode.de CNAME: tgk4io5m.up.railway.app → ki8dqcf6.up.railway.app (A 69.46.46.42), verified 21:14Z 09-10. App behavior unchanged (/login 200, / 307→/login, server railway-hikari, x-railway-edge
+- NEW Certspotter CT scan 21:14Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — inventory complete, zero new subdomains from certificate transparency.
