@@ -290,3 +290,5 @@ www.onecode.de
 - CHANGED Supabase REST gateway 10-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401 since 09-04); 06:08Z probe returned 503 PGRST002 with sb_publishable key
 - CHANGED Supabase platform-level key format change: JWT anon key (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; only sb_publishable_ format accepted — not a OneCode key rotation
 - CHANGED cto.onecode.de re-confirmed 06:08Z — HTTP 409 "error code:1001" + TLS handshake failure, CNAME→cname.perspective-dns.com stable 9+ days; unbound/reclaimable, conf 58 HUMAN pending
+
+## 2026-09-10 15:13:38 UTC

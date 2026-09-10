@@ -229,3 +229,9 @@
 - 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 06:08Z 09-10 — 409/1001 + TLS handshake-fail, CNAME→cname.perspective-dns.com stable 9+ days; unbound/reclaimable; conf 58, HUMAN pending
 - 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 10-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
 - 2026-09-10 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+- 2026-09-10 NO_DELTA @ all: REST 503 PGRST002 persists (11:34Z 09-10); cto 409/CNAME stable; kurs /login 200 unchanged. Identical to 06:08Z.
+- 2026-09-10 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted.
+- 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 11th sequential 503 PGRST002 observation; 11-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active.
+- 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 9+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-10 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- 2026-09-10 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
