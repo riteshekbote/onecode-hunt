@@ -129,3 +129,90 @@ impact: None
 verify_steps: N/A — no live code or assets to verify
 ## REPOSCAN 2026-09-10 01:12:30 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-10 12:00:00 UTC — DEEP AUDIT
+Scanned: OneCodeDevs/compass (Kotlin), OneCodeDevs/ai-coach (Next.js)
+[HYP] IDOR on praxis session endpoints — no userId verification
+class: IDOR
+asset: OneCodeDevs/ai-coach/src/lib/actions/praxis.ts:51-126
+confidence: 85
+reasoning: >
+  submitPraxis() and resetPraxis() accept sessionId from POST body and query the DB
+  by sessionId alone (lines 55, 108), never checking that the session belongs to the
+  requesting user. USER_ID is hardcoded to "me" (constants.ts:1). Any multi-user
+  deployment (e.g. kurs.onecode.de) would expose all users' praxis sessions.
+impact: Medium
+verify_steps: >
+  Deploy ai-coach with multi-user auth, create session as user A, overwrite as user B.
+[HYP] No authentication on AI-generating API routes — cost abuse vector
+class: MISCONFIG
+asset: OneCodeDevs/ai-coach/src/app/api/translate/route.ts, /api/tutor/route.ts, /api/praxis/route.ts
+confidence: 80
+reasoning: >
+  Three POST endpoints accept unauthenticated requests and invoke AI provider calls
+  server-side. No rate limiting, API key validation, or session check. Unbounded AI
+  API cost abuse if deployed publicly.
+impact: Medium
+verify_steps: >
+  Deploy to public endpoint, send repeated POST /api/translate, observe AI usage dashboard.
+[HYP] Missing security headers on Next.js app
+class: MISCONFIG
+asset: OneCodeDevs/ai-coach/next.config.ts
+confidence: 60
+reasoning: >
+  next.config.ts does not configure CSP, X-Frame-Options, HSTS, or CORS restrictions.
+impact: Low
+verify_steps: >
+  Deploy, curl -I and inspect response headers for missing security headers.
+[HYP] CI signing credential handling (informational)
+class: SECRET
+asset: OneCodeDevs/compass/.github/workflows/build.yml:62-68
+confidence: 95
+reasoning: >
+  Signing password passed via -Psigning.password CLI flag; may appear in CI logs
+  if log masking is not configured. Credentials stored in GitHub Secrets (not hardcoded).
+impact: Low
+verify_steps: >
+  Check GitHub Actions logs for signing password in plaintext.
+## REPOSCAN 2026-09-10 06:18:08 UTC
+[HYP] IDOR on praxis session endpoints — no userId verification
+class: IDOR
+asset: OneCodeDevs/ai-coach/src/lib/actions/praxis.ts:51-126
+confidence: 85
+reasoning: >
+impact: Medium — data tampering across users if multi-tenancy is added; currently low
+verify_steps: >
+[HYP] No authentication on AI-generating API routes — cost abuse vector
+class: MISCONFIG
+asset: OneCodeDevs/ai-coach/src/app/api/translate/route.ts, /api/tutor/route.ts, /api/praxis/route.ts
+confidence: 80
+reasoning: >
+impact: Medium — financial (unbounded AI API costs); potential for abuse as an
+verify_steps: >
+[HYP] No CORS / security headers configured on Next.js app
+class: MISCONFIG
+asset: OneCodeDevs/ai-coach/next.config.ts
+confidence: 60
+reasoning: >
+impact: Low — defense-in-depth; no direct data exposure but widens attack surface.
+verify_steps: >
+[HYP] Maven signing credentials in CI workflow (signing.password, signing.keyId)
+class: SECRET
+asset: OneCodeDevs/compass/.github/workflows/build.yml:62-68
+confidence: 95
+reasoning: >
+impact: Low — credentials are properly stored in GitHub Secrets; no leak found.
+verify_steps: >
+REPOSCAN 2026-09-10 — DEEP AUDIT
+Scanned repos: OneCodeDevs/compass (Kotlin/KSP), OneCodeDevs/ai-coach (Next.js/TypeScript)
+Scope: *.onecode.de, kurs.onecode.de
+
+FINDINGS (4):
+1. [IDOR] praxis session endpoints — no userId check — confidence 85
+2. [MISCONFIG] unauthenticated AI API routes (cost abuse) — confidence 80
+3. [MISCONFIG] missing security headers — confidence 60
+4. [SECRET] CI signing credential in process args (informational) — confidence 95
+
+NO hardcoded secrets found (AWS keys, API tokens, private keys, production creds).
+Both repos use proper secret management (GitHub Secrets, .env.example, .gitignore).
+
+Key file: leads/reposcan-onecode.md
