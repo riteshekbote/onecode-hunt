@@ -859,3 +859,18 @@
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
 - LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
 - LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
+
+## RANKED HYPOTHESES 2026-09-10 01:13:07 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: at next cadence window (post 00:00Z 09-11), GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with publishable key (apikey +
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishabl
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 00:10Z 09-10 probe → 503 PGRST002 (no flip; 9th seq observation, 8-state oscillation 503→401→503
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 00:10Z 09-10 — 409/1001 + TLS handshake-fail, CNAME→cname.perspective-dns.com stable 8+ days; unbound/reclaimabl
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhaust
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 9-state oscillation confirmed (503→401→503→401→503→503→401→503→401 since 09-04); NOT per
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 8+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible

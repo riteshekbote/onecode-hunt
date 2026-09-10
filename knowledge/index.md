@@ -214,3 +214,13 @@
 - 2026-09-09 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23:06Z 09-09 probe → 503 PGRST002 (flip from 401); 8-state oscillation 503→401→503→401→503→503→401→503 since 09-04; NOT permissive on any state; monitor stays active
 - 2026-09-09 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 23:06Z 09-09 — 409/1001, CNAME→cname.perspective-dns.com stable 8 days; unbound/reclaimable; conf 58, HUMAN pending
 - 2026-09-09 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 00:10Z 09-10 probe → 503 PGRST002 (no flip; 9th seq observation, 8-state oscillation 503→401→503→401→503→503→401→503 persists); NOT permissive on any state; monitor stays active
+- 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 00:10Z 09-10 — 409/1001 + TLS handshake-fail, CNAME→cname.perspective-dns.com stable 8+ days; unbound/reclaimable; conf 58, HUMAN pending
+- 2026-09-10 ACCEPTED AUTH @ kurs.onecode.de: /login + /passwort-vergessen 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-10 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-10 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
+- 2026-09-10 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted
+- 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 9-state oscillation confirmed (503→401→503→401→503→503→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 8+ days; 409/1001 + no cert; conf 58, HUMAN confirm pending
+- 2026-09-10 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-10 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
