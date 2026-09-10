@@ -228,3 +228,4 @@
 - 2026-09-10 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change (requires sb_publishable format), not a OneCode key rotation.
 - 2026-09-10 ACCEPTED MISCONFIG @ cto.onecode.de: re-confirm 06:08Z 09-10 — 409/1001 + TLS handshake-fail, CNAME→cname.perspective-dns.com stable 9+ days; unbound/reclaimable; conf 58, HUMAN pending
 - 2026-09-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 10-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-10 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
