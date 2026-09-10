@@ -216,3 +216,5 @@ NO hardcoded secrets found (AWS keys, API tokens, private keys, production creds
 Both repos use proper secret management (GitHub Secrets, .env.example, .gitignore).
 
 Key file: leads/reposcan-onecode.md
+## REPOSCAN 2026-09-10 11:31:36 UTC
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
