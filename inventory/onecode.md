@@ -283,3 +283,5 @@ www.onecode.de
 ## 2026-09-10 01:13:07 UTC
 - NEW Supabase REST `/rest/v1/` re-probed 2026-09-10 01:11Z → **401 "Secret API key required"** (was 503 PGRST002 at 23:06Z 09-09); gateway 9-state oscillation confirmed (503→401→503→401→503→503→401→503→**4
 - CHANGED Cadence probe executed; all other surfaces (cto 409/CNAME, storage empty, kurs /login 200) confirmed stable
+
+## 2026-09-10 06:10:05 UTC
