@@ -1,7 +1,7 @@
-## 2026-09-10 23:16:21 UTC [target] (model nemotron3)
-[CHANGED] Supabase REST `/rest/v1/` now returns 401 "Secret API key required" with `sb_publishable_` key (11th sequential 503→401 oscillation since 09-04); gateway remains non-permissive on all observed states
-[CHANGED] kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical (200/307, `railway-hikari`); both raw `up.railway.app` subdomains now return Railway fallback 404 JSON — platform-level migration, no app change
-[CHANGED] Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key rotation
+## 2026-09-11 01:14:33 UTC [target] (model nemotron3)
+[NEW] Supabase REST `/rest/v1/` cadence window re-opened post-00:00Z 2026-09-11 (last probe 11:34Z 09-10 = 503 PGRST002, 11th sequential); gateway 11-state oscillation persists (503→401→503→401→503→503→401→503→401→401→503 since 09-04)
+[NEW] Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key rotation
+[CHANGED] kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical (200/307, `railway-hikari`); both raw `up.railway.app` subdomains return Railway fallback 404 JSON
 [CHANGED] Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.55,a=5,b=5,t=3,g=8,c=2,f=2

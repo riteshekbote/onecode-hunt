@@ -304,3 +304,9 @@ www.onecode.de
 - CHANGED kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical (200/307, `railway-hikari`); both raw `up.railway.app` subdomains now return Railway
 - CHANGED Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key ro
 - CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+
+## 2026-09-11 01:16:51 UTC
+- NEW Supabase REST `/rest/v1/` cadence window re-opened post-00:00Z 2026-09-11 (last probe 11:34Z 09-10 = 503 PGRST002, 11th sequential); gateway 11-state oscillation persists (503→401→503→401→503→503→401→
+- NEW Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key ro
+- CHANGED kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical (200/307, `railway-hikari`); both raw `up.railway.app` subdomains return Railway fal
+- CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
