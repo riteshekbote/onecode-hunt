@@ -310,3 +310,10 @@ www.onecode.de
 - NEW Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key ro
 - CHANGED kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical (200/307, `railway-hikari`); both raw `up.railway.app` subdomains return Railway fal
 - CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+
+## 2026-09-11 06:11:04 UTC
+- NEW Supabase REST `/rest/v1/` returns 401 "Secret API key required" with `sb_publishable_` key (12th sequential probe post-00:00Z 2026-09-11); gateway 11-state oscillation persists (503→401→503→401→503→50
+- CHANGED Cadence window re-opened and probed — gateway flipped from 503 (last 11:34Z 09-10) to 401; explicit anon-block confirmed again; no permissive state observed
+- NEW Kurs.onecode.de Railway CNAME migration `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42) confirmed stable; app behavior identical (200/307, `railway-hikari`, `x-railway-edge: lax1`)
+- CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+- CHANGED Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key ro

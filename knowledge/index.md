@@ -253,3 +253,10 @@
 - 2026-09-11 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
 - 2026-09-11 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.app out of scope
 - 2026-09-11 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+- 2026-09-11 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted.
+- 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 11-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active.
+- 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 9+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-11 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
+- 2026-09-11 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
+- 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 12-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
