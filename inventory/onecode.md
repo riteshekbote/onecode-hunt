@@ -317,3 +317,7 @@ www.onecode.de
 - NEW Kurs.onecode.de Railway CNAME migration `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42) confirmed stable; app behavior identical (200/307, `railway-hikari`, `x-railway-edge: lax1`)
 - CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
 - CHANGED Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key format rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted — not a OneCode key ro
+
+## 2026-09-11 11:33:54 UTC
+- CHANGED Supabase REST `/rest/v1/profiles` flipped 503 PGRST002 → 401 "Secret API key required" (13th observation; 12-state oscillation continues)
+- CHANGED Supabase Storage `/storage/v1/bucket` changed from 200 `[]` to **400** — endpoint behavior altered (previously empty array for 7+ days)

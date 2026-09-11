@@ -260,3 +260,7 @@
 - 2026-09-11 REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible.
 - 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 12-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
 - 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 13th probe = 401 anon-block (flip from 503); 12-state oscillation persists (503→401→503→401→503→503→401→503→401→401→503→401→401 since 09-04); NOT permissive on any observed state; monitor stays active.
+- 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-11 CHANGED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint shifted from 200 `[]` to 400; possible Supabase project config change; monitor for further drift.
+- 2026-09-11 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible.
