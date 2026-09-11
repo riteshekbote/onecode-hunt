@@ -270,3 +270,7 @@
 - 2026-09-11 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: re-validated 09-11 — all external providers false (email-only, signup disabled, passkeys off); OAuth/session surface unchanged since 09-04.
 - 2026-09-11 ACCEPTED MISCONFIG @ kurs.onecode.de: HEAD /login 200; CNAME→ki8dqcf6.up.railway.app stable post-migration.
 - 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-11 — CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS-fail; unbound/reclaimable; conf 58, HUMAN pending.
+- 2026-09-11 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap still top (conf 65); two invited accounts gating; pre-auth exhausted; no delta 09-11.
+- 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23:31Z same-day HEAD confirms state held; 14th obs = 503; 13-state oscillation persists; never permissive; monitor arms for 09-12 window.
+- 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com + HTTP 409 re-confirmed 23:31Z; stable 10+ days; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-11 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure; unchanged.
