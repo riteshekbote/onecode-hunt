@@ -267,3 +267,6 @@
 - 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 14th probe = 503 PGRST002 (flip from 401 at 06:11Z); 13-state oscillation persists (503→401→503→401→503→503→401→503→401→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active.
 - 2026-09-11 CHANGED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 400 blip at 11:33Z reverted to 200 `[]` with publishable key; transient, not config change.
 - 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 13-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-11 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: re-validated 09-11 — all external providers false (email-only, signup disabled, passkeys off); OAuth/session surface unchanged since 09-04.
+- 2026-09-11 ACCEPTED MISCONFIG @ kurs.onecode.de: HEAD /login 200; CNAME→ki8dqcf6.up.railway.app stable post-migration.
+- 2026-09-11 ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-11 — CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS-fail; unbound/reclaimable; conf 58, HUMAN pending.

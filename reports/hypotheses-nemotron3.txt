@@ -1,13 +1,8 @@
-## 2026-09-11 18:41:15 UTC [target] (model nemotron3)
-[NEW] Supabase Storage `/storage/v1/bucket` reverted 400 → 200 `[]` at 15:15Z (transient blip, not config change)
-[NEW] Supabase REST `/rest/v1/profiles` flipped 401 → 503 PGRST002 (14th observation, 13-state oscillation persists)
-[CHANGED] Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted (not OneCode rotation)
-[CHANGED] kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical
-[CHANGED] Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+## 2026-09-11 21:21:55 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
+[PRIO] cto.onecode.de,4.50,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.55,a=5,b=5,t=3,g=8,c=2,f=2
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.45,a=5,b=4,t=3,g=9,c=2,f=2
-[PRIO] cto.onecode.de,4.50,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,3.80,a=4,b=3,t=3,g=8,c=2,f=2
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR

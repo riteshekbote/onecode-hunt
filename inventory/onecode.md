@@ -334,3 +334,5 @@ www.onecode.de
 - CHANGED Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted (not OneCode rotation)
 - CHANGED kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical
 - CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+
+## 2026-09-11 21:22:04 UTC

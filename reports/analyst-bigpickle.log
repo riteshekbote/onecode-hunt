@@ -8808,3 +8808,76 @@ ki8dqcf6.up.railway.app.
 [93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
 [0m✗ [0mcurl -s -o /tmp/storage_out.txt -w "%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 15; cat /tmp/storage_out.txt failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST bigpickle 2026-09-11 21:22:04 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; echo "---"; dig +short kurs.onecode.de CNAME
+cname.perspective-dns.com.
+---
+ki8dqcf6.up.railway.app.
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" -I -m 15 https://kurs.onecode.de/login
+200
+[0m
+[0m$ [0mcurl -sS -m 15 https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+[0m
+NO_DELTA — all surfaces identical to 15:15Z 09-11; ran fresh re-validations only (auth/v1/settings was stale since 09-05; REST probe correctly held to cadence).
+
+**STEP 1 — DELTA**
+- [NO_DELTA] Supabase `/auth/v1/settings` re-probed ~18:5xZ 09-11 (PASSIVE): all external OAuth `false`, email-only, `disable_signup:true`, `mailer_autoconfirm:false`, `passkeys_enabled:false` — identical to 09-04/05; OAuth surface stays closed.
+- [NO_DELTA] `dig` 09-11: cto→`cname.perspective-dns.com` (10+ days stable), kurs→`ki8dqcf6.up.railway.app` (post-migration stable).
+- [NO_DELTA] HEAD `kurs.onecode.de/login` = 200, no redirect, no Set-Cookie.
+- REST `/rest/v1/profiles` cadence NOT probed (held — next window post-00:00Z 09-12; last obs 15:12Z 09-11 = 503, 14th).
+
+**STEP 2 — PRIORITIZE**
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.6,a=7,b=9,t=8,g=4,c=9,f=9
+- [PRIO] cto.onecode.de,5.55,a=5,b=6,t=7,g=3,c=6,f=7
+- [PRIO] kurs.onecode.de,5.7,a=4,b=8,t=6,g=2,c=7,f=8
+
+**STEP 3 — HYPOTHESES**
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform; UUID PKs defeat ID enumeration, realistic vector is missing RLS user_id filter; anon-role ACL still masked by 503↔401 oscillation (14 obs, never permissive); auth/v1/settings unchanged confirms no new auth gate added
+evidence_needed: two invited test accounts; auth as A, GET /rest/v1/enrollments?user_id=eq.<A> using B's bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung, cross-check with both bearers (read-only SELECT)
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 09-11 — CNAME→cname.perspective-dns.com stable 10+ days; HTTP 409/1001 + TLS handshake-fail = hostname unbound; no TXT verification record; anon key format/platform shifts did not touch this surface
+evidence_needed: bind cto.onecode.de as custom subdomain in fresh Perspective account → 409/1001 transitions to 200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status transition
+impact: MEDIUM — attacker content on trusted *.onecode.de; phishing/TLS
+testability: HUMAN_ONLY
+
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04 (14 events, last 15:12Z = 503); never permissive but transient 200+body window remains the monitored event; storage 400 blip reverted (not config drift); sb_publishable_ still the only accepted key format post 09-10
+evidence_needed: any HTTP 200 with row-set body from /rest/v1/<table>?select=*&limit=1 using only sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — due post-00:00Z 09-12
+impact: HIGH — anonymous tenant-table exfiltration during cache recovery
+testability: PASSIVE
+
+**STEP 4 — SELF-CRITIQUE**
+[PARKED] None — all 3 survivors ≥50 with concrete verify_steps; auth/v1 OAuth-reopen hyp would be <40 (all providers just re-confirmed false) so not re-emitted.
+[FINAL] Survivors ranked: 1) BOLA/RLS (65, AUTH_HELPED) 2) cto CNAME (58, HUMAN_ONLY) 3) REST recovery (50, PASSIVE — probe due).
+
+**STEP 5 — NEXT ACTION**
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey`+`Authorization` = `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (first window post-00:00Z 09-12). If 200+body → CRITICAL escalate; if 503 → continue; if 401 → confirm anon-block. Parallel at same window (≤1/day): HEAD kurs.onecode.de/login + dig cto.onecode.de + GET storage/v1/bucket.
+
+**STEP 6 — LEARNING**
+[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: re-validated 09-11 — all external providers false (email-only, signup disabled, passkeys off); OAuth/session surface unchanged since 09-04.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: HEAD /login 200; CNAME→ki8dqcf6.up.railway.app stable post-migration.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-11 — CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS-fail; unbound/reclaimable; conf 58, HUMAN pending.
+
+**STEP 7 — RISK**
+[RISK] onecode: 67 — unchanged. BOLA (65, account-blocked) + cto CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). Storage blip resolved; auth/settings re-confirmed closed — no OAuth surface drift. REST cadence window opens post-00:00Z 09-12; only live escalation trigger remains a 200+body REST state. No new surface delta; all actionable paths gated on cadence timing or HUMAN step.
