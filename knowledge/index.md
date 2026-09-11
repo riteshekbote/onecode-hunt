@@ -266,3 +266,4 @@
 - 2026-09-11 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible.
 - 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 14th probe = 503 PGRST002 (flip from 401 at 06:11Z); 13-state oscillation persists (503→401→503→401→503→503→401→503→401→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active.
 - 2026-09-11 CHANGED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 400 blip at 11:33Z reverted to 200 `[]` with publishable key; transient, not config change.
+- 2026-09-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 13-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503 since 09-04); NOT permissive on any observed state; monitor stays active

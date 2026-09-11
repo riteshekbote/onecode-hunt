@@ -2222,3 +2222,4 @@ testability: PASSIVE
 [LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 [LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible.
 [RISK] onecode: 67 — unchanged. BOLA via RLS gap (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). Storage blip resolved (not real config drift). Cadence window opens post-00:00Z 09-12 for REST probe. No new surface delta; all actionable paths gated on either cadence timing or HUMAN step. Only live escalation trigger is the 200+body REST window at next cadence.
+## 2026-09-11 18:39:24 UTC [target] (model bigpickle)

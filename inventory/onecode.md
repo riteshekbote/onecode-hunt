@@ -327,3 +327,10 @@ www.onecode.de
 - CHANGED Supabase REST `/rest/v1/profiles` flipped 401 → 503 PGRST002 (14th observation; 13-state oscillation persists)
 - NEW Supabase Storage `/storage/v1/bucket` shifted from 200 `[]` to 400 (possible project config change)
 - NEW Supabase REST `/rest/v1/profiles` flipped 503→401 (13th observation, 12-state oscillation persists)
+
+## 2026-09-11 18:41:26 UTC
+- NEW Supabase Storage `/storage/v1/bucket` reverted 400 → 200 `[]` at 15:15Z (transient blip, not config change)
+- NEW Supabase REST `/rest/v1/profiles` flipped 401 → 503 PGRST002 (14th observation, 13-state oscillation persists)
+- CHANGED Supabase platform-level key format change confirmed: JWT `eyJhbGci...` anon key rejected as "Invalid API key" across all endpoints; only `sb_publishable_` format accepted (not OneCode rotation)
+- CHANGED kurs.onecode.de Railway CNAME migrated `tgk4io5m`→`ki8dqcf6.up.railway.app` (A 69.46.46.42); app behavior identical
+- CHANGED Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains

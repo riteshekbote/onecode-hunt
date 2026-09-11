@@ -8789,3 +8789,22 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible.
 [RISK] onecode: 67 — unchanged. BOLA via RLS gap (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending) + latent REST cache-recovery (50). Storage blip resolved (not real config drift). Cadence window opens post-00:00Z 09-12 for REST probe. No new surface delta; all actionable paths gated on either cadence timing or HUMAN step. Only live escalation trigger is the 200+body REST window at next cadence.
 ```
+===== ANALYST bigpickle 2026-09-11 18:41:26 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-09-11 18:39:22 UTC
+[0m
+[0m$ [0mcurl -sI -o /dev/null -w "%{http_code} %{redirect_url}\n" https://kurs.onecode.de/login --max-time 15
+200
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; dig +short cto.onecode.de TXT 2>/dev/null | head -5; echo "---"; dig +short kurs.onecode.de CNAME
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+---
+ki8dqcf6.up.railway.app.
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcurl -s -o /tmp/storage_out.txt -w "%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" --max-time 15; cat /tmp/storage_out.txt failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
