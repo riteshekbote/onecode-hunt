@@ -1,8 +1,10 @@
-## 2026-09-11 11:33:45 UTC [target] (model nemotron3)
+## 2026-09-11 15:15:00 UTC [target] (model nemotron3)
+[NEW] Supabase Storage `/storage/v1/bucket` shifted from 200 `[]` to 400 (possible project config change)
+[NEW] Supabase REST `/rest/v1/profiles` flipped 503→401 (13th observation, 12-state oscillation persists)
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
-[PRIO] cto.onecode.de,4.45,a=4,b=5,t=2,g=4,c=7,f=6
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.55,a=5,b=5,t=3,g=8,c=2,f=2
+[PRIO] cto.onecode.de,4.50,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.45,a=5,b=4,t=3,g=9,c=2,f=2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.55,a=5,b=5,t=3,g=8,c=2,f=2
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,3.80,a=4,b=3,t=3,g=8,c=2,f=2
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
@@ -22,28 +24,29 @@ evidence_needed: Attacker creates Perspective account, adds custom domain cto.on
 verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
 impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
 testability: HUMAN_ONLY
-[HYP] Supabase REST anon exposure on schema-cache recovery
+[HYP] Supabase Storage endpoint behavior change (200→400) indicating config drift
 class: MISCONFIG
-asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
-confidence: 50
-reasoning: REST endpoint oscillates between 401 "Secret API key required" (explicit anon-block) and 503 PGRST002 (schema-cache-down); 12-state flip observed since 09-04 (503→401→503→401→503→503→401→503→401→401→503→401); when schema-cache recovers, behavior may revert to 200 with table list depending on gateway config
-evidence_needed: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ with apikey header returns 200 with table list (not 401/503)
-verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence ≤1/day, next due post-00:00Z 2026-09-12)
-impact: Unauthenticated table enumeration → data schema exposure, potential PII leak if RLS missing — MEDIUM
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 45
+reasoning: Storage bucket list endpoint returned 200 with empty array `[]` for 7+ days; on 2026-09-11 shifted to 400 Bad Request with same publishable key; suggests Supabase project config change (bucket policy, CORS, or project settings) that may expose new attack surface
+evidence_needed: GET /storage/v1/bucket returns 200 with bucket list (non-empty) or 200 with detailed error revealing bucket names; HEAD /storage/v1/object/public/{bucket}/{path} returns 200 for public objects
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; if 400, probe HEAD https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/test/x -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+impact: If buckets exist with public policies → course resource files, user uploads exposure — MEDIUM
 testability: PASSIVE
 [PARKED] Supabase Realtime anon access: confidence 35 < 40; returns 401, no pre-auth access, speculative without live probe
 [PARKED] Supabase Functions unauthenticated invocation: confidence 30 < 40; returns 404, no deployed functions listable pre-auth
 [PARKED] Subdomain takeover (hostmaster.*): confidence 45 < 50; passive-only cannot confirm claimability without active DNS resolution against provider APIs
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
-[FINAL] 3. Supabase REST anon exposure on schema-cache recovery (confidence 50, MISCONFIG, PASSIVE) — monitor daily for cache recovery
-[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence ≤1/day, due post-00:00Z 2026-09-12)
+[FINAL] 3. Supabase Storage endpoint config drift (200→400) (confidence 45, MISCONFIG, PASSIVE) — monitor for bucket exposure
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
 [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: Post-auth BOLA via RLS gap remains highest-value (conf 65); requires 2 invited test accounts; pre-auth fully exhausted
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 12-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 10+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
 [LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
-[LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401)/storage(empty): no pre-auth exposure possible
+[LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
 [LEARN] NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+[LEARN] CHANGED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: Endpoint shifted from 200 `[]` to 400; possible Supabase project config change; monitor for further drift.
 [LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.app out of scope
 [LEARN] REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
-[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage endpoint behavior changed (200→400) — config drift needs monitoring. Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.

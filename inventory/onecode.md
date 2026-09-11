@@ -321,3 +321,9 @@ www.onecode.de
 ## 2026-09-11 11:33:54 UTC
 - CHANGED Supabase REST `/rest/v1/profiles` flipped 503 PGRST002 → 401 "Secret API key required" (13th observation; 12-state oscillation continues)
 - CHANGED Supabase Storage `/storage/v1/bucket` changed from 200 `[]` to **400** — endpoint behavior altered (previously empty array for 7+ days)
+
+## 2026-09-11 15:15:09 UTC
+- CHANGED Supabase Storage `/storage/v1/bucket` reverted 400 → 200 `[]` with publishable key; transient 400 at 11:33Z was a blip, not config change
+- CHANGED Supabase REST `/rest/v1/profiles` flipped 401 → 503 PGRST002 (14th observation; 13-state oscillation persists)
+- NEW Supabase Storage `/storage/v1/bucket` shifted from 200 `[]` to 400 (possible project config change)
+- NEW Supabase REST `/rest/v1/profiles` flipped 503→401 (13th observation, 12-state oscillation persists)
