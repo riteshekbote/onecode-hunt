@@ -1099,3 +1099,12 @@
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
 - LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.ap
 - LEARN: REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+
+## RANKED HYPOTHESES 2026-09-12 06:34:15 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey`+`Authorization` = `sb_publishable_g48Bd8qEtLesgk0zgz
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed 06:30Z 09-12; pre-auth surface stable, exhausted; no new cookie/session signal.
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: 06:30Z dig — CNAME→cname.perspective-dns.com stable 11+ days, explicit TXT = zero records, HTTP 409/HTTPS handshake-fail; c
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` baseline holds (post-400-blip); endpoint probeable, zero buckets.
+- LEARN: ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held this cycle (last 01:33Z 09-12 = 503, 15th sequential); REST monitor arms post-00:00Z 09-
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure; unchanged 09-12.
