@@ -250,3 +250,12 @@ TARGET_ORG not configured for onecode; skipping public-org deep scan.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
 ## REPOSCAN 2026-09-12 17:16:51 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-12 19:29:16 UTC
+[HYP] No candidates to audit
+class: OTHER
+asset: N/A
+confidence: 100
+reasoning: cands.txt contains "no org candidates"; scope.yml lists github_orgs as "none-configured". No repository targets were provided for secret/credential hunting.
+impact: N/A
+verify_steps: N/A — nothing to verify
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
