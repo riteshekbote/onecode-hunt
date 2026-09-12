@@ -1,11 +1,11 @@
-## 2026-09-12 19:30:29 UTC [target] (model nemotron3)
+## 2026-09-12 21:40:54 UTC [target] (model nemotron3)
 [NEW] Supabase REST `/rest/v1/` returns 401 `UNAUTHORIZED_INVALID_API_KEY_TYPE` with `sb_publishable` key (was 503 PGRST002 at 01:33Z 09-12); 15th gateway oscillation confirmed
 [CHANGED] cto.onecode.de HTTP 409 "error code:1001" re-confirmed live; CNAME→cname.perspective-dns.com stable 12+ days; TLS handshake failure persists on 443
 [CHANGED] Supabase Storage `/storage/v1/bucket` returns 200 `[]` — empty bucket list confirmed, endpoint probeable
 [NEW] Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys rejected as "Invalid API key" across all endpoints (not OneCode rotation)
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.1, attack_surface=8 business_value=8 tech_exposure=7 gate_ease=3 cloud_surface=9 freshness=9
-[PRIO] cto.onecode.de, 6.8, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=8
-[PRIO] kurs.onecode.de, 6.5, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=7
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.3, attack_surface=8 business_value=8 tech_exposure=7 gate_ease=3 cloud_surface=9 freshness=9
+[PRIO] cto.onecode.de, 7.25, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=8
+[PRIO] kurs.onecode.de, 6.65, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=7
 [HYP] Supabase REST gateway schema-cache recovery exposing anon table access
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/

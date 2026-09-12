@@ -358,3 +358,9 @@ www.onecode.de
 - CHANGED cto.onecode.de HTTP 409 "error code:1001" re-confirmed live; CNAME→cname.perspective-dns.com stable 12+ days; TLS handshake failure persists on 443
 - CHANGED Supabase Storage `/storage/v1/bucket` returns 200 `[]` — empty bucket list confirmed, endpoint probeable
 - NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys rejected as "Invalid API key" across all endpoints (not OneCode rotation)
+
+## 2026-09-12 21:41:03 UTC
+- NEW Supabase REST `/rest/v1/` returns 401 `UNAUTHORIZED_INVALID_API_KEY_TYPE` with `sb_publishable` key (was 503 PGRST002 at 01:33Z 09-12); 15th gateway oscillation confirmed
+- CHANGED cto.onecode.de HTTP 409 "error code:1001" re-confirmed live; CNAME→cname.perspective-dns.com stable 12+ days; TLS handshake failure persists on 443
+- CHANGED Supabase Storage `/storage/v1/bucket` returns 200 `[]` — empty bucket list confirmed, endpoint probeable
+- NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys rejected as "Invalid API key" across all endpoints (not OneCode rotation)

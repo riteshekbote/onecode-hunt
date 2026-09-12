@@ -308,3 +308,6 @@
 - 2026-09-12 ACCEPTED MISCONFIG @ cto.onecode.de: 19:29Z dig — CNAME→cname.perspective-dns.com stable day 12 (A 104.18.2.73/104.18.3.73), TXT zero, HTTP 409 live; conf 58, HUMAN claim-attempt only proof path.
 - 2026-09-12 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 19:29Z 09-12 — endpoint probeable, zero buckets.
 - 2026-09-12 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (no probe today; last = 401 at 17:25Z 09-12, 16th obs); 17th probe arms post-00:00Z 09-13.
+- 2026-09-12 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie re-confirmed 21:38Z 09-12 (railway-hikari, x-railway-edge lax1); pre-auth surface stable, exhausted.
+- 2026-09-12 ACCEPTED MISCONFIG @ cto.onecode.de: 21:38Z dig — CNAME→cname.perspective-dns.com stable day 12 (104.18.2.73/104.18.3.73), TXT zero, HTTP 409 live; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-12 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held this cycle (last = 401 at 17:25Z 09-12, 16th obs); 17th probe arms post-00:00Z 09-13.
