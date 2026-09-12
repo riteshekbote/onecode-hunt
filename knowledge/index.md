@@ -304,3 +304,7 @@
 - 2026-09-12 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 12+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-12 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 15-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
 - 2026-09-12 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed 14:15Z 09-12; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-12 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed 19:29Z 09-12 (railway-hikari, x-railway-edge lax1, x-hikari-trace lax1.ez9k); pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-12 ACCEPTED MISCONFIG @ cto.onecode.de: 19:29Z dig — CNAME→cname.perspective-dns.com stable day 12 (A 104.18.2.73/104.18.3.73), TXT zero, HTTP 409 live; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-12 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 19:29Z 09-12 — endpoint probeable, zero buckets.
+- 2026-09-12 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (no probe today; last = 401 at 17:25Z 09-12, 16th obs); 17th probe arms post-00:00Z 09-13.

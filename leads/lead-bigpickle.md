@@ -2539,3 +2539,38 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted.
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 12+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day 12+) + latent REST cache-recovery (50, cadence-held). No surface delta in this run; only live escalation trigger is 200+body REST in next window (post-00:00Z 09-13) or a HUMAN account/invite step.
+## 2026-09-12 19:29:38 UTC [target] (model bigpickle)
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,6.8,attack_surface(publishable-key direct, sole live escalation trigger)+freshness(17th probe due)
+[PRIO] cto.onecode.de,6.4,gate_ease(10,no auth)+attack_surface(dangling CNAME day 12+, A resolved, HTTP 409 bound)
+[PRIO] kurs.onecode.de(app),5.9,business_value(course platform/paid data)+cloud_surface(Supabase RLS behind app auth)
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04 (15-state seq confirmed, latest observed 401 at 17:25Z 09-12); never permissive on any observed state; storage baseline 200 `[]` holds; only sb_publishable_ key format accepted post-09-10 platform change; cadence held through 16th probe
+evidence_needed: HTTP 200 with row-set body from /rest/v1/profiles?select=*&limit=1 using only the sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -H 'Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' — due post-00:00Z 2026-09-13 (17th probe, ≤1/day)
+impact: HIGH — anonymous tenant-table exfiltration during cache recovery window
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 19:29Z 09-12 — CNAME→cname.perspective-dns.com (104.18.2.73/104.18.3.73) stable day 12; HTTP 409 "error code:1001" + TLS handshake-fail = hostname unbound; TXT zero (no domain-verification record); provider custom-subdomain flow documented
+evidence_needed: bind cto.onecode.de as custom subdomain in fresh Perspective account → 409/1001 transitions to 200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status transition
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de; phishing/TLS
+testability: HUMAN_ONLY
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform; UUID PKs defeat ID enumeration; realistic vector is missing RLS user_id filter; REST anon-ACL masked by oscillation, never permissive; auth/v1/settings closed and unchanged since 09-04
+evidence_needed: two invited test accounts; auth as A, GET /rest/v1/enrollments?user_id=eq.<A> using B's bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; cross-check SELECT with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed 19:29Z 09-12 (railway-hikari, x-railway-edge lax1, x-hikari-trace lax1.ez9k); pre-auth surface stable, exhausted; no new cookie/session signal.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 19:29Z dig — CNAME→cname.perspective-dns.com stable day 12 (A 104.18.2.73/104.18.3.73), TXT zero, HTTP 409 live; conf 58, HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 19:29Z 09-12 — endpoint probeable, zero buckets.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (no probe today; last = 401 at 17:25Z 09-12, 16th obs); 17th probe arms post-00:00Z 09-13.
