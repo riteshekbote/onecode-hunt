@@ -1,9 +1,8 @@
-## 2026-09-11 23:33:53 UTC [target] (model nemotron3)
+## 2026-09-12 01:35:17 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de,6.75,a=7,b=9,t=8,g=1,c=7,f=7
-[PRIO] cto.onecode.de,4.50,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,4.55,a=5,b=5,t=3,g=8,c=2,f=2
+[PRIO] cto.onecode.de,4.50,a=4,b=5,t=2,g=4,c=7,f=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.45,a=5,b=4,t=3,g=9,c=2,f=2
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/,3.80,a=4,b=3,t=3,g=8,c=2,f=2
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de (/api/* proxied to Supabase)
@@ -28,7 +27,7 @@ asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
 confidence: 45
 reasoning: Gateway oscillates 503↔401 (13-state since 09-04); neither state is permissive; but schema-cache recovery (503→200) could transiently expose table listings/rows if RLS not enforced at gateway level; platform instability increases chance of misconfiguration window
 evidence_needed: GET /rest/v1/ returns 200 with table list or row data using sb_publishable key
-verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (next cadence post-00:00Z 09-12); monitor for 200 response
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence window post-00:00Z 09-12); monitor for 200 response
 impact: If schema cache recovers with permissive ACL → anon enumeration of profiles/enrollments/courses/resources — MEDIUM
 testability: PASSIVE
 [PARKED] Supabase Storage endpoint config drift (200→400→200): reverted to 200 `[]`; transient blip, no evidence of bucket creation or policy change; confidence 45→30
