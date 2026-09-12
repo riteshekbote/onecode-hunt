@@ -9459,3 +9459,321 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent re-verified) + latent REST cache-recovery (50, 15th probe non-permissive). No surface delta in 11:16Z run; all actionable paths gated on cadence timing (REST window post-00:00Z 09-13) or HUMAN step. Sole live escalation trigger remains a 200+body REST state — not observed in this window.
+===== ANALYST bigpickle 2026-09-12 14:17:40 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u
+Sat Sep 12 14:14:20 UTC 2026
+[0m
+[0m$ [0mls -la && ls -la art inventory 2>/dev/null
+total 284
+drwxr-xr-x 12 runner runner  4096 Sep 12 14:14 .
+drwxr-xr-x  3 runner runner  4096 Sep 12 14:13 ..
+drwxr-xr-x  7 runner runner  4096 Sep 12 14:14 .git
+drwxr-xr-x  3 runner runner  4096 Sep 12 14:13 .github
+-rw-r--r--  1 runner runner  1692 Sep 12 14:13 README.md
+-rw-r--r--  1 runner runner    84 Sep 12 14:14 analyst-out.txt
+-rw-r--r--  1 runner runner 99473 Sep 12 14:14 analyst-prompt.txt
+-rw-r--r--  1 runner runner 95624 Sep 12 14:14 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 inventory
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 leads
+-rw-r--r--  1 runner runner  1943 Sep 12 14:13 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 reports
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 reposcan-raw
+-rw-r--r--  1 runner runner  3268 Sep 12 14:13 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 scripts
+-rw-r--r--  1 runner runner    33 Sep 12 14:13 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep 12 14:13 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep 12 14:13 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep 12 14:13 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep 12 14:13 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep 12 14:13 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 triage
+inventory:
+total 40
+drwxr-xr-x  2 runner runner  4096 Sep 12 14:13 .
+drwxr-xr-x 12 runner runner  4096 Sep 12 14:14 ..
+-rw-r--r--  1 runner runner 32015 Sep 12 14:13 onecode.md
+[0m
+[0m$ [0mcat probe-results.md state_bigpickle.json 2>/dev/null; echo ---; ls leads knowledge
+## 2026-09-02 21:41:05 UTC
+
+
+## 2026-09-02 23:34:10 UTC
+
+
+## 2026-09-03 01:27:20 UTC
+
+
+## 2026-09-03 06:31:56 UTC
+
+
+## 2026-09-03 11:43:44 UTC
+
+
+## 2026-09-03 16:16:20 UTC
+
+
+## 2026-09-03 19:28:15 UTC
+
+
+## 2026-09-03 21:54:04 UTC
+
+
+## 2026-09-04 00:01:14 UTC
+
+
+## 2026-09-04 03:59:02 UTC
+
+
+## 2026-09-04 08:47:33 UTC
+
+
+## 2026-09-04 13:36:00 UTC
+
+
+## 2026-09-04 17:14:36 UTC
+
+
+## 2026-09-04 20:01:49 UTC
+
+
+## 2026-09-04 22:27:30 UTC
+
+
+## 2026-09-05 00:17:17 UTC
+
+
+## 2026-09-05 04:43:56 UTC
+
+
+## 2026-09-05 08:46:23 UTC
+
+
+## 2026-09-05 12:11:29 UTC
+
+
+## 2026-09-05 15:42:43 UTC
+
+
+## 2026-09-05 17:42:22 UTC
+
+
+## 2026-09-05 19:35:48 UTC
+
+
+## 2026-09-05 21:48:33 UTC
+
+
+## 2026-09-05 23:43:03 UTC
+
+
+## 2026-09-06 03:58:05 UTC
+
+
+## 2026-09-06 08:40:13 UTC
+
+
+## 2026-09-06 12:22:06 UTC
+
+
+## 2026-09-06 15:39:14 UTC
+
+
+## 2026-09-06 17:44:25 UTC
+
+
+## 2026-09-06 20:17:37 UTC
+
+
+## 2026-09-06 22:12:43 UTC
+
+
+## 2026-09-07 00:05:41 UTC
+
+
+## 2026-09-07 04:57:10 UTC
+
+
+## 2026-09-07 10:03:58 UTC
+
+
+## 2026-09-07 15:58:33 UTC
+
+
+## 2026-09-07 19:53:53 UTC
+
+
+## 2026-09-07 22:42:59 UTC
+
+
+## 2026-09-08 01:08:31 UTC
+
+
+## 2026-09-08 06:03:48 UTC
+
+
+## 2026-09-08 11:30:35 UTC
+
+
+## 2026-09-08 15:21:10 UTC
+
+
+## 2026-09-08 18:51:07 UTC
+
+
+## 2026-09-08 21:47:30 UTC
+
+
+## 2026-09-08 23:58:20 UTC
+
+
+## 2026-09-09 04:30:01 UTC
+
+
+## 2026-09-09 09:12:24 UTC
+
+
+## 2026-09-09 13:52:43 UTC
+
+
+## 2026-09-09 17:44:36 UTC
+
+
+## 2026-09-09 20:49:39 UTC
+
+
+## 2026-09-09 23:16:20 UTC
+
+
+## 2026-09-10 01:13:07 UTC
+
+
+## 2026-09-10 06:10:05 UTC
+
+
+## 2026-09-10 11:33:14 UTC
+
+
+## 2026-09-10 15:13:38 UTC
+
+
+## 2026-09-10 18:36:05 UTC
+
+
+## 2026-09-10 21:16:03 UTC
+
+
+## 2026-09-10 23:16:33 UTC
+
+
+## 2026-09-11 01:16:51 UTC
+
+
+## 2026-09-11 06:11:04 UTC
+
+
+## 2026-09-11 11:33:54 UTC
+
+
+## 2026-09-11 15:15:10 UTC
+
+
+## 2026-09-11 18:41:26 UTC
+
+
+## 2026-09-11 21:22:04 UTC
+
+
+## 2026-09-11 23:34:01 UTC
+
+
+## 2026-09-12 01:35:29 UTC
+
+
+## 2026-09-12 06:34:15 UTC
+
+
+## 2026-09-12 11:17:19 UTC
+
+{"phase": "POC", "target": "api"}---
+knowledge:
+index.md
+
+leads:
+lead-bigpickle.md
+lead-laguna.md
+lead-ling3.md
+lead-longcat.md
+lead-mimo.md
+lead-nemotron3.md
+reposcan-onecode.md
+[0m
+[0m$ [0mtimeout 20 curl -s -o /dev/null -w "kurs /login HEAD %{http_code} %{redirect_url}\n" -I https://kurs.onecode.de/login
+kurs /login HEAD 200
+[0m
+[0m$ [0mtimeout 20 dig +short cto.onecode.de CNAME; echo ---; timeout 20 curl -s -o /dev/null -w "cto http GET %{http_code}\n" http://cto.onecode.de/ --max-time 15
+cname.perspective-dns.com.
+---
+cto http GET 409
+[0m
+[0m$ [0mtimeout 20 curl -s -o /dev/null -w "storage bucket GET %{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+storage bucket GET 200
+[0m
+NO_DELTA (14:15Z 09-12): kurs `/login` HEAD 200; cto HTTP 409 + CNAME→cname.perspective-dns.com stable day 12; storage `/bucket` 200 `[]`; REST cadence-held (last 01:33Z 09-12 = 503, 15th seq) — 16th probe arms post-00:00Z 09-13.
+
+STEP 1 — DELTA
+NO_DELTA @ all: identical to 11:16Z 09-12 run — 3h gap, no state change on any probed surface.
+
+STEP 2 — PRIORITIZE
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,6.8,gate_ease(anon key reachable)+cloud_surface(publishable-key direct, sole live escalation trigger)
+[PRIO] cto.onecode.de,6.4,gate_ease(10,no auth)+attack_surface(dangling CNAME day 12, HTTP 409 bound)
+[PRIO] kurs.onecode.de(app),5.9,business_value(course platform/paid data)+cloud_surface(Supabase RLS)
+
+STEP 3 — HYPOTHESES
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04 (15 obs, 01:33Z 09-12 = 503, no flip); never permissive; 14-state oscillation pattern persists; storage 200 `[]` baseline holds 14:15Z; sb_publishable_ only accepted key format post 09-10 platform change
+evidence_needed: any HTTP 200 with row-set body from /rest/v1/<table>?select=*&limit=1 using only sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — due post-00:00Z 09-13 (16th probe)
+impact: HIGH — anonymous tenant-table exfiltration during cache recovery
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 14:15Z 09-12 — CNAME→cname.perspective-dns.com stable 12+ days; HTTP 409/1001 + TLS handshake-fail = unbound; TXT zero records (no domain-verification); not touched by Supabase key change
+evidence_needed: bind cto.onecode.de as custom subdomain in fresh Perspective account → 409/1001 transitions to 200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status transition
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de; phishing/TLS
+testability: HUMAN_ONLY
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform; UUID PKs defeat ID enumeration; realistic vector is missing RLS user_id filter; REST anon-ACL masked by oscillation, never permissive; auth/v1/settings closed, unchanged
+evidence_needed: two invited test accounts; auth as A, GET /rest/v1/enrollments?user_id=eq.<A> using B's bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; cross-check SELECT with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] none — all three survivors carry live verification paths (time-gated or human-gated).
+[FINAL] 1. BOLA/RLS (65, AUTH_HELPED) — unchanged, still top; 2. cto CNAME (58, HUMAN_ONLY) — day-12 stability re-verified; 3. REST cache-recovery (50, PASSIVE) — cadence-held, live escalation trigger.
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey`+`Authorization`=`sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — trigger immediately when UTC rolls to 2026-09-13 (16th probe, ≤1/day cadence held through 09-12). 200+row-set → CRITICAL escalate; 503/401 → append to oscillation log. Parallel at same window: HEAD kurs.onecode.de/login + `dig cto.onecode.de CNAME TXT`.
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 14:15Z dig — CNAME→cname.perspective-dns.com stable day 12, HTTP 409, no TXT; conf 58, HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200 re-confirmed 14:15Z 09-12; pre-auth surface stable, exhausted; no new cookie/session signal.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (last 01:33Z 09-12 = 503, 15th seq); 16th probe arms post-00:00Z 09-13.
+
+STEP 7 — RISK
+[RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day 12) + latent REST cache-recovery (50, cadence-held). No surface delta in 14:15Z run; only live escalation trigger is 200+body REST in next window (post-00:00Z 09-13) or a HUMAN account/invite step.

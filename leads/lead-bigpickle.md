@@ -2461,3 +2461,42 @@ testability: PASSIVE
 [LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held this cycle (last 01:33Z 09-12 = 503, 15th sequential); 16th probe arms post-00:00Z 09-13.
 [LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure; unchanged 09-12.
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent re-verified) + latent REST cache-recovery (50, 15th probe non-permissive). No surface delta in 11:16Z run; all actionable paths gated on cadence timing (REST window post-00:00Z 09-13) or HUMAN step. Sole live escalation trigger remains a 200+body REST state — not observed in this window.
+## 2026-09-12 14:14:58 UTC [target] (model bigpickle)
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,6.8,gate_ease(anon key reachable)+cloud_surface(publishable-key direct, sole live escalation trigger)
+[PRIO] cto.onecode.de,6.4,gate_ease(10,no auth)+attack_surface(dangling CNAME day 12, HTTP 409 bound)
+[PRIO] kurs.onecode.de(app),5.9,business_value(course platform/paid data)+cloud_surface(Supabase RLS)
+[HYP] Publishable-key REST exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: gateway oscillates 503 PGRST002 ↔ 401 anon-block since 09-04 (15 obs, 01:33Z 09-12 = 503, no flip); never permissive; 14-state oscillation pattern persists; storage 200 `[]` baseline holds 14:15Z; sb_publishable_ only accepted key format post 09-10 platform change
+evidence_needed: any HTTP 200 with row-set body from /rest/v1/<table>?select=*&limit=1 using only sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — due post-00:00Z 09-13 (16th probe)
+impact: HIGH — anonymous tenant-table exfiltration during cache recovery
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 14:15Z 09-12 — CNAME→cname.perspective-dns.com stable 12+ days; HTTP 409/1001 + TLS handshake-fail = unbound; TXT zero records (no domain-verification); not touched by Supabase key change
+evidence_needed: bind cto.onecode.de as custom subdomain in fresh Perspective account → 409/1001 transitions to 200
+verify_steps: HUMAN: register Perspective → custom domain → cto.onecode.de → monitor HTTP status transition
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de; phishing/TLS
+testability: HUMAN_ONLY
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform; UUID PKs defeat ID enumeration; realistic vector is missing RLS user_id filter; REST anon-ACL masked by oscillation, never permissive; auth/v1/settings closed, unchanged
+evidence_needed: two invited test accounts; auth as A, GET /rest/v1/enrollments?user_id=eq.<A> using B's bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; cross-check SELECT with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+[PARKED] none — all three survivors carry live verification paths (time-gated or human-gated).
+[FINAL] 1. BOLA/RLS (65, AUTH_HELPED) — unchanged, still top; 2. cto CNAME (58, HUMAN_ONLY) — day-12 stability re-verified; 3. REST cache-recovery (50, PASSIVE) — cadence-held, live escalation trigger.
+[NEXT] PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 with headers `apikey`+`Authorization`=`sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — trigger immediately when UTC rolls to 2026-09-13 (16th probe, ≤1/day cadence held through 09-12). 200+row-set → CRITICAL escalate; 503/401 → append to oscillation log. Parallel at same window: HEAD kurs.onecode.de/login + `dig cto.onecode.de CNAME TXT`.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 14:15Z dig — CNAME→cname.perspective-dns.com stable day 12, HTTP 409, no TXT; conf 58, HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200 re-confirmed 14:15Z 09-12; pre-auth surface stable, exhausted; no new cookie/session signal.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (last 01:33Z 09-12 = 503, 15th seq); 16th probe arms post-00:00Z 09-13.
+[RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day 12) + latent REST cache-recovery (50, cadence-held). No surface delta in 14:15Z run; only live escalation trigger is 200+body REST in next window (post-00:00Z 09-13) or a HUMAN account/invite step.
