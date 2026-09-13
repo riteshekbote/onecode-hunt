@@ -10543,3 +10543,84 @@ STEP 7 — RISK
 > build · big-pickle
 [0m
 [91m[1mError: [0mError from provider (Console): Upstream request failed: [invalid_request_error] Unrecognized request argument supplied: prompt_cache_key
+===== ANALYST bigpickle 2026-09-13 16:42:35 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m✱ [0mGlob "**/*.txt"[90m 9 matches[0m
+[0m✱ [0mGlob "**/*.md"[90m 90 matches[0m
+[0m✱ [0mGlob "**/*.json"[90m 6 matches[0m
+I'll run the 8-step analysis process for the OneCode GmbH bug bounty program. Let me first examine the current inventory and knowledge base to understand the state.
+[0m→ [0mRead scope.yml
+[0m→ [0mRead inventory/onecode.md
+[0m→ [0mRead knowledge/index.md
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/hypotheses-nemotron3.txt
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead state_nemotron3.json
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead leads/lead-nemotron3.md
+Let me read the remaining state files and recent triage runs to complete my understanding.
+[0m→ [0mRead triage/run-2026-09-13-16-27.md
+[0m→ [0mRead triage/run-2026-09-13-12-06.md
+[0m→ [0mRead triage/run-2026-09-13-06-18.md
+[0m→ [0mRead probe-results.md
+Let me review the most recent triage runs and probe results for the latest state.
+STEP 1 — DELTA
+- [CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 17th probe @00:24Z 09-13 → 503 PGRST002 (flip from 401 @17:25Z 09-12); 16-state oscillation since 09-04; never permissive across all 17 observations.
+- [CHANGED] cto.onecode.de: day-13 CNAME→cname.perspective-dns.com, authoritative TXT zero (SOA-only), HTTP 409/1001 + TLS handshake-fail re-confirmed 06:46Z 09-13; no drift.
+- [NO_DELTA] kurs.onecode.de: /login 200 + no Set-Cookie + private/no-store (06:46Z 09-13); pre-auth surface exhausted; storage 200 `[]`, functions 404, realtime 401, GraphQL 503 — all unchanged.
+
+STEP 2 — PRIORITIZE
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.30, attack_surface=8 business_value=8 tech_exposure=7 gate_ease=3 cloud_surface=9 freshness=9
+- [PRIO] cto.onecode.de, 7.25, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=8
+- [PRIO] kurs.onecode.de, 6.65, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=7
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform (Rich Dev Poor Dev); publishable key passes the REST auth layer (503 PGRST002, not 401, on healthy-cache runs); UUID PKs defeat guessable-ID BOLA; realistic high-value vector = SELECT policy missing user_id predicate → cross-tenant row read; pre-auth surface fully exhausted (only /login,/passwort-vergessen 200); no delta 09-13
+evidence_needed: two invited accounts (distinct domains); auth as A, GET /rest/v1/enrollments?select=*&limit=1 with B's bearer → row diff vs A-owned set
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; obtain tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers; also app routes /api/courses/{B_id}
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 06:46Z 09-13 — CNAME→cname.perspective-dns.com day-13 (A 104.18.2.73/3.73); cname.perspective-dns.com is the documented Perspective funnel-SaaS custom-domain CNAME target; authoritative TXT set zero (SOA only) → no domain-verification record; HTTP 409 "error code:1001" + TLS handshake-fail = hostname currently unbound
+evidence_needed: bind cto.onecode.de as custom domain in a fresh Perspective account → 409/1001 transitions to 200 with attacker content
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de (CNAME already resolves) → monitor HTTP status transition; record before/after response bodies
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse
+testability: HUMAN_ONLY
+[HYP] Publishable-key REST table exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 17 gateway states 09-04→09-13 all 503/401, never permissive; 17th probe 00:24Z 09-13 = 503 PGRST002; sb_publishable_ only accepted key format post-09-10 (JWT anon rejected platform-wide); a cache-recovery to healthy schema could transiently expose anon table ACL/rows
+evidence_needed: HTTP 200 + row-set body from /rest/v1/profiles?select=*&limit=1 using only sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — due post-00:00Z 09-14 (18th probe, ≤1/day)
+impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] Magic-link token-in-hash leak (OATH 38): no open redirect, no hash-reading sink demonstrated on /einladung,/passwort-neu; standard Supabase handoff. Re-open only if XSS/DOM sink found on handoff path.
+- [PARKED] Realtime /api/broadcast channel-auth gap (MISCONFIG 42): 307-gated pre-auth; only testable post-auth — subsumed by the account-gated BOLA work; no pre-auth signal.
+- [PARKED] functions(404)/realtime(401)/storage(200 `[]`): confirmed no pre-auth exposure — REJECTED-class, no delta.
+- [PARKED] hostmaster.*: NXDOMAIN in OneCode-controlled zone → not claimable; differs from cto's live provider-CNAME class.
+- [FINAL] 1) BOLA/RLS gap conf 65 (IDOR, AUTH_HELPED) — highest value, sole critical-scaled path. 2) cto CNAME conf 58 (MISCONFIG, HUMAN_ONLY) — stable day-13, only active-claim proof. 3) REST cache-recovery conf 50 (MISCONFIG, PASSIVE) — cadence monitor armed.
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: post-00:00Z 2026-09-14 (18th probe, ≤1/day cadence): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; then GET /rest/v1/ (schema listing) if first returns non-503/401. 200+row-set → CRITICAL escalate; 503 → continue oscillation log; 401 `UNAUTHORIZED_INVALID_API_KEY_TYPE` → anon-block re-confirmed.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 17th probe 00:24Z 09-13 → 503 PGRST002 (flip from 401); 16-state oscillation (…→401→503) since 09-04; never permissive; monitor arms for 09-14.
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 06:46Z dig day-13 — CNAME→cname.perspective-dns.com, zero verification TXT, HTTP 409 live, HTTPS handshake-fail; conf 58, HUMAN claim-attempt only proof path.
+- [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie + private/no-store re-confirmed 06:46Z 09-13; pre-auth surface stable/exhausted.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets; functions 404; realtime 401 (no pre-auth exposure).
+
+STEP 7 — RISK
+[RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked, highest value) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-13) + latent REST cache-recovery (50, cadence-held to 09-14). Surface static 12 days; 17 gateway observations never permissive; only escalation triggers are REST 200+body in the 09-14 window, a HUMAN invite/claim step, or a fresh OAuth/GraphQL surface that is currently absent.

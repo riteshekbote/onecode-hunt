@@ -1,4 +1,4 @@
-## 2026-09-13 12:43:21 UTC [target] (model nemotron3)
+## 2026-09-13 16:41:41 UTC [target] (model nemotron3)
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.30, attack_surface=8 business_value=8 tech_exposure=7 gate_ease=3 cloud_surface=9 freshness=9
 [PRIO] cto.onecode.de, 7.25, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=8
 [PRIO] kurs.onecode.de, 6.65, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=7
@@ -29,7 +29,6 @@ evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's
 verify_steps: (AUTH_HELPED) With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client
 impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
 testability: AUTH_HELPED
-[PARKED] Supabase Storage endpoint config drift (200→400→200): reverted to 200 `[]`; transient blip, no evidence of bucket creation or policy change; confidence 30
 [PARKED] Supabase Realtime anon access: confidence 35 < 40; returns 401, no pre-auth access, speculative without live probe
 [PARKED] Supabase Functions unauthenticated invocation: confidence 30 < 40; returns 404, no deployed functions listable pre-auth
 [PARKED] Subdomain takeover (hostmaster.*): confidence 45 < 50; passive-only cannot confirm claimability without active DNS resolution against provider APIs
