@@ -10538,3 +10538,8 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-13) + latent REST cache-recovery (50, cadence-held to 09-14). No surface delta at 06:46Z 09-13; only live escalation triggers are REST 200+body in the 09-14 window, a HUMAN invite/claim step, or fresh OAuth/GraphQL surface that is currently absent.
+===== ANALYST bigpickle 2026-09-13 12:43:31 UTC =====
+[0m
+> build · big-pickle
+[0m
+[91m[1mError: [0mError from provider (Console): Upstream request failed: [invalid_request_error] Unrecognized request argument supplied: prompt_cache_key

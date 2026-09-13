@@ -388,3 +388,5 @@ www.onecode.de
 - CHANGED Supabase Storage `/storage/v1/bucket` returns 200 `[]` — empty bucket list confirmed, endpoint probeable
 - CHANGED `kurs.onecode.de` `/login` 200 + `/` 307→/login re-confirmed; pre-auth surface stable, exhausted; no new cookie/session signal
 - CHANGED `kurs.onecode.de` `x-railway-edge` flipped iad1→lax1 (load balancing noise, no app-level change)
+
+## 2026-09-13 12:43:31 UTC

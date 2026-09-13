@@ -2714,3 +2714,4 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 06:46Z 09-13 — endpoint probeable, zero buckets.
 [LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (17th probe 00:24Z 09-13 = 503, 16-state oscillation); 18th probe arms post-00:00Z 09-14.
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-13) + latent REST cache-recovery (50, cadence-held to 09-14). No surface delta at 06:46Z 09-13; only live escalation triggers are REST 200+body in the 09-14 window, a HUMAN invite/claim step, or fresh OAuth/GraphQL surface that is currently absent.
+## 2026-09-13 12:38:37 UTC [target] (model bigpickle)
