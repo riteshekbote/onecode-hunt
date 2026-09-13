@@ -2652,3 +2652,31 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 23:24Z 09-12 — endpoint probeable, zero buckets.
 [LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (last = 401 @ 17:25Z 09-12, 16th obs); 17th probe arms post-00:00Z 09-13.
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-12) + latent REST cache-recovery (50, cadence-held). No surface delta this run; only live escalation trigger is 200+body REST in the 00:00Z 09-13 window or a HUMAN invite/account step.
+## 2026-09-13 01:25:06 UTC [target] (model bigpickle)
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 17th probe @00:24Z 09-13 → **503 PGRST002** (flip from 401 @17:25Z 09-12); oscillation now 16-state (…→401→503) since 09-04; never permissive on any observed state; storage 200 `[]`; sb_publishable key only format accepted post-09-10
+evidence_needed: HTTP 200 + row-set body from /rest/v1/profiles?select=*&limit=1 using only sb_publishable key
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — due post-00:00Z 2026-09-14 (18th probe, ≤1/day)
+impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window
+testability: PASSIVE
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 01:24Z 09-13 — CNAME→cname.perspective-dns.com day-13; TXT query resolves CNAME only (zero domain-verification records); HTTP 409 "error code:1001"
+evidence_needed: bind cto.onecode.de as custom domain in a fresh Perspective account → 409/1001 transitions to 200
+verify_steps: HUMAN: register Perspective → custom domain cto.onecode.de → monitor HTTP status transition
+impact: MEDIUM — attacker-controlled content on trusted *.onecode.de; phishing/TLS
+testability: HUMAN_ONLY
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform; UUID PKs defeat ID enumeration; realistic vector = missing RLS user_id filter; anon-ACL masked by oscillation, never permissive; pre-auth surface exhausted, no delta
+evidence_needed: two invited test accounts; auth as A, GET /rest/v1/enrollments?user_id=eq.<A> with B's bearer → row diff
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; cross-check SELECT with both bearers
+impact: CRITICAL — cross-tenant PII/course-data exfiltration
+testability: AUTH_HELPED
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 17th probe 00:24Z 09-13 → 503 PGRST002 (flip from 401); 16-state oscillation (…→401→503) since 09-04; never permissive; monitor arms for 09-14.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 01:24Z — CNAME→cname.perspective-dns.com day-13, zero verification TXT, HTTP 409 live; conf 58, HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie + no-store re-confirmed 01:24Z 09-13 (railway-hikari, x-railway-edge iad1, x-hikari-trace iad1.trg5); pre-auth surface stable, exhausted.

@@ -372,3 +372,11 @@ www.onecode.de
 - CHANGED Supabase Storage `/storage/v1/bucket` returns 200 `[]` — empty bucket list confirmed, endpoint probeable
 - NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys rejected as "Invalid API key" across all endpoints (not OneCode rotation)
 - CHANGED kurs.onecode.de `/login` 200 + `/` 307→/login re-confirmed 19:29Z 09-12; pre-auth surface stable, exhausted; no new cookie/session signal
+
+## 2026-09-13 01:26:11 UTC
+- NEW Supabase REST `/rest/v1/` returned `401 UNAUTHORIZED_INVALID_API_KEY_TYPE` with `sb_publishable` key at 23:24Z 2026-09-12 (was 503 PGRST002 at 01:33Z 09-12); 15th gateway oscillation confirmed since 0
+- NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected as "Invalid API key" across all endpoints (platform-level change, not OneCode rotation)
+- CHANGED `cto.onecode.de` HTTP 409 "error code:1001" re-confirmed live; CNAME→cname.perspective-dns.com stable 12+ days; TLS handshake failure persists on 443
+- CHANGED Supabase Storage `/storage/v1/bucket` returns 200 `[]` — empty bucket list confirmed, endpoint probeable
+- CHANGED `kurs.onecode.de` `/login` 200 + `/` 307→/login re-confirmed 19:29Z 2026-09-12; pre-auth surface stable, exhausted; no new cookie/session signal
+- CHANGED `kurs.onecode.de` `x-railway-edge` flipped lax1→iad1 (23:24Z) + `x-hikari-trace` iad1.* — Railway edge region load-balancing noise, no app-level change
