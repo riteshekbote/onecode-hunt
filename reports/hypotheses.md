@@ -1320,3 +1320,21 @@
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
 - LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.ap
 - LEARN: REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+
+## RANKED HYPOTHESES 2026-09-13 23:38:27 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- [50] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Publishable-key REST table exposure on schema-cache recovery (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: post-00:00Z 2026-09-14 (18th, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qE
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishabl
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: live 21:28Z 09-13 — CNAME→cname.perspective-dns.com day-13 (104.18.2.73/3.73), authoritative TXT zero, HTTP 409; conf 58, H
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 (railway-hikari) + / 307→/login re-confirmed 21:28Z 09-13; pre-auth surface stable, exhausted.
+- LEARN: ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (17th probe 00:24Z 09-13 = 503, 16-state oscillation); 18th probe arms post-00:00Z 09-14
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 17-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
+- LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.ap
+- LEARN: REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
