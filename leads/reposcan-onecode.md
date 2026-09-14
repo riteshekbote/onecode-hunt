@@ -279,3 +279,12 @@ TARGET_ORG not configured for onecode; skipping public-org deep scan.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
 ## REPOSCAN 2026-09-14 01:39:38 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-14 07:10:19 UTC
+[HYP] <title>
+class: SECRET|MISCONFIG|IDOR|SSRF|OTHER
+asset: <repo/path>
+confidence: <0-100>
+reasoning: <facts>
+impact: <severity>
+verify_steps: <how to confirm it is live/in-scope, passive>
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
