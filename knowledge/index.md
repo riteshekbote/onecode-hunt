@@ -377,3 +377,8 @@
 - 2026-09-14 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 19th probe 14:16Z 09-14 = 503 PGRST002 (no flip); 18-state oscillation persists; never permissive; monitor arms for 09-15.
 - 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: 409/1001 live 14:16Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending.
 - 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted.
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login + no Set-Cookie re-confirmed 14:16Z 09-14 (railway-hikari, x-railway-edge lax1); pre-auth surface stable, exhausted.
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: TLS handshake-fail + CNAME→cname.perspective-dns.com (A 104.18.2.73/3.73) re-confirmed; stable 14+ days; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-14 Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+- 2026-09-14 Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal

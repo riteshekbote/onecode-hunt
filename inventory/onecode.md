@@ -424,3 +424,9 @@ www.onecode.de
 - CHANGED Supabase Storage `/storage/v1/bucket`: 200 `[]` baseline holds (post-400 blip 09-11); endpoint probeable, zero buckets
 
 ## 2026-09-14 14:23:38 UTC
+
+## 2026-09-14 19:33:50 UTC
+- CHANGED Supabase REST `/rest/v1/` 19th probe 14:16Z 09-14 = 503 PGRST002 (no flip from 01:42Z); 18-state oscillation persists (…→401→503 since 09-04); never permissive
+- CHANGED cto.onecode.de 409/1001 live 14:16Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
+- CHANGED kurs.onecode.de /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` holds — endpoint probeable, zero buckets
