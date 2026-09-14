@@ -1429,3 +1429,20 @@
 - LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 17-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
+
+## RANKED HYPOTHESES 2026-09-14 22:56:04 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: after 00:00Z 2026-09-15 (20th probe, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g
+- NEXT(hypotheses-nemotron3.txt): PROBE: post-00:00Z 2026-09-15 (21st probe, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g4
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie re-confirmed 22:45Z 09-14 (railway-hikari, x-railway-edge iad1 region-flip noise); pre-auth surface 
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: 22:45Z dig — CNAME→cname.perspective-dns.com day-14 (A 104.18.2.73/3.73), TXT zero, HTTP 409 implicit; conf 58, HUMAN claim
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 re-confirmed 22:45Z 09-14 — endpoint probeable, zero buckets.
+- LEARN: ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (last probe 14:16Z 09-14 = 503, 19th obs); 20th probe arms post-00:00Z 09-15.
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 20th probe 22:47Z 09-14 = 401 (flip from 503 at 14:16Z); 19-state oscillation persists; never pe
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: 409/1001 live 22:47Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401)/graphql(503): no pre-auth exposure possible
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 19-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→
+- LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 

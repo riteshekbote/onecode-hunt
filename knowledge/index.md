@@ -382,3 +382,11 @@
 - 2026-09-14 Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
 - 2026-09-14 Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
 - 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie re-confirmed 22:45Z 09-14 (railway-hikari, x-railway-edge iad1 region-flip noise); pre-auth surface stable, exhausted.
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: 22:45Z dig — CNAME→cname.perspective-dns.com day-14 (A 104.18.2.73/3.73), TXT zero, HTTP 409 implicit; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 re-confirmed 22:45Z 09-14 — endpoint probeable, zero buckets.
+- 2026-09-14 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (last probe 14:16Z 09-14 = 503, 19th obs); 20th probe arms post-00:00Z 09-15.
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 20th probe 22:47Z 09-14 = 401 (flip from 503 at 14:16Z); 19-state oscillation persists; never permissive; monitor arms for 09-15
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: 409/1001 live 22:47Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
+- 2026-09-14 REJECTED MISCONFIG @ functions(404)/realtime(401)/graphql(503): no pre-auth exposure possible
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 19-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active

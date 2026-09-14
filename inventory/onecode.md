@@ -430,3 +430,13 @@ www.onecode.de
 - CHANGED cto.onecode.de 409/1001 live 14:16Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
 - CHANGED kurs.onecode.de /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
 - CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` holds — endpoint probeable, zero buckets
+
+## 2026-09-14 22:56:04 UTC
+- CHANGED Supabase REST `/rest/v1/` 20th probe 22:47Z 09-14 = 401 `UNAUTHORIZED_INVALID_API_KEY_TYPE` (flip from 503 at 14:16Z); 19-state oscillation persists (…→503→401 since 09-04); never permissive
+- CHANGED cto.onecode.de 409/1001 live 22:47Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
+- CHANGED kurs.onecode.de /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` holds — endpoint probeable, zero buckets
+- CHANGED Supabase Functions `/functions/v1/` 404; no deployed functions
+- CHANGED Supabase Realtime `/realtime/v1/` 401; auth required
+- CHANGED Supabase GraphQL `/graphql/v1` 503 PGRST002; cache down
+- CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
