@@ -341,3 +341,30 @@
 - 2026-09-13 ACCEPTED MISCONFIG @ cto.onecode.de: live 21:28Z 09-13 — CNAME→cname.perspective-dns.com day-13 (104.18.2.73/3.73), authoritative TXT zero, HTTP 409; conf 58, HUMAN claim-attempt only proof path.
 - 2026-09-13 ACCEPTED AUTH @ kurs.onecode.de: /login 200 (railway-hikari) + / 307→/login re-confirmed 21:28Z 09-13; pre-auth surface stable, exhausted.
 - 2026-09-13 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 17-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 17-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-14 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-14 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
+- 2026-09-14 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+- 2026-09-14 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.app out of scope
+- 2026-09-14 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 17-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-14 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-14 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
+- 2026-09-14 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+- 2026-09-14 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.app out of scope
+- 2026-09-14 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 17-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login re-confirmed; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-14 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-14 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
+- 2026-09-14 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+- 2026-09-14 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway CNAME target migrated tgk4io5m→ki8dqcf6.up.railway.app (verified 21:14Z 09-10); app behavior identical; railway.app out of scope
+- 2026-09-14 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete

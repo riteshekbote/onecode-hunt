@@ -2853,3 +2853,33 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 (railway-hikari) + / 307→/login re-confirmed 21:28Z 09-13; pre-auth surface stable, exhausted.
 [LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held (17th probe 00:24Z 09-13 = 503, 16-state oscillation); 18th probe arms post-00:00Z 09-14.
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked, highest value) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-13) + latent REST cache-recovery (50, probe due ≤09-14). Surface static 13 days; only escalation triggers are REST 200+body in the 09-14 window, a HUMAN invite/claim step, or fresh OAuth/GraphQL surface currently absent.
+## 2026-09-14 01:42:42 UTC [target] (model bigpickle)
+[HYP] Publishable-key REST table exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 50
+reasoning: 18 observations 09-04→09-14 all 503/401, never permissive; 18th probe 01:42Z 09-14 = 503 PGRST002 (no flip); only sb_publishable_ key accepted post-09-10; cache-recovery could transiently expose anon table ACL/rows.
+evidence_needed: HTTP 200 + row-set from /rest/v1/profiles?select=*&limit=1 using only sb_publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — due post-00:00Z 09-15 (19th probe, ≤1/day).
+impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window.
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 01:42Z 09-14 — CNAME→cname.perspective-dns.com stable day-14; authoritative TXT zero; HTTP 409 "error code:1001" + TLS handshake-fail = hostname unbound 14 days.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → HTTP 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: single Supabase project backs invite-only course platform; UUID PKs defeat guessable-ID BOLA → real vector is SELECT policy missing user_id predicate; pre-auth app surface exhausted; storage 200 `[]`; auth/v1/settings closed 09-11; no delta 09-14.
+evidence_needed: two invited accounts; auth as A, cross-query enrollments/profiles with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers + /api/courses/{B_id}.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+[NEXT] PROBE: post-00:00Z 2026-09-15 (19th, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; if non-503/401, GET /rest/v1/ for schema listing. 200+row-set → CRITICAL escalate; 503 → log 19th obs (18-state oscillation); 401 `UNAUTHORIZED_INVALID_API_KEY_TYPE` → anon-block re-confirmed; 200 `[]`/empty → probe schema + known tables (profiles,enrollments,courses,users).
+[RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked, highest value) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-14) + latent REST cache-recovery (50, probe due ≤09-15). Surface static 14 days; only escalation triggers are REST 200+body in the 09-15 window, a HUMAN invite/claim step, or fresh OAuth/GraphQL surface currently absent.
