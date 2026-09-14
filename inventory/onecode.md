@@ -415,3 +415,10 @@ www.onecode.de
 - CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; HTTP 409 "error code:1001" + TLS handshake-fail persistent; zero verification TXT records
 - CHANGED kurs.onecode.de: /login 200 + / 307→/login stable; Railway edge region flapping (iad1↔lax1) — load balancing noise, no app change
 - CHANGED Supabase Storage `/storage/v1/bucket`: 200 `[]` baseline holds (post-400 blip 09-11); endpoint probeable, zero buckets
+
+## 2026-09-14 07:11:55 UTC
+- NEW Cadence window open for 18th Supabase REST probe (post-00:00Z 2026-09-14): last probe 00:24Z 09-13 = 503 PGRST002 (16-state oscillation); 17th probe was 401 at 06:46Z 09-13; 18th probe due now
+- NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; HTTP 409 "error code:1001" + TLS handshake-fail persistent; zero verification TXT records
+- CHANGED kurs.onecode.de: /login 200 + / 307→/login stable; Railway edge region flapping (iad1↔lax1) — load balancing noise, no app change
+- CHANGED Supabase Storage `/storage/v1/bucket`: 200 `[]` baseline holds (post-400 blip 09-11); endpoint probeable, zero buckets
