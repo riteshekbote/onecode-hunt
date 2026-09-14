@@ -374,3 +374,6 @@
 - 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets.
 - 2026-09-14 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 - 2026-09-14 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible.
+- 2026-09-14 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 19th probe 14:16Z 09-14 = 503 PGRST002 (no flip); 18-state oscillation persists; never permissive; monitor arms for 09-15.
+- 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: 409/1001 live 14:16Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending.
+- 2026-09-14 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted.

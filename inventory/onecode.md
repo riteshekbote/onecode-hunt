@@ -422,3 +422,5 @@ www.onecode.de
 - CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 13+ days; HTTP 409 "error code:1001" + TLS handshake-fail persistent; zero verification TXT records
 - CHANGED kurs.onecode.de: /login 200 + / 307→/login stable; Railway edge region flapping (iad1↔lax1) — load balancing noise, no app change
 - CHANGED Supabase Storage `/storage/v1/bucket`: 200 `[]` baseline holds (post-400 blip 09-11); endpoint probeable, zero buckets
+
+## 2026-09-14 14:23:38 UTC
