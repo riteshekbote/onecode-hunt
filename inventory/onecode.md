@@ -464,3 +464,10 @@ www.onecode.de
 ## 2026-09-15 11:57:38 UTC
 
 ## 2026-09-15 16:53:45 UTC
+
+## 2026-09-15 19:57:14 UTC
+- CHANGED Supabase REST gateway: 23rd probe 01:16Z 09-16 = 503 PGRST002 (no flip from prior 503); 22-state oscillation (503↔401) persists since 09-04; never permissive on any observed state
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 16+ days; HTTP 409 "error code:1001" + TLS handshake-fail persistent; zero verification TXT records
+- CHANGED kurs.onecode.de: /login 200 + / 307→/login unchanged 09-16; pre-auth surface stable, exhausted; no new cookie/session signal
+- CHANGED Supabase Storage /storage/v1/bucket: 200 `[]` baseline holds — endpoint probeable, zero buckets
+- CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation

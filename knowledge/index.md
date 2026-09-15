@@ -413,3 +413,8 @@
 - 2026-09-15 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 16+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
 - 2026-09-15 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged 06:14Z/11:55Z 09-15; pre-auth surface stable, exhausted; no new cookie/session signal
 - 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 20-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401→503 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-15 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged 09-15; pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-15 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
+- 2026-09-15 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: cadence-held this cycle (last = 503 @ 01:16Z 09-16, 23rd obs); 24th probe arms post-00:00Z 09-17.
+- 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23rd probe 01:16Z 09-16 = 503 PGRST002 (no flip); 22-state oscillation persists; never permissive; monitor stays active
+- 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 22-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401→503→503 since 09-04); NOT permissive on any observed state; monitor stays active
