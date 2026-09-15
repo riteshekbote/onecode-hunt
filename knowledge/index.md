@@ -390,3 +390,11 @@
 - 2026-09-14 ACCEPTED MISCONFIG @ cto.onecode.de: 409/1001 live 22:47Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
 - 2026-09-14 REJECTED MISCONFIG @ functions(404)/realtime(401)/graphql(503): no pre-auth exposure possible
 - 2026-09-14 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 19-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 20th probe 22:47Z 09-14 = 401 (flip from 503 at 14:16Z); 19-state oscillation persists; never permissive; monitor arms for 09-15
+- 2026-09-15 ACCEPTED MISCONFIG @ cto.onecode.de: 409/1001 live 22:47Z 09-14; CNAME→cname.perspective-dns.com stable 14+ days; conf 58, HUMAN pending
+- 2026-09-15 ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-15 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-15 REJECTED MISCONFIG @ functions(404)/realtime(401)/graphql(503): no pre-auth exposure possible
+- 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 19-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401 since 09-04); NOT permissive on any observed state; monitor stays active
+- 2026-09-15 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
