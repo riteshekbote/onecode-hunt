@@ -404,3 +404,7 @@
 - 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets.
 - 2026-09-15 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects.
 - 2026-09-15 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible.
+- 2026-09-15 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 22nd probe 01:17Z 09-15 = 503 PGRST002 (flip from 401); 21-state oscillation persists (…→401→503 since 09-04); never permissive; monitor arms for 09-16.
+- 2026-09-15 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged 11:55Z 09-15; pre-auth surface stable, exhausted; no new cookie/session signal.
+- 2026-09-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 21st probe 06:14Z 09-15 = 503 PGRST002 (flip from 401); 20-state oscillation persists; never permissive; monitor stays active
+- 2026-09-15 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged 06:14Z 09-15; pre-auth surface stable, exhausted; no new cookie/session signal
