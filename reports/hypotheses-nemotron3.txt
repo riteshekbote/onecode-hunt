@@ -1,4 +1,4 @@
-## 2026-09-15 01:19:27 UTC [target] (model nemotron3)
+## 2026-09-15 06:15:45 UTC [target] (model nemotron3)
 [NEW] Cadence window open for 21st Supabase REST probe (post-00:00Z 2026-09-15): last probe 22:47Z 09-14 = 401 `UNAUTHORIZED_INVALID_API_KEY_TYPE` (19-state oscillation); 21st probe due now  
 [NEW] Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation  
 [CHANGED] cto.onecode.de: CNAME→cname.perspective-dns.com stable 14+ days; HTTP 409/1001 + TLS handshake-fail persistent; zero verification TXT records  
