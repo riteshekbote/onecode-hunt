@@ -485,3 +485,5 @@ www.onecode.de
 - CHANGED kurs.onecode.de: /login 200 + / 307→/login unchanged 09-16; pre-auth surface stable, exhausted; no new cookie/session signal
 - CHANGED Supabase Storage /storage/v1/bucket: 200 `[]` baseline holds — endpoint probeable, zero buckets
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+
+## 2026-09-16 06:13:42 UTC

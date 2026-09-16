@@ -1,4 +1,4 @@
-## 2026-09-16 01:12:18 UTC [target] (model bigpickle)
+## 2026-09-16 06:11:06 UTC [target] (model bigpickle)
 [PRIO] kurs.onecode.de (post-auth BOLA/RLS),65.0,a=9,b=8,t=8,g=1,c=6,f=3
 [PRIO] cto.onecode.de (dangling CNAME takeover),58.0,a=6,b=7,t=3,g=5,c=8,f=10
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,50.0,a=5,b=8,t=6,g=3,c=7,f=9

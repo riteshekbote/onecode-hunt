@@ -1,9 +1,4 @@
-## 2026-09-16 01:13:27 UTC [target] (model nemotron3)
-[NEW] Supabase REST gateway 23rd probe 01:16Z 2026-09-16 = 503 PGRST002 (no flip from prior 503); 22-state oscillation (503↔401) persists since 09-04; never permissive on any observed state
-[CHANGED] cto.onecode.de: CNAME→cname.perspective-dns.com stable 16+ days; HTTP 409 "error code:1001" + TLS handshake-fail persistent; zero verification TXT records
-[CHANGED] kurs.onecode.de: /login 200 + / 307→/login unchanged 09-16; pre-auth surface stable, exhausted; no new cookie/session signal
-[CHANGED] Supabase Storage /storage/v1/bucket: 200 `[]` baseline holds — endpoint probeable, zero buckets
-[CHANGED] Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+## 2026-09-16 06:13:33 UTC [target] (model nemotron3)
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.40, attack_surface=8 business_value=8 tech_exposure=7 gate_ease=3 cloud_surface=9 freshness=10
 [PRIO] cto.onecode.de, 7.35, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de, 6.75, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=8
@@ -35,9 +30,6 @@ evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's
 verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client
 impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
 testability: AUTH_HELPED
-[PARKED] Supabase Realtime anon access: confidence 35 < 40; returns 401, no pre-auth access, speculative without live probe
-[PARKED] Supabase Functions unauthenticated invocation: confidence 30 < 40; returns 404, no deployed functions listable pre-auth
-[PARKED] Subdomain takeover (hostmaster.*): confidence 45 < 50; passive-only cannot confirm claimability without active DNS resolution against provider APIs
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [FINAL] 3. Supabase REST gateway schema-cache recovery exposing anon table access (confidence 45, MISCONFIG, PASSIVE) — monitor for 200 response
