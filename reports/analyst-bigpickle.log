@@ -12163,3 +12163,29 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 65 — down 2. BOLA/RLS (65, highest value, account-blocked) + cto dangling-CNAME (58, HUMAN-pending day-17). REST cache-recovery parked (45), removing a live pre-auth monitor; surface static 17 days with zero permissive observations and zero new routes (fresh sweep confirmed). Only escalation triggers left: REST 200+body in the final 09-17 closeout window, a HUMAN invite/claim step, or fresh surface currently absent.
+===== ANALYST bigpickle 2026-09-16 20:03:42 UTC =====
+[0m
+> build · big-pickle
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcurl -sS -o /tmp/nextimg1 -w "code=%{http_code} ct=%{content_type} size=%{size_download}\n" --max-time 20 "https://kurs.onecode.de/_next/image?url=%2Flogo.png&w=64&q=75" -A "Mozilla/5.0 (sec-research)"; echo "---body1---"; cat /tmp/nextimg1 | head -c 400; echo failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcurl -sS -o /tmp/nextimg2 -w "code=%{http_code} ct=%{content_type} size=%{size_download}\n" --max-time 25 "https://kurs.onecode.de/_next/image?url=https%3A%2F%2Fexample.com%2Ffavicon.ico&w=64&q=75" -A "Mozilla/5.0 (sec-research)"; echo "---body2---"; cat /tmp/nextimg2 | head -c 400; echo failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+[0m$ [0mecho "kurs CNAME:"; dig +short curs.onecode.de CNAME; dig +short kurs.onecode.de CNAME; echo "kurs A:"; dig +short kurs.onecode.de A; echo "cto CNAME:"; dig +short cto.onecode.de CNAME; echo "cto TXT:"; dig +short cto.onecode.de TXT; echo "cto A:"; dig +short cto.onecode.de A
+kurs CNAME:
+ki8dqcf6.up.railway.app.
+kurs A:
+ki8dqcf6.up.railway.app.
+69.46.46.42
+cto CNAME:
+cname.perspective-dns.com.
+cto TXT:
+cname.perspective-dns.com.
+cto A:
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+[0m

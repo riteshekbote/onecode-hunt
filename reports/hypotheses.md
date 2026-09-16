@@ -1630,3 +1630,5 @@
 - LEARN: REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 22-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
+
+## RANKED HYPOTHESES 2026-09-16 20:03:42 UTC

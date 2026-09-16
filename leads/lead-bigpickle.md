@@ -3410,3 +3410,4 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dig 16:34Z 09-16 — CNAME→cname.perspective-dns.com day-17 (104.18.2.73/3.73), zero verification TXT; HTTP 409; conf 58, HUMAN claim-attempt only proof path.
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 16:34Z 09-16 — endpoint probeable, zero buckets.
 [RISK] onecode: 65 — down 2. BOLA/RLS (65, highest value, account-blocked) + cto dangling-CNAME (58, HUMAN-pending day-17). REST cache-recovery parked (45), removing a live pre-auth monitor; surface static 17 days with zero permissive observations and zero new routes (fresh sweep confirmed). Only escalation triggers left: REST 200+body in the final 09-17 closeout window, a HUMAN invite/claim step, or fresh surface currently absent.
+## 2026-09-16 19:46:41 UTC [target] (model bigpickle)
