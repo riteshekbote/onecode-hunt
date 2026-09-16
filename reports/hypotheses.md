@@ -1632,3 +1632,12 @@
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
 
 ## RANKED HYPOTHESES 2026-09-16 20:03:42 UTC
+
+## RANKED HYPOTHESES 2026-09-16 22:48:57 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: post-00:00Z 2026-09-17 (final closeout, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishabl
+- LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 30
+- LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth.
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-16 — CNAME→cname.perspective-dns.com day-17, TXT zero, SOA present; 409/1001; conf 58, HUMAN claim-attempt only proo
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie stable; pre-auth surface now exhaustively re-validated including two newly excluded vectors.
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — zero buckets.

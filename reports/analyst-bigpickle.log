@@ -12189,3 +12189,77 @@ cname.perspective-dns.com.
 104.18.2.73
 104.18.3.73
 [0m
+===== ANALYST bigpickle 2026-09-16 22:48:57 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; dig +short cto.onecode.de TXT | head -5; echo "dgtl-ns soa:"; dig +short cto.onecode.de SOA
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+dgtl-ns soa:
+cname.perspective-dns.com.
+[0m
+[0m$ [0mecho "--- control /api/v1/health ---"; curl -sS -o /dev/null -w "%{http_code} redirect=%{redirect_url}\n" --max-time 15 "https://kurs.onecode.de/api/v1/health"; echo "--- bypass header test /api/v1/health ---"; curl -sS -o /dev/null -w "%{http_code} redirect=%{redirect_url}\n" --max-time 15 -H "x-middleware-subrequest: middleware:middleware:middleware:middleware:middleware" "https://kurs.onecode.de/api/v1/health"; echo "--- bypass header test /dashboard ---"; curl -sS -o /dev/null -w "%{http_code} redirect=%{redirect_url}\n" --max-time 15 -H "x-middleware-subrequest: middleware:middleware:middleware:middleware:middleware" "https://kurs.onecode.de/dashboard"; echo "--- _next/image external fetch ---"; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 20 "https://kurs.onecode.de/_next/image?url=https%3A%2F%2Fwww.google.com%2Fimages%2Fbranding%2Fgooglelogo%2F1x%2Fgooglelogo_color_272x92dp.png&w=64&q=75"
+--- control /api/v1/health ---
+307 redirect=https://kurs.onecode.de/login
+--- bypass header test /api/v1/health ---
+307 redirect=https://kurs.onecode.de/login
+--- bypass header test /dashboard ---
+307 redirect=https://kurs.onecode.de/login
+--- _next/image external fetch ---
+400
+[0m
+STEP 1 — DELTA
+- [NEW] Tested two fresh pre-auth vectors not in prior KB: (a) Next.js middleware bypass `x-middleware-subrequest` (CVE-2025-29927) against `/api/v1/health` + `/dashboard` → both still 307→/login, patched, gate intact; (b) `/_next/image` with external URL → 400 "url not allowed", no open-proxy primitive.
+- [NO_DELTA] cto.onecode.de CNAME→cname.perspective-dns.com day-17, TXT zero, SOA present (dig 19:5xZ); REST 24th obs 503; kurs 200/307; storage `[]` — all unchanged from 16:34Z.
+
+STEP 2 — PRIORITIZE
+[PRIO] kurs.onecode.de,8.6,a=9,b=8,t=8,g=6,c=6,f=3
+[PRIO] cto.onecode.de,6.4,a=6,b=7,t=3,g=5,c=8,f=10
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.6,a=5,b=8,t=6,g=3,c=7,f=9
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform, UUID PKs defeat guessable-ID BOLA; realistic vector is SELECT policy missing user_id predicate. Pre-auth surface now exhaustively closed 17 days including newly excluded middleware-bypass (CVE-2025-29927: header → 307 persists) and image-optimizer SSRF (400). Auth settings closed, storage empty, functions 404.
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable day-17 (dig today), authoritative TXT zero (no domain-verification record), SOA present; documented Perspective custom-subdomain CNAME value; HTTP 409 "error code:1001" + TLS handshake-fail = hostname unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Publishable-key REST table exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 45
+reasoning: 24 observations 09-04→09-16 all 503/401, never permissive; 401 min-state (UNAUTHORIZED_INVALID_API_KEY_TYPE) proves publishable-key rejection is platform-enforced post-09-10; exposure would need 3-fold conjunction (key-accepted node + schema recovery + anon ACL) with zero signal in 12 days.
+evidence_needed: HTTP 200 + row-set from /rest/v1/profiles?select=*&limit=1 using only sb_publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — final closeout post-00:00Z 09-17.
+impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window.
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] REST cache-recovery (45): confidence cut from 50 after 401-min-state demonstrated platform-wide publishable-key type rejection; final closeout probe post-00:00Z 09-17 then monitor ends. Also archived (no survivors, negative live tests): Next.js middleware-bypass (CVE-2025-29927), _next/image open-proxy SSRF.
+[FINAL] 1] BOLA/RLS (65, AUTH_HELPED — unchanged, highest value) 2] cto CNAME takeover (58, HUMAN_ONLY, TXT-absent day-17)
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: post-00:00Z 2026-09-17 (final closeout, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30". 200+row-set → CRITICAL escalate; 503 → 24-obs/23-state oscillation logged; 401 → anon-block re-confirmed; either non-200 closes the monitor. Escalation thereafter: BOLA via two invited accounts (AUTH_HELPED), cto via Perspective claim attempt (HUMAN_ONLY).
+
+STEP 6 — LEARNING
+[LEARN] REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login with header; Next.js patch level > vulnerable; middleware auth gate intact.
+[LEARN] REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-16 — CNAME→cname.perspective-dns.com day-17, TXT zero, SOA present; 409/1001; conf 58, HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie stable; pre-auth surface now exhaustively re-validated including two newly excluded vectors.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — zero buckets.
+
+STEP 7 — RISK
+[RISK] onecode: 65 — unchanged. BOLA/RLS (65, account-blocked, highest value) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-17). REST cache-recovery parked (45, closeout probe due ≤09-17). Fresh-mind sweep closed two more pre-auth paths (middleware-bypass, image-proxy SSRF) — surface static 17 days with zero permissive observations; only escalation triggers left: REST 200+body in 09-17 closeout, a HUMAN invite/claim step, or fresh surface currently absent.

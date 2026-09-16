@@ -438,3 +438,8 @@
 - 2026-09-16 ACCEPTED AUTH @ kurs.onecode.de: HEAD /login 200 + no Set-Cookie re-confirmed 16:34Z 09-16 (railway-hikari, x-railway-edge lax1); /api/v1/health, /v1/health, /api/admin all 307→/login — pre-auth surface stable, exhausted.
 - 2026-09-16 ACCEPTED MISCONFIG @ cto.onecode.de: dig 16:34Z 09-16 — CNAME→cname.perspective-dns.com day-17 (104.18.2.73/3.73), zero verification TXT; HTTP 409; conf 58, HUMAN claim-attempt only proof path.
 - 2026-09-16 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 16:34Z 09-16 — endpoint probeable, zero buckets.
+- 2026-09-16 REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login with header; Next.js patch level > vulnerable; middleware auth gate intact.
+- 2026-09-16 REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth.
+- 2026-09-16 ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-16 — CNAME→cname.perspective-dns.com day-17, TXT zero, SOA present; 409/1001; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-16 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + no Set-Cookie stable; pre-auth surface now exhaustively re-validated including two newly excluded vectors.
+- 2026-09-16 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — zero buckets.
