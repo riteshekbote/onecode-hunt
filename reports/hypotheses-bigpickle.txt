@@ -1,7 +1,7 @@
-## 2026-09-16 06:11:06 UTC [target] (model bigpickle)
-[PRIO] kurs.onecode.de (post-auth BOLA/RLS),65.0,a=9,b=8,t=8,g=1,c=6,f=3
-[PRIO] cto.onecode.de (dangling CNAME takeover),58.0,a=6,b=7,t=3,g=5,c=8,f=10
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,50.0,a=5,b=8,t=6,g=3,c=7,f=9
+## 2026-09-16 11:50:24 UTC [target] (model bigpickle)
+[PRIO] kurs.onecode.de,9.0,a=9,b=8,t=8,g=1,c=6,f=3
+[PRIO] cto.onecode.de,6.8,a=6,b=7,t=3,g=5,c=8,f=10
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.8,a=5,b=8,t=6,g=3,c=7,f=9
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
@@ -30,7 +30,7 @@ verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?sele
 impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window.
 testability: PASSIVE
 [PARKED] none — all three ≥50 with valid verify_steps; no REJECTED-class survivors.
-[FINAL] 1] BOLA/RLS (65, AUTH_HELPED) 2] cto CNAME takeover (58, HUMAN_ONLY) 3] REST cache-recovery (50, PASSIVE, probe due ≤09-17 00:00Z)
+[FINAL]
 [NEXT] PROBE: post-00:00Z 2026-09-17 (24th probe, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30". 200+row-set → CRITICAL escalate; 503 → 23-state oscillation logged; 401 → anon-block re-confirmed; 200 `[]`/empty → probe schema + known tables (profiles,enrollments,courses,users).
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login HEAD 200 + no Set-Cookie re-confirmed 01:11Z 09-16 (railway-hikari, x-railway-edge iad1); pre-auth surface stable, exhausted.
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dig 09-16 — CNAME→cname.perspective-dns.com day-17 (104.18.2.73/3.73), zero verification TXT; HTTP 409 implicit; conf 58, HUMAN claim-attempt only proof path.
