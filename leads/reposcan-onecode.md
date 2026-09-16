@@ -317,3 +317,19 @@ reasoning:
 impact: None - no assets to audit
 verify_steps: 
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-16 11:50:58 UTC
+[HYP] CI signing credential flow may leak to GitHub Actions logs
+class: SECRET
+asset: OneCodeDevs/compass/.github/workflows/build.yml:62
+confidence: 90
+reasoning: build.yml passes GPG signing password via `-Psigning.password="$SIGNING_PASSWORD"` Gradle CLI flag. If GitHub Actions log masking is not configured, the signing password may appear in plaintext in CI build output. Credentials are sourced from GitHub Secrets (not hardcoded), but the `-P` argument-passing pattern is the known leak vector. Five secrets are used: MAVEN_USERNAME, MAVEN_PASSWORD, SIGNING_KEY_ID, SIGNING_PASSWORD, SIGNING_KEY_FILE_BASE64 — all stored properly in GitHub Secrets.
+impact: Low — credentials not hardcoded; requires log masking misconfiguration to exploit; GPG signing key only signs Maven artifacts (limited blast radius).
+verify_steps: 1) Check GitHub Actions build logs for any of the five secret names in plaintext. 2) Confirm GitHub Actions "masking" is enabled (default for org secrets). 3) No active deployment of this library confirmed — verify if kurs.onecode.de uses a published artifact.
+[HYP] Sonatype staging repository URLs hardcoded in build system
+class: OTHER
+asset: OneCodeDevs/compass/build-common/src/main/kotlin/de/onecode/build/publish/PublishCommon.kt:96-98
+confidence: 40
+reasoning: Two Sonatype repository URLs are hardcoded: `https://s01.oss.sonatype.org/content/repositories/snapshots/` and `https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/`. These are public Maven Central staging endpoints — not secrets, but they reveal the Sonatype OSSRH project identifier (s01) and confirm the org publishes to Maven Central. No credentials are embedded.
+impact: Informational — no security impact; standard Maven Central publishing pattern.
+verify_steps: Search Maven Central for `de.onecode:compass-api` to confirm published artifacts.
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
