@@ -434,3 +434,7 @@
 - 2026-09-16 REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
 - 2026-09-16 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 22-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401→503→503 since 09-04); NOT permissive on any observed state; monitor stays active
 - 2026-09-16 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+- 2026-09-16 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: supplementary 24th obs 16:33Z 09-16 = 503 PGRST002 (no flip) on /profiles + /enrollments; confidence 50→45 (parked) — 401 min-state demonstrates publishable-key type rejection platform-wide, killing the cache-recovery exposure thesis.
+- 2026-09-16 ACCEPTED AUTH @ kurs.onecode.de: HEAD /login 200 + no Set-Cookie re-confirmed 16:34Z 09-16 (railway-hikari, x-railway-edge lax1); /api/v1/health, /v1/health, /api/admin all 307→/login — pre-auth surface stable, exhausted.
+- 2026-09-16 ACCEPTED MISCONFIG @ cto.onecode.de: dig 16:34Z 09-16 — CNAME→cname.perspective-dns.com day-17 (104.18.2.73/3.73), zero verification TXT; HTTP 409; conf 58, HUMAN claim-attempt only proof path.
+- 2026-09-16 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 16:34Z 09-16 — endpoint probeable, zero buckets.

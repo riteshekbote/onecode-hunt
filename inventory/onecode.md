@@ -494,3 +494,7 @@ www.onecode.de
 - NEW kurs.onecode.de: /login 200 + / 307→/login unchanged 09-16; pre-auth surface stable, exhausted; no new cookie/session signal
 - NEW Supabase Storage /storage/v1/bucket: 200 `[]` baseline holds — endpoint probeable, zero buckets
 - NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+
+## 2026-09-16 16:35:51 UTC
+- CHANGED REST gateway: supplementary same-day probe 16:33Z 09-16 (24th sequential obs) = 503 PGRST002 on both `/profiles` and `/enrollments` — no flip from 01:16Z 09-16; cadence infraction noted (2 probes 09-1
+- NEW NO_DELTA — identical state to 2026-09-15 22:55Z: Supabase REST 23rd probe 503 PGRST002 (22-state oscillation 503↔401 since 09-04), cto.onecode.de CNAME→cname.perspective-dns.com 16+ days HTTP 409/TLS-

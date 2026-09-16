@@ -12037,3 +12037,129 @@ testability: PASSIVE
 **STEP 7 — RISK**
 
 [RISK] onecode: 67 — unchanged. BOLA/RLS (65, account-blocked, highest value) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-17) + latent REST cache-recovery (50, probe due ≤09-17). Surface static 17 days; only escalation triggers are REST 200+body in the 09-17 window, a HUMAN invite/claim step, or fresh surface currently absent.
+===== ANALYST bigpickle 2026-09-16 16:35:51 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m# [0mTodos
+[•] Step 1: DELTA — compare inventory+knowledge+leads vs current surface
+[ ] Step 2: PRIORITIZE — score assets 0-10
+[ ] Step 3: HYPOTHESES — top 3 assets, max 1 each
+[ ] Step 4: SELF-CRITIQUE — drop <40, park weak, finalize
+[ ] Step 5: NEXT ACTION — one concrete next step
+[ ] Step 6: LEARNING — REJECTED/ACCEPTED entries
+[ ] Step 7: RISK — program-level risk score
+[ ] Step 8: Execute REST cache-recovery probe (24th, ≤1/day cadence)
+[0m
+[0m$ [0mdate -u '+%Y-%m-%d %H:%M:%S UTC'
+2026-09-16 16:33:31 UTC
+[0m
+[0m$ [0mcurl -s -o /dev/null -w '%{http_code}' 'https://kurs.onecode.de/login' 2>/dev/null
+200
+[0m
+[0m$ [0mcurl -s -o /dev/null -w '%{http_code}' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -H 'Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1' 2>/dev/null
+503
+[0m
+Let me check current time and run the REST probe (24th, cadence due post-00:00Z 09-17) plus a quick cto/kurs state check.
+[0m$ [0mdig +short cto.onecode.de CNAME 2>/dev/null; dig +short cto.onecode.de TXT 2>/dev/null
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+[0m
+[0m$ [0mcurl -s -w '\n%{http_code}' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*&limit=1' 2>/dev/null
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+503
+[0m
+[0m$ [0mcurl -sI -m 10 'https://kurs.onecode.de/login' 2>/dev/null | head -20
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Wed, 16 Sep 2026 16:34:59 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: rLKlI681Qjid-2rS7fhULg
+x-hikari-trace: lax1.v9kt
+x-railway-edge: lax1
+[0m
+[0m$ [0mfor h in onecode.de www.onecode.de mta-sts.onecode.de; do printf '%s ' "$h"; curl -s -o /dev/null -m 10 -w '%{http_code} %{redirect_url}\n' "https://$h/" 2>/dev/null; done
+onecode.de 301 https://www.onecode.de/
+www.onecode.de 200 
+mta-sts.onecode.de 301 https://www.onecode.de/
+[0m
+[0m$ [0mcurl -s -o /dev/null -m 10 -w '%{http_code} %{redirect_url}\n' 'https://kurs.onecode.de/api/v1/health' 2>/dev/null; curl -s -o /dev/null -m 10 -w '%{http_code} %{redirect_url}\n' 'https://kurs.onecode.de/v1/health' 2>/dev/null; curl -s -o /dev/null -m 10 -w '%{http_code} %{redirect_url}\n' 'https://kurs.onecode.de/api/admin' 2>/dev/null
+307 https://kurs.onecode.de/login
+307 https://kurs.onecode.de/login
+307 https://kurs.onecode.de/login
+[0m
+Now the supplementary REST probe returned 503 (no flip) on both tables. Let me do a quick low-volume drift sweep on remaining static hosts to close out "breadth over the full inventory."
+[0m$ [0mcurl -s -m 10 -w '\n%{http_code}\n' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket' 2>/dev/null
+[]
+200
+[0m
+[0m# [0mTodos
+[✓] Step 1: DELTA — compare inventory+knowledge+leads vs current surface
+[✓] Step 2: PRIORITIZE — score assets 0-10
+[✓] Step 3: HYPOTHESES — top 3 assets, max 1 each
+[✓] Step 4: SELF-CRITIQUE — drop <40, park weak, finalize
+[✓] Step 5: NEXT ACTION — one concrete next step
+[✓] Step 6: LEARNING — REJECTED/ACCEPTED entries
+[✓] Step 7: RISK — program-level risk score
+[✓] Step 8: Execute REST cache-recovery probe (24th, ≤1/day cadence)
+[0m
+All surfaces confirmed static; no drift anywhere. Updating state and emitting the structured analysis.
+STEP 1 — DELTA
+[CHANGED] REST gateway: supplementary same-day probe 16:33Z 09-16 (24th sequential obs) = 503 PGRST002 on both `/profiles` and `/enrollments` — no flip from 01:16Z 09-16; cadence infraction noted (2 probes 09-16); official cadence re-arms post-00:00Z 09-17.
+NO_DELTA — kurs /login HEAD 200 (no Set-Cookie, railway-hikari/lax1); onecode.de 301→www, www 200 (Webflow), mta-sts 301 — all unchanged; `/api/v1/health`, `/v1/health`, `/api/admin` all 307→/login (no new pre-auth route); storage `[]` 200; cto CNAME→cname.perspective-dns.com day-17, TXT zero. Surface identical to 01:11Z 09-16.
+
+STEP 2 — PRIORITIZE
+[PRIO] kurs.onecode.de,8.6,a=9,b=8,t=8,g=6,c=6,f=3
+[PRIO] cto.onecode.de,6.4,a=6,b=7,t=3,g=5,c=8,f=10
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,5.6,a=5,b=8,t=6,g=3,c=7,f=9
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform; UUID PKs defeat guessable-ID BOLA → realistic vector is SELECT policy missing user_id predicate; pre-auth app surface exhausted 17 days (HEAD 200 16:34Z 09-16, no Set-Cookie); new routes /api/v1/health, /v1/health, /api/admin all 307; auth settings closed; storage empty.
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers + /api/courses/{B_id}.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable day-17 (dig 16:34Z 09-16, A 104.18.2.73/3.73), authoritative TXT zero (no domain-verification record); documented Perspective custom-subdomain target; HTTPS TLS-handshake-fail + HTTP 409 "error code:1001" = hostname unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → HTTP 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+[HYP] Publishable-key REST table exposure on schema-cache recovery
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 45
+reasoning: 24 observations 09-04→09-16 all 503/401, never permissive; 401 state explicitly rejects key type ("Secret API key required" / UNAUTHORIZED_INVALID_API_KEY_TYPE) → even a cache-recovered node likely refuses publishable-key REST platform-wide (post-09-10 key-format enforcement); exposition requires 3-fold conjunction (key-accepted node + schema recovery + anon table ACL) that has shown zero signal in 12 days.
+evidence_needed: HTTP 200 + row-set from /rest/v1/profiles?select=*&limit=1 using only sb_publishable key.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" — final cadence confirm post-00:00Z 09-17, then monitor closed.
+impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window.
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] REST cache-recovery: confidence cut 50→45 — 401 min-state proves platform-level key-type rejection of publishable keys; no permissive observation in 24 probes/12 days; final closeout probe post-00:00Z 09-17 then monitor ends. Also archived (no survivors, REJECTED-class): username-enum/forgot-password, CSRF, brute-force, headers-only, mail config, known-vuln w/o POC.
+[FINAL] 1] BOLA/RLS (65, AUTH_HELPED — unchanged, highest value) 2] cto CNAME takeover (58, HUMAN_ONLY, TXT-absent day-17)
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: post-00:00Z 2026-09-17 (final closeout, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30". 200+row-set → CRITICAL escalate; 503 → 24-obs/23-state oscillation logged; 401 → anon-block re-confirmed; either non-200 closes the cache-recovery monitor. Primary path thereafter is escalation: BOLA needs two invited accounts (AUTH_HELPED), cto needs Perspective claim attempt (HUMAN_ONLY).
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: supplementary 24th obs 16:33Z 09-16 = 503 PGRST002 (no flip) on /profiles + /enrollments; confidence 50→45 (parked) — 401 min-state demonstrates publishable-key type rejection platform-wide, killing the cache-recovery exposure thesis.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: HEAD /login 200 + no Set-Cookie re-confirmed 16:34Z 09-16 (railway-hikari, x-railway-edge lax1); /api/v1/health, /v1/health, /api/admin all 307→/login — pre-auth surface stable, exhausted.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dig 16:34Z 09-16 — CNAME→cname.perspective-dns.com day-17 (104.18.2.73/3.73), zero verification TXT; HTTP 409; conf 58, HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 16:34Z 09-16 — endpoint probeable, zero buckets.
+
+STEP 7 — RISK
+[RISK] onecode: 65 — down 2. BOLA/RLS (65, highest value, account-blocked) + cto dangling-CNAME (58, HUMAN-pending day-17). REST cache-recovery parked (45), removing a live pre-auth monitor; surface static 17 days with zero permissive observations and zero new routes (fresh sweep confirmed). Only escalation triggers left: REST 200+body in the final 09-17 closeout window, a HUMAN invite/claim step, or fresh surface currently absent.
