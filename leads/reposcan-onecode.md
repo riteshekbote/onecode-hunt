@@ -335,3 +335,12 @@ verify_steps: Search Maven Central for `de.onecode:compass-api` to confirm publi
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
 ## REPOSCAN 2026-09-16 16:33:29 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-16 19:42:02 UTC
+[HYP] No repo audit candidates
+class: OTHER
+asset: N/A
+confidence: 100
+reasoning: github_orgs is set to none-configured; cands.txt lists no org candidates; no public GitHub repositories with source code exist to audit.
+impact: None — no source code in scope for secret/credential scanning
+verify_steps: Confirm with program maintainer whether any public GitHub orgs should be added to scope.yml github_orgs for reposcan
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
