@@ -333,3 +333,5 @@ reasoning: Two Sonatype repository URLs are hardcoded: `https://s01.oss.sonatype
 impact: Informational — no security impact; standard Maven Central publishing pattern.
 verify_steps: Search Maven Central for `de.onecode:compass-api` to confirm published artifacts.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-16 16:33:29 UTC
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
