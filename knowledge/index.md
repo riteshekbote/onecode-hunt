@@ -462,3 +462,6 @@
 - 2026-09-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
 - 2026-09-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
 - 2026-09-17 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-17 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains the sole actionable lead (conf 65); pre-auth surface exhausted 18 days, zero permissive observations; only an AUTH_HELPED 2-account test can resolve TRUE/FALSE.
+- 2026-09-17 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes have converged, no delta value.
+- 2026-09-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes.

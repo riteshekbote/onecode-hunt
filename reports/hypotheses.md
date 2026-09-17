@@ -1679,3 +1679,21 @@
 - LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 30
 - LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
+
+## RANKED HYPOTHESES 2026-09-17 16:42:11 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/tok
+- NEXT(hypotheses-nemotron3.txt): PROBE: post-00:00Z 2026-09-18 (cadence probe, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains the sole actionable lead (conf 65); pre-auth surface exhausted 18 days, zero permissive obs
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection i
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 503 PGRST002 persists; 22+ state oscillation (503↔401) since 09-04; never permissive; monitor st
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 30
+- LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+- LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 

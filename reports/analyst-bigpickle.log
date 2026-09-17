@@ -12856,3 +12856,50 @@ models:
 > build · big-pickle
 [0m
 [91m[1mError: [0mError from provider (Console): Upstream request failed: [invalid_request_error] request could not be processed
+===== ANALYST bigpickle 2026-09-17 16:42:11 UTC =====
+[0m
+> build · big-pickle
+[0m
+STEP 1 — DELTA
+NO_DELTA — 18 days static. All pre-auth monitors closed today 01:14Z (REST final 503/401); no fresh observations since 11:54Z run; cto day-18 CNAME, kurs /login 200, storage `[]` all unchanged.
+
+STEP 2 — PRIORITIZE
+[PRIO] kurs.onecode.de, 5.4, attack_surface=3 business=10 tech=8 gate_ease=2 cloud=4 fresh=1 — auth-gated, invite-only; only post-auth surface remains
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co, 4.6, attack_surface=2 business=8 tech=6 gate_ease=3 cloud=6 fresh=1 — REST closed 09-17, storage empty
+[PRIO] cto.onecode.de, 4.4, attack_surface=2 business=6 tech=4 gate_ease=1 cloud=6 fresh=2 — dangling CNAME, HUMAN-proof-only
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform; UUID PKs defeat guessable-ID BOLA; realistic vector is SELECT policy missing user_id predicate. Pre-auth surface exhaustively closed 18 days (CVE-2025-29927 neg, image-proxy SSRF neg, CT 5-host inventory complete).
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable day-18 (dig 01:15Z 09-17), authoritative TXT zero, SOA present; documented Perspective custom-subdomain CNAME; HTTP 409 "error code:1001" + TLS handshake-fail = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] REST publishable-key table exposure (45): CLOSED 09-17 — 26 observations never permissive; 401 min-state = platform key-type rejection; no 200+rows ever. Terminated, not actionable further.
+[FINAL] kurs.onecode.de BOLA/RLS (65, AUTH_HELPED) — only live threat, escalation-gated.
+[FINAL] cto.onecode.de dangling CNAME (58, HUMAN_ONLY) — evidence path = claim attempt only.
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/enrollments?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade.
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains the sole actionable lead (conf 65); pre-auth surface exhausted 18 days, zero permissive observations; only an AUTH_HELPED 2-account test can resolve TRUE/FALSE.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes have converged, no delta value.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes.
+
+STEP 7 — RISK
+[RISK] onecode: 62 — unchanged. All pre-auth monitors closed with zero permissive observations over 18 days; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, TRUE/FALSE unresolved) + cto dangling-CNAME (58, HUMAN claim). No fresh surface to probe; only a HUMAN/AUTH_HELPED step can move the needle.

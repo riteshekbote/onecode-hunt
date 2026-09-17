@@ -514,3 +514,11 @@ www.onecode.de
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
 
 ## 2026-09-17 11:54:25 UTC
+
+## 2026-09-17 16:42:11 UTC
+- NEW Supabase REST gateway still 503 PGRST002 (23rd sequential probe) — oscillation 503↔401 persists since 09-04, never permissive
+- NEW cto.onecode.de HTTP 409 "error code:1001" + TLS handshake-fail re-confirmed; CNAME→cname.perspective-dns.com stable 17+ days; zero verification TXT
+- NEW kurs.onecode.de /login 200 (no Set-Cookie, railway-hikari, x-railway-edge iad1) + / 307→/login stable; pre-auth surface exhaustively re-validated (CVE-2025-29927 negative, _next/image SSRF negative)
+- NEW Supabase Storage /storage/v1/bucket 200 `[]` — endpoint probeable, zero buckets
+- NEW Supabase Functions 404, Realtime 401 — no pre-auth exposure
+- NEW Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys rejected globally as "Invalid API key"
