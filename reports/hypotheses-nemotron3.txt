@@ -1,6 +1,7 @@
-## 2026-09-17 19:53:15 UTC [target] (model nemotron3)
-[NEW] Supabase REST monitor formally closed 09-17 — 26 probes (503↔401) since 09-04, never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes
-[NEW] cto.onecode.de CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes have converged, no delta value
+## 2026-09-17 22:45:40 UTC [target] (model nemotron3)
+[NEW] Current time 2026-09-17 22:45 UTC — 3 hours since last lead update (19:53); no new passive probes executed in this window
+[CHANGED] Supabase REST monitor formally closed 09-17 — 26 probes (503↔401) since 09-04, never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes
+[CHANGED] cto.onecode.de CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes have converged, no delta value
 [CHANGED] kurs.onecode.de pre-auth surface exhaustively re-validated including CVE-2025-29927 (negative) and _next/image SSRF (negative); zero new pre-auth vectors
 [CHANGED] Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
 [CHANGED] Supabase Storage `/storage/v1/bucket` 200 `[]` holds — endpoint probeable, zero buckets (stable 10+ days)
@@ -16,7 +17,7 @@ asset: kurs.onecode.de (/api/* proxied to Supabase)
 confidence: 65
 reasoning: Single Supabase project (aygnpacdkgtsfnhgcyjc) backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only /login, /passwort-vergessen at 200)
 evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
-verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client
+verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client bundle Supabase client
 impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
 testability: AUTH_HELPED
 [HYP] Dangling Perspective CNAME takeover on cto.onecode.de
@@ -40,7 +41,6 @@ testability: PASSIVE
 [PARKED] Supabase Storage bucket enumeration via LIST endpoint: confidence 35 < 40; zero buckets confirmed 10+ days; no evidence buckets will be created; monitor only
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
-[FINAL] 3. (none — only 2 hypotheses meet confidence ≥40 with valid verify_steps)
 [NEXT] HUMAN: Execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets

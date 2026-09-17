@@ -530,3 +530,12 @@ www.onecode.de
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
 - CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` holds — endpoint probeable, zero buckets (stable 10+ days)
 - CHANGED Supabase Functions 404, Realtime 401, GraphQL 503 — no pre-auth exposure, unchanged
+
+## 2026-09-17 22:45:48 UTC
+- NEW Current time 2026-09-17 22:45 UTC — 3 hours since last lead update (19:53); no new passive probes executed in this window
+- CHANGED Supabase REST monitor formally closed 09-17 — 26 probes (503↔401) since 09-04, never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes
+- CHANGED cto.onecode.de CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes have converged, no delta value
+- CHANGED kurs.onecode.de pre-auth surface exhaustively re-validated including CVE-2025-29927 (negative) and _next/image SSRF (negative); zero new pre-auth vectors
+- CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+- CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` holds — endpoint probeable, zero buckets (stable 10+ days)
+- CHANGED Supabase Functions 404, Realtime 401, GraphQL 503 — no pre-auth exposure, unchanged

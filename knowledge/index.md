@@ -466,3 +466,6 @@
 - 2026-09-17 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes have converged, no delta value.
 - 2026-09-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes.
 - 2026-09-17 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 18+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-17 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap sole actionable lead (conf 65); pre-auth surface exhausted 18.5 days, zero permissive observations; only AUTH_HELPED 2-account test resolves TRUE/FALSE.
+- 2026-09-17 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-19, TXT zero (fresh dig 09-17); unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes fully converged.
+- 2026-09-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes.
