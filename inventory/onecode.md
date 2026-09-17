@@ -512,3 +512,5 @@ www.onecode.de
 - CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days (day 17 at 09-16), HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT; conf 58 HUMAN claim-attempt only proof path
 - CHANGED kurs.onecode.de: /login 200 + / 307→/login + no Set-Cookie re-confirmed 23:24Z 09-16 (railway-hikari, x-railway-edge iad1→lax1 region flip noise); pre-auth surface exhaustively re-validated including 
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+
+## 2026-09-17 11:54:25 UTC

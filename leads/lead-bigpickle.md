@@ -3550,3 +3550,4 @@ impact: HIGH — anonymous tenant-table exfiltration during cache-recovery windo
 testability: PASSIVE
 [NEXT] HUMAN: execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/enrollments?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade.
 [RISK] onecode: 62 — down 3. All pre-auth monitors now closed with zero permissive observations across 18 days (REST final closeout 503/401). Remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, unknown TRUE/FALSE) + cto dangling-CNAME (58, HUMAN claim). No fresh surface; only a HUMAN/AUTH_HELPED step can move the needle.
+## 2026-09-17 11:53:37 UTC [target] (model bigpickle)

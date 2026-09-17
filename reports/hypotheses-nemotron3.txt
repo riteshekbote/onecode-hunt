@@ -1,10 +1,4 @@
-## 2026-09-17 06:13:06 UTC [target] (model nemotron3)
-[NEW] Supabase REST gateway 24th probe 16:33Z 09-16 (supplementary, same-day) = 503 PGRST002 on `/profiles` + `/enrollments` — no flip from 01:16Z; 22-state oscillation persists; cadence infraction noted (2 probes 09-16)
-[NEW] x-middleware-subrequest bypass header (CVE-2025-29927) tested live 16:34Z-19:5xZ 09-16 on `/api/v1/health` + `/dashboard` — both still 307→/login; Next.js patch level > vulnerable; middleware auth gate intact
-[NEW] _next/image external URL fetch tested → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
-[CHANGED] cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days (day 17 at 09-16), HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT; conf 58 HUMAN claim-attempt only proof path
-[CHANGED] kurs.onecode.de: /login 200 + / 307→/login + no Set-Cookie re-confirmed 23:24Z 09-16 (railway-hikari, x-railway-edge iad1→lax1 region flip noise); pre-auth surface exhaustively re-validated including two newly excluded vectors
-[CHANGED] Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+## 2026-09-17 11:54:14 UTC [target] (model nemotron3)
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 7.40, attack_surface=8 business_value=8 tech_exposure=7 gate_ease=3 cloud_surface=9 freshness=10
 [PRIO] cto.onecode.de, 7.35, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de, 6.75, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=8
@@ -31,9 +25,9 @@ testability: HUMAN_ONLY
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
 confidence: 45
-reasoning: Gateway oscillates 503↔401 (22-state since 09-04); neither state permissive; schema-cache recovery (503→200) could transiently expose table listings/rows if RLS not enforced at gateway level; platform instability increases misconfiguration window; platform-level key format change (sb_publishable_ only) confirms active Supabase management
+reasoning: Gateway oscillates 503↔401 (22+ states since 09-04); neither state permissive; schema-cache recovery (503→200) could transiently expose table listings/rows if RLS not enforced at gateway level; platform instability increases misconfiguration window; platform-level key format change (sb_publishable_ only) confirms active Supabase management
 evidence_needed: GET /rest/v1/ or /rest/v1/profiles returns 200 with table list or row data using sb_publishable key
-verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence window post-00:00Z 2026-09-17, 24th probe ≤1/day); monitor for 200 response
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence window post-00:00Z 2026-09-18, ≤1/day); monitor for 200 response
 impact: If schema cache recovers with permissive ACL → anon enumeration of profiles/enrollments/courses/resources — MEDIUM
 testability: PASSIVE
 [PARKED] Supabase Functions unauthenticated invocation: confidence 30 < 40; returns 404, no deployed functions listable pre-auth
@@ -41,15 +35,15 @@ testability: PASSIVE
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [FINAL] 3. Supabase REST gateway schema-cache recovery exposing anon table access (confidence 45, MISCONFIG, PASSIVE) — monitor for 200 response
-[NEXT] PROBE: post-00:00Z 2026-09-17 (24th probe, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
-[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 23rd probe 01:16Z 09-16 = 503 PGRST002 (no flip); 22-state oscillation persists; never permissive; monitor stays active
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged 09-16; pre-auth surface stable, exhausted; no new cookie/session signal
+[NEXT] PROBE: post-00:00Z 2026-09-18 (cadence probe, ≤1/day): GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 503 PGRST002 persists; 22+ state oscillation (503↔401) since 09-04; never permissive; monitor stays active
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
 [LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
-[LEARN] REJECTED MISCONFIG @ functions(404)/realtime(401): no pre-auth exposure possible
-[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Gateway 22-state oscillation confirmed (503→401→503→401→503→503→401→503→401→401→503→401→401→503→401→401→401→401→503→401→503→503 since 09-04); NOT permissive on any observed state; monitor stays active
-[LEARN] NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
 [LEARN] REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login with header; Next.js patch level > vulnerable; middleware auth gate intact
 [LEARN] REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+[LEARN] NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.

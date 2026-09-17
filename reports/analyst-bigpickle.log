@@ -12851,3 +12851,8 @@ models:
 **STEP 7 — RISK**
 
 - [RISK] onecode: 62 — unchanged. All pre-auth monitors closed with zero permissive observations over 18 days; risk fully escalation-gated: BOLA/RLS (65, needs 2 invites) + cto dangling-CNAME (58, HUMAN claim). No fresh in-scope surface identified this cycle.
+===== ANALYST bigpickle 2026-09-17 11:54:25 UTC =====
+[0m
+> build · big-pickle
+[0m
+[91m[1mError: [0mError from provider (Console): Upstream request failed: [invalid_request_error] request could not be processed
