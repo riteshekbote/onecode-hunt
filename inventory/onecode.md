@@ -504,3 +504,11 @@ www.onecode.de
 ## 2026-09-16 22:48:57 UTC
 
 ## 2026-09-17 01:14:53 UTC
+
+## 2026-09-17 06:18:37 UTC
+- NEW Supabase REST gateway 24th probe 16:33Z 09-16 (supplementary, same-day) = 503 PGRST002 on `/profiles` + `/enrollments` — no flip from 01:16Z; 22-state oscillation persists; cadence infraction noted (2
+- NEW x-middleware-subrequest bypass header (CVE-2025-29927) tested live 16:34Z-19:5xZ 09-16 on `/api/v1/health` + `/dashboard` — both still 307→/login; Next.js patch level > vulnerable; middleware auth gat
+- NEW _next/image external URL fetch tested → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 17+ days (day 17 at 09-16), HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT; conf 58 HUMAN claim-attempt only proof path
+- CHANGED kurs.onecode.de: /login 200 + / 307→/login + no Set-Cookie re-confirmed 23:24Z 09-16 (railway-hikari, x-railway-edge iad1→lax1 region flip noise); pre-auth surface exhaustively re-validated including 
+- CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
