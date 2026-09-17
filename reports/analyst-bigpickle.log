@@ -12263,3 +12263,85 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 65 — unchanged. BOLA/RLS (65, account-blocked, highest value) + cto dangling-CNAME (58, HUMAN-pending, TXT-absent day-17). REST cache-recovery parked (45, closeout probe due ≤09-17). Fresh-mind sweep closed two more pre-auth paths (middleware-bypass, image-proxy SSRF) — surface static 17 days with zero permissive observations; only escalation triggers left: REST 200+body in 09-17 closeout, a HUMAN invite/claim step, or fresh surface currently absent.
+===== ANALYST bigpickle 2026-09-17 01:14:53 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u
+Thu Sep 17 01:13:40 UTC 2026
+[0m
+Final closeout window open (01:13Z 09-17, post-00:00Z). Executing the exact read-only REST probe.
+[0m$ [0mcurl -sS -o /dev/null -w "rest_generic HTTP %{http_code}\n" --max-time 30 "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+rest_generic HTTP 401
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/rest_closeout.txt -w "HTTP %{http_code}\n" --max-time 30 "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*&limit=1" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+HTTP 503
+[0m
+[0m$ [0mcat /tmp/opencode/rest_closeout.txt
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "storage HTTP %{http_code}\n" --max-time 30 "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; curl -sS -o /dev/null -w "login HTTP %{http_code}\n" --max-time 30 -I "https://kurs.onecode.de/login"
+storage HTTP 200
+login HTTP 200
+[0m
+Final closeout: `/profiles` → **503 PGRST002** (25th obs), generic **401** (anon-block min-state). Monitor closes as predicted — never permissive. One cadence dig on cto, then full analysis.
+[0m$ [0mdig +short cto.onecode.de CNAME; dig +short cto.onecode.de TXT; echo "---"; curl -sS -o /dev/null -w "cto_http HTTP %{http_code}\n" --max-time 20 "http://cto.onecode.de/"
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+---
+cto_http HTTP 409
+[0m
+## STEP 1 — DELTA
+- [CHANGED] REST cache-recovery monitor **CLOSED** per pre-committed 09-16 plan: final probe 01:14Z 09-17 — `/profiles`→503 PGRST002 (25th obs), generic `/rest/v1/`→401 anon-block (26th obs); 24-state oscillation 09-04→09-17, **never permissive**.
+- [CHANGED] Only live pre-auth monitor now terminated; remaining monitors are lekked HUMAN/AUTH_HELPED-gated (BOLA, cto-claim).
+- NO_DELTA: cto (CNAME day-18, 409), kurs `/login` 200, storage 200 `[]`.
+
+## STEP 2 — PRIORITIZE
+- [PRIO] kurs.onecode.de,8.6,a=9,b=8,t=8,g=6,c=6,f=3 — unchanged; only high-value live target, gate now AUTH_HELPED.
+- [PRIO] cto.onecode.de,6.4,a=6,b=7,t=3,g=5,c=8,f=10 — unchanged; HUMAN_ONLY proof.
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,3.1,a=5,b=8,t=6,g=3,c=7,f=-9 — freshness collapsed with monitor close; archived.
+
+## STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform; UUID PKs defeat guessable-ID BOLA; realistic vector is SELECT policy missing user_id predicate. Pre-auth surface exhaustively closed 18 days (middleware-bypass, image-proxy SSRF, CT 5-host inventory all excluded/complete).
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable day-18 (dig 01:15Z 09-17), authoritative TXT zero, SOA present; documented Perspective custom-subdomain CNAME; HTTP 409 "error code:1001" + TLS handshake-fail = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Publishable-key REST table exposure on schema-cache recovery (CLOSED 09-17)
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 45
+reasoning: 26 observations 09-04→09-17 all 503/401, never permissive; 401 min-state (UNAUTHORIZED_INVALID_API_KEY_TYPE) proves platform-enforced publishable-key rejection post-09-10; exposure required 3-fold conjunction never signaled in 13 days. 09-17 closeout confirmed final state 503/401.
+evidence_needed: HTTP 200 + row-set from /rest/v1/profiles?select=*&limit=1 with only sb_publishable key — NONE produced at closeout; monitor terminated.
+verify_steps: PROBE (final, done 01:14Z 09-17): GET .../rest/v1/profiles?select=*&limit=1 → 503 PGRST002; generic → 401. 200+row-set never observed.
+impact: HIGH — anonymous tenant-table exfiltration during cache-recovery window.
+testability: PASSIVE
+
+## STEP 4 — SELF-CRITIQUE
+- [PARKED] REST cache-recovery (45): monitor CLOSED per pre-committed 09-16 plan — 26 obs / 24-state oscillation, never permissive; 401 min-state proves platform key-type rejection; 3-fold-conjunction thesis dead after 13 days of zero signal. Archived with the earlier negatives (middleware-bypass, image-proxy SSRF, Realtime 35, pre-auth BOLA).
+- [FINAL] 1] BOLA/RLS (65, AUTH_HELPED — unchanged, highest value) 2] cto CNAME takeover (58, HUMAN_ONLY, TXT-absent day-18)
+
+## STEP 5 — NEXT ACTION
+[NEXT] HUMAN: execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/enrollments?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade.
+
+## STEP 6 — LEARNING
+- [LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: final closeout 01:14Z 09-17 — /profiles 503 PGRST002 (25th obs) + generic 401 (26th obs); 24-state oscillation never permissive; cache-recovery monitor CLOSED, thesis retired.
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dig 01:15Z 09-17 — CNAME→cname.perspective-dns.com day-18, respect TXT zero, HTTP 409 live; conf 58, HUMAN claim-attempt only proof path.
+- [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 unchanged 09-17; pre-auth surface stable, exhausted.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 09-17 — zero buckets.
+
+## STEP 7 — RISK
+[RISK] onecode: 62 — down 3. All pre-auth monitors now closed with zero permissive observations across 18 days (REST final closeout 503/401). Remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, unknown TRUE/FALSE) + cto dangling-CNAME (58, HUMAN claim). No fresh surface; only a HUMAN/AUTH_HELPED step can move the needle.

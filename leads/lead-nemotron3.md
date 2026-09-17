@@ -4730,3 +4730,4 @@ testability: PASSIVE
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
 ## 2026-09-16 20:03:32 UTC [target] (model nemotron3)
 ## 2026-09-16 22:48:45 UTC [target] (model nemotron3)
+## 2026-09-17 01:14:43 UTC [target] (model nemotron3)
