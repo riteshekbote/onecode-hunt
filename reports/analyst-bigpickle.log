@@ -12903,3 +12903,83 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 62 — unchanged. All pre-auth monitors closed with zero permissive observations over 18 days; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, TRUE/FALSE unresolved) + cto dangling-CNAME (58, HUMAN claim). No fresh surface to probe; only a HUMAN/AUTH_HELPED step can move the needle.
+===== ANALYST bigpickle 2026-09-17 19:53:26 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -o /dev/null -D - --max-time 10 -I https://kurs.onecode.de/login | head -12; echo "---"; curl -sS --max-time 10 -I https://kurs.onecode.de/ | head -4
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Thu, 17 Sep 2026 19:52:20 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: -nyme5wcQ2ujy9g57fhULg
+x-hikari-trace: lax1.v9kt
+x-railway-edge: lax1
+
+---
+HTTP/2 307 
+date: Thu, 17 Sep 2026 19:52:20 GMT
+location: /login
+server: railway-hikari
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; dig +short cto.onecode.de TXT; echo "---"; curl -sS -o /dev/null -w "http:%{http_code}\n" --max-time 10 http://cto.onecode.de/ 2>&1 | tail -1
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+---
+http:409
+[0m
+[0m$ [0mcurl -sS --max-time 10 -w "\nstorage:%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" | tail -3
+[]
+storage:200
+[0m
+STEP 1 — DELTA
+- NO_DELTA @ kurs.onecode.de: HEAD /login 200 (railway-hikari, no Set-Cookie, x-railway-edge lax1), / 307→/login — identical to 16:42Z 09-17.
+- NO_DELTA @ cto.onecode.de: CNAME→cname.perspective-dns.com (TXT zero), HTTP 409 live — day-18 stable, conf 58.
+- NO_DELTA @ storage/v1/bucket: 200 `[]` — zero buckets.
+
+STEP 2 — PRIORITIZE
+- [PRIO] kurs.onecode.de, 4.6, attack_surface=3 business=10 tech=8 gate_ease=2 cloud=4 fresh=0 — post-auth BOLA only remaining, escalation-gated
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co, 2.4, attack_surface=1 business=8 tech=4 gate_ease=3 cloud=4 fresh=0 — REST monitor closed, storage empty, no pre-auth surface
+- [PRIO] cto.onecode.de, 3.9, attack_surface=2 business=6 tech=4 gate_ease=1 cloud=6 fresh=0 — dangling CNAME, HUMAN-proof-only
+
+STEP 3 — HYPOTHESES (all three escalation-gated; unchanged since closeout)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform; UUID PKs defeat guessable-ID BOLA; realistic vector is SELECT policy missing user_id predicate. Pre-auth surface exhaustively closed 18 days (CVE-2025-29927 neg, _next/image SSRF neg, CT 5-host inventory complete).
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable day-18, zero verification TXT, SOA present; documented Perspective custom-subdomain CNAME; HTTP 409 "error code:1001" + TLS handshake-fail = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] REST publishable-key table exposure (45): formally CLOSED 09-17 — 26 probes (503↔401), never 200+rows; 401 min-state = platform key-type rejection; no cadence probes remain.
+- [PARKED] storage(empty) / functions(404) / realtime(401) / OATH(all providers false): no pre-auth exposure possible; REJECTED class holders.
+- [FINAL] kurs.onecode.de BOLA/RLS (65, AUTH_HELPED) — sole live threat, escalation-gated.
+- [FINAL] cto.onecode.de dangling CNAME (58, HUMAN_ONLY) — evidence path = claim attempt only.
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/enrollments?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: BOLA via RLS gap remains the sole actionable lead (conf 65); pre-auth surface exhausted 18 days, zero permissive observations; only an AUTH_HELPED 2-account test can resolve TRUE/FALSE.
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt is the only proof path — passive probes converged, no delta value.
+- [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection is platform-enforced; no further cadence probes.
+
+STEP 7 — RISK
+- [RISK] onecode: 62 — unchanged. Re-probe 19:52Z 09-17 confirms zero state change. All pre-auth monitors closed with zero permissive observations over 18 days; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, TRUE/FALSE unresolved) + cto dangling-CNAME (58, HUMAN claim). No fresh surface; only a HUMAN/AUTH_HELPED step can move the needle.
