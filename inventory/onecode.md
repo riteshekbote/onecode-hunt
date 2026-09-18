@@ -566,3 +566,10 @@ www.onecode.de
 - CHANGED cto.onecode.de: HTTP 409 "error code:1001" re-confirmed live 2026-09-18 18:39Z; CNAME→cname.perspective-dns.com stable 20+ days; TLS handshake-fail on 443; zero verification TXT records
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 2026-09-18 18:40Z — endpoint probeable, zero buckets; unchanged
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+
+## 2026-09-18 21:16:49 UTC
+- NEW kurs.onecode.de: New Next.js build deployed 2026-09-18 15:09Z (chunk `0-mbmp1iqb6hj.js`); client route refs now {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}; `/api/broadca
+- NEW kurs.onecode.de: Verified `/admin`, `/courses`, `/dashboard`, `/einladung`, `/passwort-neu` all 307→/login; `/api/courses`, `/api/resources`, `/api/enrollments`, `/v1/*` all 307→/login — zero new pre-
+- CHANGED cto.onecode.de: HTTP 409 "error code:1001" re-confirmed live 2026-09-18 18:39Z; CNAME→cname.perspective-dns.com stable 20+ days; TLS handshake-fail on 443; zero verification TXT records
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 2026-09-18 18:40Z — endpoint probeable, zero buckets; unchanged
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes

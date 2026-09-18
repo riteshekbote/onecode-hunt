@@ -491,3 +491,6 @@
 - 2026-09-18 ACCEPTED MISCONFIG @ cto.onecode.de: 18:34Z dig — CNAME→cname.perspective-dns.com day-21, pure CNAME (TXT not reachable at host); kurs CNAME ki8dqcf6 stable; conf 58 holds; HUMAN claim-attempt only proof path.
 - 2026-09-18 ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 18:34Z — 401 anon-block flip from 503 (expected 503↔401 oscillation since 09-04); never 200+rows; closed monitor stays closed; storage 200 `[]` unchanged.
 - 2026-09-18 REJECTED MISCONFIG @ kurs.onecode.de: sourcemaps 404 on all chunks; no buildId dir; /_next/static 308 — no recon/disclosure value from build artifacts.
+- 2026-09-18 ACCEPTED MISCONFIG @ kurs.onecode.de: 21:15Z 09-18 — chunk 0-mbmp1iqb6hj.js sha256 f916f314... unchanged since 15:09Z build; /login 200 serving co-resident old boot chunk; no deploy in ~3h; build-diff cadence = on-deploy only, not time-based.
+- 2026-09-18 ACCEPTED MISCONFIG @ cto.onecode.de: 21:15Z dig — CNAME→cname.perspective-dns.com day-21 (dig raw CNAME, HTTP 409 live); conf 58 holds; no verification TXT; HUMAN claim-attempt only proof path.
+- 2026-09-18 REJECTED MISCONFIG @ all: 21:15Z cycle — chunk diff + route-literal scan + CNAME re-check yield zero deltas; all passive monitors confirmed converged/closed.
