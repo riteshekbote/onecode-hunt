@@ -3703,3 +3703,22 @@ testability: HUMAN_ONLY
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 06:04Z 09-18 — endpoint probeable, zero buckets; unchanged.
 [LEARN] REJECTED MISCONFIG @ all sources: triage 7Q gate returned empty twice (01:06Z/06:01Z 09-18) — no new findings to validate; confirms all pre-auth & REST monitors are closed and no passive claim remains testable.
 [RISK] onecode: 62 — unchanged. All pre-auth/REST monitors closed; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, TRUE/FALSE unresolved) + cto dangling-CNAME (58, HUMAN claim attempt). 06:04Z 09-18 re-probes confirm identical state across kurs/cto/storage; no passive step can move the needle — only HUMAN (claim-attempt, 2-account BOLA test) advances either lead.
+## 2026-09-18 11:30:55 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-20; UUID PKs defeat guessable-ID BOLA; realistic vector is SELECT policy missing user_id predicate. Pre-auth surface exhaustively closed (CVE-2025-29927 neg, _next/image SSRF neg, CT 5-host inventory complete, REST monitor closed 09-17); 11:30Z 09-18 probes confirm zero surface change.
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: provision 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: Dig 11:30Z 09-18 — CNAME→cname.perspective-dns.com day-20, TXT zero at target, A 104.18.2.73/3.73; documented Perspective custom-subdomain CNAME; HTTP 409 "error code:1001" + TLS handshake-fail = unbound/reclaimable. Passive probes fully converged.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY

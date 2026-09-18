@@ -483,3 +483,4 @@
 - 2026-09-18 ACCEPTED MISCONFIG @ cto.onecode.de: 06:04Z 09-18 — CNAME→cname.perspective-dns.com day-20 (104.18.2.73/3.73), HTTP 409 live, TXT zero; conf 58 holds; HUMAN claim-attempt remains only proof path.
 - 2026-09-18 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 06:04Z 09-18 — endpoint probeable, zero buckets; unchanged.
 - 2026-09-18 REJECTED MISCONFIG @ all sources: triage 7Q gate returned empty twice (01:06Z/06:01Z 09-18) — no new findings to validate; confirms all pre-auth & REST monitors are closed and no passive claim remains testable.
+- 2026-09-18 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 20+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending

@@ -550,3 +550,9 @@ www.onecode.de
 - NEW Live re-probe 06:04Z 09-18 vs last lead 01:09Z 09-18: kurs.onecode.de /login=200 (no Set-Cookie), /=307→/login, /api/broadcast=307→/login, x-middleware-subrequest bypass header STILL non-bypassing (30
 - NEW Live re-probe 06:04Z 09-18: cto.onecode.de CNAME→cname.perspective-dns.com (day-20), HTTP 409 via --resolve, TXT zero at target; aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket=200 — all identical 
 - CHANGED Triage 7Q gate (mimo) invoked 01:06Z + 06:01Z 09-18 with EMPTY LEADS — zero new findings in flight; only the two escalation-gated leads (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY) remain unresolved.
+
+## 2026-09-18 11:31:12 UTC
+- CHANGED kurs.onecode.de: 06:04Z re-probe — /login 200, / 307, /api/broadcast 307, x-middleware-subrequest bypass header still non-bypassing (CVE-2025-29927 negative); pre-auth surface unchanged day-20
+- CHANGED cto.onecode.de: 06:04Z — CNAME→cname.perspective-dns.com day-20 (104.18.2.73/3.73), HTTP 409 live, TXT zero; conf 58 holds
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 06:04Z — endpoint probeable, zero buckets; unchanged
+- CHANGED Triage 7Q gate invoked 01:06Z/06:01Z 09-18 with EMPTY LEADS — zero new findings; only two escalation-gated leads remain (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY)
