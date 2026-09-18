@@ -14091,3 +14091,205 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 62 — unchanged day-21. All pre-auth/REST monitors closed; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, TRUE/FALSE unresolved) + cto dangling-CNAME (58, HUMAN claim attempt). Fresh build diff (09-18) confirms active deploys but zero unauthenticated handlers; no passive step can move the needle — only HUMAN (claim-attempt, 2-account BOLA test) advances either lead.
+===== ANALYST bigpickle 2026-09-18 18:41:09 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -I --max-time 15 https://kurs.onecode.de/login 2>&1 | head -25
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Fri, 18 Sep 2026 18:34:53 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: Oux_rInTS3icAT5-2JZdWA
+x-hikari-trace: lax1.v9kt
+x-railway-edge: lax1
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; echo "---TXT---"; dig +short cto.onecode.de TXT; echo "---KURS---"; dig +short kurs.onecode.de CNAME
+cname.perspective-dns.com.
+---TXT---
+cname.perspective-dns.com.
+---KURS---
+ki8dqcf6.up.railway.app.
+[0m
+[0m$ [0mcurl -sS --max-time 20 https://kurs.onecode.de/login 2>&1 | grep -oE '/_next/static/chunks/[0-9a-f\-]+\.js' | sort -u | head -60
+(no output)
+[0m
+[0m$ [0mcurl -sS --max-time 15 -o /dev/null -w "%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; echo "---REST---"; curl -sS --max-time 15 -o /dev/null -w "%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+200
+---REST---
+401
+[0m
+[0m$ [0mBID=$(curl -sS --max-time 20 https://kurs.onecode.de/login | grep -oE 'static/[a-f0-9]{12,24}/' | head -1 | sed 's#static/##;s#/##'); echo "BUILDID=$BID"; curl -sS --max-time 20 "https://kurs.onecode.de/_next/static/$BID/_buildManifest.js" -o /tmp/opencode/bm.js -w "bm_http=%{http_code}\n"; wc -c /tmp/opencode/bm.js
+BUILDID=
+bm_http=308
+31 /tmp/opencode/bm.js
+[0m
+`/login` 200 unchanged; REST now 401 (anon-block flip — expected oscillation, non-permissive). Let me get the build manifest for a precise chunk diff given active dev.
+[0m$ [0mcurl -sS --max-time 20 https://kurs.onecode.de/login | grep -oE '/_next/static/[^"]+\.(js|css)' | sort -u | head -40
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2n8375xih-hg0.css
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+[0m
+Both old (`0-lpao5_i9htd.js`) and new (`0-mbmp1iqb6hj.js`) chunks are referenced — possible stale prefetch. No buildId dir (Turbopack layout). Let me diff the chunks for newly registered handlers.
+[0m$ [0mcd /tmp/opencode; curl -sS --max-time 25 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" -o new.js -w "new=%{http_code} %{size_download}\n"; curl -sS --max-time 25 "https://kurs.onecode.de/_next/static/chunks/0-lpao5_i9htd.js" -o old.js -w "old=%{http_code} %{size_download}\n"; echo "--- new.js routes ---"; grep -oE '"/(admin|courses|dashboard|einladung|passwort-neu|passwort-vergessen|login|recovery|api/[a-z0-9\-/]+|v1/[a-z0-9\-/]+)"' new.js | sort -u | head -40
+new=200 154581
+old=200 251775
+--- new.js routes ---
+grep: Invalid range end
+[0m
+[0m$ [0mcd /tmp/opencode; echo "=== NEW routes ==="; grep -oE '"(/admin|/courses|/dashboard|/einladung|/passwort-neu|/passwort-vergessen|/login|/recovery|/api/[a-zA-Z0-9_/-]+|/v1/[a-zA-Z0-9_/-]+)"' new.js | sort -u; echo "=== NEW api/supabase refs ==="; grep -oE '(supabase\.co[^"'\'' ]*|/auth/v1/[a-zA-Z0-9_?=&]+|/rest/v1/[a-zA-Z0-9_?=&]+)' new.js | sort -u | head -30; echo "=== OLD api refs ==="; grep -oE '(/api/[a-zA-Z0-9_/-]+|/auth/v1/[a-zA-Z0-9_?=&]+|/rest/v1/[a-zA-Z0-9_?=&]+)' old.js | sort -u | head -30
+=== NEW routes ===
+=== NEW api/supabase refs ===
+=== OLD api refs ===
+/api/broadcast
+[0m
+[0m$ [0mcd /tmp/opencode; echo "=== token/grant refs NEW vs OLD ==="; grep -oE 'grant_type[a-zA-Z_":=]+' new.js | sort -u; grep -oE '(broadcast|realtime|channel)[a-zA-Z_]{0,20}' new.js | sort -u | head; echo "=== admin ref context ==="; grep -oE '.{80}/admin.{80}' new.js | head -5
+=== token/grant refs NEW vs OLD ===
+=== admin ref context ===
+[0m
+[0m$ [0mcd /tmp/opencode; for w in admin dashboard courses einladung passwort recovery broadcast supabase aygnpacdkgtsfnhgcyjc; do echo "== $w =="; grep -oE "[a-zA-Z0-9_\"'/]{0,40}$w[a-zA-Z0-9_\"'/]{0,40}" new.js | sort -u | head -8; done 2>/dev/null | head -80
+== admin ==
+== dashboard ==
+== courses ==
+== einladung ==
+== passwort ==
+== recovery ==
+== broadcast ==
+== supabase ==
+== aygnpacdkgtsfnhgcyjc ==
+[0m
+[0m$ [0mcd /tmp/opencode; head -c 300 new.js; echo; echo "---"; grep -c login new.js; grep -c password new.js; grep -oE '[a-z]{6,20}' new.js | sort | uniq -c | sort -rn | head -25; echo "=== old head ==="; head -c 200 old.js
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,32120,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"callServer",{enumerable:!0,get:function(){return u}});let n=e.r(71645),a=e.r(88540),l
+---
+0
+0
+    917 return
+    838 function
+    341 default
+    204 roperty
+    203 define
+    194 typeof
+    116 trategy
+    116 status
+    112 refetch
+     99 egment
+     89 enumerable
+     84 length
+     79 prefetch
+     71 strict
+     70 reason
+     65 create
+     64 object
+     62 parent
+     59 ynamic
+     54 avigation
+     53 artial
+     48 exports
+     48 assign
+     46 metadata
+     44 switch
+=== old head ===
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,48425,e=>{"use strict";var t=e.i(71645),r=e.i(74080),s=e.i(91918),i=e.i(43476),n=Object.
+[0m
+[0m$ [0mcd /tmp/opencode; curl -sS --max-time 20 https://kurs.onecode.de/login -o login.html -w "html=%{http_code} %{size_download}\n"; echo "=== all chunk refs ==="; grep -oE 'chunks/[a-zA-Z0-9_\-]+\.js' login.html | sort -u; echo "=== route literals in RSC ==="; grep -oE '"/(admin|courses|dashboard|einladung|passwort-neu|passwort-vergessen|login|privacy|impressum|recovery)"' login.html | sort -u
+html=200 18702
+=== all chunk refs ===
+chunks/0-lpao5_i9htd.js
+chunks/0-mbmp1iqb6hj.js
+chunks/08ttfj81-47mu.js
+chunks/0cz1d0mv5g_q7.js
+chunks/1a4tqdnsy9k1l.js
+chunks/1ymt1shyhmu-4.js
+chunks/2i51e627rllld.js
+chunks/2n1zydk_92chn.js
+chunks/2ufbqzbeyam3w.js
+chunks/3fntmmi971322.js
+chunks/3mc6dra1m0098.js
+chunks/4310-_brt1a3g.js
+chunks/turbopack-2a8cgfwu75lsu.js
+=== route literals in RSC ===
+"/passwort-vergessen"
+[0m
+[0m$ [0mcd /tmp/opencode; echo "=== ctx around old chunk ==="; grep -oE '.{160}0-lpao5_i9htd\.js.{60}' login.html | head -3; echo "=== ctx around new chunk ==="; grep -oE '.{160}0-mbmp1iqb6hj\.js.{60}' login.html | head -3
+=== ctx around old chunk ===
+m3w.js" async="" crossorigin=""></script><script src="/_next/static/chunks/1a4tqdnsy9k1l.js" async="" crossorigin=""></script><script src="/_next/static/chunks/0-lpao5_i9htd.js" async="" crossorigin=""></script><title>Rich Dev Poor Dev<
+0\",{\"src\":\"/_next/static/chunks/1a4tqdnsy9k1l.js\",\"async\":true,\"nonce\":\"$undefined\"}],[\"$\",\"script\",\"script-1\",{\"src\":\"/_next/static/chunks/0-lpao5_i9htd.js\",\"async\":true,\"nonce\":\"$undefined\"}]],[\"$\",\"$L11\
+71322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/1a4tqdnsy9k1l.js\",\"/_next/static/chunks/0-lpao5_i9htd.js\"],\"HashSessionHandoff\"]\n19:I[28420,[\"/_next/static/chu
+=== ctx around new chunk ===
+_next/static/chunks/2i51e627rllld.js" async=""></script><script src="/_next/static/chunks/08ttfj81-47mu.js" async=""></script><script src="/_next/static/chunks/0-mbmp1iqb6hj.js" async=""></script><script src="/_next/static/chunks/turbop
+[0m
+Mixed-generation deployment confirmed (old boot chunk + new app chunk co-resident). Let me check for sourcemaps (passive, could expose route handlers for the BOLA chain) and confirm no new chunk hash.
+[0m$ [0mcd /tmp/opencode; for c in 0-mbmp1iqb6hj 0-lpao5_i9htd turbopack-2a8cgfwu75lsu; do curl -sS --max-time 12 -o /dev/null -w "$c.map=%{http_code} %{size_download}\n" "https://kurs.onecode.de/_next/static/chunks/$c.js.map"; done; echo "=== probe _next/static listing ==="; curl -sS --max-time 12 -o /dev/null -w "static/=%{http_code}\n" "https://kurs.onecode.de/_next/static/"
+0-mbmp1iqb6hj.map=404 9
+0-lpao5_i9htd.map=404 9
+turbopack-2a8cgfwu75lsu.map=404 9
+=== probe _next/static listing ===
+static/=308
+[0m
+All probes complete (read-only, 18:34Z 09-18). Analyzing…
+
+## STEP 1 — DELTA
+- NO_DELTA: `/login` 200, no Set-Cookie, private/no-store, railway-hikari lax1.v9kt — identical to 15:09Z today.
+- NO_DELTA: `cto.onecode.de` CNAME→cname.perspective-dns.com day-21; `kurs.onecode.de`→ki8dqcf6.up.railway.app stable (post-migration).
+- [CHANGED] REST gateway flipped 503→401 (anon-block, `UNAUTHORIZED_INVALID_API_KEY_TYPE`) — expected oscillation, explicit anon-block, never 200+rows; closed monitor stays closed. Storage still 200 `[]`.
+- [NEW] `/login` HTML co-loads OLD boot chunk `0-lpao5_i9htd.js` (server-rendered script chain + client ref "HashSessionHandoff") AND new `0-mbmp1iqb6hj.js` — mixed-generation rolling deploy. RSC route literals: **only** `/passwort-vergessen`. No `/admin`,`/courses`,`/dashboard` in this page payload. Chunk hash unchanged since 15:09Z build.
+- [NEW] No sourcemaps (`*.js.map`→404) on any chunk, no buildId dir (Turbopack layout), `/_next/static/`→308. No info-disclosure/recon aid.
+
+## STEP 2 — PRIORITIZE
+- [PRIO] kurs.onecode.de, 5.4, attack_surface=3 business=10 tech=8 gate_ease=2 cloud=4 fresh=1 — BOLA/RLS (65) sole live threat; new deploy confirmed active dev but zero new unauthenticated handlers
+- [PRIO] cto.onecode.de, 4.4, attack_surface=2 business=6 tech=4 gate_ease=1 cloud=6 fresh=1 — dangling CNAME day-21; HUMAN-proof-only, passive converged
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co, 4.0, attack_surface=2 business=8 tech=6 gate_ease=3 cloud=6 fresh=1 — REST closed, storage empty, no fresh surface
+
+## STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-21; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy missing user_id predicate. 18:34Z 09-18 re-probe: RSC payload shows only /passwort-vergessen, REST 401 anon-block, storage 200[] — zero pre-auth change; new build drops /api/broadcast client-side, adds /admin route-ref (307), all handlers gated.
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / course-resource / enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: 18:34Z 09-18 dig — CNAME→cname.perspective-dns.com day-21 (pure CNAME, no own TXT → no verification record reachable), HTTP 409/1001 + TLS handshake-fail; documented Perspective custom-subdomain CNAME target. Passive probes fully converged; no observation changes reasoning.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+## STEP 4 — SELF-CRITIQUE
+- [PARKED] Mixed-generation deploy (old boot chunk + new app chunk co-resident): version-skew is app-internal, no pre-auth exploit primitive, class lacks program-specific impact — threshold not met.
+- [PARKED] Sourcemap/static-listing recon aid: .map 404, no buildId dir, 308 on /_next/static — closed, no value.
+- No new passive hypothesis crosses conf>=40; active dev confirmed but chunk diff (15:09Z build, re-verified 18:34Z) shows zero new unauthenticated handlers.
+- [FINAL] kurs.onecode.de BOLA/RLS (65, AUTH_HELPED) — sole live threat, escalation-gated, TRUE/FALSE unresolved.
+- [FINAL] cto.onecode.de dangling CNAME (58, HUMAN_ONLY) — evidence path = claim attempt only.
+
+## STEP 5 — NEXT ACTION
+[NEXT] HUMAN: execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/enrollments?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade. Parallel: re-diff chunk hash + RSC route literals on next deploy (both co-resident chunks still served 18:34Z).
+
+## STEP 6 — LEARNING
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: 18:34Z 09-18 — /login 200 (no Set-Cookie, private/no-store, railway-hikari lax1.v9kt); RSC route literals only /passwort-vergessen; old boot chunk still server-loaded (HashSessionHandoff) alongside new 0-mbmp1iqb6hj — mixed generation, zero new pre-auth surface; hash unchanged since 15:09Z build.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 18:34Z dig — CNAME→cname.perspective-dns.com day-21, pure CNAME (TXT not reachable at host); kurs CNAME ki8dqcf6 stable; conf 58 holds; HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED IDOR @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: 18:34Z — 401 anon-block flip from 503 (expected 503↔401 oscillation since 09-04); never 200+rows; closed monitor stays closed; storage 200 `[]` unchanged.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: sourcemaps 404 on all chunks; no buildId dir; /_next/static 308 — no recon/disclosure value from build artifacts.
+
+## STEP 7 — RISK
+[RISK] onecode: 62 — unchanged day-21. All pre-auth/serverless monitors closed (REST 26 probes ended, sourcemap/deploy-diff dry); remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites, TRUE/FALSE unresolved) + cto dangling-CNAME (58, HUMAN claim). No passive step can move the needle — only HUMAN (claim-attempt, 2-account BOLA test) advances either lead.

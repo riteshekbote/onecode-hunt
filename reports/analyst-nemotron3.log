@@ -9761,3 +9761,186 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
+===== ANALYST nemotron3 2026-09-18 18:41:09 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[
+[0m$ [0mcurl -s -I "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" 2>&1 | head -20
+HTTP/2 200 
+accept-ranges: bytes
+cache-control: public, max-age=31536000, immutable
+content-type: application/javascript; charset=UTF-8
+date: Fri, 18 Sep 2026 18:38:12 GMT
+etag: W/"25bd5-1a0a0bb61f0"
+last-modified: Mon, 14 Sep 2026 16:23:50 GMT
+server: railway-hikari
+vary: Accept-Encoding
+x-railway-request-id: s7vEyeL2T4ybEkaas_GTAg
+content-length: 154581
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" 2>&1 | head -5000
+...output truncated...
+
+Full output saved to: /home/runner/.local/share/opencode/tool-output/tool_0b5cfed63001GsaSnqxRm4H2P9
+
+tch(e){n(e)}},n),"$"+(m?"x":"X")+O.toString(16);if((e=E(h))!==P&&(null===e||null!==E(e))){if(void 0===t)throw Error(a(499,""));return"$T"}return h}if("string"==typeof h)return"Z"===h[h.length-1]&&this[e]instanceof Date?"$D"+h:e="$"===h[0]?"$"+h:h;if("boolean"==typeof h)return h;if("number"==typeof h)return Number.isFinite(h)?0===h&&-1/0==1/h?"$-0":h:1/0===h?"$Infinity":-1/0===h?"$-Infinity":"$NaN";if(void 0===h)return"$undefined";if("function"==typeof h){if(void 0!==(A=S.get(h)))return void 0!==(e=f.get(h))||(e=JSON.stringify({id:A.id,bound:A.bound},u),null===s&&(s=new FormData),A=o++,s.set(""+A,e),e="$h"+A.toString(16),f.set(h,e)),e;if(void 0!==t&&-1===e.indexOf(":")&&void 0!==(A=f.get(this)))return t.set(A+":"+e,h),"$T";throw Error(a(469))}if("symbol"==typeof h){if(void 0!==t&&-1===e.indexOf(":")&&void 0!==(A=f.get(this)))return t.set(A+":"+e,h),"$T";throw Error(a(517,""))}if("bigint"==typeof h)return"$n"+h.toString(10);throw Error(a(472,typeof h))}function i(e,r){return"object"==typeof e&&null!==e&&(r="$"+r.toString(16),f.set(e,r),void 0!==t&&t.set(r,e)),d=e,JSON.stringify(e,u)}var o=1,c=0,s=null,f=new WeakMap,d=e,h=i(e,0);return null===s?r(h):(s.set("0",h),0===c&&r(s)),function(){0<c&&(c=0,null===s?r(h):r(s))}}(e,t&&t.temporaryReferences?t.temporaryReferences:void 0,r,n);if(t&&t.signal){var u=t.signal;if(u.aborted)l(u.reason);else{var i=function(){l(u.reason),u.removeEventListener("abort",i)};u.addEventListener("abort",i)}}})},r.registerServerReference=function(e,t){return R(e,t,null),e}},21413,(e,t,r)=>{"use strict";e.i(47167),t.exports=e.r(64893)},35326,(e,t,r)=>{"use strict";t.exports=e.r(21413)},63416,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={ACTION_SUFFIX:function(){return g},APP_DIR_ALIAS:function(){return V},CACHE_ONE_YEAR_SECONDS:function(){return I},DOT_NEXT_ALIAS:function(){return H},ESLINT_DEFAULT_DIRS:function(){return ei},GSP_NO_RETURNED_VALUE:function(){return et},GSSP_COMPONENT_MEMBER_ERROR:function(){return ea},GSSP_NO_RETURNED_VALUE:function(){return er},HTML_CONTENT_TYPE_HEADER:function(){return u},INFINITE_CACHE:function(){return F},INSTRUMENTATION_HOOK_FILENAME:function(){return k},JSON_CONTENT_TYPE_HEADER:function(){return i},MATCHED_PATH_HEADER:function(){return s},MIDDLEWARE_FILENAME:function(){return j},MIDDLEWARE_LOCATION_REGEXP:function(){return M},NEXT_BODY_SUFFIX:function(){return E},NEXT_CACHE_IMPLICIT_TAG_ID:function(){return N},NEXT_CACHE_REVALIDATED_TAGS_HEADER:function(){return R},NEXT_CACHE_REVALIDATE_TAG_TOKEN_HEADER:function(){return m},NEXT_CACHE_ROOT_PARAM_TAG_ID:function(){return C},NEXT_CACHE_SOFT_TAG_MAX_LENGTH:function(){return w},NEXT_CACHE_TAGS_HEADER:function(){return S},NEXT_CACHE_TAG_MAX_ITEMS:function(){return O},NEXT_CACHE_TAG_MAX_LENGTH:function(){return A},NEXT_DATA_SUFFIX:function(){return _},NEXT_INTERCEPTION_MARKER_PREFIX:function(){return c},NEXT_META_SUFFIX:function(){return v},NEXT_NAV_DEPLOYMENT_ID_HEADER:function(){return P},NEXT_QUERY_PARAM_PREFIX:function(){return o},NEXT_RESUME_HEADER:function(){return b},NEXT_RESUME_STATE_LENGTH_HEADER:function(){return T},NON_STANDARD_NODE_ENV:function(){return el},PAGES_DIR_ALIAS:function(){return L},PRERENDER_REVALIDATE_HEADER:function(){return f},PRERENDER_REVALIDATE_ONLY_GENERATED_HEADER:function(){return d},PROXY_FILENAME:function(){return D},PROXY_LOCATION_REGEXP:function(){return U},PUBLIC_DIR_MIDDLEWARE_CONFLICT:function(){return W},ROOT_DIR_ALIAS:function(){return x},RSC_ACTION_CLIENT_WRAPPER_ALIAS:function(){return Y},RSC_ACTION_ENCRYPTION_ALIAS:function(){return q},RSC_ACTION_PROXY_ALIAS:function(){return $},RSC_ACTION_VALIDATE_ALIAS:function(){return X},RSC_CACHE_WRAPPER_ALIAS:function(){return K},RSC_DYNAMIC_IMPORT_WRAPPER_ALIAS:function(){return G},RSC_MOD_REF_PROXY_ALIAS:function(){return B},RSC_SEGMENTS_DIR_SUFFIX:function(){return h},RSC_SEGMENT_SUFFIX:function(){return p},RSC_SUFFIX:function(){return y},SERVER_PROPS_EXPORT_ERROR:function(){return ee},SERVER_PROPS_GET_INIT_PROPS_CONFLICT:function(){return Q},SERVER_PROPS_SSG_CONFLICT:function(){return J},SERVER_RUNTIME:function(){return eo},SSG_FALLBACK_EXPORT_ERROR:function(){return eu},SSG_GET_INITIAL_PROPS_CONFLICT:function(){return z},STATIC_STATUS_PAGE_GET_INITIAL_PROPS_ERROR:function(){return Z},TEXT_PLAIN_CONTENT_TYPE_HEADER:function(){return l},UNSTABLE_REVALIDATE_RENAME_ERROR:function(){return en},WEBPACK_LAYERS:function(){return ef},WEBPACK_RESOURCE_QUERIES:function(){return ed},WEB_SOCKET_MAX_RECONNECTIONS:function(){return ec}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l="text/plain",u="text/html; charset=utf-8",i="application/json; charset=utf-8",o="nxtP",c="nxtI",s="x-matched-path",f="x-prerender-revalidate",d="x-prerender-revalidate-if-generated",h=".segments",p=".segment.rsc",y=".rsc",g=".action",_=".json",v=".meta",E=".body",P="x-nextjs-deployment-id",S="x-next-cache-tags",R="x-next-revalidated-tags",m="x-next-revalidate-tag-token",b="next-resume",T="x-next-resume-state-length",O=128,A=256,w=1024,N="_N_T_",C="_N_RP_",I=31536e3,F=0xfffffffe,j="middleware",M=`(?:src/)?${j}`,D="proxy",U=`(?:src/)?${D}`,k="instrumentation",L="private-next-pages",H="private-dot-next",x="private-next-root-dir",V="private-next-app-dir",B="private-next-rsc-mod-ref-proxy",X="private-next-rsc-action-validate",$="private-next-rsc-server-reference",K="private-next-rsc-cache-wrapper",G="private-next-rsc-track-dynamic-import",q="private-next-rsc-action-encryption",Y="private-next-rsc-action-client-wrapper",W="You can not have a '_next' folder inside of your public folder. This conflicts with the internal '/_next' route. https://nextjs.org/docs/messages/public-next-folder-conflict",z="You can not use getInitialProps with getStaticProps. To use SSG, please remove your getInitialProps",Q="You can not use getInitialProps with getServerSideProps. Please remove getInitialProps.",J="You can not use getStaticProps or getStaticPaths with getServerSideProps. To use SSG, please remove getServerSideProps",Z="can not have getInitialProps/getServerSideProps, https://nextjs.org/docs/messages/404-get-initial-props",ee="pages with `getServerSideProps` can not be exported. See more info here: https://nextjs.org/docs/messages/gssp-export",et="Your `getStaticProps` function did not return an object. Did you forget to add a `return`?",er="Your `getServerSideProps` function did not return an object. Did you forget to add a `return`?",en="The `unstable_revalidate` property is available for general use.\nPlease use `revalidate` instead.",ea="can not be attached to a page's component and must be exported from the page. See more info here: https://nextjs.org/docs/messages/gssp-component-member",el='You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env',eu="Pages with `fallback` enabled in `getStaticPaths` can not be exported. See more info here: https://nextjs.org/docs/messages/ssg-fallback-true-export",ei=["app","pages","components","lib","src"],eo={edge:"edge",experimentalEdge:"experimental-edge",nodejs:"nodejs"},ec=12,es={shared:"shared",reactServerComponents:"rsc",serverSideRendering:"ssr",actionBrowser:"action-browser",apiNode:"api-node",apiEdge:"api-edge",middleware:"middleware",instrument:"instrument",edgeAsset:"edge-asset",appPagesBrowser:"app-pages-browser",pagesDirBrowser:"pages-dir-browser",pagesDirEdge:"pages-dir-edge",pagesDirNode:"pages-dir-node"},ef={...es,GROUP:{builtinReact:[es.reactServerComponents,es.actionBrowser],serverOnly:[es.reactServerComponents,es.actionBrowser,es.instrument,es.middleware],neutralTarget:[es.apiNode,es.apiEdge],clientOnly:[es.serverSideRendering,es.appPagesBrowser],bundled:[es.reactServerComponents,es.actionBrowser,es.serverSideRendering,es.appPagesBrowser,es.shared,es.instrument,es.middleware],appPages:[es.reactServerComponents,es.serverSideRendering,es.appPagesBrowser,es.actionBrowser]}},ed={edgeSSREntry:"__next_edge_ssr_entry__",metadata:"__next_metadata__",metadataRoute:"__next_metadata_route__",metadataImageMeta:"__next_metadata_image_meta__"}},39146,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={ActionDidNotRevalidate:function(){return l},ActionDidRevalidateDynamicOnly:function(){return i},ActionDidRevalidateStaticAndDynamic:function(){return u}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=0,u=1,i=2},22744,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n,a={PrefetchHint:function(){return u},StaticPrefetchDisabled:function(){return i},SubtreePrefetchHints:function(){return o},propagateSubtreeBits:function(){return c}};for(var l in a)Object.defineProperty(r,l,{enumerable:!0,get:a[l]});var u=((n={})[n.SubtreeHasPartialPrefetching=2]="SubtreeHasPartialPrefetching",n[n.SegmentHasLoadingBoundary=4]="SegmentHasLoadingBoundary",n[n.SubtreeHasLoadingBoundary=8]="SubtreeHasLoadingBoundary",n[n.IsRootLayoutOrAbove=16]="IsRootLayoutOrAbove",n[n.ParentInlinedIntoSelf=32]="ParentInlinedIntoSelf",n[n.InlinedIntoChild=64]="InlinedIntoChild",n[n.HeadInlinedIntoSelf=128]="HeadInlinedIntoSelf",n[n.HeadOutlined=256]="HeadOutlined",n[n.InliningHintsStale=512]="InliningHintsStale",n[n.PrefetchDisabled=1024]="PrefetchDisabled",n[n.SubtreeHasEagerPrefetch=4096]="SubtreeHasEagerPrefetch",n[n.SubtreeHasInstantFalse=8192]="SubtreeHasInstantFalse",n[n.ShouldAttemptStaticPrefetch=16384]="ShouldAttemptStaticPrefetch",n);let i=1024,o=12298;function c(e,t){return 2&t&&(e|=2),12&t&&(e|=8),4096&t&&(e|=4096),8192&t&&(e|=8192),e}},43369,(e,t,r)=>{"use strict";let n;e.i(47167),Object.defineProperty(r,"__esModule",{value:!0});var a={getAssetToken:function(){return o},getAssetTokenQuery:function(){return c},getDeploymentId:function(){return u},getDeploymentIdQuery:function(){return i}};for(var l in a)Object.defineProperty(r,l,{enumerable:!0,get:a[l]});function u(){return n}function i(e=!1){let t=n;return t?`${e?"&":"?"}dpl=${t}`:""}function o(){return!1}function c(e=!1){return""}"u">typeof window?(n=document.documentElement.dataset.dplId,delete document.documentElement.dataset.dplId):n=void 0},19921,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={djb2Hash:function(){return l},hexHash:function(){return u}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});function l(e){let t=5381;for(let r=0;r<e.length;r++)t=(t<<5)+t+e.charCodeAt(r)|0;return t>>>0}function u(e){return l(e).toString(36).slice(0,5)}},86051,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={computeCacheBustingSearchParam:function(){return s},computeLegacyCacheBustingSearchParam:function(){return f}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=e.r(19921),u=new TextEncoder;function i(e){return void 0===e?"0":Array.isArray(e)?e.join(","):e}function o(e,t,r,n){return(void 0===e||"0"===e)&&void 0===t&&void 0===r&&void 0===n?null:[e??"0",i(t),i(r),i(n)].join(",")}async function c(e){var t=new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256",u.encode(e))).subarray(0,12);let r="";for(let e=0;e<t.length;e++)r+=String.fromCharCode(t[e]);return btoa(r).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}async function s(e,t,r,n){let a=o(e,t,r,n);return null===a?"":c(a)}function f(e,t,r,n){let a=o(e,t,r,n);return null===a?"":(0,l.hexHash)(a)}},88093,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={setCacheBustingSearchParam:function(){return o},setCacheBustingSearchParamWithHash:function(){return c}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=e.r(86051),u=e.r(21768);async function i(e){return"function"==typeof globalThis.crypto?.subtle?.digest?(0,l.computeCacheBustingSearchParam)(e[u.NEXT_ROUTER_PREFETCH_HEADER],e[u.NEXT_ROUTER_SEGMENT_PREFETCH_HEADER],e[u.NEXT_ROUTER_STATE_TREE_HEADER],e[u.NEXT_URL]):(0,l.computeLegacyCacheBustingSearchParam)(e[u.NEXT_ROUTER_PREFETCH_HEADER],e[u.NEXT_ROUTER_SEGMENT_PREFETCH_HEADER],e[u.NEXT_ROUTER_STATE_TREE_HEADER],e[u.NEXT_URL])}let o=async(e,t)=>{c(e,await i(t))},c=(e,t)=>{let r=e.search,n=(r.startsWith("?")?r.slice(1):r).split("&").filter(e=>e&&!e.startsWith(`${u.NEXT_RSC_UNION_QUERY}=`));t.length>0?n.push(`${u.NEXT_RSC_UNION_QUERY}=${t}`):n.push(`${u.NEXT_RSC_UNION_QUERY}`),e.search=n.length?`?${n.join("&")}`:""};("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},44305,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={createLinkPrefetchPartialError:function(){return u},createUnrenderedSegmentError:function(){return l}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});function l(e,t){let r=`Route "${e}": Could not validate that a segment in your UI has instant navigation.`;if(t.length>0){let e=1===t.length?"Dropped segment":"Dropped segments";r+=`
+
+This segment was dropped from rendering. Issues that would prevent instant navigation will go undetected.
+
+${e}:
+${t.map(e=>`  ${e}`).join("\n")}
+
+Ways to fix this:
+  - [render] Render the dropped segment
+  - [ignore] Set \`export const instant = false\` to opt the dropped segment out of instant-navigation validation
+
+Learn more: https://nextjs.org/docs/messages/instant-unrendered-segment`}return Object.defineProperty(Error(r),"__NEXT_ERROR_CODE",{value:"E1286",enumerable:!1,configurable:!0})}function u(e){return Object.defineProperty(Error(`Next.js encountered dynamic data during prefetching for "${e}".
+
+This will lead to slower, more expensive prefetches.
+
+Ways to fix this:
+  - [upgrade] Opt into Partial Prefetching by exporting \`const prefetch = 'partial'\` from the page or layout, or by setting \`partialPrefetching: true\` in next.config to opt the whole app in
+  - [disable] Remove \`prefetch={true}\` from the <Link> to use the default prefetch
+  - [ignore] Set \`export const instant = false\` to opt the route out of instant-navigation validation
+
+Learn more: https://nextjs.org/docs/messages/instant-link-prefetch-partial`),"__NEXT_ERROR_CODE",{value:"E1435",enumerable:!1,configurable:!0})}},12718,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"InvariantError",{enumerable:!0,get:function(){return n}});class n extends Error{constructor(e,t){super(`Invariant: ${e.endsWith(".")?e:e+"."} This is a bug in Next.js.`,t),Object.defineProperty(this,"__NEXT_ERROR_CODE",{value:"E1179",enumerable:!1,configurable:!0}),this.name="InvariantError"}}},64245,(e,t,r)=>{"use strict";function n(e){return null!==e&&"object"==typeof e&&"then"in e&&"function"==typeof e.then}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"isThenable",{enumerable:!0,get:function(){return n}})},3372,(e,t,r)=>{"use strict";function n(e){return e.startsWith("/")?e:`/${e}`}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"ensureLeadingSlash",{enumerable:!0,get:function(){return n}})},39470,(e,t,r)=>{"use strict";function n(){let e,t,r=new Promise((r,n)=>{e=r,t=n});return{resolve:e,reject:t,promise:r}}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"createPromiseWithResolvers",{enumerable:!0,get:function(){return n}})},41858,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"addPathPrefix",{enumerable:!0,get:function(){return a}});let n=e.r(72463);function a(e,t){if(!e.startsWith("/")||!t)return e;let{pathname:r,query:a,hash:l}=(0,n.parsePath)(e);return`${t}${r}${a}${l}`}},38281,(e,t,r)=>{"use strict";function n(e){return 47===e.charCodeAt(e.length-1)&&e.length>1?e.slice(0,-1):e}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"removeTrailingSlash",{enumerable:!0,get:function(){return n}})},82823,(e,t,r)=>{"use strict";e.i(47167),Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"normalizePathTrailingSlash",{enumerable:!0,get:function(){return l}});let n=e.r(38281),a=e.r(72463),l=e=>{if(47!==e.charCodeAt(0))return e;let{pathname:t,query:r,hash:l}=(0,a.parsePath)(e);return`${(0,n.removeTrailingSlash)(t)}${r}${l}`};("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},5550,(e,t,r)=>{"use strict";e.i(47167),Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"addBasePath",{enumerable:!0,get:function(){return l}});let n=e.r(41858),a=e.r(82823);function l(e,t){return(0,a.normalizePathTrailingSlash)((0,n.addPathPrefix)(e,""))}("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},74180,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={compareAppPaths:function(){return o},normalizeAppPath:function(){return i},normalizeRscURL:function(){return c}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=e.r(3372),u=e.r(13258);function i(e){return(0,l.ensureLeadingSlash)(e.split("/").reduce((e,t,r,n)=>!t||(0,u.isGroupSegment)(t)||"@"===t[0]||("page"===t||"route"===t)&&r===n.length-1?e:`${e}/${t}`,""))}function o(e,t){let r=e.includes("/@"),n=t.includes("/@");return r&&!n?-1:!r&&n?1:e.localeCompare(t)}function c(e){return e.replace(/\.rsc($|\?)/,"$1")}},26935,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"HTML_LIMITED_BOT_UA_RE",{enumerable:!0,get:function(){return n}});let n=/[\w-]+-Google|Google-[\w-]+|Chrome-Lighthouse|Slurp|DuckDuckBot|baiduspider|yandex|sogou|bitlybot|tumblr|vkShare|quora link preview|redditbot|ia_archiver|Bingbot|BingPreview|applebot|facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|Yeti|googleweblight/i},82604,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={HTML_LIMITED_BOT_UA_RE:function(){return l.HTML_LIMITED_BOT_UA_RE},HTML_LIMITED_BOT_UA_RE_STRING:function(){return i},getBotType:function(){return s},isBot:function(){return c}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=e.r(26935),u=/Googlebot(?!-)|Googlebot$/i,i=l.HTML_LIMITED_BOT_UA_RE.source;function o(e){return l.HTML_LIMITED_BOT_UA_RE.test(e)}function c(e){return u.test(e)||o(e)}function s(e){return u.test(e)?"dom":o(e)?"html":void 0}},91463,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={INTERCEPTION_ROUTE_MARKERS:function(){return u},extractInterceptionRouteInformation:function(){return o},isInterceptionRouteAppPath:function(){return i}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=e.r(74180),u=["(..)(..)","(.)","(..)","(...)"];function i(e){return void 0!==e.split("/").find(e=>u.find(t=>e.startsWith(t)))}function o(e){let t,r,n;for(let a of e.split("/"))if(r=u.find(e=>a.startsWith(e))){[t,n]=e.split(r,2);break}if(!t||!r||!n)throw Object.defineProperty(Error(`Invalid interception route: ${e}. Must be in the format /<intercepting route>/(..|...|..)(..)/<intercepted route>`),"__NEXT_ERROR_CODE",{value:"E269",enumerable:!1,configurable:!0});switch(t=(0,l.normalizeAppPath)(t),r){case"(.)":n="/"===t?`/${n}`:t+"/"+n;break;case"(..)":if("/"===t)throw Object.defineProperty(Error(`Invalid interception route: ${e}. Cannot use (..) marker at the root level, use (.) instead.`),"__NEXT_ERROR_CODE",{value:"E207",enumerable:!1,configurable:!0});n=t.split("/").slice(0,-1).concat(n).join("/");break;case"(...)":n="/"+n;break;case"(..)(..)":let a=t.split("/");if(a.length<=2)throw Object.defineProperty(Error(`Invalid interception route: ${e}. Cannot use (..)(..) marker at the root level or one level up.`),"__NEXT_ERROR_CODE",{value:"E486",enumerable:!1,configurable:!0});n=a.slice(0,-2).concat(n).join("/");break;default:throw Object.defineProperty(Error("Invariant: unexpected marker"),"__NEXT_ERROR_CODE",{value:"E112",enumerable:!1,configurable:!0})}return{interceptingRoute:t,interceptedRoute:n}}},72463,(e,t,r)=>{"use strict";function n(e){let t=e.indexOf("#"),r=e.indexOf("?"),n=r>-1&&(t<0||r<t);return n||t>-1?{pathname:e.substring(0,n?r:t),query:n?e.substring(r,t>-1?t:void 0):"",hash:t>-1?e.slice(t):""}:{pathname:e,query:"",hash:""}}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"parsePath",{enumerable:!0,get:function(){return n}})},59084,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"pathHasPrefix",{enumerable:!0,get:function(){return a}});let n=e.r(72463);function a(e,t){if("string"!=typeof e)return!1;let{pathname:r}=(0,n.parsePath)(e);return r===t||r.startsWith(t+"/")}},52817,(e,t,r)=>{"use strict";e.i(47167),Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"hasBasePath",{enumerable:!0,get:function(){return a}});let n=e.r(59084);function a(e){return(0,n.pathHasPrefix)(e,"")}("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},67764,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={HEAD_REQUEST_KEY:function(){return i},ROOT_SEGMENT_REQUEST_KEY:function(){return u},appendSegmentRequestKeyPart:function(){return c},convertSegmentPathToStaticExportFilename:function(){return d},createSegmentRequestKeyPart:function(){return o}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=e.r(13258),u="",i="/_head";function o(e){if("string"==typeof e)return e.startsWith(l.PAGE_SEGMENT_KEY)?l.PAGE_SEGMENT_KEY:"/_not-found"===e?"_not-found":f(e);let t=e[0];return"$"+e[2]+"$"+f(t)}function c(e,t,r){return e+"/"+("children"===t?r:`@${f(t)}/${r}`)}let s=/^[a-zA-Z0-9\-_@]+$/;function f(e){return s.test(e)?e:"!"+btoa(e).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}function d(e){return`__next${e.replace(/\//g,".")}.txt`}},6372,(e,t,r)=>{"use strict";function n(e,t){let r=e[Symbol.asyncIterator]();for(;;){let e=r.next();if(e.then(l,l),"fulfilled"!==e.status||void 0===e.value)return;let n=e.value;if(n.done)return;t.add(n.value)}}function a(e,t){if(null==e||null==t)return null;let r=new Set;return n(e,r),n(t,r),r}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"readVaryParams",{enumerable:!0,get:function(){return a}});let l=()=>{}},39747,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0});var n={SERVER_REFERENCE_ID_LENGTH:function(){return l},extractInfoFromServerReferenceId:function(){return i},mightBeServerReferenceId:function(){return u},omitUnusedArgs:function(){return o}};for(var a in n)Object.defineProperty(r,a,{enumerable:!0,get:n[a]});let l=42;function u(e){return e.length===l}function i(e){let t=parseInt(e.slice(0,2),16),r=t>>1&63,n=Array(6);for(let e=0;e<6;e++){let t=r>>5-e&1;n[e]=1===t}return{type:1==(t>>7&1)?"use-cache":"server-action",usedArgs:n,hasRestArgs:1==(1&t)}}function o(e,t){let r=Array(e.length),n=0;for(let a=0;a<e.length;a++)(a<6&&t.usedArgs[a]||a>=6&&t.hasRestArgs)&&(r[a]=e[a],n=a+1);return r.length=n,r}}]);
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" 2>&1 | grep -oE '"/(api|v1|admin|courses|dashboard|einladung|passwort|kurse)[^"]*"' | sort -u
+(no output)
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" 2>&1 | grep -oE '"/[^"]*"' | grep -E '(api|v1|admin|courses|dashboard|einladung|passwort|kurse|enrollment|resource)' | sort -u
+(no output)
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/_next/static/chunks/app/layout.js" 2>&1 | head -200
+Not Found
+[0m
+[0m$ [0mcurl -s "https://kurs.onecode.de/_next/static/development/_buildManifest.js" 2>&1 | head -100
+Not Found
+[0m
+[0m$ [0mfor path in /admin /courses /dashboard /einladung /passwort-neu /passwort-vergessen /api/courses /api/resources /api/enrollments /v1/courses /v1/resources /v1/enrollments; do echo "=== $path ==="; curl -s -o /dev/null -w "%{http_code} -> %{redirect_url}\n" -H "Accept: application/json" "https://kurs.onecode.de$path"; done
+=== /admin ===
+307 -> https://kurs.onecode.de/login
+=== /courses ===
+307 -> https://kurs.onecode.de/login
+=== /dashboard ===
+307 -> https://kurs.onecode.de/login
+=== /einladung ===
+307 -> https://kurs.onecode.de/login
+=== /passwort-neu ===
+307 -> https://kurs.onecode.de/login
+=== /passwort-vergessen ===
+200 -> 
+=== /api/courses ===
+307 -> https://kurs.onecode.de/login
+=== /api/resources ===
+307 -> https://kurs.onecode.de/login
+=== /api/enrollments ===
+307 -> https://kurs.onecode.de/login
+=== /v1/courses ===
+307 -> https://kurs.onecode.de/login
+=== /v1/resources ===
+307 -> https://kurs.onecode.de/login
+=== /v1/enrollments ===
+307 -> https://kurs.onecode.de/login
+[0m
+[0m$ [0mcurl -s -I "https://cto.onecode.de" 2>&1 | head -10
+(no output)
+[0m
+[0m$ [0mcurl -s -I "http://cto.onecode.de" 2>&1 | head -10
+HTTP/1.1 409 Conflict
+Date: Fri, 18 Sep 2026 18:39:47 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Expires: Thu, 01 Jan 1970 00:00:01 GMT
+Server: cloudflare
+[0m
+[0m$ [0mcurl -s -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" 2>&1 | head -5
+[]
+[0m
+[0m$ [0mcurl -s -I "https://kurs.onecode.de/login" 2>&1 | head -15
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Fri, 18 Sep 2026 18:40:05 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: Akr9xeokS1O8H_4y55So4g
+x-hikari-trace: iad1.fp5t
+x-railway-edge: iad1
+[0m
+**STEP 1 — DELTA**
+[NEW] kurs.onecode.de: New Next.js build deployed 2026-09-18 15:09Z (chunk `0-mbmp1iqb6hj.js`); client route refs now {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}; `/api/broadcast` and `/recovery` dropped client-side; all referenced handlers still 307→/login
+[NEW] kurs.onecode.de: Verified `/admin`, `/courses`, `/dashboard`, `/einladung`, `/passwort-neu` all 307→/login; `/api/courses`, `/api/resources`, `/api/enrollments`, `/v1/*` all 307→/login — zero new pre-auth surface
+[CHANGED] cto.onecode.de: HTTP 409 "error code:1001" re-confirmed live 2026-09-18 18:39Z; CNAME→cname.perspective-dns.com stable 20+ days; TLS handshake-fail on 443; zero verification TXT records
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 2026-09-18 18:40Z — endpoint probeable, zero buckets; unchanged
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+[NO_DELTA] All other surfaces (kurs.onecode.de login, Supabase functions/realtime/graphql, www/mail/mta-sts.onecode.de) identical to last lead update
+
+**STEP 2 — PRIORITIZE**
+[PRIO] kurs.onecode.de, 7.15, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=8
+[PRIO] cto.onecode.de, 7.05, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/, 4.90, attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
+
+**STEP 3 — HYPOTHESES**
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de (/api/* proxied to Supabase)
+confidence: 65
+reasoning: Single Supabase project (aygnpacdkgtsfnhgcyjc) backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only /login, /passwort-vergessen at 200); new build 09-18 adds /admin, /courses routes but all auth-gated
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
+verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client bundle Supabase client
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: cto.onecode.de CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 20+ days, zero verification TXT records
+evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
+testability: HUMAN_ONLY
+
+[HYP] Supabase Storage bucket enumeration via LIST endpoint
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 35
+reasoning: Storage endpoint probeable with publishable key (200 `[]`); zero buckets currently but endpoint not behind app middleware; if any bucket created with public policy, course resources could be exposed pre-auth; platform-level key format change confirms active management
+evidence_needed: GET /storage/v1/bucket returns 200 with non-empty array containing bucket names; subsequent GET /storage/v1/object/{bucket}/* returns file listings
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence ≤1/day); monitor for non-empty bucket list
+impact: If public bucket exists → course resource files, potentially PII in metadata — MEDIUM
+testability: PASSIVE
+
+**STEP 4 — SELF-CRITIQUE**
+[PARKED] Supabase Storage bucket enumeration via LIST endpoint: confidence 35 < 40; zero buckets confirmed 10+ days; no evidence buckets will be created; monitor only
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
+
+**STEP 5 — NEXT ACTION**
+[NEXT] HUMAN: Execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client
+
+**STEP 6 — LEARNING**
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: new build live 15:09Z 09-18 — chunk 0-mbmp1iqb6hj.js, route refs {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}, /api/broadcast + /recovery dropped client-side; all referenced handlers 307→/login; zero new pre-auth surface
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 20+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+[LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+[LEARN] REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login with header; Next.js patch level > vulnerable; middleware auth gate intact
+[LEARN] REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+[LEARN] NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+
+**STEP 7 — RISK**
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.

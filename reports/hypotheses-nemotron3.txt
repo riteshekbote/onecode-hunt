@@ -1,4 +1,9 @@
-## 2026-09-18 15:10:36 UTC [target] (model nemotron3)
+## 2026-09-18 18:40:59 UTC [target] (model nemotron3)
+[NEW] kurs.onecode.de: New Next.js build deployed 2026-09-18 15:09Z (chunk `0-mbmp1iqb6hj.js`); client route refs now {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}; `/api/broadcast` and `/recovery` dropped client-side; all referenced handlers still 307→/login
+[NEW] kurs.onecode.de: Verified `/admin`, `/courses`, `/dashboard`, `/einladung`, `/passwort-neu` all 307→/login; `/api/courses`, `/api/resources`, `/api/enrollments`, `/v1/*` all 307→/login — zero new pre-auth surface
+[CHANGED] cto.onecode.de: HTTP 409 "error code:1001" re-confirmed live 2026-09-18 18:39Z; CNAME→cname.perspective-dns.com stable 20+ days; TLS handshake-fail on 443; zero verification TXT records
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 2026-09-18 18:40Z — endpoint probeable, zero buckets; unchanged
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: Monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
 [PRIO] kurs.onecode.de, 7.15, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=8
 [PRIO] cto.onecode.de, 7.05, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/, 4.90, attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
@@ -6,7 +11,7 @@
 class: IDOR
 asset: kurs.onecode.de (/api/* proxied to Supabase)
 confidence: 65
-reasoning: Single Supabase project (aygnpacdkgtsfnhgcyjc) backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only /login, /passwort-vergessen at 200)
+reasoning: Single Supabase project (aygnpacdkgtsfnhgcyjc) backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only /login, /passwort-vergessen at 200); new build 09-18 adds /admin, /courses routes but all auth-gated
 evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
 verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client bundle Supabase client
 impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
@@ -33,11 +38,12 @@ testability: PASSIVE
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [NEXT] HUMAN: Execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client
-[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: new build live 15:09Z 09-18 — chunk 0-mbmp1iqb6hj.js, route refs {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}, /api/broadcast + /recovery dropped client-side; all referenced handlers 307→/login; zero new pre-auth surface
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 20+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 20+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
 [LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
 [LEARN] REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login with header; Next.js patch level > vulnerable; middleware auth gate intact
