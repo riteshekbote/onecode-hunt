@@ -364,3 +364,12 @@ TARGET_ORG not configured for onecode; skipping public-org deep scan.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
 ## REPOSCAN 2026-09-18 11:28:31 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-18 15:09:30 UTC
+[HYP] No candidate repos provided
+class: OTHER
+asset: N/A
+confidence: 100
+reasoning: The scope explicitly states "no org candidates". Only one public repo exists under the OneCodeDevs GitHub org (compass — a Jetpack Compose navigation library), which is generic open-source code, not an in-scope asset tied to bugs.olivermaicher.eu. Without designated candidate repos, no meaningful audit can be performed.
+impact: None
+verify_steps: Confirm at bugs.olivermaicher.eu/programs whether OneCode GmbH lists any public repos in scope; the hub currently shows no programs loaded.
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
