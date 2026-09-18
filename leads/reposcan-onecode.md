@@ -373,3 +373,5 @@ reasoning: The scope explicitly states "no org candidates". Only one public repo
 impact: None
 verify_steps: Confirm at bugs.olivermaicher.eu/programs whether OneCode GmbH lists any public repos in scope; the hub currently shows no programs loaded.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-18 18:34:38 UTC
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
