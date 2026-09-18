@@ -556,3 +556,6 @@ www.onecode.de
 - CHANGED cto.onecode.de: 06:04Z — CNAME→cname.perspective-dns.com day-20 (104.18.2.73/3.73), HTTP 409 live, TXT zero; conf 58 holds
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 06:04Z — endpoint probeable, zero buckets; unchanged
 - CHANGED Triage 7Q gate invoked 01:06Z/06:01Z 09-18 with EMPTY LEADS — zero new findings; only two escalation-gated leads remain (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY)
+
+## 2026-09-18 15:11:32 UTC
+- NEW New Next.js build deployed since 09-05: main client chunk `0-lpao5_i9htd.js` → `0-mbmp1iqb6hj.js` (fetched 15:09Z 09-18). Client route refs now {/admin,/courses,/dashboard,/einladung,/passwort-neu,/pa

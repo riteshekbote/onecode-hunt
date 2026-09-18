@@ -1,13 +1,7 @@
-## 2026-09-18 11:29:23 UTC [target] (model nemotron3)
-[CHANGED] kurs.onecode.de: 06:04Z re-probe — /login 200, / 307, /api/broadcast 307, x-middleware-subrequest bypass header still non-bypassing (CVE-2025-29927 negative); pre-auth surface unchanged day-20
-[CHANGED] cto.onecode.de: 06:04Z — CNAME→cname.perspective-dns.com day-20 (104.18.2.73/3.73), HTTP 409 live, TXT zero; conf 58 holds
-[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 06:04Z — endpoint probeable, zero buckets; unchanged
-[CHANGED] Triage 7Q gate invoked 01:06Z/06:01Z 09-18 with EMPTY LEADS — zero new findings; only two escalation-gated leads remain (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY)
+## 2026-09-18 15:10:36 UTC [target] (model nemotron3)
 [PRIO] kurs.onecode.de, 7.15, attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=8
 [PRIO] cto.onecode.de, 7.05, attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/, 4.90, attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/, 4.10, attack_surface=4 business_value=6 tech_exposure=4 gate_ease=3 cloud_surface=9 freshness=2
-[PRIO] www.onecode.de, 2.80, attack_surface=3 business_value=4 tech_exposure=2 gate_ease=10 cloud_surface=5 freshness=1
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de (/api/* proxied to Supabase)
