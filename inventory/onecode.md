@@ -545,3 +545,8 @@ www.onecode.de
 - CHANGED Supabase REST monitor formally closed 09-17 — 26 probes (503↔401) since 09-04, never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
 - CHANGED cto.onecode.de CNAME→cname.perspective-dns.com day-18, TXT zero; unbound/reclaimable; conf 58 holds; HUMAN claim-attempt only proof path — passive probes converged
 - CHANGED kurs.onecode.de pre-auth surface exhaustively re-validated including CVE-2025-29927 (negative) and _next/image SSRF (negative); zero new pre-auth vectors
+
+## 2026-09-18 06:08:40 UTC
+- NEW Live re-probe 06:04Z 09-18 vs last lead 01:09Z 09-18: kurs.onecode.de /login=200 (no Set-Cookie), /=307→/login, /api/broadcast=307→/login, x-middleware-subrequest bypass header STILL non-bypassing (30
+- NEW Live re-probe 06:04Z 09-18: cto.onecode.de CNAME→cname.perspective-dns.com (day-20), HTTP 409 via --resolve, TXT zero at target; aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket=200 — all identical 
+- CHANGED Triage 7Q gate (mimo) invoked 01:06Z + 06:01Z 09-18 with EMPTY LEADS — zero new findings in flight; only the two escalation-gated leads (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY) remain unresolved.
