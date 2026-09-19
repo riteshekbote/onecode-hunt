@@ -577,3 +577,8 @@ www.onecode.de
 ## 2026-09-18 23:24:36 UTC
 
 ## 2026-09-19 01:37:31 UTC
+
+## 2026-09-19 06:39:33 UTC
+- CHANGED kurs.onecode.de: new build live 15:09Z 09-18 (chunk 0-mbmp1iqb6hj.js), client route refs {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}; all referenced handlers 307→/login; 
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 21+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
