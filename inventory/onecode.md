@@ -588,3 +588,13 @@ www.onecode.de
 ## 2026-09-19 14:52:08 UTC
 - NEW kurs.onecode.de: new deploy 11:33Z 09-19 (boot 2a8cgfwu75lsu, module 4310-_brt1a3g) adds pre-auth /datenschutz + /rechtliches — static legal pages, no form action, no /api, contact@onecode.de public; 
 - CHANGED kurs.onecode.de: pre-auth surface now = /login, /passwort-vergessen, /datenschutz, /rechtliches (all 200); /admin,/courses,/dashboard,/api/*,/v1/* remain 307→/login
+
+## 2026-09-19 17:53:37 UTC
+- NEW kurs.onecode.de: live re-diff 17:52Z 09-19 — /login 200 (railway-hikari, lax1.e74w, no Set-Cookie), main chunk `0-mbmp1iqb6hj.js` sha256 f916f314... unchanged since 15:09Z 09-18 build; module `4310-_b
+- CHANGED None — cto.onecode.de CNAME→cname.perspective-dns.com live re-confirmed day-23 (17:52Z); storage/functions/realtime/REST states unchanged across 20+ cycles.
+- NEW kurs.onecode.de: pre-auth surface expanded to `/datenschutz` + `/rechtliches` (static legal pages, 200, prerendered, no forms/API) — confirmed live 09-19 11:33Z deploy
+- CHANGED kurs.onecode.de: pre-auth surface = `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` (all 200); `/admin`, `/courses`, `/dashboard`, `/api/*`, `/v1/*` remain 307→/login
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; HTTP 409 "error code:1001" on port 80; TLS handshake failure on 443; zero verification TXT records
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` confirmed — endpoint probeable with `sb_publishable_` key, zero buckets
+- CHANGED Supabase REST `/rest/v1/`: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative; `_next/image` SSRF negative; pre-auth surface exhaustively validated

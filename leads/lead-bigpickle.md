@@ -3953,3 +3953,34 @@ testability: HUMAN_ONLY
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 14:50Z; Bearer-only now 400 "Invalid Compact JWS" → apikey header required; platform key-handling hardening, no exposure.
 [LEARN] REJECTED MISCONFIG @ all: 14:50Z cycle — legal pages static (zero /api), chunk unchanged, all passive monitors closed/converged day-23.
 [RISK] onecode: 62 — unchanged day-23. All pre-auth/serverless monitors closed; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites) + cto dangling-CNAME (58, HUMAN claim). No passive step moves the needle; only HUMAN actions advance either lead.
+## 2026-09-19 17:53:17 UTC [target] (model bigpickle)
+[NEW] kurs.onecode.de: live re-diff 17:52Z 09-19 — /login 200 (railway-hikari, lax1.e74w, no Set-Cookie), main chunk `0-mbmp1iqb6hj.js` sha256 f916f314... unchanged since 15:09Z 09-18 build; module `4310-_brt1a3g` route literals only {/admin,/courses,/datenschutz,/rechtliches}, zero /api refs; mixed-generation co-residency persists → no new deploy since 11:33Z.
+[CHANGED] None — cto.onecode.de CNAME→cname.perspective-dns.com live re-confirmed day-23 (17:52Z); storage/functions/realtime/REST states unchanged across 20+ cycles.
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,5.75,cloud_surface=10/gate_ease=10 (direct endpoints pre-auth probeable) — but every constituent hypothesis converged or closed.
+[PRIO] kurs.onecode.de,5.60,business_value=8/tech_exposure=7 (pre-auth exhausted; BOLA sole live lead, gate_ease=2 invite-gated).
+[PRIO] cto.onecode.de,5.30,gate_ease=10,dangling-CNAME proof-path converged 10+ days.
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-23; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy missing user_id predicate. REST gateway 26 probes (503↔401) never 200+rows, monitor closed; storage 200 `[]`; chunk re-diff 17:52Z = zero new surface; flush 3 cycles today unchanged.
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / enrollment / course-resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: 17:52Z dig — CNAME→cname.perspective-dns.com day-23 (pure CNAME, no verification TXT), HTTP 409 "error code:1001" + TLS handshake-fail; documented Perspective custom-subdomain CNAME target = unbound/reclaimable. Passive probes converged 10+ days.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[PARKED] Storage public-bucket exposure @ aygnpacdkgtsfnhgcyjc.supabase.co: zero buckets for 15+ days falsifies exposure class; functions 404 / realtime 401 / REST monitor closed. No <40 hypothesis freshly generated.
+[FINAL] BOLA/RLS @ kurs.onecode.de (65) — unchanged, sole escalation-gated lead with concrete AUTH_HELPED verify steps.
+[FINAL] cto CNAME @ cto.onecode.de (58) — unchanged, HUMAN_ONLY proof path; passive probes fully converged.
+[NEXT] HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade. No PROBE productive: chunk re-diff consumed (f916f314 unchanged), legal surface consumed, all passive monitors closed.
+[LEARN] REJECTED MISCONFIG @ all: 17:52Z cycle — chunk hash f916f314 unchanged, module 4310-_brt1a3g route literals consumed, cto CNAME day-23 stable, /login 200; zero deltas; passive recon fully converged day-23.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: mixed-generation co-residency (old chunk 0-lpao5_i9htd.js + new) still served pre-auth; no runtime exposure — all referenced handlers 307→/login.
+[RISK] onecode: 62 — unchanged day-23. All pre-auth/serverless monitors closed; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites) + cto dangling-CNAME (58, HUMAN claim). No passive step moves the needle; only HUMAN actions advance either lead.
