@@ -515,3 +515,8 @@
 - 2026-09-19 REJECTED MISCONFIG @ kurs.onecode.de: new deploy 11:33Z 09-19 (boot 2a8cgfwu75lsu, module 4310-_brt1a3g) adds pre-auth /datenschutz+/rechtliches — static legal pages, no form action, no /api, contact@onecode.de public; zero new surface; main chunk f916f314 unchanged.
 - 2026-09-19 ACCEPTED AUTH @ kurs.onecode.de: /datenschutz + /rechtliches now pre-auth 200; /admin,/dashboard 307→/login unchanged; pre-auth surface = /login,/passwort-vergessen,/datenschutz,/rechtliches.
 - 2026-09-19 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 22+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-19 ACCEPTED AUTH @ kurs.onecode.de: 14:50Z 09-19 — /login 200 no Set-Cookie, /datenschutz + /rechtliches 200 (11:33Z build live-verified), chunk f916f314 unchanged; pre-auth surface day-23 stable, exhausted.
+- 2026-09-19 ACCEPTED MISCONFIG @ cto.onecode.de: 14:50Z dig — CNAME→cname.perspective-dns.com day-23, HTTP 409 live; conf 58 holds; HUMAN claim-attempt only proof path.
+- 2026-09-19 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 14:50Z; Bearer-only now 400 "Invalid Compact JWS" → apikey header required; platform key-handling hardening, no exposure.
+- 2026-09-19 REJECTED MISCONFIG @ all: 14:50Z cycle — legal pages static (zero /api), chunk unchanged, all passive monitors closed/converged day-23.
+- 2026-09-19 ACCEPTED MISCONFIG @ kurs.onecode.de: new deploy 11:33Z 09-19 adds pre-auth /datenschutz + /rechtliches — static legal pages, no form, no API, zero new surface

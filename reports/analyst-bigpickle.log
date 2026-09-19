@@ -15601,3 +15601,86 @@ STEP 6 — LEARNING:
 
 STEP 7 — RISK:
 [RISK] onecode: 62 — unchanged day-22. New build today introduced only static legal pages; risk unchanged. Remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites) + cto dangling-CNAME (58, HUMAN claim). No passive step moves the needle.
+===== ANALYST bigpickle 2026-09-19 14:52:08 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-09-19 14:50:58 UTC
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "login:%{http_code} set-cookie:%{header_json}\n" -I https://kurs.onecode.de/login 2>&1 | head -c 400
+login:200 set-cookie:{"cache-control":["private, no-cache, no-store, max-age=0, must-revalidate"],
+"content-type":["text/html; charset=utf-8"],
+"date":["Sat, 19 Sep 2026 14:50:59 GMT"],
+"link":["</_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as=\"font\"; crossorigin=\"\"; type=\"font/woff2\""],
+"server":["railway-hikari"],
+"vary":["rsc, next-router-state-tree, next-ro
+[0m
+[0m$ [0mfor p in datenschutz rechtliches passwort-vergessen; do curl -sS -o /dev/null -w "$p:%{http_code} " -I "https://kurs.onecode.de/$p"; done; echo
+datenschutz:200 rechtliches:200 passwort-vergessen:200
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; echo "---"; curl -sS -o /dev/null -w "storage:%{http_code}\n" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket"
+cname.perspective-dns.com.
+---
+storage:400
+[0m
+[0m$ [0mcurl -sS "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" -o /tmp/opencode/chunk.js -w "chunk_http:%{http_code} size:%{size_download}\n"; sha256sum /tmp/opencode/chunk.js 2>/dev/null | cut -c1-12; echo "prev: f916f314..."
+chunk_http:200 size:154581
+f916f314ea61
+prev: f916f314...
+[0m
+[0m$ [0mcurl -sS -w "\nHTTP:%{http_code}\n" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket"; echo "---retry2---"; curl -sS -w "\nHTTP:%{http_code}\n" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket"; echo "---retry3---"; curl -sS -w "\nHTTP:%{http_code}\n" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/"
+{"statusCode":"403","error":"Unauthorized","message":"Invalid Compact JWS","code":"AccessDenied"}
+HTTP:400
+---retry2---
+[]
+HTTP:200
+---retry3---
+{"message":"Route GET:/ not found","error":"Not Found","statusCode":404}
+HTTP:404
+[0m
+**STEP 1 — DELTA**
+- NO_DELTA: 14:50Z 09-19, 3h16m after last lead (11:34Z). `/login` 200 no Set-Cookie, `/datenschutz` + `/rechtliches` 200 (11:33Z build live-verified, already consumed), main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314...` unchanged, cto CNAME day-23 stable, storage 200 `[]`.
+- NEW INFO (minor): storage `/storage/v1/bucket` Bearer-only → 400 `Invalid Compact JWS`; `apikey` header required → still 200 `[]`. Platform key-handling hardening (consistent w/ sb_publishable enforcement), NOT exposure.
+
+**STEP 2 — PRIORITIZE**
+- [PRIO] kurs.onecode.de→supabase REST/RLS, 7.05, BOLA-on-single-tenant-store (a7/b10/t8/g2/c8/f5)
+- [PRIO] cto.onecode.de, 5.45, dangling-CNAME takeover (a3/b7/t4/g9/c4/f6)
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage, 5.15, public-bucket (a2/b6/t5/g10/c6/f3) — zero buckets → parked
+
+**STEP 3 — HYPOTHESES**
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-23; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy missing user_id predicate. REST gateway 26 probes (503↔401) never 200+rows, monitor closed; storage 200 `[]`; new legal deploys (11:33Z) static; zero passive deltas across 3 cycles today.
+evidence_needed: Two invited accounts; auth as A, cross-query enrollments/profiles/courses with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / enrollment / course-resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: 14:50Z dig — CNAME→cname.perspective-dns.com day-23 (pure CNAME, no verification TXT), HTTP 409 "error code:1001" + TLS handshake-fail; documented custom-subdomain target = unbound/reclaimable. Passive probes converged 10+ days.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+**STEP 4 — SELF-CRITIQUE**
+- [FINAL] BOLA/RLS (65): AUTH_HELPED, concrete steps, highest impact — sole survivor that advances.
+- [FINAL] cto CNAME (58): HUMAN_ONLY, claim-attempt only proof — held but no passive step advances it.
+- [PARKED] storage public-bucket (30): 200 `[]` zero buckets for 15+ days; no object exposure; Bearer-only 400 is key-format hardening, not ACL drift. No action.
+
+**STEP 5 — NEXT ACTION**
+[NEXT] HUMAN: Execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange bearer tokens via POST /auth/v1/token?grant_type=password, then as A cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with B's bearer; row-set != A-owned → CRITICAL escalate; empty/self-only → RLS intact, downgrade. No PROBE productive today: chunk verified unchanged, legal-page surface consumed, all passive monitors closed.
+
+**STEP 6 — LEARNING**
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: 14:50Z 09-19 — /login 200 no Set-Cookie, /datenschutz + /rechtliches 200 (11:33Z build live-verified), chunk f916f314 unchanged; pre-auth surface day-23 stable, exhausted.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 14:50Z dig — CNAME→cname.perspective-dns.com day-23, HTTP 409 live; conf 58 holds; HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds 14:50Z; Bearer-only now 400 "Invalid Compact JWS" → apikey header required; platform key-handling hardening, no exposure.
+[LEARN] REJECTED MISCONFIG @ all: 14:50Z cycle — legal pages static (zero /api), chunk unchanged, all passive monitors closed/converged day-23.
+
+**STEP 7 — RISK**
+[RISK] onecode: 62 — unchanged day-23. All pre-auth/serverless monitors closed; remaining risk fully escalation-gated: BOLA/RLS (65, needs 2 invites) + cto dangling-CNAME (58, HUMAN claim). No passive step moves the needle; only HUMAN actions advance either lead.

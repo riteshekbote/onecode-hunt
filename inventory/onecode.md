@@ -584,3 +584,7 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
 
 ## 2026-09-19 11:36:54 UTC
+
+## 2026-09-19 14:52:08 UTC
+- NEW kurs.onecode.de: new deploy 11:33Z 09-19 (boot 2a8cgfwu75lsu, module 4310-_brt1a3g) adds pre-auth /datenschutz + /rechtliches — static legal pages, no form action, no /api, contact@onecode.de public; 
+- CHANGED kurs.onecode.de: pre-auth surface now = /login, /passwort-vergessen, /datenschutz, /rechtliches (all 200); /admin,/courses,/dashboard,/api/*,/v1/* remain 307→/login
