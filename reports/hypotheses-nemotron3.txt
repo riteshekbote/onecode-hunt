@@ -1,4 +1,4 @@
-## 2026-09-19 17:53:29 UTC [target] (model nemotron3)
+## 2026-09-19 20:23:05 UTC [target] (model nemotron3)
 [NEW] kurs.onecode.de: pre-auth surface expanded to `/datenschutz` + `/rechtliches` (static legal pages, 200, prerendered, no forms/API) — confirmed live 09-19 11:33Z deploy
 [CHANGED] kurs.onecode.de: pre-auth surface = `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` (all 200); `/admin`, `/courses`, `/dashboard`, `/api/*`, `/v1/*` remain 307→/login
 [CHANGED] cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; HTTP 409 "error code:1001" on port 80; TLS handshake failure on 443; zero verification TXT records
