@@ -1,4 +1,4 @@
-## 2026-09-18 23:23:42 UTC [target] (model nemotron3)
+## 2026-09-19 01:36:52 UTC [target] (model nemotron3)
 [PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de,6.75,attack_surface=6 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=8
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
@@ -15,7 +15,7 @@ testability: AUTH_HELPED
 class: MISCONFIG
 asset: cto.onecode.de
 confidence: 58
-reasoning: cto.onecode.de CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 20+ days, zero verification TXT records
+reasoning: cto.onecode.de CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 21+ days, zero verification TXT records
 evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de
 verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
 impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
@@ -34,7 +34,7 @@ testability: PASSIVE
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [NEXT] HUMAN: Execute the BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both hashed bearer tokens via POST /auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client
 [LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: new build live 15:09Z 09-18 — chunk 0-mbmp1iqb6hj.js, route refs {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}, /api/broadcast + /recovery dropped client-side; all referenced handlers 307→/login; zero new pre-auth surface
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 20+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 21+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions

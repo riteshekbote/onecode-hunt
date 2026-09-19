@@ -3861,3 +3861,22 @@ evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 
 verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition; record before/after bodies.
 impact: MEDIUM-HIGH — attacker-controlled content on trusted *.onecode.de; phishing + TLS/trust abuse.
 testability: HUMAN_ONLY
+## 2026-09-19 01:35:26 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-22; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy missing user_id predicate. Chunk hash unchanged 15:09Z-now (no deploy), all /admin,/courses,/api/*,/v1 307→/login; REST gateway 26 probes (503↔401) never 200+rows, monitor closed. No passive step left.
+evidence_needed: Two invited accounts; auth as A, cross-query with B's bearer → row-set != A-owned.
+verify_steps: HUMAN/AUTH_HELPED: 2 invites via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; cross-query /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with both bearers.
+impact: CRITICAL — cross-tenant PII / enrollment / course-resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: day-22 dig — CNAME→cname.perspective-dns.com (pure CNAME, no verification TXT), HTTP 409 "error code:1001" + TLS handshake-fail; documented Perspective custom-subdomain CNAME target = unbound/reclaimable. Passive probes fully converged 9+ days.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition.
+verify_steps: HUMAN: register Perspective → add custom domain cto.onecode.de → monitor HTTP status transition, record before/after bodies.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY

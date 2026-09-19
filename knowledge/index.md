@@ -494,3 +494,14 @@
 - 2026-09-18 ACCEPTED MISCONFIG @ kurs.onecode.de: 21:15Z 09-18 — chunk 0-mbmp1iqb6hj.js sha256 f916f314... unchanged since 15:09Z build; /login 200 serving co-resident old boot chunk; no deploy in ~3h; build-diff cadence = on-deploy only, not time-based.
 - 2026-09-18 ACCEPTED MISCONFIG @ cto.onecode.de: 21:15Z dig — CNAME→cname.perspective-dns.com day-21 (dig raw CNAME, HTTP 409 live); conf 58 holds; no verification TXT; HUMAN claim-attempt only proof path.
 - 2026-09-18 REJECTED MISCONFIG @ all: 21:15Z cycle — chunk diff + route-literal scan + CNAME re-check yield zero deltas; all passive monitors confirmed converged/closed.
+- 2026-09-19 ACCEPTED MISCONFIG @ kurs.onecode.de: new build live 15:09Z 09-18 — chunk 0-mbmp1iqb6hj.js, route refs {/admin,/courses,/dashboard,/einladung,/passwort-neu,/passwort-vergessen}, /api/broadcast + /recovery dropped client-side; all referenced handlers 307→/login; zero new pre-auth surface
+- 2026-09-19 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 21+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-19 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-19 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+- 2026-09-19 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+- 2026-09-19 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+- 2026-09-19 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-19 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-19 REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login with header; Next.js patch level > vulnerable; middleware auth gate intact
+- 2026-09-19 REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+- 2026-09-19 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
