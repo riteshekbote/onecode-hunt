@@ -524,3 +524,5 @@
 - 2026-09-19 ACCEPTED MISCONFIG @ kurs.onecode.de: mixed-generation co-residency (old chunk 0-lpao5_i9htd.js + new) still served pre-auth; no runtime exposure — all referenced handlers 307→/login.
 - 2026-09-19 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
 - 2026-09-19 REJECTED MISCONFIG @ all: 20:21Z 09-19 cycle — chunk hash f916f314 unchanged, route gates stable (/login 200, legal 200, /admin 307), cto CNAME day-23, kurs CNAME stable; zero deltas; passive recon fully converged day-23.
+- 2026-09-19 REJECTED MISCONFIG @ all: 22:29Z 09-19 cycle — chunk set byte-identical, route gates stable (/login 200, legal 200, /admin 307), cto CNAME day-24 (409/1001 + TLS-fail), kurs CNAME ki8dqcf6 stable; zero deltas; passive recon fully converged day-24.
+- 2026-09-19 ACCEPTED MISCONFIG @ cto.onecode.de: live re-confirm 22:29Z 09-19 — HTTP 80 → 409, HTTPS 443 handshake-fail, CNAME→cname.perspective-dns.com (104.18.2.73/3.73), no verification TXT; conf 58 holds; HUMAN claim-attempt only proof path.

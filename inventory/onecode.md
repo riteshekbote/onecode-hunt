@@ -606,3 +606,23 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` confirmed — endpoint probeable with `sb_publishable_` key, zero buckets
 - CHANGED Supabase REST `/rest/v1/`: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative; `_next/image` SSRF negative; pre-auth surface exhaustively validated
+
+## 2026-09-19 22:32:25 UTC
+- NEW kurs.onecode.de: pre-auth surface expanded to `/datenschutz` + `/rechtliches` (static legal pages, 200, prerendered, no forms/API) — confirmed live 09-19 11:33Z deploy
+- CHANGED kurs.onecode.de: pre-auth surface = `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` (all 200); `/admin`, `/courses`, `/dashboard`, `/api/*`, `/v1/*` remain 307→/login
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; HTTP 409 "error code:1001" on port 80; TLS handshake failure on 443; zero verification TXT records
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` confirmed — endpoint probeable with `sb_publishable_` key, zero buckets
+- CHANGED Supabase REST `/rest/v1/`: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative; `_next/image` SSRF negative; pre-auth surface exhaustively validated
+- NEW kurs.onecode.de: pre-auth surface expanded to `/datenschutz` + `/rechtliches` (static legal pages, 200, prerendered, no forms/API) — confirmed live 09-19 11:33Z deploy
+- CHANGED kurs.onecode.de: pre-auth surface = `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` (all 200); `/admin`, `/courses`, `/dashboard`, `/api/*`, `/v1/*` remain 307→/login
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; HTTP 409 "error code:1001" on port 80; TLS handshake failure on 443; zero verification TXT records
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` confirmed — endpoint probeable with `sb_publishable_` key, zero buckets
+- CHANGED Supabase REST `/rest/v1/`: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative; `_next/image` SSRF negative; pre-auth surface exhaustively validated
+- NEW kurs.onecode.de: pre-auth surface expanded to `/datenschutz` + `/rechtliches` (static legal pages, 200, prerendered, no forms/API) — confirmed live 09-19 11:33Z deploy
+- CHANGED kurs.onecode.de: pre-auth surface = `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` (all 200); `/admin`, `/courses`, `/dashboard`, `/api/*`, `/v1/*` remain 307→/login
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; HTTP 409 "error code:1001" on port 80; TLS handshake failure on 443; zero verification TXT records
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` confirmed — endpoint probeable with `sb_publishable_` key, zero buckets
+- CHANGED Supabase REST `/rest/v1/`: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative; `_next/image` SSRF negative; pre-auth surface exhaustively validated
