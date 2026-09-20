@@ -423,3 +423,5 @@ reasoning: The passive verifier extracts URLs from AI-generated lead files using
 impact: Low — the verifier runs in GitHub Actions CI with limited network egress; however, it could be leveraged for SSRF against internal services if the CI runner has access to internal networks. The primary risk is outbound HTTP requests to attacker-controlled URLs from the CI environment.
 verify_steps: Passive — review the URL extraction regex and allowlist logic at `.github/workflows/hunt.yml:216-219`; confirm `PROBE_ALLOW` uses substring matching rather than domain-suffix matching; verify CI runner network isolation prevents internal SSRF.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-20 05:24:23 UTC
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
