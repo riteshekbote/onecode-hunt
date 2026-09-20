@@ -543,3 +543,4 @@
 - 2026-09-20 REJECTED MISCONFIG @ all: 05:27Z 09-20 cycle — /login 200 (no Set-Cookie, iad1), chunk set byte-identical to 09-19 22:29Z, cto CNAME day-26 (TXT zero), kurs CNAME ki8dqcf6 stable, storage 200 `[]`; zero deltas; passive recon fully converged day-26.
 - 2026-09-20 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 25+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
 - 2026-09-20 REJECTED MISCONFIG @ all: 10:07Z 09-20 cycle — /login 200, chunk set byte-identical to 09-19, cto CNAME day-27, storage 200 `[]`; zero deltas; passive recon fully converged day-26+, no further probe value.
+- 2026-09-20 REJECTED MISCONFIG @ all: 09-20 cycle — /login 200, /datenschutz 200, /admin 307, storage 200 `[]`, cto CNAME→cname.perspective-dns.com day-27 (409/1001); zero deltas; passive recon fully converged, no further probe value.

@@ -1,4 +1,4 @@
-## 2026-09-20 10:11:27 UTC [target] (model nemotron3)
+## 2026-09-20 14:23:05 UTC [target] (model nemotron3)
 [PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
