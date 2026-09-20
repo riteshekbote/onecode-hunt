@@ -393,3 +393,33 @@ TARGET_ORG not configured for onecode; skipping public-org deep scan.
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
 ## REPOSCAN 2026-09-19 22:29:37 UTC
 TARGET_ORG not configured for onecode; skipping public-org deep scan.
+## REPOSCAN 2026-09-20 00:25:35 UTC
+[HYP] Supabase publishable key committed in plaintext across inventory commits
+class: SECRET
+asset: inventory/onecode.md (lines 115, 123, 134, 153+)
+confidence: 85
+reasoning: The Supabase publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` is committed in plaintext at least 15 times across inventory snapshots. While Supabase publishable/anon keys are client-facing by design, the `sb_publishable_` format is the newer Supabase key format that grants access to Storage, REST, Functions, and Realtime endpoints. Currently Storage returns 200 with empty buckets, but any future bucket creation would be immediately enumerable by anyone with this key. The key bypasses Next.js middleware entirely and hits Supabase service endpoints directly.
+impact: Medium — enables pre-auth enumeration of Supabase Storage, Functions, Realtime, and REST endpoints for the `aygnpacdkgtsfnhgcyjc` project; risk elevates to High if any storage bucket is created with permissive policies.
+verify_steps: Passive — confirm `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` still present in current HEAD of `inventory/onecode.md` via `git show HEAD:inventory/onecode.md | grep sb_publishable`; verify endpoint response with `curl -s -o /dev/null -w '%{http_code}' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket'`
+[HYP] Incomplete secret redaction in CI commit step allows credential leakage to git history
+class: MISCONFIG
+asset: .github/workflows/hunt.yml:241
+confidence: 90
+reasoning: The commit step's `sed` redaction regex only covers `AIza*`, `ghp_*`, and `AKIA*` patterns. It does NOT redact `sb_publishable_*` keys, Supabase project IDs, sha256 key hashes, or any other credential format. The inventory/onecode.md file contains the full Supabase publishable key in plaintext across many commits, and the redaction logic never touches it. Additionally, the redaction is partial — it only masks characters 7-14+ of matched patterns, leaving prefixes and suffixes intact.
+impact: Medium — all secrets captured in AI analyst output will be committed to git history with only partial redaction; the `sb_publishable_` key and Supabase project ID `aygnpacdkgtsfnhgcyjc` are already in the permanent git history.
+verify_steps: Passive — inspect the `sed` regex in `.github/workflows/hunt.yml:241` and verify it does not include `sb_publishable` or `aygnpacdkgtsfnhgcyjc` patterns; run `git log -p --all -- inventory/onecode.md | grep 'sb_publishable' | wc -l` to count leaked key instances in history.
+[HYP] Overly permissive GitHub Actions workflow permissions
+class: MISCONFIG
+asset: .github/workflows/hunt.yml:8-10
+confidence: 70
+reasoning: `hunt.yml` declares `contents: write` and `actions: write`. The `actions: write` permission is not used by any step in the workflow (the workflow only checks out code, runs opencode, and pushes commits). Excess permissions violate the principle of least privilege and increase blast radius if the workflow is compromised.
+impact: Low-Medium — unnecessary `actions: write` permission could allow a compromised workflow step to trigger or cancel other workflow runs.
+verify_steps: Passive — audit all `steps` in `.github/workflows/hunt.yml` and confirm none use `actions: write` capability (no `workflow_dispatch`, `workflow_run`, or `actions/*` API calls beyond checkout/upload/download).
+[HYP] SSRF-adjacent URL follower in passive verifier with insufficient allowlist enforcement
+class: SSRF
+asset: .github/workflows/hunt.yml:207-234
+confidence: 55
+reasoning: The passive verifier extracts URLs from AI-generated lead files using a broad regex (`https?://[^\s"\)\]\}]+`), then makes HTTP HEAD requests to them. The `PROBE_ALLOW` filter checks if any allowed substring appears in the URL (via `any(a in u.lower() for a in allow.split('|'))`), but the URL is not strictly validated against a domain allowlist — it only checks for substring presence. A crafted lead containing a URL like `https://kurs.onecode.de.attacker.com/` would pass the filter since `kurs.onecode.de` is a substring. Additionally, the URL is truncated to 300 chars but the `urllib.request` call sends the full URL to the server.
+impact: Low — the verifier runs in GitHub Actions CI with limited network egress; however, it could be leveraged for SSRF against internal services if the CI runner has access to internal networks. The primary risk is outbound HTTP requests to attacker-controlled URLs from the CI environment.
+verify_steps: Passive — review the URL extraction regex and allowlist logic at `.github/workflows/hunt.yml:216-219`; confirm `PROBE_ALLOW` uses substring matching rather than domain-suffix matching; verify CI runner network isolation prevents internal SSRF.
+TARGET_ORG not configured for onecode; skipping public-org deep scan.
