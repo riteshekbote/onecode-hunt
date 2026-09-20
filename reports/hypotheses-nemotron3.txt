@@ -1,4 +1,5 @@
-## 2026-09-20 19:48:49 UTC [target] (model nemotron3)
+## 2026-09-20 22:21:58 UTC [target] (model nemotron3)
+[NEW] NO_DELTA — all surfaces identical to 2026-09-20 19:48Z confirmation: kurs.onecode.de /login 200, /datenschutz 200, / 307→/login, /api/* 307; cto.onecode.de CNAME→cname.perspective-dns.com day-27 (409/1001, TLS-fail); Supabase storage 200 `[]`; REST monitor closed (503↔401 never permissive); functions 404, realtime 401; chunk hash f916f314 stable since 09-18 deploy.
 [PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=9
 [PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
