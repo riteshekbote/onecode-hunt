@@ -626,3 +626,5 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` confirmed — endpoint probeable with `sb_publishable_` key, zero buckets
 - CHANGED Supabase REST `/rest/v1/`: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative; `_next/image` SSRF negative; pre-auth surface exhaustively validated
+
+## 2026-09-20 00:25:15 UTC

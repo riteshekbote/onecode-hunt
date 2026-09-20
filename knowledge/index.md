@@ -526,3 +526,17 @@
 - 2026-09-19 REJECTED MISCONFIG @ all: 20:21Z 09-19 cycle — chunk hash f916f314 unchanged, route gates stable (/login 200, legal 200, /admin 307), cto CNAME day-23, kurs CNAME stable; zero deltas; passive recon fully converged day-23.
 - 2026-09-19 REJECTED MISCONFIG @ all: 22:29Z 09-19 cycle — chunk set byte-identical, route gates stable (/login 200, legal 200, /admin 307), cto CNAME day-24 (409/1001 + TLS-fail), kurs CNAME ki8dqcf6 stable; zero deltas; passive recon fully converged day-24.
 - 2026-09-19 ACCEPTED MISCONFIG @ cto.onecode.de: live re-confirm 22:29Z 09-19 — HTTP 80 → 409, HTTPS 443 handshake-fail, CNAME→cname.perspective-dns.com (104.18.2.73/3.73), no verification TXT; conf 58 holds; HUMAN claim-attempt only proof path.
+- 2026-09-20 REJECTED MISCONFIG @ all: 09-20 cycle — kurs /login 200+/ 307, cto CNAME→cname.perspective-dns.com day-25 (409/1001 via --resolve), storage 200 `[]`, kurs CNAME ki8dqcf6 stable; zero deltas; passive recon fully converged day-25.
+- 2026-09-20 ACCEPTED MISCONFIG @ cto.onecode.de: live re-confirm 09-20 — HTTP 80 → 409, HTTPS 443 handshake-fail, CNAME→cname.perspective-dns.com (104.18.2.73/3.73), no verification TXT; conf 58 holds; HUMAN claim-attempt only proof path.
+- 2026-09-20 ACCEPTED MISCONFIG @ kurs.onecode.de: new deploy 11:33Z 09-19 adds pre-auth /datenschutz + /rechtliches — static legal pages, no form, no API, zero new surface
+- 2026-09-20 ACCEPTED AUTH @ kurs.onecode.de: /datenschutz + /rechtliches now pre-auth 200; /admin,/dashboard 307→/login unchanged; pre-auth surface = /login,/passwort-vergessen,/datenschutz,/rechtliches
+- 2026-09-20 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 23+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-20 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-20 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+- 2026-09-20 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+- 2026-09-20 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+- 2026-09-20 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-20 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-20 REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login; Next.js patch level > vulnerable; middleware auth gate intact
+- 2026-09-20 REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+- 2026-09-20 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
