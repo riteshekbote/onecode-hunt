@@ -659,3 +659,10 @@ www.onecode.de
 - CHANGED Supabase storage/v1/bucket 200 `[]` re-confirmed — endpoint probeable, zero buckets; unchanged
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 never permissive); platform enforces `sb_publishable_` format only
 - CHANGED kurs.onecode.de pre-auth surface stable day-29: /login, /passwort-vergessen, /datenschutz, /rechtliches at 200; all /api/*, /v1, /dashboard, /admin, /courses 307→/login; no new cookie/session signal
+
+## 2026-09-21 17:01:19 UTC
+- NEW Minor: /login Link preload references new woff2 `75affa71d1e2f6a7-s.p.17-aodiw50953.woff2` (fetchable 200, 34KB) — asset re-publish artifact, main chunk sha256 f916f314 + route set identical ⇒ no code
+- CHANGED cto.onecode.de CNAME→cname.perspective-dns.com day-29 stable; HTTP 409/1001 + TLS handshake-fail persist; zero verification TXT; conf 58 holds
+- CHANGED Supabase storage/v1/bucket 200 `[]` re-confirmed — endpoint probeable, zero buckets; unchanged
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 never permissive); platform enforces `sb_publishable_` format only
+- CHANGED kurs.onecode.de pre-auth surface stable day-29: /login, /passwort-vergessen, /datenschutz, /rechtliches at 200; all /api/*, /v1, /dashboard, /admin, /courses 307→/login; no new cookie/session signal

@@ -1,4 +1,4 @@
-## 2026-09-21 10:55:43 UTC [target] (model nemotron3)
+## 2026-09-21 17:01:09 UTC [target] (model nemotron3)
 [NEW] Minor: /login Link preload references new woff2 `75affa71d1e2f6a7-s.p.17-aodiw50953.woff2` (fetchable 200, 34KB) — asset re-publish artifact, main chunk sha256 f916f314 + route set identical ⇒ no code deploy, no new surface
 [CHANGED] cto.onecode.de CNAME→cname.perspective-dns.com day-29 stable; HTTP 409/1001 + TLS handshake-fail persist; zero verification TXT; conf 58 holds
 [CHANGED] Supabase storage/v1/bucket 200 `[]` re-confirmed — endpoint probeable, zero buckets; unchanged
