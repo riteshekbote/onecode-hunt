@@ -17629,3 +17629,144 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 62 — unchanged day-29. All pre-auth/serverless monitors closed/converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim-attempt or report). No passive step moves the needle.
+===== ANALYST bigpickle 2026-09-21 05:13:57 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mecho "cto CNAME:"; dig +short cto.onecode.de CNAME; echo "cto TXT:"; dig +short cto.onecode.de TXT; echo "kurs CNAME:"; dig +short kurs.onecode.de CNAME
+cto CNAME:
+cname.perspective-dns.com.
+cto TXT:
+cname.perspective-dns.com.
+kurs CNAME:
+ki8dqcf6.up.railway.app.
+[0m
+[0m$ [0mcurl -s -o /dev/null -w 'storage:%{http_code}\n' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30'
+storage:200
+[0m
+[0m$ [0mB=$(curl -s https://kurs.onecode.de/login | grep -oE '/_next/static/chunks/[^"'"'"' ]+\.js' | sort -u); echo "chunks:"; echo "$B"; for f in $B; do h=$(curl -s "https://kurs.onecode.de$f" | sha256sum | cut -d' ' -f1); echo "$f $h"; done; curl -s -o /dev/null -w 'login:%{http_code}\n' -I https://kurs.onecode.de/login; curl -s -o /dev/null -w 'root:%{http_code}\n' -I https://kurs.onecode.de/; curl -s -o /dev/null -w 'admin:%{http_code}\n' -I https://kurs.onecode.de/admin; curl -s -o /dev/null -w 'datenschutz:%{http_code}\n' -I https://kurs.onecode.de/datenschutz
+chunks:
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+/_next/static/chunks/0-lpao5_i9htd.js b6d8beece36e7dd507a8c9c5148e6bca3f9874f4fbdccdf7e31c5c3868f77a99
+/_next/static/chunks/0-mbmp1iqb6hj.js f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca
+/_next/static/chunks/08ttfj81-47mu.js dd976fc71297b2c55b3c9eacaa65b11bb1be18efe8392bf5cb2016e7af8b64c8
+/_next/static/chunks/0cz1d0mv5g_q7.js 0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683
+/_next/static/chunks/1a4tqdnsy9k1l.js 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0
+/_next/static/chunks/1ymt1shyhmu-4.js 71d30e67ed90f3e0dce2785e36d27deceafbd20937bcaebabd67666fc2b39d2f
+/_next/static/chunks/2i51e627rllld.js a4590375a64190f57d18b357bf576bf111bd5f02f3c93cad0f65fdf176689f46
+/_next/static/chunks/2n1zydk_92chn.js 557fd5c2674f0411b7083a82d5597a3364f3acfdb7e3be60bed7c2150c49d746
+/_next/static/chunks/2ufbqzbeyam3w.js 598c4def7e716d8bebb8f06ae15fe5097937e3e9d2077e3e484683fa84bbab88
+/_next/static/chunks/3fntmmi971322.js 34ed6abf4c6d0d1bb3dc56d3f133d2a5dbc3a3c89c791deab314e27143ac14ce
+/_next/static/chunks/3mc6dra1m0098.js d9840d6de414f19d28fbe08cc2ddd0aeb95cf379864950a506592a54f4996f31
+/_next/static/chunks/4310-_brt1a3g.js 9e44f13f28628f01da9ed38dad7b9a3c4b423eb84f19ab22c852871dcdf688d4
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js e521a361d3efadbeeb0e36f98e0e62fc6ea197300af1c996c862047d0774a238
+login:200
+root:307
+admin:307
+datenschutz:200
+[0m
+[0m$ [0mecho "storage body:"; curl -s 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' | head -c 500; echo; echo "prod[datenschutz]:"; curl -s https://kurs.onecode.de/prod/datenschutz -o /dev/null -w '%{http_code}\n'; curl -s https://kurs.onecode.de/privacy -o /dev/null -w '%{http_code}\n'; curl -s https://kurs.onecode.de/legal -o /dev/null -w '%{http_code}\n'
+storage body:
+[]
+prod[datenschutz]:
+307
+307
+307
+[0m
+Delta verification this cycle (read-only): chunk set identical (main `0-mbmp1iqb6hj.js` sha256 `f916f314...`), route gates stable, cto CNAME day-30 stable, storage 200. Two final breadth checks — storage body (confirm still `[]`) and an RSC flight payload sniff on pre-auth routes (not previously attempted in 29 days).
+[0m$ [0mecho "RSC /login flight:"; curl -s 'https://kurs.onecode.de/login' -H 'RSC: 1' | head -c 600; echo; echo "RSC /datenschutz:"; curl -s 'https://kurs.onecode.de/datenschutz' -H 'RSC: 1' | head -c 400
+RSC /login flight:
+
+RSC /datenschutz:
+[0m
+RSC returned empty likely due to Content-Encoding. Re-checking with decompression before dismissing.
+[0m$ [0mfor p in login passwort-vergessen datenschutz rechtliches; do echo "== /$p =="; curl -s --compressed -w '\nstatus:%{http_code} size:%{size_download}\n' "https://kurs.onecode.de/$p" -H 'RSC: 1' | head -c 900; echo; done
+== /login ==
+
+status:307 size:0
+
+== /passwort-vergessen ==
+
+status:307 size:0
+
+== /datenschutz ==
+
+status:307 size:0
+
+== /rechtliches ==
+
+status:307 size:0
+[0m
+[0m$ [0mcurl -s -D - -o /dev/null 'https://kurs.onecode.de/login' -H 'RSC: 1' | head -12; echo "---nonRSC baseline---"; curl -s -D - -o /dev/null 'https://kurs.onecode.de/login' | head -6
+HTTP/2 307 
+date: Mon, 21 Sep 2026 05:12:05 GMT
+location: /login?_rsc
+server: railway-hikari
+x-railway-request-id: E6iR_potTsSh3k8nss7a6g
+x-railway-edge: iad1
+x-hikari-trace: iad1.trg5
+
+---nonRSC baseline---
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Mon, 21 Sep 2026 05:12:05 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+[0m
+**STEP 1 — DELTA**
+- [NEW] RSC flight recon (first attempt in campaign): `RSC: 1` on /login,/passwort-vergessen,/datenschutz,/rechtliches → `307 /<route>?_rsc`; middleware auth gate applies to flight navigations identically to HTML — no pre-auth flight payload leak.
+- [CHANGED] None — read-only re-verify: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314...` unchanged (all 13 chunks byte-identical), /login 200, /admin 307, /datenschutz 200, cto CNAME→cname.perspective-dns.com day-30 (no verification TXT), storage `[]`.
+- NO_DELTA vs 00:21Z 09-21 cycle; no deploy signal, no new pre-auth surface.
+
+**STEP 2 — PRIORITIZE**
+- [PRIO] kurs.onecode.de,7.5:attack_surface=6,business_value=8,tech_exposure=8(Next.js+Supabase RLS),gate_ease=2(AUTH_HELPED),cloud_surface=6,freshness=0 | BOLA/RLS remains only actionable lead day-30
+- [PRIO] cto.onecode.de,6.0:attack_surface=4,business_value=7,tech_exposure=5(dangling CNAME),gate_ease=0(HUMAN),cloud_surface=7,freshness=0 | 409/1001 stable day-30
+
+**STEP 3 — HYPOTHESES**
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-30; UUID PKs defeat ID-guess BOLA; vector = SELECT policy lacking user_id predicate. REST monitor closed 09-17 (26 probes, never 200+rows); chunk set byte-identical this cycle, zero runtime delta.
+evidence_needed: as account A query {profiles,enrollments,courses} carrying account B's bearer → row-set ≠ A-owned.
+verify_steps: AUTH_HELPED: 2 invited accounts via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; as A GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization Bearer <B>.
+impact: CRITICAL — cross-tenant PII/enrollment/resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 09-21 — pure CNAME→cname.perspective-dns.com (A 104.18.2.73/3.73), no verification TXT, HTTP 409/1001 + 443 TLS-fail since 09-05; documented custom-subdomain CNAME = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in a fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: vendor-authorized registration + add custom domain → monitor HTTP status transition (before/after bodies). Else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+**STEP 4 — SELF-CRITIQUE**
+- [PARKED] RSC flight payload recon on /datenschutz+/rechtliches: all flight navigations 307→?_rsc; gate identical for RSC/HTML; static pages exposable only with supabase url+publishable key already public in bundle — zero leak value.
+- [PARKED] storage/prod|privacy|legal aliases: 200 `[]`, all aliases 307 — no hidden routes.
+- [FINAL] BOLA/RLS (65, AUTH_HELPED) > cto CNAME (58, HUMAN_ONLY). Both escalation-gated; no passive step advances either.
+
+**STEP 5 — NEXT ACTION**
+[NEXT] HUMAN: Confirm bug-bounty authorization for two invited synthetic accounts, then execute BOLA escalation — 2 invites via kurs.onecode.de/einladung; exchange bearer tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password; as A GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>; non-A row-set → CRITICAL; empty/self-only → RLS intact (65→30). No PROBE productive — chunk byte-identical, route gates stable, all passive monitors closed.
+
+**STEP 6 — LEARNING**
+- [LEARN] REJECTED MISCONFIG @ kurs.onecode.de: `RSC: 1` flight navigation 307→<route>?_rsc on all 4 pre-auth routes — middleware gates RSC data requests identically; no pre-auth flight payload leak, angle closed day-30.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: `[]` re-confirmed 05:1xZ 09-21 — probeable, zero buckets; unchanged.
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-30 (TXT none at host), HTTP 409/1001 + TLS-fail persist; conf 58 holds; HUMAN claim-attempt only proof path.
+
+**STEP 7 — RISK**
+[RISK] onecode: 62 — unchanged day-30. All pre-auth/serverless/RSC monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim or report). No passive step moves the needle.
