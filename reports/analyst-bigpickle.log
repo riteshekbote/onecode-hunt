@@ -17770,3 +17770,82 @@ testability: HUMAN_ONLY
 
 **STEP 7 — RISK**
 [RISK] onecode: 62 — unchanged day-30. All pre-auth/serverless/RSC monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim or report). No passive step moves the needle.
+===== ANALYST bigpickle 2026-09-21 10:55:56 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /dev/null -D - --max-time 15 -H "User-Agent: recon" https://kurs.onecode.de/login | head -20; echo "---CTO---"; curl -s -o /dev/null -D - --max-time 15 -H "User-Agent: recon" --resolve cto.onecode.de:80:104.18.2.73 http://cto.onecode.de/ | head -8
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Mon, 21 Sep 2026 10:52:05 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: z23a4_bTRvSmjyHwEuroCg
+x-railway-edge: iad1
+x-hikari-trace: iad1.dh1s
+
+---CTO---
+HTTP/1.1 409 Conflict
+Date: Mon, 21 Sep 2026 10:52:05 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; echo "---TXT---"; dig +short cto.onecode.de TXT; echo "---STORAGE---"; curl -s --max-time 15 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket; echo; echo "---KURS CNAME---"; dig +short kurs.onecode.de CNAME
+cname.perspective-dns.com.
+---TXT---
+cname.perspective-dns.com.
+---STORAGE---
+[]
+---KURS CNAME---
+ki8dqcf6.up.railway.app.
+[0m
+STEP 1 — DELTA:
+- NO_DELTA @ kurs.onecode.de: /login 200 (no Set-Cookie, railway-hikari, woff2 preload `75affa...` unchanged), route gates identical; x-railway-edge iad1 (region-flip noise, lax1→iad1).
+- NO_DELTA @ cto.onecode.de: 409/1001 live 10:52Z, CNAME→cname.perspective-dns.com day-30, TXT zero.
+- NO_DELTA @ storage: 200 `[]` (zero buckets); kurs CNAME ki8dqcf6 stable.
+
+STEP 2 — PRIORITIZE:
+- [PRIO] kurs.onecode.de,7.5:attack_surface=6,business_value=8,tech_exposure=8(Next.js+Supabase RLS),gate_ease=2(AUTH_HELPED),cloud_surface=6,freshness=0 | BOLA/RLS only actionable lead, day-30
+- [PRIO] cto.onecode.de,6.0:attack_surface=4,business_value=7,tech_exposure=5(dangling CNAME),gate_ease=0(HUMAN),cloud_surface=7,freshness=0 | 409/1001 stable day-30
+
+STEP 3 — HYPOTHESES:
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-30; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy lacking user_id predicate. REST monitor closed 09-17 (26 probes 503↔401, never 200+rows); chunk sha256 f916f314 byte-identical, no functional delta since 09-18 build; no runtime change to feed hypothesis.
+evidence_needed: as account A GET {profiles,enrollments,courses} carrying account B's bearer token → row-set ≠ A-owned.
+verify_steps: AUTH_HELPED: 2 invited accounts via kurs.onecode.de/einladung; tokens via POST /auth/v1/token?grant_type=password; as A GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>.
+impact: CRITICAL — cross-tenant PII/enrollment/course-resource exfiltration.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 10:52Z 09-21 — pure CNAME→cname.perspective-dns.com (A 104.18.2.73/3.73), zero verification TXT, HTTP 80 → 409/1001 + 443 TLS handshake-fail persist since 09-05; provider docs confirm custom-subdomain CNAME = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: vendor-authorized registration → add custom domain cto.onecode.de → monitor HTTP status transition (before/after bodies). Else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+STEP 4 — SELF-CRITIQUE:
+- [PARKED] woff2 asset: static font, no JS/route/apiParams, zero exploit value.
+- [PARKED] storage/functions/realtime/REST/legal-pages: all closed monitors, unchanged states.
+- [FINAL] BOLA/RLS (65, AUTH_HELPED) > cto CNAME (58, HUMAN_ONLY). Both escalation-gated; no passive probe advances either.
+
+STEP 5 — NEXT ACTION:
+[NEXT] HUMAN: Confirm bug-bounty authorization for two invited synthetic accounts, then execute BOLA escalation — 2 invites via kurs.onecode.de/einladung; exchange bearer tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password; as A GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>; non-A row-set → CRITICAL; empty/self-only → RLS intact (65→30). No PROBE productive — chunk byte-identical, route gates stable, all passive monitors closed day-30.
+
+STEP 6 — LEARNING:
+- [LEARN] REJECTED MISCONFIG @ all: 10:52Z 09-21 cycle — /login 200 (iad1 region-flip, no Set-Cookie), chunk f916f314 unchanged, storage 200 `[]`, kurs CNAME ki8dqcf6, cto CNAME→cname.perspective-dns.com day-30 (TXT zero, 409/1001); zero deltas; passive recon fully converged, no probe value remains without deploy signal.
+
+STEP 7 — RISK:
+[RISK] onecode: 62 — unchanged day-30. All pre-auth/serverless/RSC monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim-attempt or report). No passive step moves the needle.
