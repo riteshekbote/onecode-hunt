@@ -641,3 +641,6 @@ www.onecode.de
 
 ## 2026-09-20 22:22:08 UTC
 - NEW NO_DELTA — all surfaces identical to 2026-09-20 19:48Z confirmation: kurs.onecode.de /login 200, /datenschutz 200, / 307→/login, /api/* 307; cto.onecode.de CNAME→cname.perspective-dns.com day-27 (409/
+
+## 2026-09-21 00:22:12 UTC
+- NEW Minor: /login Link preload references new woff2 `75affa71d1e2f6a7-s.p.17-aodiw50953.woff2` (fetchable 200, 34KB) — assets re-publish artifact, main chunk + route set identical ⇒ no code deploy, no new
