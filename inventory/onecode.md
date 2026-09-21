@@ -666,3 +666,5 @@ www.onecode.de
 - CHANGED Supabase storage/v1/bucket 200 `[]` re-confirmed — endpoint probeable, zero buckets; unchanged
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 never permissive); platform enforces `sb_publishable_` format only
 - CHANGED kurs.onecode.de pre-auth surface stable day-29: /login, /passwort-vergessen, /datenschutz, /rechtliches at 200; all /api/*, /v1, /dashboard, /admin, /courses 307→/login; no new cookie/session signal
+
+## 2026-09-21 20:56:27 UTC
