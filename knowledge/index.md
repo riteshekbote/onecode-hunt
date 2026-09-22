@@ -580,3 +580,7 @@
 - 2026-09-22 ACCEPTED AUTH @ kurs.onecode.de: 09:44Z 09-22 re-probe — /login 200, / 307→/login, legal pages 200, /admin 307, chunk sha256 f916f314 byte-identical; pre-auth surface stable/exhausted day-31; no new cookie/session signal.
 - 2026-09-22 ACCEPTED MISCONFIG @ cto.onecode.de: 09:44Z dig/re-probe — CNAME→cname.perspective-dns.com day-31, TXT zero, HTTP 409/1001; conf 58 holds; HUMAN claim-attempt only proof path.
 - 2026-09-22 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 09:44Z 09-22 — probeable, zero buckets; unchanged.
+- 2026-09-22 ACCEPTED AUTH @ kurs.onecode.de: 14:32Z 09-22 re-probe — /login 200 (iad1.fp5t/jfk1.aghq), / 307→/login, legal 200, /admin + /api/broadcast 307, chunk sha256 f916f314 byte-identical, boot turbopack-2a8cgfwu75lsu unchanged; pre-auth surface stable/exhausted day-31; no new cookie/session signal.
+- 2026-09-22 ACCEPTED MISCONFIG @ cto.onecode.de: 14:32Z dig/re-probe — CNAME→cname.perspective-dns.com day-31 (A 104.18.2.73/3.73), TXT zero, HTTP 409/1001; conf 58 holds; HUMAN claim-attempt only proof path.
+- 2026-09-22 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 14:32Z 09-22 — probeable, zero buckets; unchanged.
+- 2026-09-22 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 31+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
