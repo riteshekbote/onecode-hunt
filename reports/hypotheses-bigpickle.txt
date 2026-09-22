@@ -1,11 +1,12 @@
-## 2026-09-22 04:41:37 UTC [target] (model bigpickle)
-[PRIO] kurs.onecode.de (BOLA post-auth): 0.25(6)+0.25(8)+0.15(8)+0.15(3)+0.10(8)+0.10(1)=6.25 — attack_surface 6, business_value 8, tech_exposure 8, gate_ease 3 (invite-only auth), cloud_surface 8 (Supabase), freshness 1 (unchanged 30d)
+## 2026-09-22 09:45:18 UTC [target] (model bigpickle)
+[PRIO] kurs.onecode.de (BOLA post-auth): 0.25(6)+0.25(8)+0.15(8)+0.15(3)+0.10(8)+0.10(1)=6.25 — attack_surface 6, business_value 8, tech_exposure 8, gate_ease 3 (invite-only), cloud_surface 8 (Supabase), freshness 1 (unchanged 31d)
 [PRIO] cto.onecode.de (dangling CNAME): 0.25(5)+0.25(6)+0.15(5)+0.15(8)+0.10(6)+0.10(1)=5.35 — attack_surface 5, business_value 6, tech_exposure 5, gate_ease 8 (unbound host), cloud_surface 6, freshness 1
+[PRIO] onecode.de inventory (recon breadth): 0.25(3)+0.25(4)+0.15(3)+0.15(9)+0.10(4)+0.10(1)=4.40 — attack_surface 3, business_value 4, tech_exposure 3, gate_ease 9 (static), cloud_surface 4, freshness 1; CT inventory complete, no new hosts
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
 class: IDOR
 asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
 confidence: 65
-reasoning: Single Supabase project, invite-only course platform day-31; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy lacking user_id predicate. REST monitor closed 09-17 (26 probes 503↔401, never 200+rows); chunk sha256 f916f314 byte-identical 09-22 — no runtime change to refute/confirm.
+reasoning: Single Supabase project, invite-only course platform day-31; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy lacking user_id predicate. REST monitor closed 09-17 (26 probes 503↔401, never 200+rows); chunk sha256 f916f314 byte-identical 09-22 09:44Z — no runtime change to refute/confirm.
 evidence_needed: as account A query {profiles,enrollments,courses} carrying account B bearer → non-A row-set.
 verify_steps: AUTH_HELPED: 2 authorized invited accounts via kurs.onecode.de/einladung; tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password {email,password}; as A GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>.
 impact: CRITICAL — cross-tenant PII/enrollment/course-resource exfiltration.
@@ -14,17 +15,28 @@ testability: AUTH_HELPED
 class: MISCONFIG
 asset: cto.onecode.de
 confidence: 58
-reasoning: live dig 09-22 — pure CNAME→cname.perspective-dns.com, zero verification TXT at host, HTTP 80 → 409/1001 + 443 TLS handshake-fail persist day-31; provider docs confirm custom-subdomain CNAME = unbound/reclaimable.
+reasoning: live dig 09:44Z 09-22 — pure CNAME→cname.perspective-dns.com, zero verification TXT at host, HTTP 80 → 409/1001 persist day-31; provider docs confirm custom-subdomain CNAME = unbound/reclaimable.
 evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
 verify_steps: HUMAN: vendor-authorized registration → add custom domain cto.onecode.de → monitor HTTP status transition (record before/after bodies). Else report-only.
 impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
 testability: HUMAN_ONLY
-[FINAL] BOLA/RLS (65, AUTH_HELPED) > cto CNAME (58, HUMAN_ONLY). Both escalation-gated; no passive step advances either.
-[PARKED] storage(200 `[]`)/functions(404)/realtime(401)/REST(closed 09-17)/legal-pages/woff2: all closed or converged monitors, states unchanged day-31; confidence <40, no mutation possible.
-[PARKED] NEW deploy hunt: chunk sha256 f916f314 byte-identical 09-22 — deploy-diff cadence armed but silent; no probe value without a deploy event.
-[PARKED] OATH/SSRF/CVE-2025-29927: previously REJECTED, surface unchanged.
+[HYP] Supabase Storage bucket creation exposing course resources pre-auth
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+confidence: 35
+reasoning: endpoint live 200 `[]` with publishable key 09:44Z day-31; zero buckets exist; creation requires authenticated admin — no pre-auth mutation path observed; risk only materializes if app later creates public buckets.
+evidence_needed: non-empty bucket list or public object GET 200 with course data.
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with apikey header; alert on != [].
+impact: LOW now (zero buckets) → MEDIUM if public buckets appear.
+testability: PASSIVE
+[PARKED] Supabase REST anon exposure: monitor formally closed 09-17 — 26 probes 503↔401, never 200+rows; publishable-key type rejection is platform-enforced; no cadence value.
+[PARKED] functions(404)/realtime(401)/graphql(503): unchanged, no pre-auth exposure path.
+[PARKED] OATH/SSRF/CVE-2025-29927: previously REJECTED, surface unchanged day-31.
+[PARKED] NEW deploy hunt: chunk sha256 f916f314 byte-identical 09:44Z 09-22 — deploy-diff cadence armed but silent; no probe value without deploy event.
+[FINAL] BOLA/RLS (65, AUTH_HELPED) > cto CNAME (58, HUMAN_ONLY) > storage-monitor (35, PASSIVE). Both top leads escalation-gated; no passive step advances either.
 [NEXT] HUMAN: Confirm bug-bounty authorization for two invited synthetic accounts, then execute BOLA escalation — 2 invites via kurs.onecode.de/einladung; exchange bearer tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password; as A GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>; non-A row-set → CRITICAL; empty/self-only → RLS intact (65→30). No PROBE productive — chunk byte-identical, route gates stable, all passive monitors closed day-31.
-[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: live 09-22 dig/re-probe — CNAME→cname.perspective-dns.com day-31, TXT zero, HTTP 409/1001; conf 58 holds; HUMAN claim-attempt only proof path.
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200, chunk sha256 f916f314 byte-identical, route set unchanged; pre-auth surface stable/exhausted day-31; no new cookie/session signal.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: 09:44Z 09-22 re-probe — /login 200, / 307→/login, legal pages 200, /admin 307, chunk sha256 f916f314 byte-identical; pre-auth surface stable/exhausted day-31; no new cookie/session signal.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: 09:44Z dig/re-probe — CNAME→cname.perspective-dns.com day-31, TXT zero, HTTP 409/1001; conf 58 holds; HUMAN claim-attempt only proof path.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` re-confirmed 09:44Z 09-22 — probeable, zero buckets; unchanged.
 [LEARN] REJECTED MISCONFIG @ all: no deploy since 09-19 11:33Z build; zero deltas across 09-22 probes; passive recon fully converged day-31, no probe value without a deploy event.
 [RISK] onecode: 62 — unchanged day-31. All pre-auth/serverless/RSC monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim or report). No passive step moves the needle.
