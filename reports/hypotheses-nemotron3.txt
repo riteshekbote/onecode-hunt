@@ -1,4 +1,4 @@
-## 2026-09-22 18:18:55 UTC [target] (model nemotron3)
+## 2026-09-22 21:30:03 UTC [target] (model nemotron3)
 [PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
@@ -20,15 +20,6 @@ evidence_needed: Attacker creates Perspective account, adds custom domain cto.on
 verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
 impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
 testability: HUMAN_ONLY
-[HYP] Supabase Storage bucket enumeration via LIST endpoint
-class: MISCONFIG
-asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
-confidence: 35
-reasoning: Storage endpoint probeable with publishable key (200 `[]`); zero buckets currently but endpoint not behind app middleware; if any bucket created with public policy, course resources could be exposed pre-auth; platform-level key format change confirms active management
-evidence_needed: GET /storage/v1/bucket returns 200 with non-empty array containing bucket names; subsequent GET /storage/v1/object/{bucket}/* returns file listings
-verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence ≤1/day); monitor for non-empty bucket list
-impact: If public bucket exists → course resource files, potentially PII in metadata — MEDIUM
-testability: PASSIVE
 [PARKED] Supabase Storage bucket enumeration via LIST endpoint: confidence 35 < 40; zero buckets confirmed 10+ days; no evidence buckets will be created; monitor only
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account

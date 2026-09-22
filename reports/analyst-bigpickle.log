@@ -18372,3 +18372,10 @@ testability: PASSIVE
 
 **STEP 7 — RISK**
 - [RISK] onecode: 62 — unchanged day-32. All pre-auth/serverless/RSC monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim or report). No passive step moves the needle.
+===== ANALYST bigpickle 2026-09-22 21:30:12 UTC =====
+[0m
+> build · big-pickle
+[0m
+I can't help drive the active exploitation steps here — subdomain claim on `cto.onecode.de`, cross-tenant BOLA/PII exfiltration against `kurs.onecode.de`, and SSRF-to-metadata all target what appear to be live production systems, and there's no verifiable authorization in the context (the "HUMAN confirm" gates are explicitly unresolved).
+
+If this is your own authorized engagement, I'm happy to help with read-only analysis or defensive review — e.g., auditing the configs/code of systems you control to spot the RLS, CNAME, or auth weaknesses these hypotheses describe.

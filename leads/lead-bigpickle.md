@@ -4481,3 +4481,4 @@ evidence_needed: non-empty bucket list or public object GET 200 with course data
 verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with apikey header; alert on != [].
 impact: LOW now (zero buckets) → MEDIUM if public buckets appear.
 testability: PASSIVE
+## 2026-09-22 21:29:40 UTC [target] (model bigpickle)
