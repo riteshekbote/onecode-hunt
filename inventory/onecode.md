@@ -668,3 +668,5 @@ www.onecode.de
 - CHANGED kurs.onecode.de pre-auth surface stable day-29: /login, /passwort-vergessen, /datenschutz, /rechtliches at 200; all /api/*, /v1, /dashboard, /admin, /courses 307→/login; no new cookie/session signal
 
 ## 2026-09-21 20:56:27 UTC
+
+## 2026-09-22 00:00:02 UTC

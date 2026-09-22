@@ -564,3 +564,13 @@
 - 2026-09-21 ACCEPTED MISCONFIG @ cto.onecode.de: dig day-30 09-21 — CNAME→cname.perspective-dns.com stable, TXT zero, A 104.18.2.73/3.73; HTTP 409/1001 + TLS handshake-fail; conf 58 holds; HUMAN claim-attempt only proof path.
 - 2026-09-21 ACCEPTED AUTH @ kurs.onecode.de: /login + legal pages 200, /admin etc 307; chunk sha256 f916f314 byte-identical; pre-auth surface stable, exhausted; no new cookie/session signal day-30.
 - 2026-09-21 REJECTED MISCONFIG @ all: no deploy signal since 09-19 11:33Z build; zero deltas across same-day cycles; passive recon fully converged day-30, no probe value without a deploy event.
+- 2026-09-22 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 30+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-22 ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- 2026-09-22 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- 2026-09-22 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+- 2026-09-22 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+- 2026-09-22 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+- 2026-09-22 REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- 2026-09-22 REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login; Next.js patch level > vulnerable; middleware auth gate intact
+- 2026-09-22 REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+- 2026-09-22 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
