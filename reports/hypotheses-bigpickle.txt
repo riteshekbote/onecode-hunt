@@ -1,1 +1,28 @@
-## 2026-09-22 21:29:40 UTC [target] (model bigpickle)
+## 2026-09-22 23:50:58 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project, invite-only course platform day-31; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy lacking user_id predicate. REST re-probed 21:30Z → 503 PGRST002 (never 200+rows in 26 closed probes); chunk set byte-identical, no deploy event.
+evidence_needed: as account A query {profiles,enrollments,courses} carrying account B bearer → non-A row-set.
+verify_steps: AUTH_HELPED: 2 authorized invited accounts via kurs.onecode.de/einladung; tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password {email,password}; as A GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>.
+impact: CRITICAL — cross-tenant PII/enrollment/course-resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: live dig 21:30Z day-31 — pure CNAME→cname.perspective-dns.com, A 104.18.2.73/3.73, TXT zero, HTTP 409/1001 + TLS handshake-fail via --resolve; provider docs confirm custom-subdomain CNAME = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: vendor-authorized registration → add custom domain cto.onecode.de → monitor HTTP status transition (record before/after bodies). Else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Supabase Storage bucket creation exposing course resources pre-auth
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+confidence: 35
+reasoning: endpoint live 200 `[]` with publishable key 21:30Z day-31; zero buckets exist; creation requires authenticated admin — no pre-auth mutation path observed; risk only materializes if app later creates public buckets.
+evidence_needed: non-empty bucket list or public object GET 200 with course data.
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with apikey header; alert on != [].
+impact: LOW now (zero buckets) → MEDIUM if public buckets appear.
+testability: PASSIVE
