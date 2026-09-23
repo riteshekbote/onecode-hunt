@@ -4559,3 +4559,40 @@ impact: LOW now → MEDIUM if public buckets appear.
 testability: PASSIVE
 [NEXT] HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange bearer tokens (POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password), then cross-query /rest/v1/{profiles,enrollments,courses} as A with B's bearer; else report-only both leads (BOLA + cto CNAME) to bugs.olivermaicher.eu.
 [RISK] onecode: 38 — zero confirmed findings; two escalation-gated leads (BOLA conf 65 AUTH_HELPED, cto CNAME conf 58 HUMAN_ONLY) unresolved; storage monitor LOW; no permissive state observed in 33 days across all surfaces.
+## 2026-09-23 14:26:59 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project, invite-only platform day-33; UUID PKs defeat guessable-ID BOLA; remaining vector = SELECT policy lacking user_id predicate. Pre-auth surface exhausted and stable; REST anon monitor closed (26 probes, 503↔401, never 200+rows, platform-enforced key-type rejection). No new surface from any 09-23 build.
+evidence_needed: as account A, query {profiles,enrollments,courses} carrying account B's bearer → non-A row-set.
+verify_steps: PASSIVE none — requires two authorized invited accounts; token exchange via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password, then GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with publishable-key apikey + Bearer B. This is mutating/auth-heavy and touches real platform data — executed ONLY under verified program authorization.
+impact: CRITICAL — cross-tenant PII/enrollment/resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: live dig 09-23 — pure CNAME→cname.perspective-dns.com, A 104.18.2.73/3.73, TXT zero; HTTP 409/1001 + TLS handshake-fail persist day-33; provider custom-subdomain CNAME documented as reclaimable/unbound.
+evidence_needed: bind cto.onecode.de in a fresh Perspective account → 409→200 transition hosting attacker content.
+verify_steps: HUMAN only — requires a vendor account and touching a domain not confirmed as test-hostile; proof must be preceded by explicit OneCode/domain-owner consent, else report-only. Passive probes fully converged; no further read-only checks add signal.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Supabase Storage bucket creation exposing course resources pre-auth
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+confidence: 35
+reasoning: endpoint live 200 `[]` with publishable key 09-23; zero buckets; creation requires authenticated admin — no pre-auth mutation path; risk only materializes if the app later adds public buckets.
+evidence_needed: non-empty bucket list or public object GET 200 returning course data.
+verify_steps: PASSIVE — GET /storage/v1/bucket with apikey header; alert only on != [].
+impact: LOW now → MEDIUM if public buckets appear.
+testability: PASSIVE
+[PARKED] Supabase Storage bucket exposure (conf 35 < 40): zero buckets for 33 days; the only trigger is future app behavior, not a testable defect today. Monitor as LOW passive, drop as an active lead.
+[FINAL] kurs BOLA cross-tenant RLS gap (65, AUTH_HELPED) — sole high-value lead; prior is degraded (33 days, zero permissive states anywhere) so escalation now has low expected value unless access trivially via real invites.
+[FINAL] cto.onecode.de CNAME takeover (58, HUMAN_ONLY) — proof path requires vendor/domain-owner consent; passively converged, no residual probe value.
+[NEXT] HUMAN: Both open leads are proof-gated, not probe-gated — report-only to bugs.olivermaicher.eu (BOLA + cto CNAME) unless real, authorized access is held: (a) two platform-invited test accounts AND OneCode consent for the RLS cross-query, (b) vendor consent before any Perspective claim demo on cto.onecode.de; no new passive probes — recon converged, only an event-triggered build-diff (deploy → re-fetch main-chunk sha256 + route-literal scan of kurs.onecode.de) retains any value.
+[LEARN] REJECTED MISCONFIG @ all: no deploy signal since 09-19 11:33Z; chunk sha256 f916f314 byte-identical; build-diff is event-triggered, not time-based — time-cadence probing on kurs has no value day-33.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-33, 409/1001 + TLS-fail, TXT zero; conf 58 holds; HUMAN/consented proof path only.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface stable/exhausted day-33 = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; all /api,/v1,/admin,/dashboard 307→/login; no cookie/session signal.
+[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: publishable-key anon-block platform-enforced (REST monitor closed after 26 probes); storage 200 `[]` zero buckets; no pre-auth data exposure.
+[RISK] onecode: 38 — zero confirmed findings across 33 days; two escalation-gated leads unresolved (BOLA conf 65 AUTH_HELPED, cto CNAME conf 58 HUMAN_ONLY); both require verified authorization before execution, else report-only; remaining monitors are LOW/passive.
