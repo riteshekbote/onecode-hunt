@@ -4596,3 +4596,31 @@ testability: PASSIVE
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface stable/exhausted day-33 = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; all /api,/v1,/admin,/dashboard 307→/login; no cookie/session signal.
 [LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: publishable-key anon-block platform-enforced (REST monitor closed after 26 probes); storage 200 `[]` zero buckets; no pre-auth data exposure.
 [RISK] onecode: 38 — zero confirmed findings across 33 days; two escalation-gated leads unresolved (BOLA conf 65 AUTH_HELPED, cto CNAME conf 58 HUMAN_ONLY); both require verified authorization before execution, else report-only; remaining monitors are LOW/passive.
+## 2026-09-23 18:38:21 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project, UUID PKs defeat guessable-ID BOLA; day-34 no permissive pre-auth state anywhere; only unpaid surface is a missing RLS filter on SELECT. No new build signal changes this.
+evidence_needed: as account A, GET row-set of account B via B's bearer → non-A rows returned.
+verify_steps: AUTH_HELPED only — two platform-invited accounts + OneCode consent for the cross-query; token exchange POST /auth/v1/token?grant_type=password, then GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 (apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, Bearer B). Not executable read-only.
+impact: CRITICAL — cross-tenant PII/enrollment/resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: day-34 pure CNAME→cname.perspective-dns.com (A 104.18.2.73/3.73), zero verification TXT, HTTP 409/1001 + TLS handshake-fail → hostname unbound/reclaimable per provider custom-subdomain docs.
+evidence_needed: bind cto.onecode.de in fresh vendor account → 409→200 hosting attacker content.
+verify_steps: HUMAN_ONLY — vendor/domain-owner consent mandatory before any claim attempt; otherwise report-only. Passive probes fully converged, no read-only signal remains.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Supabase Storage public bucket exposure of course resources
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+confidence: 35
+reasoning: endpoint live 200 `[]`, zero buckets 34 days; creation requires authenticated admin; no pre-auth mutation path. Open only if app ships public buckets later.
+evidence_needed: non-empty bucket list or anonymous object GET 200 with course data.
+verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header); alert only on != [].
+impact: LOW now → MEDIUM if public buckets appear.
+testability: PASSIVE

@@ -689,3 +689,5 @@ www.onecode.de
 
 ## 2026-09-23 14:29:09 UTC
 - NEW NO_DELTA — all surfaces identical to 2026-09-23 09:24Z: kurs.onecode.de pre-auth (/login,/passwort-vergessen,/datenschutz,/rechtliches 200; /api/*,/v1,/dashboard,/admin 307→/login), cto.onecode.de CNA
+
+## 2026-09-23 18:42:27 UTC
