@@ -599,3 +599,6 @@
 - 2026-09-23 ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface stable/exhausted day-33 = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; all /api,/v1,/admin,/dashboard 307→/login; no cookie/session signal.
 - 2026-09-23 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: publishable-key anon-block platform-enforced (REST monitor closed after 26 probes); storage 200 `[]` zero buckets; no pre-auth data exposure.
 - 2026-09-23 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 33+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-23 REJECTED MISCONFIG @ all: no deploy since 09-19 11:33Z; chunk sha256 f916f314 byte-identical; build-diff is event-triggered, not time-based — time-cadence probing on kurs has no value day-34.
+- 2026-09-23 ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface stable/exhausted day-34 = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; all /api,/v1,/admin,/dashboard 307→/login; no cookie/session signal.
+- 2026-09-23 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-34, 409/1001 + TLS-fail, TXT zero; conf 58 holds; HUMAN/consented proof path only.
