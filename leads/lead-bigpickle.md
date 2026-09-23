@@ -4510,3 +4510,22 @@ evidence_needed: non-empty bucket list or public object GET 200 with course data
 verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket with apikey header; alert on != [].
 impact: LOW now (zero buckets) → MEDIUM if public buckets appear.
 testability: PASSIVE
+## 2026-09-23 04:12:16 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project, invite-only platform day-33; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy lacking user_id predicate. REST monitor closed (26 probes, 503↔401, never 200+rows); chunk set unchanged since 09-19 build — no new app surface.
+evidence_needed: as account A query {profiles,enrollments,courses} carrying account B bearer → non-A row-set.
+verify_steps: AUTH_HELPED: 2 authorized invited accounts via kurs.onecode.de/einladung; tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password {email,password}; as A GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>.
+impact: CRITICAL — cross-tenant PII/enrollment/course-resource exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 09-23 day-33 — pure CNAME→cname.perspective-dns.com, A 104.18.2.73/3.73, TXT zero; HTTP 409/1001 + TLS handshake-fail persist; provider custom-subdomain CNAME = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: vendor-authorized registration → add custom domain cto.onecode.de → monitor HTTP status transition. Else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY

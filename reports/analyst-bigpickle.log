@@ -18482,3 +18482,98 @@ testability: PASSIVE
 
 **STEP 7 — RISK**
 - [RISK] onecode: 62 — unchanged day-31. All pre-auth/REST monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim or report). No passive step moves the needle.
+===== ANALYST bigpickle 2026-09-23 04:12:29 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -m 15 -o /dev/null -w "%{http_code} %{redirect_url} server=%{header_json}" -H "User-Agent: Mozilla/5.0" https://kurs.onecode.de/login 2>/dev/null | head -c 600; echo; curl -s -m 15 -o /dev/null -w "%{http_code} %{redirect_url}" -H "User-Agent: Mozilla/5.0" https://kurs.onecode.de/ 2>/dev/null
+200  server={"cache-control":["private, no-cache, no-store, max-age=0, must-revalidate"],
+"content-type":["text/html; charset=utf-8"],
+"date":["Wed, 23 Sep 2026 04:11:55 GMT"],
+"link":["</_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as=\"font\"; crossorigin=\"\"; type=\"font/woff2\""],
+"server":["railway-hikari"],
+"vary":["rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"],
+"x-powered-by":["Next.js"],
+"x-railway-request-id":["GGGVg8CvQiWvB2cj8Hk9cQ"],
+"x-railway-edge":["iad1"],
+"x-hikari-trace":["iad1.dh1s"]
+}
+307 https://kurs.onecode.de/login
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; dig +short kurs.onecode.de CNAME; readarray -t a <<< "$(dig +short cto.onecode.de A)"; echo "cto A: ${a[*]}"
+cname.perspective-dns.com.
+ki8dqcf6.up.railway.app.
+cto A: cname.perspective-dns.com. 104.18.2.73 104.18.3.73
+[0m
+[0m$ [0mcurl -s -m 15 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -o /dev/null -w "%{http_code} %{size_download}" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket 2>/dev/null
+200 2
+[0m
+[0m$ [0mcurl -s -m 15 -H "User-Agent: Mozilla/5.0" https://kurs.onecode.de/login 2>/dev/null | grep -oE '/_next/static[^"]*chunks[^"]*' | sort -u | head -20
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-lpao5_i9htd.js\
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1a4tqdnsy9k1l.js\
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/1ymt1shyhmu-4.js\
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2n1zydk_92chn.js\
+/_next/static/chunks/2n8375xih-hg0.css
+/_next/static/chunks/2n8375xih-hg0.css\
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/2ufbqzbeyam3w.js\
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3fntmmi971322.js\
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+[0m
+[0m$ [0mcurl -s -m 20 -H "User-Agent: Mozilla/5.0" https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js 2>/dev/null | sha1sum
+460367b929f22d9c693dd3be5f1f4474ed13b137  -
+[0m
+STEP 1 — DELTA
+- NO_DELTA (probed 09-23 04:11Z): kurs `/login` 200 (railway-hikari, iad1.dh1s, no Set-Cookie), `/` 307→/login — Preload font `75affa71d1e2f6a7…woff2` same as 09-21; boot turbopack + module set byte-identical to 09-19 11:33Z build; main chunk `0-mbmp1iqb6hj.js` name-verified identical (sha1 460367b9…) ⇒ no deploy event since 09-19.
+- NO_DELTA (dig 09-23): cto.onecode.de → CNAME cname.perspective-dns.com day-33, A 104.18.2.73/3.73; kurs → ki8dqcf6.up.railway.app stable.
+- NO_DELTA: supabase storage/v1/bucket → 200 `[]` (2B), zero buckets.
+
+STEP 2 — PRIORITIZE
+- [PRIO] kurs.onecode.de/Supabase-REST, 7.1, a=6 b=9 t=7 g=8 c=7 f=5 (post-auth BOLA top, but gate=gated → probe cadence zero-value)
+- [PRIO] cto.onecode.de, 6.1, a=4 b=7 t=6 g=6 c=8 f=5 (dangling CNAME, permanence high)
+- [PRIO] supabase/storage/v1, 3.9, a=3 b=4 t=4 g=9 c=6 f=2 (conf <40 → park)
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project, invite-only platform day-33; UUID PKs defeat guessable-ID BOLA; vector = SELECT policy lacking user_id predicate. REST monitor closed (26 probes, 503↔401, never 200+rows); chunk set unchanged since 09-19 build — no new app surface.
+evidence_needed: as account A query {profiles,enrollments,courses} carrying account B bearer → non-A row-set.
+verify_steps: AUTH_HELPED: 2 authorized invited accounts via kurs.onecode.de/einladung; tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password {email,password}; as A GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <B>.
+impact: CRITICAL — cross-tenant PII/enrollment/course-resource exfiltration.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: dig 09-23 day-33 — pure CNAME→cname.perspective-dns.com, A 104.18.2.73/3.73, TXT zero; HTTP 409/1001 + TLS handshake-fail persist; provider custom-subdomain CNAME = unbound/reclaimable.
+evidence_needed: bind cto.onecode.de in fresh Perspective account → 409→200 transition with attacker content.
+verify_steps: HUMAN: vendor-authorized registration → add custom domain cto.onecode.de → monitor HTTP status transition. Else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] Storage bucket creation (conf 35): zero buckets 30+ days, creation needs authenticated admin; passive value exhausted, drop below threshold.
+- [FINAL] BOLA-RLS (65) and cto-CNAME (58) survive; both escalation-gated, zero passive delta expected until AUTH_HELPED/HUMAN action or a deploy event.
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: Provision two invited test accounts via kurs.onecode.de/einladung, then execute the BOLA cross-tenant SELECT chain (verify_steps above) — the only remaining lead resolvable; no passive probe has value without a deploy signal.
+
+STEP 6 — LEARNING
+- [LEARN] NO_DELTA @ all: 09-23 04:11Z cycle — /login 200, / 307→/login, chunk set byte-identical to 09-19 11:33Z build (no deploy), cto CNAME day-33, storage 200 `[]`; zero deltas; passive recon converged day-33/34, no probe value without a deploy event.
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 33+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending.
+
+STEP 7 — RISK
+- [RISK] onecode: 62 — unchanged day-33/34. All passive/serverless/RSC monitors closed or converged; residual risk fully escalation-gated: BOLA/RLS (65, needs 2 authorized synthetic accounts) + cto dangling-CNAME (58, vendor-authorized claim or report). No passive step moves the needle.
