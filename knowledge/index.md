@@ -612,3 +612,7 @@
 - 2026-09-24 REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login; Next.js patch level > vulnerable; middleware auth gate intact
 - 2026-09-24 REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
 - 2026-09-24 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+- 2026-09-24 ACCEPTED AUTH @ kurs.onecode.de: 19:19Z 09-24 re-probe — /login 200 no Set-Cookie, / 307, main chunk f916f314 byte-identical day-36; no deploy, no cookie/session signal.
+- 2026-09-24 ACCEPTED MISCONFIG @ cto.onecode.de: 19:19Z — CNAME→cname.perspective-dns.com day-36, TXT zero, HTTP 409/1001; conf 58 holds; HUMAN claim-attempt only proof path.
+- 2026-09-24 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: 200 `[]` holds day-36; confidence 35 parked below threshold.
+- 2026-09-24 REJECTED MISCONFIG @ all: no deploy signal since 09-19 11:33Z; chunk diff is event-triggered, not time-based — time-cadence probing has no value day-36.
