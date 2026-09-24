@@ -704,3 +704,5 @@ www.onecode.de
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
 
 ## 2026-09-24 05:09:00 UTC
+
+## 2026-09-24 10:13:41 UTC

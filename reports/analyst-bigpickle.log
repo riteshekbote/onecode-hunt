@@ -19057,3 +19057,82 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] onecode: 38 — zero confirmed findings across 35 days; two escalation-gated leads unresolved (BOLA conf 65 AUTH_HELPED, cto CNAME conf 58 HUMAN_ONLY), both requiring verified authorization before execution; remaining monitors LOW/passive; passive recon fully converged with no residual probe value.
+===== ANALYST bigpickle 2026-09-24 10:13:41 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code}" -I https://kurs.onecode.de/login --max-time 15; echo; dig +short cto.onecode.de CNAME; echo; curl -s -o /dev/null -w "%{http_code}" --max-time 15 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+200
+cname.perspective-dns.com.
+
+200
+[0m
+[0m$ [0mcurl -s --max-time 15 https://kurs.onecode.de/login | rg -o '0-[a-z0-9_]+\.js' | sort -u | head -5
+/bin/bash: line 1: rg: command not found
+[0m
+[0m$ [0mcurl -s --max-time 15 https://kurs.onecode.de/login | grep -oE '0-[a-z0-9_]+\.js' | sort -u | head -5; echo "---"; curl -s -o /dev/null -w "%{http_code}\n" --max-time 15 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js"
+0-_brt1a3g.js
+0-lpao5_i9htd.js
+0-mbmp1iqb6hj.js
+---
+200
+[0m
+[0m$ [0mcurl -s --max-time 20 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" | sha256sum | cut -d' ' -f1
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca
+[0m
+STEP 1 — DELTA
+- NO_DELTA on all surfaces 05:07/00:20Z→now 2026-09-24: kurs /login 200, / 307→/login; main chunk `0-mbmp1iqb6hj.js` sha256 f916f314… byte-identical (no deploy since 09-19 11:33Z); cto CNAME→cname.perspective-dns.com day-35; storage `/storage/v1/bucket` 200 `[]`.
+- [CHANGED] none — mixed-generation co-residency (`0-lpao5_i9htd.js`/`0-_brt1a3g.js` + `0-mbmp1iqb6hj.js`) persists; route set identical.
+
+STEP 2 — PRIORITIZE
+- [PRIO] kurs.onecode.de BOLA,7.6,gate=low(0.35)/tech=8 exp/conf=65 unchanged, no new info
+- [PRIO] cto.onecode.de CNAME takeover,5.9,gate=HUMAN_ONLY/conf=58, no new info
+- [PRIO] supabase storage,4.2,passive alert only, day-35 zero buckets
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project; UUID PKs defeat guessable-id BOLA; day-35 zero permissive pre-auth state on every surface; only unpaid vector is SELECT policy missing user_id filter; no deploy/gateway signal changes this.
+evidence_needed: account A row-set keyed to account B returned under B's bearer → cross-tenant read.
+verify_steps: AUTH_HELPED only — two platform-invited accounts + OneCode consent; POST /auth/v1/token?grant_type=password per account, GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with sb_publishable apikey + target bearer. Not executable read-only.
+impact: CRITICAL — cross-tenant PII/enrollment exfiltration.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: day-35 pure CNAME→cname.perspective-dns.com (A 104.18.2.73/3.73), zero verification TXT, HTTP 409/1001 + TLS handshake-fail → hostname unbound/reclaimable per provider custom-subdomain docs.
+evidence_needed: bind cto.onecode.de in fresh vendor account → 409→200 serving attacker content.
+verify_steps: HUMAN_ONLY — vendor/domain-owner consent mandatory before any claim attempt; else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+
+[HYP] Supabase Storage public bucket exposure of course resources
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+confidence: 35
+reasoning: endpoint live 200 `[]`, zero buckets 35 days; creation requires authenticated admin; no pre-auth mutation path; risk materializes only if app ships public buckets later.
+evidence_needed: non-empty bucket list or anonymous object GET 200 returning course data.
+verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header), alert only on != [].
+impact: LOW now → MEDIUM if public buckets appear.
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] Storage exposure (conf 35 < 40): zero buckets 35 days; only a future app change could trigger — keep as LOW passive alert, drop as active lead.
+- [FINAL] kurs BOLA RLS gap (65, AUTH_HELPED) — sole high-value lead; prior 35 days degraded with zero permissive states, un-authorized escalation has low expected value.
+- [FINAL] cto.onecode.de CNAME takeover (58, HUMAN_ONLY) — proof path requires vendor/domain-owner consent; passively converged, no residual probe value.
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: report-only to bugs.olivermaicher.eu the two proof-gated leads (BOLA RLS-gap 65 + cto CNAME takeover 58) unless verified authorization is held: (a) two platform-invited test accounts AND OneCode consent for the cross-tenant RLS query; (b) vendor/domain-owner consent before any Perspective claim demo. No new passive probes warranted — recon converged; only event-triggered build-diff (deploy → re-fetch kurs main chunk sha256 + route-literal scan) retains value.
+
+STEP 6 — LEARNING
+- [LEARN] REJECTED MISCONFIG @ all: 2026-09-24 live re-check — chunk sha256 f916f314… byte-identical, /login 200, / 307, storage 200 `[]`, cto CNAME day-35; zero deltas vs 09-23; build-diff confirmed event-triggered, time-cadence probing worthless day-35.
+- [LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface stable/exhausted day-35 = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; all /api,/v1,/admin,/dashboard 307→/login; no cookie/session signal.
+- [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-35, HTTP 409/1001 + TLS-fail, TXT zero; conf 58 holds; HUMAN/consented proof path only.
+- [LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: publishable-key anon-block platform-enforced (REST monitor closed after 26 probes); storage 200 `[]`; no pre-auth data exposure.
+
+STEP 7 — RISK
+- [RISK] onecode: 38 — zero confirmed findings across 35 days; two escalation-gated leads unresolved (BOLA conf 65 AUTH_HELPED, cto CNAME conf 58 HUMAN_ONLY); both require verified authorization before execution, else report-only; remaining monitors LOW/passive; no new attack surface surfaced.

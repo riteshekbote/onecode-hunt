@@ -1,9 +1,9 @@
-## 2026-09-24 05:07:03 UTC [target] (model bigpickle)
+## 2026-09-24 10:12:56 UTC [target] (model bigpickle)
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
 class: IDOR
 asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
 confidence: 65
-reasoning: Single Supabase project; UUID PKs defeat guessable-id BOLA; day-35 zero permissive pre-auth state on any surface; only unpaid vector is a SELECT policy missing user_id filter; no new build or gateway signal changes this.
+reasoning: single Supabase project; UUID PKs defeat guessable-id BOLA; day-35 zero permissive pre-auth state on every surface; only unpaid vector is SELECT policy missing user_id filter; no deploy/gateway signal changes this.
 evidence_needed: account A row-set keyed to account B returned under B's bearer → cross-tenant read.
 verify_steps: AUTH_HELPED only — two platform-invited accounts + OneCode consent; POST /auth/v1/token?grant_type=password per account, GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with sb_publishable apikey + target bearer. Not executable read-only.
 impact: CRITICAL — cross-tenant PII/enrollment exfiltration.
@@ -21,8 +21,8 @@ testability: HUMAN_ONLY
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
 confidence: 35
-reasoning: endpoint live 200 `[]`, zero buckets 35 days; creation requires authenticated admin; no pre-auth mutation path.
-evidence_needed: non-empty bucket list or anonymous object GET 200 with course data.
-verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header); alert only on != [].
+reasoning: endpoint live 200 `[]`, zero buckets 35 days; creation requires authenticated admin; no pre-auth mutation path; risk materializes only if app ships public buckets later.
+evidence_needed: non-empty bucket list or anonymous object GET 200 returning course data.
+verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header), alert only on != [].
 impact: LOW now → MEDIUM if public buckets appear.
 testability: PASSIVE
