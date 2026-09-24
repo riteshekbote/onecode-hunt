@@ -4721,3 +4721,22 @@ evidence_needed: non-empty bucket list or anonymous object GET 200 returning cou
 verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header), alert only on != [].
 impact: LOW now → MEDIUM if public buckets appear.
 testability: PASSIVE
+## 2026-09-24 15:17:40 UTC [target] (model bigpickle)
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project; UUID PKs defeat guessable-id BOLA; day-35 zero permissive pre-auth state on every surface; only unpaid vector is a SELECT policy missing user_id filter; no deploy/gateway signal changes this.
+evidence_needed: account A row-set keyed to account B returned under B's bearer → cross-tenant read.
+verify_steps: AUTH_HELPED only — two platform-invited accounts + OneCode consent; POST /auth/v1/token?grant_type=password per account, GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with sb_publishable apikey + target bearer.
+impact: CRITICAL — cross-tenant PII/enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: day-35 pure CNAME→cname.perspective-dns.com (A 104.18.2.73/3.73), zero verification TXT, HTTP 409/1001 + TLS handshake-fail → hostname unbound/reclaimable per provider custom-subdomain docs.
+evidence_needed: bind cto.onecode.de in fresh vendor account → 409→200 serving attacker content.
+verify_steps: HUMAN_ONLY — vendor/domain-owner consent mandatory before any claim attempt; else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
