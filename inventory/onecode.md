@@ -702,3 +702,5 @@ www.onecode.de
 - NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: Unchanged — email-only, disable_signup=true, mailer_autoconfirm=false, all external OAuth false, passkeys disabled
 - NEW kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16; _next/image SSRF negative; pre-auth surface exhaustively validated
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+
+## 2026-09-24 05:09:00 UTC
