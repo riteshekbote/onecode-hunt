@@ -18851,3 +18851,140 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] onecode: 38 — zero confirmed findings across 34 days; two escalation-gated leads unresolved (BOLA conf 65 AUTH_HELPED, cto CNAME conf 58 HUMAN_ONLY); both require verified authorization before execution, else report-only; remaining monitors are LOW/passive.
+===== ANALYST bigpickle 2026-09-24 00:23:06 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/onecode-hunt/onecode-hunt/ 2>/dev/null | head -50; echo "---"; ls /home/runner/work/onecode-hunt/onecode-hunt/art/ 2>/dev/null
+total 468
+drwxr-xr-x 12 runner runner   4096 Sep 24 00:19 .
+drwxr-xr-x  3 runner runner   4096 Sep 24 00:19 ..
+drwxr-xr-x  7 runner runner   4096 Sep 24 00:19 .git
+drwxr-xr-x  3 runner runner   4096 Sep 24 00:19 .github
+-rw-r--r--  1 runner runner   1692 Sep 24 00:19 README.md
+-rw-r--r--  1 runner runner     32 Sep 24 00:19 analyst-out.txt
+-rw-r--r--  1 runner runner 190247 Sep 24 00:19 analyst-prompt.txt
+-rw-r--r--  1 runner runner 186398 Sep 24 00:19 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 leads
+-rw-r--r--  1 runner runner   4060 Sep 24 00:19 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 reports
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Sep 24 00:19 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 scripts
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Sep 24 00:19 triage
+---
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "login:%{http_code} " --max-time 15 https://kurs.onecode.de/login -H 'User-Agent: opencode-analyst/1.0'; curl -s -o /dev/null -w "root:%{http_code} " --max-time 15 https://kurs.onecode.de/ -H 'User-Agent: opencode-analyst/1.0'; echo
+login:200 root:307
+[0m
+[0m$ [0mcat /home/runner/work/onecode-hunt/onecode-hunt/probe-results.md 2>/dev/null | head -40; echo "---SCRIPTS---"; ls /home/runner/work/onecode-hunt/onecode-hunt/scripts/ 2>/dev/null; echo "---STATE---"; cat /home/runner/work/onecode-hunt/onecode-hunt/state_bigpickle.json /home/runner/work/onecode-hunt/onecode-hunt/analyst-out.txt 2>/dev/null
+## 2026-09-02 21:41:05 UTC
+
+
+## 2026-09-02 23:34:10 UTC
+
+
+## 2026-09-03 01:27:20 UTC
+
+
+## 2026-09-03 06:31:56 UTC
+
+
+## 2026-09-03 11:43:44 UTC
+
+
+## 2026-09-03 16:16:20 UTC
+
+
+## 2026-09-03 19:28:15 UTC
+
+
+## 2026-09-03 21:54:04 UTC
+
+
+## 2026-09-04 00:01:14 UTC
+
+
+## 2026-09-04 03:59:02 UTC
+
+
+## 2026-09-04 08:47:33 UTC
+
+
+## 2026-09-04 13:36:00 UTC
+
+
+## 2026-09-04 17:14:36 UTC
+
+
+---SCRIPTS---
+sync-issues.py
+---STATE---
+{"phase": "POC", "target": "api"}[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/onecode-hunt/onecode-hunt/ 2>/dev/null | head -50; echo "---"; ls /home/runner/work/onecode-hunt/onecode-hunt/art/ 2>/dev/null
+total 468
+drwxr-xr-x 12 runner runner   4096 Sep 24 00:19 .
+drwxr-xr-x  3 runner runner   4096 Sep 24 00:19 ..
+drwxr-xr-x  7 runner runner   4096 Sep 24 00:19 .git
+drwxr-xr-x  3 runner runner   4096 Sep 24 00:19 .github
+-rw-r--r--  1 runner runner   1692 Sep 24 00:19 README.md
+-rw-r--r--  1 runner runner     32 Sep 24 00:19 analyst-out.txt
+-rw-r--r--  1 runner runner 190247 Sep 24 00:19 analyst-prompt.txt
+-rw-r--r--  1 runner runner 186398 Sep 24 00:19 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 leads
+-rw-r--r--  1 runner runner   4060 Sep 24 00:19 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 reports
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Sep 24 00:19 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 24 00:19 scripts
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 24 00:19 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Sep 24 00:19 triage
+---
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "login:%{http_code} " --max-time 15 https://kurs.onecode.de/login -H 'User-Agent: opencode-analyst/1.0'; curl -s -o /dev/null -w "root:%{http_code} " --max-time 15 https://kurs.onecode.de/ -H 'User-Agent: opencode-analyst/1.0'; echo
+login:200 root:307
+[0m
+[0m
+[0m$ [0mHTML=$(curl -s --max-time 20 https://kurs.onecode.de/login -H 'User-Agent: opencode-analyst/1.0'); echo "$HTML" | grep -oE '/_next/static/chunks/[A-Za-z0-9_.%-]+\.js' | sort -u; echo "---woff---"; echo "$HTML" | grep -oE 'woff2' | head -2
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+---woff---
+woff2
+woff2
+[0m
+[0m$ [0mcurl -s --max-time 20 'https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js' -H 'User-Agent: opencode-analyst/1.0' | sha256sum | cut -c1-16
+f916f314ea61a8c5
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mdig +short CNAME cto.onecode.de @1.1.1.1; echo "---"; dig +short CNAME kurs.onecode.de @1.1.1.1; echo "---storage---"; curl -s --max-time 15 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -o /tmp/storage.json -w "%{http_code}\n"; cat /tmp/storage.json | head -c 200 failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

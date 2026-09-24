@@ -13009,3 +13009,204 @@ testability: PASSIVE
 
 [STEP 7] RISK
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
+===== ANALYST nemotron3 2026-09-24 00:23:06 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mcurl -sI https://kurs.onecode.de/login 2>&1 | head -20
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Thu, 24 Sep 2026 00:20:16 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: BEddcrc-RjmBrDoI8Hk9cQ
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -sI https://kurs.onecode.de/ 2>&1 | head -20
+HTTP/2 307 
+date: Thu, 24 Sep 2026 00:20:20 GMT
+location: /login
+server: railway-hikari
+x-railway-request-id: MsRkEc0jQcOIhNbj7fhULg
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -sI https://kurs.onecode.de/datenschutz 2>&1 | head -15
+HTTP/2 200 
+cache-control: s-maxage=31536000
+content-type: text/html; charset=utf-8
+date: Thu, 24 Sep 2026 00:20:24 GMT
+etag: "xtn3njar0t7x"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-nextjs-cache: HIT
+x-nextjs-prerender: 1
+x-nextjs-prerender: 1
+x-nextjs-stale-time: 300
+x-powered-by: Next.js
+x-railway-request-id: A5V63dvMSO2s2BNt8Hk9cQ
+content-length: 38013
+x-hikari-trace: iad1.fp5t
+[0m
+[0m$ [0mcurl -sI http://cto.onecode.de/ 2>&1 | head -15
+HTTP/1.1 409 Conflict
+Date: Thu, 24 Sep 2026 00:20:31 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Expires: Thu, 01 Jan 1970 00:00:01 GMT
+Server: cloudflare
+CF-RAY: a3fd9fb0def4876a-IAD
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME
+cname.perspective-dns.com.
+[0m
+[0m$ [0mcurl -sI "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -15
+HTTP/2 200 
+date: Thu, 24 Sep 2026 00:21:05 GMT
+content-type: application/json; charset=utf-8
+content-length: 2
+cf-ray: a3fda081b8d9aa17-IAD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0d0c9-8d1d-766a-8b2b-6a48d2b5ac3e
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=2EOleoVI1biESTVikdDJOy6qKQfzDAgsw_eknQ5RzRA-1790209264.918986-1.0.1.1-sfkA6opUUdUse6F4esGEFJ_kOnlSpdQssV5K_Dakyle54vhSyENh8a.3GUB15rU6IwAMJagyGkxemCQV1BLe1t_3K7fEWewDQqZu7n6oPCaD7kgyalQMth8RyMONQHho; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 24 Sep 2026 00:51:05 GMT
+[0m
+[0m$ [0mcurl -sI "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -15
+HTTP/2 503 
+date: Thu, 24 Sep 2026 00:21:14 GMT
+content-type: application/json; charset=utf-8
+content-length: 119
+cf-ray: a3fda0b34f7c5df7-IAD
+cf-cache-status: DYNAMIC
+retry-after: 0
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Accept-Encoding
+proxy-status: PostgREST; error=PGRST002
+x-content-type-options: nosniff
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0d0c9-ac15-785a-8ea0-86d00b56f079
+[0m
+[0m$ [0mcurl -sI "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | head -15
+HTTP/2 405 
+date: Thu, 24 Sep 2026 00:21:24 GMT
+content-length: 0
+cf-ray: a3fda0f84b8b9c64-IAD
+cf-cache-status: DYNAMIC
+allow: GET
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0d0c9-d73e-7d43-89da-5318a681efdc
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 82
+[0m
+[0m$ [0mcurl -s "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+[0m
+---
+
+### STEP 1 — DELTA
+
+[NEW] kurs.onecode.de: No new deploy since 2026-09-19 11:33Z (chunk `0-mbmp1iqb6hj.js` sha256 f916f314... byte-identical); pre-auth surface stable = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; all /api/*,/v1,/dashboard,/admin,/courses 307→/login; no Set-Cookie on /login
+[NEW] cto.onecode.de: CNAME→cname.perspective-dns.com stable 34+ days; HTTP 409 "error code:1001" + TLS handshake-fail persists; zero verification TXT records; conf 58 holds
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` re-confirmed — endpoint probeable with `sb_publishable_` key, zero buckets; unchanged since 09-04
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles: 503 PGRST002 (schema-cache-down) — monitor formally closed 09-17 after 26 probes (503↔401 oscillation), never 200+rows; platform enforces `sb_publishable_` format only
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: Unchanged — email-only, disable_signup=true, mailer_autoconfirm=false, all external OAuth false, passkeys disabled
+[NEW] kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16; _next/image SSRF negative; pre-auth surface exhaustively validated
+[CHANGED] Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
+
+---
+
+### STEP 2 — PRIORITIZE
+
+[PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
+[PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
+
+---
+
+### STEP 3 — HYPOTHESES
+
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: kurs.onecode.de (/api/* proxied to Supabase)
+confidence: 65
+reasoning: Single Supabase project (aygnpacdkgtsfnhgcyjc) backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only /login, /passwort-vergessen, /datenschutz, /rechtliches at 200); all /api/*, /v1, /dashboard, /admin, /courses auth-gated
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows
+verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client bundle Supabase client
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: cto.onecode.de CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 34+ days, zero verification TXT records
+evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
+testability: HUMAN_ONLY
+
+[HYP] Supabase Storage bucket enumeration via LIST endpoint
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
+confidence: 35
+reasoning: Storage endpoint probeable with publishable key (200 `[]`); zero buckets currently but endpoint not behind app middleware; if any bucket created with public policy, course resources could be exposed pre-auth; platform-level key format change confirms active management
+evidence_needed: GET /storage/v1/bucket returns 200 with non-empty array containing bucket names; subsequent GET /storage/v1/object/{bucket}/* returns file listings
+verify_steps: PASSIVE: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" (cadence ≤1/day); monitor for non-empty bucket list
+impact: If public bucket exists → course resource files, potentially PII in metadata — MEDIUM
+testability: PASSIVE
+
+---
+
+### STEP 4 — SELF-CRITIQUE
+
+[PARKED] Supabase Storage bucket enumeration via LIST endpoint: confidence 35 < 40; zero buckets confirmed 10+ days; no evidence buckets will be created; monitor only
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS policy gap (confidence 65, IDOR, AUTH_HELPED) — highest overall value
+[FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
+
+---
+
+### STEP 5 — NEXT ACTION
+
+[NEXT] HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung, exchange both bearer tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client
+
+---
+
+### STEP 6 — LEARNING
+
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 34+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection platform-enforced; no further cadence probes
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+[LEARN] REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+[LEARN] REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 307→/login; Next.js patch level > vulnerable; middleware auth gate intact
+[LEARN] REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+[LEARN] NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format still accepted. Supabase platform-level change, not OneCode key rotation.
+
+---
+
+### STEP 7 — RISK
+
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.

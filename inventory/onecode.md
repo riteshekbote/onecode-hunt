@@ -693,3 +693,12 @@ www.onecode.de
 ## 2026-09-23 18:42:27 UTC
 
 ## 2026-09-23 21:51:53 UTC
+
+## 2026-09-24 00:23:06 UTC
+- NEW kurs.onecode.de: No new deploy since 2026-09-19 11:33Z (chunk `0-mbmp1iqb6hj.js` sha256 f916f314... byte-identical); pre-auth surface stable = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 20
+- NEW cto.onecode.de: CNAME→cname.perspective-dns.com stable 34+ days; HTTP 409 "error code:1001" + TLS handshake-fail persists; zero verification TXT records; conf 58 holds
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` re-confirmed — endpoint probeable with `sb_publishable_` key, zero buckets; unchanged since 09-04
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles: 503 PGRST002 (schema-cache-down) — monitor formally closed 09-17 after 26 probes (503↔401 oscillation), never 200+rows; platform enforces `sb_publish
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: Unchanged — email-only, disable_signup=true, mailer_autoconfirm=false, all external OAuth false, passkeys disabled
+- NEW kurs.onecode.de: x-middleware-subrequest bypass (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16; _next/image SSRF negative; pre-auth surface exhaustively validated
+- CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — confirmed platform-level change, not OneCode rotation
