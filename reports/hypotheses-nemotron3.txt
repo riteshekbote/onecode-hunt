@@ -1,4 +1,9 @@
-## 2026-09-24 19:19:34 UTC [target] (model nemotron3)
+## 2026-09-24 22:34:58 UTC [target] (model nemotron3)
+[NEW] kurs.onecode.de: No delta since 09-24 19:20Z — /login 200 (no Set-Cookie, iad1), / 307, /api/broadcast 307, /datenschutz 200 (prerendered), /rechtliches 200 (prerendered), chunk f916f314 byte-identical since 09-19 11:33Z deploy
+[NEW] cto.onecode.de: CNAME→cname.perspective-dns.com day-36 stable (104.18.2.73/3.73), HTTP 409 "error code:1001" + TLS handshake-fail, zero verification TXT — identical to prior cycles
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` re-confirmed — endpoint probeable with sb_publishable_ key, zero buckets; unchanged 20+ days
+[NEW] Supabase REST /rest/v1/: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces sb_publishable_ format only; no cadence probes
+[NEW] No deploy signal since 09-19 11:33Z; chunk diff is event-triggered, not time-based — time-cadence probing has no value day-36
 [PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=9
 [PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5

@@ -710,3 +710,10 @@ www.onecode.de
 ## 2026-09-24 15:18:24 UTC
 
 ## 2026-09-24 19:20:24 UTC
+
+## 2026-09-24 22:35:08 UTC
+- NEW kurs.onecode.de: No delta since 09-24 19:20Z — /login 200 (no Set-Cookie, iad1), / 307, /api/broadcast 307, /datenschutz 200 (prerendered), /rechtliches 200 (prerendered), chunk f916f314 byte-identica
+- NEW cto.onecode.de: CNAME→cname.perspective-dns.com day-36 stable (104.18.2.73/3.73), HTTP 409 "error code:1001" + TLS handshake-fail, zero verification TXT — identical to prior cycles
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` re-confirmed — endpoint probeable with sb_publishable_ key, zero buckets; unchanged 20+ days
+- NEW Supabase REST /rest/v1/: monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces sb_publishable_ format only; no cadence probes
+- NEW No deploy signal since 09-19 11:33Z; chunk diff is event-triggered, not time-based — time-cadence probing has no value day-36
