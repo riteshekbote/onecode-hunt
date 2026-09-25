@@ -1,1 +1,39 @@
-## 2026-09-25 11:43:40 UTC [target] (model bigpickle)
+## 2026-09-25 16:57:23 UTC [target] (model bigpickle)
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.20, a6 b8 t7 g3 c8 f4
+[PRIO] kurs.onecode.de,5.60, a5 b8 t7 g2 c7 f3
+[PRIO] cto.onecode.de,4.40, a4 b6 t5 g1 c3 f7
+[HYP] Cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project is the only backend for kurs.onecode.de (09-04 bundle analysis, publishable key sha256 870cf518…); UUID PKs make ID-guessing BOLA useless, so the only viable IDOR shape is a SELECT policy that returns rows without a user_id/auth.uid() predicate; PostgREST is a flat per-table surface reachable directly, bypassing the Next.js middleware; day-38 of anon probes have produced zero permissive reads (REST 503↔401 ×26, storage `[]`, functions 404, realtime 401) so pre-auth ACLs are not the vector — the gap would be post-auth RLS only; enrollments/profiles carry PII + course entitlement, so impact is high if it exists.
+evidence_needed: account A's row identifiers (or row count) returned in account B's authenticated GET response, i.e. A≠B identity in the result set.
+verify_steps: AUTH_HELPED only. 1) POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password with each invited account's email+password, capture access_token. 2) GET /rest/v1/enrollments?select=id,user_id&limit=50 with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + `Authorization: Bearer <A>`. 3) Repeat with <B>. 4) Compare returned user_id sets for cross-account rows. Read-only GETs only; do not enumerate beyond the caller's own visibility window.
+impact: CRITICAL — cross-tenant PII and paid-course entitlement disclosure; reportable as broken object-level authorization on a multi-tenant data store.
+testability: AUTH_HELPED
+[HYP] Next.js App Router middleware auth gate does not cover RSC/segment negotiation
+class: AUTH
+asset: kurs.onecode.de/dashboard (and /admin, /courses)
+confidence: 45
+reasoning: the gate is a Next.js middleware that 307s every non-public path; CVE-2025-29927 header bypass was already tested negative (09-16), but App Router clients negotiate server components with `?_rsc=<cacheKey>` plus `RSC: 1` / `Next-Router-State-Tree` request headers, which take a different server entry path than a plain document GET; a matcher scoped to document requests can be skipped by the RSC segment handler and return the rendered segment payload (props/data) directly; if the segment payload is returned, it can contain dashboard data the 307 was meant to gate; the app is demonstrably App Router (route refs /admin,/courses,/dashboard; boot chunk `turbopack-2a8cgfwu75lsu`), so the handler exists; this is the last untested gate-coverage variant on the app shell and is readable with a single GET.
+evidence_needed: an `?_rsc=` / `RSC: 1` request to /dashboard or /admin returning 200 + RSC flight payload (or 200 + any JSON) where the plain GET returns 307.
+verify_steps: GET https://kurs.onecode.de/dashboard?_rsc=k1 with `RSC: 1`, `Next-Router-State-Tree: %5B%22%22%2C%7B%7D%2Cnull%2Cnull%2Ctrue%5D` — expect 307 to mirror plain GET; 200+flight payload = hypothesis confirmed. Then repeat on /admin?_rsc=k1. One request per path, >=1s apart. If 307, the hypothesis is falsified for RSC negotiation.
+impact: HIGH if confirmed — unauthenticated disclosure of authenticated route data (user/course state) with no credentials, i.e. a complete pre-auth bypass of the app's only access control.
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: pure CNAME to cname.perspective-dns.com (dig 16:56Z 09-25, day-38) with zero verification TXT records, HTTP 80 returning 409 "error code:1001" and TLS handshake failure on 443 — the signature of a custom-subdomain target that exists but has no hostname bound, per Perspective's documented connect-your-own-domain flow; onecode.de's own zone therefore delegates a first-party hostname to a third-party SaaS with no ownership proof; the 409/1001 has been stable for 38 days, so the record is not transient.
+evidence_needed: cto.onecode.de returning 200 and serving attacker-controlled content after binding it in a fresh Perspective account.
+verify_steps: HUMAN_ONLY — requires vendor and domain-owner consent. Do not attempt a claim. Report-only with the dig evidence, HTTP 409/1001 body, and the provider documentation reference.
+impact: MEDIUM-HIGH — attacker-controlled content on a trusted *.onecode.de hostname, enabling phishing against OneCode customers and trust-boundary abuse; no current data impact.
+testability: HUMAN_ONLY
+[NEXT] PROBE: GET https://kurs.onecode.de/dashboard?_rsc=k1 with headers `RSC: 1` and `Next-Router-State-Tree: %5B%22%22%2C%7B%7D%2Cnull%2Cnull%2Ctrue%5D` (no cookies, no follow-redirect) — one request, >=1s before/after. 307 => RSC negotiation does not bypass the middleware, hypothesis falsified and dropped. 200 with a flight payload => escalate immediately: repeat on /admin?_rsc=k1 and /courses?_rsc=k1, then diff the payload for user/course data.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: versioned and debug path sweep (09-25 16:56Z) — /api/graphql, /api/v2/health, /api/internal, /api/docs, /openapi.json, /swagger.json, /debug all 307→/login; no unauthenticated GraphQL, OpenAPI, or debug surface exists.
+[LEARN] REJECTED SSRF @ kurs.onecode.de/_next/image: external URL fetch re-confirmed 400 at 16:56Z; remotePatterns still not permissive, no open-proxy primitive.
+[LEARN] NO_DELTA @ kurs.onecode.de: main chunk sha256 f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca byte-identical to the 09-19 11:33Z build, day-6 with no deploy; build-diffing must stay event-triggered, not time-triggered.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: /auth/v1/settings re-read 16:56Z shows all 26 external providers false, saml_enabled false, passkeys disabled — no OAuth redirect_uri/state or SAML surface.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME cto.onecode.de → cname.perspective-dns.com confirmed day-38 with zero verification TXT; still unbound/reclaimable at conf 58, proof path remains HUMAN_ONLY.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface is exactly {/login, /passwort-vergessen, /datenschutz, /rechtliches} at 200; the sole RSC literal in the payload is /passwort-vergessen, so the unauthenticated attack surface is fully characterized.
+[RISK] onecode: 38 — 38 days of continuous probing have produced zero permissive reads or unauthenticated bypasses; the only pre-auth 200s are static legal pages and the login form, and every versioned/debug path 307s. Residual risk is concentrated in two untestable-by-passive-means areas: post-auth RLS on the Supabase project (single point of failure for PII, needs two invited accounts) and the unbound first-party CNAME (needs vendor consent). No evidence supports an exploitable pre-auth finding today.

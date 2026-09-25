@@ -20203,3 +20203,148 @@ I’ll perform a minimal, read-only freshness check: DNS, public route status, a
 [93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
 [0m✗ [0mdate -u +'%Y-%m-%dT%H:%M:%SZ'; printf '%s\n' '--- DNS ---'; for host in kurs.onecode.de cto.onecode.de aygnpacdkgtsfnhgcyjc.supabase.co; do printf '%s\n' "[$host]"; dig +short CNAME "$host"; dig +short A "$host"; done; printf '%s\n' '--- kurs routes ---'; for path in /login / /datenschutz /rechtliches /admin /api/broadcast; do curl --http1.1 -sS -L --max-redirs 0 -o /dev/null -D - --connect-timeout 8 --max-time 15 "https://kurs.onecode.de$path" | awk 'BEGIN{IGNORECASE=1} /^HTTP\// || /^location:/ || /^server:/ || /^set-cookie:/ || /^x-railway-edge:/ || /^x-hikari-trace:/ || /^content-type:/ {print}' | tr '\n' ' '; printf ' path=%s\n' "$path"; sleep 1; done; printf '%s\n' '--- supabase storage ---'; curl --http1.1 -sS --max-time 15 -D - -o /tmp/storage-body -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket' | awk 'BEGIN{IGNORECASE=1} /^HTTP\// || /^content-type:/ || /^content-length:/ || /^server:/ || /^x-/ {print}'; wc -c </tmp/storage-body; sha256sum /tmp/storage-body | cut -d' ' -f1; printf '%s\n' '--- supabase auth settings ---'; curl --http1.1 -sS --max-time 15 -D - -o /tmp/auth-body -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings' | awk 'BEGIN{IGNORECASE=1} /^HTTP\// || /^content-type:/ || /^content-length:/ || /^server:/ || /^x-/ {print}'; python3 -c 'import json; p="/tmp/auth-body"; d=json.load(open(p)); print(json.dumps({k:d.get(k) for k in ("disable_signup","mailer_autoconfirm","external")},sort_keys=True))' 2>/dev/null || true; rm -f /tmp/storage-body /tmp/auth-body failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST bigpickle 2026-09-25 16:57:56 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mecho "--- cto cname ---"; dig +short cto.onecode.de CNAME @1.1.1.1; echo "--- kurs cname ---"; dig +short kurs.onecode.de CNAME @1.1.1.1; echo "--- supabase auth settings ---"; curl -s -m 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" | head -c 1200
+--- cto cname ---
+cname.perspective-dns.com.
+--- kurs cname ---
+ki8dqcf6.up.railway.app.
+--- supabase auth settings ---
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+[0m
+[0m$ [0mdate -u +"%Y-%m-%dT%H:%M:%SZ"; echo "--- login ---"; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" -m 20 -I https://kurs.onecode.de/login; sleep 1; echo "--- root ---"; curl -s -o /dev/null -w "%{http_code}\n" -m 20 -I https://kurs.onecode.de/; sleep 1; echo "--- datenschutz ---"; curl -s -o /dev/null -w "%{http_code}\n" -m 20 -I https://kurs.onecode.de/datenschutz
+2026-09-25T16:56:21Z
+--- login ---
+200 0
+--- root ---
+307
+--- datenschutz ---
+200
+[0m
+[0m$ [0mcd /tmp/opencode && curl -s -m 20 https://kurs.onecode.de/login -o login.html && echo "bytes=$(wc -c < login.html)" && grep -o '_next/static/chunks/[A-Za-z0-9_.-]*\.js' login.html | sort -u | head -20; echo "--- route literals ---"; grep -oE '"/(admin|courses|dashboard|einladung|passwort[a-z-]*|api/[a-z0-9/_-]*|v[0-9]/[a-z0-9/_-]*)"' login.html | sort -u | head -20
+bytes=18702
+_next/static/chunks/0-lpao5_i9htd.js
+_next/static/chunks/0-mbmp1iqb6hj.js
+_next/static/chunks/08ttfj81-47mu.js
+_next/static/chunks/0cz1d0mv5g_q7.js
+_next/static/chunks/1a4tqdnsy9k1l.js
+_next/static/chunks/1ymt1shyhmu-4.js
+_next/static/chunks/2i51e627rllld.js
+_next/static/chunks/2n1zydk_92chn.js
+_next/static/chunks/2ufbqzbeyam3w.js
+_next/static/chunks/3fntmmi971322.js
+_next/static/chunks/3mc6dra1m0098.js
+_next/static/chunks/4310-_brt1a3g.js
+_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+--- route literals ---
+"/passwort-vergessen"
+[0m
+[0m$ [0msleep 2; echo "--- storage bucket ---"; curl -s -m 20 -w "\nHTTP=%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+--- storage bucket ---
+[]
+HTTP=200
+[0m
+[0m$ [0mcd /tmp/opencode && sleep 1 && curl -s -m 25 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" -o m.js -w "HTTP=%{http_code} bytes=%{size_download}\n" && sha256sum m.js && echo "--- route/api literals in main chunk ---" && grep -oE '"/(api/[a-zA-Z0-9/_-]{2,40}|v[0-9]/[a-zA-Z0-9/_-]{1,40}|[a-z-]{3,20})"' m.js | sort -u | head -40
+HTTP=200 bytes=154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  m.js
+--- route/api literals in main chunk ---
+[0m
+[0m$ [0mfor p in /api/graphql /openapi.json /swagger.json /api/docs /api/v2/health /api/internal /debug /_next/image?url=https%3A%2F%2Fexample.com%2Fa.png; do sleep 1; printf "%-28s %s\n" "$p" "$(curl -s -o /dev/null -w '%{http_code}' -m 15 "https://kurs.onecode.de$p")"; done
+/api/graphql                 307
+/openapi.json                307
+/swagger.json                307
+/api/docs                    307
+/api/v2/health               307
+/api/internal                307
+/debug                       307
+/_next/image?url=https%3A%2F%2Fexample.com%2Fa.png 400
+[0m
+**STEP 1 — DELTA** (live read-only probes 2026-09-25 16:56Z)
+
+NO_DELTA on all tracked surfaces. Verified this cycle:
+- `kurs.onecode.de/login` HEAD 200 (0-byte body on HEAD), `/` 307, `/datenschutz` 200 — unchanged.
+- Main client chunk `/_next/static/chunks/0-mbmp1iqb6hj.js` → 200, 154581 bytes, **sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`** — byte-identical to the 09-19 11:33Z build. Boot `turbopack-2a8cgfwu75lsu.js`, module `4310-_brt1a3g.js`, legacy `0-lpao5_i9htd.js` still co-resident. **No deploy day-6.**
+- `cto.onecode.de` CNAME → `cname.perspective-dns.com.` (stable day-38). `kurs.onecode.de` CNAME → `ki8dqcf6.up.railway.app.` (stable).
+- `…supabase.co/auth/v1/settings` → all 26 external providers `false`, `email:true`, `phone:false`, `disable_signup:true`, `mailer_autoconfirm:false`, `saml_enabled:false`, `passkeys_enabled:false` — byte-identical to 09-04 baseline.
+- `…supabase.co/storage/v1/bucket` → 200 `[]` (zero buckets, day-38).
+- NEW coverage (breadth sweep, all 307→/login, no new surface): `/api/graphql`, `/openapi.json`, `/swagger.json`, `/api/docs`, `/api/v2/health`, `/api/internal`, `/debug`. `_next/image?url=https://example.com/a.png` → 400 (SSRF primitive still closed, re-confirmed).
+- Only pre-auth route literal in the RSC payload remains `/passwort-vergessen`; `main chunk` contains zero `/api/*` or `/vN/*` literals.
+- REST `/rest/v1/*` monitor remains formally closed (09-17, 26 probes, never 200+rows) — no re-probe.
+
+**STEP 2 — PRIORITIZE**
+
+```
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.20, a6 b8 t7 g3 c8 f4
+[PRIO] kurs.onecode.de,5.60, a5 b8 t7 g2 c7 f3
+[PRIO] cto.onecode.de,4.40, a4 b6 t5 g1 c3 f7
+```
+Supabase is the whole backend (PostgREST+RLS, GraphQL, Storage, Realtime, Auth) and holds every PII row; it outranks the app shell, which is a pure 307 gate. `cto` scores on brand/trust impact despite zero app surface.
+
+**STEP 3 — HYPOTHESES**
+
+```
+[HYP] Cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project is the only backend for kurs.onecode.de (09-04 bundle analysis, publishable key sha256 870cf518…); UUID PKs make ID-guessing BOLA useless, so the only viable IDOR shape is a SELECT policy that returns rows without a user_id/auth.uid() predicate; PostgREST is a flat per-table surface reachable directly, bypassing the Next.js middleware; day-38 of anon probes have produced zero permissive reads (REST 503↔401 ×26, storage `[]`, functions 404, realtime 401) so pre-auth ACLs are not the vector — the gap would be post-auth RLS only; enrollments/profiles carry PII + course entitlement, so impact is high if it exists.
+evidence_needed: account A's row identifiers (or row count) returned in account B's authenticated GET response, i.e. A≠B identity in the result set.
+verify_steps: AUTH_HELPED only. 1) POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password with each invited account's email+password, capture access_token. 2) GET /rest/v1/enrollments?select=id,user_id&limit=50 with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + `Authorization: Bearer <A>`. 3) Repeat with <B>. 4) Compare returned user_id sets for cross-account rows. Read-only GETs only; do not enumerate beyond the caller's own visibility window.
+impact: CRITICAL — cross-tenant PII and paid-course entitlement disclosure; reportable as broken object-level authorization on a multi-tenant data store.
+testability: AUTH_HELPED
+
+[HYP] Next.js App Router middleware auth gate does not cover RSC/segment negotiation
+class: AUTH
+asset: kurs.onecode.de/dashboard (and /admin, /courses)
+confidence: 45
+reasoning: the gate is a Next.js middleware that 307s every non-public path; CVE-2025-29927 header bypass was already tested negative (09-16), but App Router clients negotiate server components with `?_rsc=<cacheKey>` plus `RSC: 1` / `Next-Router-State-Tree` request headers, which take a different server entry path than a plain document GET; a matcher scoped to document requests can be skipped by the RSC segment handler and return the rendered segment payload (props/data) directly; if the segment payload is returned, it can contain dashboard data the 307 was meant to gate; the app is demonstrably App Router (route refs /admin,/courses,/dashboard; boot chunk `turbopack-2a8cgfwu75lsu`), so the handler exists; this is the last untested gate-coverage variant on the app shell and is readable with a single GET.
+evidence_needed: an `?_rsc=` / `RSC: 1` request to /dashboard or /admin returning 200 + RSC flight payload (or 200 + any JSON) where the plain GET returns 307.
+verify_steps: GET https://kurs.onecode.de/dashboard?_rsc=k1 with `RSC: 1`, `Next-Router-State-Tree: %5B%22%22%2C%7B%7D%2Cnull%2Cnull%2Ctrue%5D` — expect 307 to mirror plain GET; 200+flight payload = hypothesis confirmed. Then repeat on /admin?_rsc=k1. One request per path, >=1s apart. If 307, the hypothesis is falsified for RSC negotiation.
+impact: HIGH if confirmed — unauthenticated disclosure of authenticated route data (user/course state) with no credentials, i.e. a complete pre-auth bypass of the app's only access control.
+testability: PASSIVE
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: pure CNAME to cname.perspective-dns.com (dig 16:56Z 09-25, day-38) with zero verification TXT records, HTTP 80 returning 409 "error code:1001" and TLS handshake failure on 443 — the signature of a custom-subdomain target that exists but has no hostname bound, per Perspective's documented connect-your-own-domain flow; onecode.de's own zone therefore delegates a first-party hostname to a third-party SaaS with no ownership proof; the 409/1001 has been stable for 38 days, so the record is not transient.
+evidence_needed: cto.onecode.de returning 200 and serving attacker-controlled content after binding it in a fresh Perspective account.
+verify_steps: HUMAN_ONLY — requires vendor and domain-owner consent. Do not attempt a claim. Report-only with the dig evidence, HTTP 409/1001 body, and the provider documentation reference.
+impact: MEDIUM-HIGH — attacker-controlled content on a trusted *.onecode.de hostname, enabling phishing against OneCode customers and trust-boundary abuse; no current data impact.
+testability: HUMAN_ONLY
+```
+
+**STEP 4 — SELF-CRITIQUE**
+
+- `Supabase Storage public bucket exposure` — **PARKED**: confidence 35 < 40. 200 `[]` on day-38 with zero buckets and a platform-enforced key-type check; the risk is hypothetical future state, not a current condition.
+- `x-middleware-subrequest` (CVE-2025-29927) — dropped: REJECTED class, already falsified live on 09-16.
+- `/_next/image` SSRF — dropped: REJECTED class, re-confirmed 400 this cycle.
+- Survivor 1: `[FINAL] RLS cross-tenant BOLA (65)` — highest value, sole unresolved lead, AUTH_HELPED-gated.
+- Survivor 2: `[FINAL] cto.onecode.de dangling CNAME (58)` — HUMAN_ONLY, report-only.
+- Survivor 3: `[FINAL] Next.js RSC gate-coverage gap (45)` — newly untested, PASSIVE, cheap to falsify, so it is worth one probe even at 45.
+
+**STEP 5 — NEXT ACTION**
+
+```
+[NEXT] PROBE: GET https://kurs.onecode.de/dashboard?_rsc=k1 with headers `RSC: 1` and `Next-Router-State-Tree: %5B%22%22%2C%7B%7D%2Cnull%2Cnull%2Ctrue%5D` (no cookies, no follow-redirect) — one request, >=1s before/after. 307 => RSC negotiation does not bypass the middleware, hypothesis falsified and dropped. 200 with a flight payload => escalate immediately: repeat on /admin?_rsc=k1 and /courses?_rsc=k1, then diff the payload for user/course data.
+```
+
+**STEP 6 — LEARNING**
+
+```
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: versioned and debug path sweep (09-25 16:56Z) — /api/graphql, /api/v2/health, /api/internal, /api/docs, /openapi.json, /swagger.json, /debug all 307→/login; no unauthenticated GraphQL, OpenAPI, or debug surface exists.
+[LEARN] REJECTED SSRF @ kurs.onecode.de/_next/image: external URL fetch re-confirmed 400 at 16:56Z; remotePatterns still not permissive, no open-proxy primitive.
+[LEARN] NO_DELTA @ kurs.onecode.de: main chunk sha256 f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca byte-identical to the 09-19 11:33Z build, day-6 with no deploy; build-diffing must stay event-triggered, not time-triggered.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: /auth/v1/settings re-read 16:56Z shows all 26 external providers false, saml_enabled false, passkeys disabled — no OAuth redirect_uri/state or SAML surface.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME cto.onecode.de → cname.perspective-dns.com confirmed day-38 with zero verification TXT; still unbound/reclaimable at conf 58, proof path remains HUMAN_ONLY.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface is exactly {/login, /passwort-vergessen, /datenschutz, /rechtliches} at 200; the sole RSC literal in the payload is /passwort-vergessen, so the unauthenticated attack surface is fully characterized.
+```
+
+**STEP 7 — RISK**
+
+```
+[RISK] onecode: 38 — 38 days of continuous probing have produced zero permissive reads or unauthenticated bypasses; the only pre-auth 200s are static legal pages and the login form, and every versioned/debug path 307s. Residual risk is concentrated in two untestable-by-passive-means areas: post-auth RLS on the Supabase project (single point of failure for PII, needs two invited accounts) and the unbound first-party CNAME (needs vendor consent). No evidence supports an exploitable pre-auth finding today.
+```
