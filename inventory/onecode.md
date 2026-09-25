@@ -739,3 +739,14 @@ www.onecode.de
 - NEW Supabase: `GET /auth/v1/health` → GoTrue `v2.197.0` (version disclosure, OOS class, not reportable).
 - CHANGED hypothesis "Next.js middleware does not cover RSC/segment negotiation" → **FALSIFIED**: `GET /dashboard?_rsc=k1` with `RSC: 1` + `Next-Router-State-Tree` → **307→/login**, byte-identical to plain GET.
 - CHANGED cto.onecode.de: unchanged — CNAME `cname.perspective-dns.com`, TXT zero, HTTP 409. Chunk `0-mbmp1iqb6hj.js` sha256 `f916f314…` byte-identical → day-7, no deploy.
+
+## 2026-09-25 23:34:33 UTC
+- NEW kurs.onecode.de: /login form has NO action, NO method, and its email/password inputs carry no `name` attribute (id="email"/"password" only), no `$ACTION_ID_*`, no `next-action`/`server-reference` in t
+- NEW kurs.onecode.de: the URL-fragment→session sink is APPLICATION code, not a library default — module 34891 `HashSessionHandoff` in current-build chunk `1a4tqdnsy9k1l.js`: parses `window.location.hash` v
+- NEW kurs.onecode.de: `HashSessionHandoff`'s `next` is hardcoded `{invite:"/einladung",recovery:"/passwort-neu"}` defaulting to `/` → the injected session cannot be steered to an external origin. No open r
+- CHANGED kurs.onecode.de: pre-auth window for the fragment sink is now NARROWER than the last lead claimed. Module 34891 is defined in a pre-auth-served chunk (200) but is imported by **no** chunk in the /logi
+- NEW kurs.onecode.de: bundled supabase-js is `2.112.0` with library defaults `rY={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:"implicit"}`; the app passes `detectSessionInUrl:(void
+- NEW kurs.onecode.de: secret-leak sweep across all 13 pre-auth-served chunks → **zero** `eyJ*.*.*` JWTs, zero `service_role` / `SUPABASE_SERVICE` / `secret_key` / `JWT_SECRET` strings. Only `sb_publishable
+- CHANGED kurs.onecode.de: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical → day-7, no deploy; `/login` 200 (no Set-Cookie, `private/no-sto
+- CHANGED cto.onecode.de: CNAME `cname.perspective-dns.com` (dig 1.1.1.1), TXT empty, HTTP 409 — day-39, unchanged.
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 with publishable key — zero buckets, unchanged.

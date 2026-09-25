@@ -20698,3 +20698,322 @@ testability: HUMAN_ONLY
 ## STEP 7 — RISK
 
 [RISK] onecode: 42 — day-39 of probing produced zero pre-auth bypasses across every gate-coverage, normalization, header-desync, JWT and WebSocket variant tested today, which is itself a strong signal the app shell is sound. Risk is now concentrated in two authenticated-window issues: the Supabase RLS authorization model, and the still-shipped implicit-flow session handler that accepts a session from a URL fragment with no state binding. Both are real design weaknesses with no unauthenticated path to proof, so they cannot be resolved without an account — but the second is a self-contained, reproducible finding as soon as one session token exists.
+===== ANALYST bigpickle 2026-09-25 23:34:33 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u; echo "--- LOGIN ---"; curl -s -o /dev/null -w "%{http_code}\n" -I --max-time 20 https://kurs.onecode.de/login; echo "--- ROOT ---"; curl -s -o /dev/null -w "%{http_code}\n" -I --max-time 20 https://kurs.onecode.de/; sleep 1; echo "--- CHUNK ---"; curl -s --max-time 25 https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js | sha256sum
+Fri Sep 25 23:32:21 UTC 2026
+--- LOGIN ---
+200
+--- ROOT ---
+307
+--- CHUNK ---
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  -
+[0m
+[0m$ [0mcd /tmp/opencode && curl -s --max-time 25 -H 'User-Agent: Mozilla/5.0' https://kurs.onecode.de/login -o login.html -D login.hdr; wc -c login.html; echo "=== form/action signals ==="; grep -o -E '\$ACTION_ID_[a-f0-9]+|"action":"[^"]{0,60}|action="[^"]{0,80}|useActionState|next-action|server-reference|method="[a-z]+"' login.html | sort | uniq -c | head -40; echo "=== input names ==="; grep -o -E '<input[^>]{0,200}' login.html | sed 's/type="[^"]*"//' | head -20; echo "=== form tags ==="; grep -o -E '<form[^>]*>' login.html | head -10
+18702 login.html
+=== form/action signals ===
+=== input names ===
+<input  data-slot="input" class="w-full min-w-0 border border-input bg-transparent py-1 transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm fi
+<input  data-slot="input" class="w-full min-w-0 border border-input bg-transparent py-1 transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm
+=== form tags ===
+<form class="kr-shadow flex flex-col gap-5 rounded-lg border border-border bg-card p-7">
+[0m
+[0m$ [0mcd /tmp/opencode && echo "=== names/ids/placeholders ==="; grep -o -E 'name="[^"]{0,40}"|id="[^"]{0,40}"|placeholder="[^"]{0,40}"|type="[^"]{0,20}"|autocomplete="[^"]{0,30}"' login.html | sort -u | head -30; echo "=== next-data / self.__next_f route ==="; grep -o -E 'self\.__next_f\.push\(\[[^]]{0,200}' login.html | head -5; echo "=== supabase/keys in html ==="; grep -o -E 'sb_publishable_[A-Za-z0-9_-]{0,10}|supabase\.co|flowType|signInWithPassword|magiclink' login.html | sort -u | head; echo "=== hdrs ==="; grep -i -E 'set-cookie|x-railway|server:|cache-control|x-powered|content-security|x-frame|strict-transport' login.hdr
+=== names/ids/placeholders ===
+id="_R_"
+id="email"
+id="password"
+name="description"
+name="next-size-adjust"
+name="viewport"
+placeholder="du@beispiel.de"
+placeholder="••••••••••"
+type="email"
+type="image/x-icon"
+type="password"
+type="submit"
+=== next-data / self.__next_f route ===
+self.__next_f.push([1,"1:\"$Sreact.fragment\"\n2:I[40264,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\"
+=== supabase/keys in html ===
+=== hdrs ===
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+server: railway-hikari
+x-powered-by: Next.js
+x-railway-request-id: VCNTW3BHSCur_av_ss7a6g
+x-railway-edge: iad1
+[0m
+[0m$ [0mcd /tmp/opencode && grep -o -E '/_next/static/chunks/[A-Za-z0-9_.-]+\.js' login.html | sort -u > chunks.txt; cat chunks.txt; sleep 1; mkdir -p ch && for c in $(cat chunks.txt); do f=ch/$(basename $c); curl -s --max-time 25 "https://kurs.onecode.de$c" -o "$f"; sleep 0.4; done; ls -l ch | head -20
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+total 912
+-rw-r--r-- 1 runner runner 251775 Sep 25 23:32 0-lpao5_i9htd.js
+-rw-r--r-- 1 runner runner 154581 Sep 25 23:32 0-mbmp1iqb6hj.js
+-rw-r--r-- 1 runner runner 229078 Sep 25 23:32 08ttfj81-47mu.js
+-rw-r--r-- 1 runner runner 112594 Sep 25 23:32 0cz1d0mv5g_q7.js
+-rw-r--r-- 1 runner runner  13880 Sep 25 23:32 1a4tqdnsy9k1l.js
+-rw-r--r-- 1 runner runner  27433 Sep 25 23:32 1ymt1shyhmu-4.js
+-rw-r--r-- 1 runner runner  31346 Sep 25 23:32 2i51e627rllld.js
+-rw-r--r-- 1 runner runner  11147 Sep 25 23:32 2n1zydk_92chn.js
+-rw-r--r-- 1 runner runner   1311 Sep 25 23:32 2ufbqzbeyam3w.js
+-rw-r--r-- 1 runner runner  14377 Sep 25 23:32 3fntmmi971322.js
+-rw-r--r-- 1 runner runner  12653 Sep 25 23:32 3mc6dra1m0098.js
+-rw-r--r-- 1 runner runner  37519 Sep 25 23:32 4310-_brt1a3g.js
+-rw-r--r-- 1 runner runner   9652 Sep 25 23:32 turbopack-2a8cgfwu75lsu.js
+[0m
+[0m$ [0mcd /tmp/opencode && grep -oh -E 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{5,}' ch/*.js | sort -u > jwt.txt; wc -l jwt.txt; while read -r t; do echo "--- $(echo "$t" | cut -c1-24) (sha256 $(printf '%s' "$t" | sha256sum | cut -c1-16))"; python3 - "$t" <<'EOF'
+import sys,base64,json
+t=sys.argv[1]
+def d(s):
+    s+='='*(-len(s)%4)
+    try: return json.loads(base64.urlsafe_b64decode(s))
+    except Exception as e: return f"err:{e}"
+h,pl,_=t.split('.')
+print("hdr",json.dumps(d(h)))
+print("pl",json.dumps(d(pl))[:400])
+EOF
+done < jwt.txt
+0 jwt.txt
+[0m
+[0m$ [0mcd /tmp/opencode && echo "== publishable key / project ref =="; grep -oh -E 'sb_publishable_[A-Za-z0-9_-]+|aygnpacdkgtsfnhgcyjc' ch/*.js | sort | uniq -c; echo "== supabase.co urls =="; grep -oh -E 'https://[a-z0-9.-]*supabase\.co[A-Za-z0-9/_.?=-]*' ch/*.js | sort -u | head; echo "== createClient call sites (current-gen only) =="; grep -oh -E 'createClient\([^)]{0,200}' ch/0-mbmp1iqb6hj.js ch/4310-_brt1a3g.js ch/3fntmmi971322.js 2>/dev/null | head; echo "== which chunk holds the key =="; for f in ch/*.js; do if grep -q 'sb_publishable_\|aygnpacdkgtsfnhgcyjc' "$f"; then echo "HIT $f"; fi; done
+== publishable key / project ref ==
+      1 aygnpacdkgtsfnhgcyjc
+      1 sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+== supabase.co urls ==
+https://aygnpacdkgtsfnhgcyjc.supabase.co
+https://supabase.com/dashboard/project/_/settings/api
+https://supabase.com/docs/guides/auth/server-side
+== createClient call sites (current-gen only) ==
+== which chunk holds the key ==
+HIT ch/0-lpao5_i9htd.js
+[0m
+[0m$ [0mcd /tmp/opencode && echo "== key context =="; grep -oh -E '.{160}sb_publishable_[A-Za-z0-9_-]+.{240}' ch/0-lpao5_i9htd.js; echo; echo "== service_role / secret refs across all chunks =="; grep -oh -E 'service_role|SUPABASE_SERVICE|secret[_-]?key|JWT_SECRET|anon[_-]?key' ch/*.js | sort | uniq -c; echo "== auth method usage =="; for f in ch/*.js; do m=$(grep -oh -E 'signInWithPassword|signInWithOtp|signInWithOAuth|exchangeCodeForSession|verifyOtp|setSession|onAuthStateChange|getUser\(' "$f" | sort -u | tr '\n' ' '); [ -n "$m" ] && echo "$(basename $f): $m"; done
+== key context ==
+void 0)??sn(),detectSessionInUrl:(void 0)??sn(),persistSession:(void 0)??!0,storage:s,...null}});return r&&(i=n),n}("https://aygnpacdkgtsfnhgcyjc.supabase.co","sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30")}],11795)},90571,e=>{"use strict";var t=function(){return(t=Object.assign||function(e){for(var t,r=1,s=arguments.length;r<s;r++)for(var i in t=arguments[r])Object.prototype.hasOwnProperty.call(t,i)&&(e[i]=t[i]);return e}).apply(this,argum
+
+== service_role / secret refs across all chunks ==
+== auth method usage ==
+0-lpao5_i9htd.js: exchangeCodeForSession getUser( onAuthStateChange setSession signInWithOAuth signInWithOtp signInWithPassword verifyOtp 
+1a4tqdnsy9k1l.js: setSession signInWithPassword
+[0m
+[0m$ [0mcd /tmp/opencode && echo "=== 1a4tqdnsy9k1l.js full (13.8KB) ==="; cat ch/1a4tqdnsy9k1l.js | tr ';' '\n' | head -120
+=== 1a4tqdnsy9k1l.js full (13.8KB) ===
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,91918,20783,e=>{"use strict"
+var t=e.i(71645),r=Object.defineProperty,i=(e,t)=>r(e,"name",{value:t,configurable:!0})
+function n(e,t){if("function"==typeof e)return e(t)
+null!=e&&(e.current=t)}function a(...e){return t=>{let r=!1,i=e.map(e=>{let i=n(e,t)
+return r||"function"!=typeof i||(r=!0),i})
+if(r)return()=>{for(let t=0
+t<i.length
+t++){let r=i[t]
+"function"==typeof r?r():n(e[t],null)}}}}function l(...e){return t.useCallback(a(...e),e)}i(n,"setRef"),i(a,"composeRefs"),i(l,"useComposedRefs"),e.s(["useComposedRefs",0,l],20783)
+var o=Object.defineProperty,s=(e,t)=>o(e,"name",{value:t,configurable:!0})
+function d(e){let r=t.forwardRef((r,i)=>{let{children:n,...a}=r,o=null,s=!1,d=[]
+x(n)&&"function"==typeof j&&(n=j(n._payload)),t.Children.forEach(n,e=>{if(b(e)){s=!0
+let t="child"in e.props?e.props.child:e.props.children
+x(t)&&"function"==typeof j&&(t=j(t._payload)),o=g(e,t),d.push(o?.props?.children)}else d.push(e)}),o?o=t.cloneElement(o,void 0,d):!s&&1===t.Children.count(n)&&t.isValidElement(n)&&(o=n)
+let u=o?h(o):void 0,c=l(i,u)
+if(!o){if(n||0===n)throw Error(s?w(e):k(e))
+return n}let p=m(a,o.props??{})
+return o.type!==t.Fragment&&(p.ref=i?c:u),t.cloneElement(o,p)})
+return r.displayName=`${e}.Slot`,r}s(d,"createSlot")
+var u=d("Slot"),c=Symbol.for("radix.slottable")
+function p(e){let t=s(e=>"child"in e?e.children(e.child):e.children,"Slottable")
+return t.displayName=`${e}.Slottable`,t.__radixId=c,t}s(p,"createSlottable")
+var f=p("Slottable"),g=s((e,r)=>{if("child"in e.props){let r=e.props.child
+return t.isValidElement(r)?t.cloneElement(r,void 0,e.props.children(r.props.children)):null}return t.isValidElement(r)?r:null},"getSlottableElementFromSlottable")
+function m(e,t){let r={...t}
+for(let i in t){let n=e[i],a=t[i]
+/^on[A-Z]/.test(i)?n&&a?r[i]=(...e)=>{let t=a(...e)
+return n(...e),t}:n&&(r[i]=n):"style"===i?r[i]={...n,...a}:"className"===i&&(r[i]=[n,a].filter(Boolean).join(" "))}return{...e,...r}}function h(e){let t=Object.getOwnPropertyDescriptor(e.props,"ref")?.get,r=t&&"isReactWarning"in t&&t.isReactWarning
+return r?e.ref:(r=(t=Object.getOwnPropertyDescriptor(e,"ref")?.get)&&"isReactWarning"in t&&t.isReactWarning)?e.props.ref:e.props.ref||e.ref}function b(e){return t.isValidElement(e)&&"function"==typeof e.type&&"__radixId"in e.type&&e.type.__radixId===c}s(m,"mergeProps"),s(h,"getElementRef"),s(b,"isSlottable")
+var v=Symbol.for("react.lazy")
+function x(e){return null!=e&&"object"==typeof e&&"$$typeof"in e&&e.$$typeof===v&&"_payload"in e&&y(e._payload)}function y(e){return"object"==typeof e&&null!==e&&"then"in e}s(x,"isLazyComponent"),s(y,"isPromiseLike")
+var k=s(e=>`${e} failed to slot onto its children. Expected a single React element child or \`Slottable\`.`,"createSlotError"),w=s(e=>`${e} failed to slot onto its \`Slottable\`. Expected \`Slottable\` to receive a single React element child.`,"createSlottableError"),j=t[" use ".trim().toString()]
+e.s(["Root",0,u,"Slot",0,u,"Slottable",0,f,"createSlot",0,d,"createSlottable",0,p],91918)},5014,e=>{"use strict"
+var t=e.i(71645),r=e.i(71987),i=e.i(88973),n=e.i(96661)
+let a=(0,t.createContext)({}),l=(0,t.forwardRef)(({color:e,size:l,strokeWidth:o,absoluteStrokeWidth:s,className:d="",children:u,iconNode:c,...p},f)=>{let{size:g=24,strokeWidth:m=2,absoluteStrokeWidth:h=!1,color:b="currentColor",className:v=""}=(0,t.useContext)(a)??{},x=s??h?24*Number(o??m)/Number(l??g):o??m
+return(0,t.createElement)("svg",{ref:f,...r.default,width:l??g??r.default.width,height:l??g??r.default.height,stroke:e??b,strokeWidth:x,className:(0,n.mergeClasses)("lucide",v,d),...!u&&!(0,i.hasA11yProp)(p)&&{"aria-hidden":"true"},...p},[...c.map(([e,r])=>(0,t.createElement)(e,r)),...Array.isArray(u)?u:[u]])})
+e.s(["default",0,l],5014)},56420,e=>{"use strict"
+var t=e.i(71645),r=e.i(96661)
+let i=e=>{let t=e.replace(/^([A-Z])|[\s-_]+(\w)/g,(e,t,r)=>r?r.toUpperCase():t.toLowerCase())
+return t.charAt(0).toUpperCase()+t.slice(1)}
+var n=e.i(5014)
+e.s(["default",0,(e,a)=>{let l=(0,t.forwardRef)(({className:l,...o},s)=>(0,t.createElement)(n.default,{ref:s,iconNode:a,className:(0,r.mergeClasses)(`lucide-${i(e).replace(/([a-z0-9])([A-Z])/g,"$1-$2").toLowerCase()}`,`lucide-${e}`,l),...o}))
+return l.displayName=i(e),l}],56420)},71987,88973,e=>{"use strict"
+e.s(["default",0,{xmlns:"http://www.w3.org/2000/svg",width:24,height:24,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"}],71987),e.s(["hasA11yProp",0,e=>{for(let t in e)if(t.startsWith("aria-")||"role"===t||"title"===t)return!0
+return!1}],88973)},68877,e=>{"use strict"
+let t=(0,e.i(56420).default)("arrow-right",[["path",{d:"M5 12h14",key:"1ays0h"}],["path",{d:"m12 5 7 7-7 7",key:"xquz4c"}]])
+e.s(["ArrowRight",0,t],68877)},96661,e=>{"use strict"
+e.s(["mergeClasses",0,(...e)=>e.filter((e,t,r)=>!!e&&""!==e.trim()&&r.indexOf(e)===t).join(" ").trim()])},76017,e=>{"use strict"
+var t=e.i(43476)
+let r=(0,e.i(56420).default)("circle-alert",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["line",{x1:"12",x2:"12",y1:"8",y2:"12",key:"1pkeuh"}],["line",{x1:"12",x2:"12.01",y1:"16",y2:"16",key:"4dfq90"}]])
+e.s(["FormError",0,function({message:e}){return e?(0,t.jsxs)("div",{role:"alert",className:"kr-fade flex gap-2.5 rounded-[10px] border border-border bg-(--kr-accent-soft) px-3 py-2.75",children:[(0,t.jsx)(r,{className:"mt-px size-4 shrink-0 text-destructive",strokeWidth:2.2}),(0,t.jsx)("p",{className:"text-[12.5px] leading-relaxed",children:e})]}):null}],76017)},34891,e=>{"use strict"
+var t=e.i(71645),r=e.i(18566),i=e.i(11795)
+let n={invite:"/einladung",recovery:"/passwort-neu"}
+e.s(["HashSessionHandoff",0,function(){let e=(0,r.useRouter)()
+return(0,t.useEffect)(()=>{let t=function(e){let t=e.startsWith("#")?e.slice(1):e
+if(!t)return null
+let r=new URLSearchParams(t),i=r.get("error_code")??r.get("error")
+if(i)return{kind:"error",code:i.includes("expired")?"link-abgelaufen":"link-ungueltig"}
+let a=r.get("access_token"),l=r.get("refresh_token")
+return a&&l?{kind:"session",accessToken:a,refreshToken:l,next:n[r.get("type")??""]??"/"}:null}(window.location.hash)
+if(!t)return
+if(window.history.replaceState(null,"",window.location.pathname+window.location.search),"error"===t.kind)return void e.replace(`/login?error=${t.code}`)
+let r=!1
+return(0,i.createClient)().auth.setSession({access_token:t.accessToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login?error=link-abgelaufen")
+e.replace(t.next),e.refresh()}}),()=>{r=!0}},[e]),null}],34891)},28420,e=>{"use strict"
+var t=e.i(43476),r=e.i(71645),i=e.i(22016),n=e.i(18566),a=e.i(68877),l=e.i(11795),o=e.i(19455),s=e.i(55764),d=e.i(10204),u=e.i(76017)
+e.s(["LoginForm",0,function({linkError:e}){let c=(0,n.useRouter)(),[p,f]=(0,r.useState)(""),[g,m]=(0,r.useState)(""),[h,b]=(0,r.useState)(null),[v,x]=(0,r.useState)(!1)
+async function y(e){e.preventDefault(),x(!0),b(null)
+let t=(0,l.createClient)(),{error:r}=await t.auth.signInWithPassword({email:p,password:g})
+if(r){b("E-Mail oder Passwort ist falsch."),x(!1)
+return}c.push("/"),c.refresh()}return(0,t.jsxs)("form",{onSubmit:y,className:"kr-shadow flex flex-col gap-5 rounded-lg border border-border bg-card p-7",children:[(0,t.jsxs)("div",{children:[(0,t.jsx)("h1",{className:"mb-1.5 text-[23px] font-extrabold",children:"Willkommen zurück"}),(0,t.jsx)("p",{className:"text-[13.5px] leading-relaxed text-muted-foreground",children:"Melde dich mit der E-Mail an, an die deine Einladung ging."})]}),(0,t.jsxs)("div",{className:"flex flex-col gap-1.5",children:[(0,t.jsx)(d.Label,{htmlFor:"email",className:"text-[12.5px]",children:"E-Mail"}),(0,t.jsx)(s.Input,{id:"email",type:"email",required:!0,autoComplete:"email",value:p,onChange:e=>f(e.target.value),placeholder:"du@beispiel.de",className:"h-11.5 rounded-[10px] px-3.5 text-[15px]"})]}),(0,t.jsxs)("div",{className:"flex flex-col gap-1.5",children:[(0,t.jsxs)("div",{className:"flex items-baseline justify-between",children:[(0,t.jsx)(d.Label,{htmlFor:"password",className:"text-[12.5px]",children:"Passwort"}),(0,t.jsx)(i.default,{href:"/passwort-vergessen",className:"text-xs font-semibold text-primary no-underline hover:underline",children:"Vergessen?"})]}),(0,t.jsx)(s.Input,{id:"password",type:"password",required:!0,autoComplete:"current-password",value:g,onChange:e=>m(e.target.value),placeholder:"••••••••••",className:"h-11.5 rounded-[10px] px-3.5 text-[15px]"})]}),(0,t.jsx)(u.FormError,{message:h??e}),(0,t.jsxs)(o.Button,{type:"submit",disabled:v,className:"mt-1 h-12 rounded-[10px] text-[15px] font-bold",children:[v?"Wird angemeldet…":"Anmelden",(0,t.jsx)(a.ArrowRight,{className:"size-4",strokeWidth:2.2})]})]})}])},19455,25913,e=>{"use strict"
+var t=e.i(43476),r=e.i(7670)
+let i=e=>"boolean"==typeof e?`${e}`:0===e?"0":e,n=r.clsx,a=(e,t)=>r=>{var a
+if((null==t?void 0:t.variants)==null)return n(e,null==r?void 0:r.class,null==r?void 0:r.className)
+let{variants:l,defaultVariants:o}=t,s=Object.keys(l).map(e=>{let t=null==r?void 0:r[e],n=null==o?void 0:o[e]
+if(null===t)return null
+let a=i(t)||i(n)
+return l[e][a]}),d=r&&Object.entries(r).reduce((e,t)=>{let[r,i]=t
+return void 0===i||(e[r]=i),e},{})
+return n(e,s,null==t||null==(a=t.compoundVariants)?void 0:a.reduce((e,t)=>{let{class:r,className:i,...n}=t
+return Object.entries(n).every(e=>{let[t,r]=e
+return Array.isArray(r)?r.includes({...o,...d}[t]):({...o,...d})[t]===r})?[...e,r,i]:e},[]),null==r?void 0:r.class,null==r?void 0:r.className)}
+e.s(["cva",0,a],25913)
+var l=e.i(91918),l=l,o=e.i(75157)
+let s=a("group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",{variants:{variant:{default:"bg-primary text-primary-foreground hover:bg-primary/80",outline:"border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",secondary:"bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",ghost:"hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",destructive:"bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",link:"text-primary underline-offset-4 hover:underline"},size:{default:"h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",xs:"h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",sm:"h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",lg:"h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",icon:"size-8","icon-xs":"size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3","icon-sm":"size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg","icon-lg":"size-9"}},defaultVariants:{variant:"default",size:"default"}})
+e.s(["Button",0,function({className:e,variant:r="default",size:i="default",asChild:n=!1,...a}){let d=n?l.Root:"button"
+return(0,t.jsx)(d,{"data-slot":"button","data-variant":r,"data-size":i,className:(0,o.cn)(s({variant:r,size:i,className:e})),...a})}],19455)},55764,10204,e=>{"use strict"
+var t=e.i(43476),r=e.i(75157)
+e.s(["Input",0,function({className:e,type:i,...n}){return(0,t.jsx)("input",{type:i,"data-slot":"input",className:(0,r.cn)("h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",e),...n})}],55764)
+var i=e.i(71645),n=e.i(48425),a=Object.defineProperty,l=i.forwardRef(a(function(e,r){return(0,t.jsx)(n.Primitive.label,{...e,ref:r,onMouseDown:t=>{t.target.closest("button, input, select, textarea")||(e.onMouseDown?.(t),!t.defaultPrevented&&t.detail>1&&t.preventDefault())}})},"name",{value:"Label",configurable:!0}))
+e.s(["Label",0,l,"Root",0,l],73741)
+var o=e.i(73741),o=o
+e.s(["Label",0,function({className:e,...i}){return(0,t.jsx)(o.Root,{"data-slot":"label",className:(0,r.cn)("flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",e),...i})}],10204)}])
+[0m
+[0m$ [0mcd /tmp/opencode && echo "== who imports HashSessionHandoff (module 34891) =="; grep -l '34891' ch/*.js; echo; for f in ch/*.js; do if grep -q '34891' "$f"; then echo "--- $(basename $f)"; grep -oh -E '.{0,180}34891.{0,120}' "$f" | head -4; fi; done
+== who imports HashSessionHandoff (module 34891) ==
+ch/1a4tqdnsy9k1l.js
+
+--- 1a4tqdnsy9k1l.js
+children:[(0,t.jsx)(r,{className:"mt-px size-4 shrink-0 text-destructive",strokeWidth:2.2}),(0,t.jsx)("p",{className:"text-[12.5px] leading-relaxed",children:e})]}):null}],76017)},34891,e=>{"use strict";var t=e.i(71645),r=e.i(18566),i=e.i(11795);let n={invite:"/einladung",recovery:"/passwort-neu"};e.s(["
+sToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login?error=link-abgelaufen");e.replace(t.next),e.refresh()}}),()=>{r=!0}},[e]),null}],34891)},28420,e=>{"use strict";var t=e.i(43476),r=e.i(71645),i=e.i(22016),n=e.i(18566),a=e.i(68877),l=e.i(11795),o=e.i(19455)
+[0m
+[0m$ [0mcd /tmp/opencode && python3 - <<'EOF'
+import re
+s=open('ch/0-lpao5_i9htd.js',encoding='utf8',errors='replace').read()
+# find the publishable key, then walk back to the enclosing module registration
+i=s.find('sb_publishable_')
+seg=s[max(0,i-3000):i+600]
+print(seg)
+EOF
+turn this._returnResult({data:null,error:e});throw e}}async _updatePasskey(e){rl(this.experimental);try{return await this._useSession(async t=>{let{data:{session:r},error:s}=t;if(s)return this._returnResult({data:null,error:s});if(!r)return this._returnResult({data:null,error:new tT});let{data:i,error:n}=await rp(this.fetch,"PATCH",`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:r.access_token,body:{friendly_name:e.friendlyName}});return n?this._returnResult({data:null,error:n}):this._returnResult({data:i,error:null})})}catch(e){if(tv(e))return this._returnResult({data:null,error:e});throw e}}async _deletePasskey(e){rl(this.experimental);try{return await this._useSession(async t=>{let{data:{session:r},error:s}=t;if(s)return this._returnResult({data:null,error:s});if(!r)return this._returnResult({data:null,error:new tT});let{error:i}=await rp(this.fetch,"DELETE",`${this.url}/passkeys/${e.passkeyId}`,{headers:this.headers,jwt:r.access_token,noResolveJson:!0});return i?this._returnResult({data:null,error:i}):this._returnResult({data:null,error:null})})}catch(e){if(tv(e))return this._returnResult({data:null,error:e});throw e}}}rW.nextInstanceID={};let rK=rW,rz="";if("u">typeof Deno)rz="deno",s=null==(g=Deno.version)?void 0:g.deno;else if("u">typeof document)rz="web";else if("u">typeof navigator&&"ReactNative"===navigator.product)rz="react-native";else{rz="node";let e=globalThis.process;s=null==e||null==(y=e.version)?void 0:y.replace(/^v/,"")}let rJ=[`runtime=${rz}`];s&&rJ.push(`runtime-version=${s}`);let rG={headers:{"X-Client-Info":`supabase-js/2.112.0; ${rJ.join("; ")}`}},rV={schema:"public"},rY={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:"implicit"},rX={},rZ={enabled:!1,respectSamplingDecision:!0};function rQ(e){return(rQ="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function r0(e,t){var r=Object.keys(e);if(Object.getOwnPropertySymbols){var s=Object.getOwnPropertySymbols(e);t&&(s=s.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),r.push.apply(r,s)}return r}function r1(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{};t%2?r0(Object(r),!0).forEach(function(t){!function(e,t,r){var s;(s=function(e,t){if("object"!=rQ(e)||!e)return e;var r=e[Symbol.toPrimitive];if(void 0!==r){var s=r.call(e,t||"default");if("object"!=rQ(s))return s;throw TypeError("@@toPrimitive must return a primitive value.")}return("string"===t?String:Number)(e)}(t,"string"),(t="symbol"==rQ(s)?s:s+"")in e)?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r}(e,t,r[t])}):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(r)):r0(Object(r)).forEach(function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(r,t))})}return e}let r2=e=>e.startsWith("sb_publishable_")||e.startsWith("sb_secret_"),r5=new Set,r8=(e,t,r,s,i,n)=>{let a=s?(...e)=>s(...e):(...e)=>fetch(...e),o=Headers,l=(null==i?void 0:i.enabled)===!0,h=(null==i?void 0:i.respectSamplingDecision)!==!1,u=l?function(e){let t=[];try{let r=new URL(e);t.push(r.hostname)}catch(e){}return t.push("*.supabase.co","*.supabase.in"),t.push("localhost","127.0.0.1","[::1]"),t}(t):null,c=!((null==n?void 0:n.omitApiKeyAsBearer)&&r2(e));return async(t,s)=>{let i=await r(),n=new o(null==s?void 0:s.headers);if(n.has("apikey")||n.set("apikey",e),!n.has("Authorization")){let t=null!=i?i:c?e:null;t&&n.
+[0m
+[0m$ [0mcd /tmp/opencode && dig +short CNAME cto.onecode.de @1.1.1.1; dig +short TXT cto.onecode.de @1.1.1.1 | head -3; echo "--- cto http ---"; curl -s -o /dev/null -w "%{http_code}\n" --max-time 20 http://cto.onecode.de/; sleep 1; echo "--- storage ---"; curl -s -o /dev/null -w "%{http_code}\n" --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+--- cto http ---
+409
+--- storage ---
+200
+[0m
+## STEP 1 — DELTA
+
+```
+[NEW] kurs.onecode.de: /login form has NO action, NO method, and its email/password inputs carry no `name` attribute (id="email"/"password" only), no `$ACTION_ID_*`, no `next-action`/`server-reference` in the 18,702-byte payload → no Server Action and no server-side form post; authentication is 100% client-side against GoTrue (`signInWithPassword` in module 28420 of chunk 1a4tqdnsy9k1l.js). Consequence: there is no Next.js auth proxy to fuzz, and the middleware 307 is the only server-side control.
+[NEW] kurs.onecode.de: the URL-fragment→session sink is APPLICATION code, not a library default — module 34891 `HashSessionHandoff` in current-build chunk `1a4tqdnsy9k1l.js`: parses `window.location.hash` via `new URLSearchParams`, reads `access_token`+`refresh_token`, `history.replaceState` scrubs the hash, then `createClient().auth.setSession({access_token,refresh_token})` and on success `router.replace(next); router.refresh()`. No `state`, nonce, PKCE/PIMD check, no verification that the fragment originated from a GoTrue email. This corrects the prior lead, which placed implicit-flow handling only in the "old-generation" chunk.
+[NEW] kurs.onecode.de: `HashSessionHandoff`'s `next` is hardcoded `{invite:"/einladung",recovery:"/passwort-neu"}` defaulting to `/` → the injected session cannot be steered to an external origin. No open redirect, but also no restriction on *which* identity may be injected.
+[CHANGED] kurs.onecode.de: pre-auth window for the fragment sink is now NARROWER than the last lead claimed. Module 34891 is defined in a pre-auth-served chunk (200) but is imported by **no** chunk in the /login-reachable set, so its mount page sits behind the 307 gate; and `LoginForm` calls `createClient()` lazily *inside* the submit handler, so the library's `detectSessionInUrl` path does not fire on `/login` page load. Unauthenticated-no-interaction injection is therefore unproven.
+[NEW] kurs.onecode.de: bundled supabase-js is `2.112.0` with library defaults `rY={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:"implicit"}`; the app passes `detectSessionInUrl:(void 0)??sn()` — i.e. it explicitly declines to override the default and never sets `flowType`, so implicit flow + URL-token detection stay on for every page that constructs a client.
+[NEW] kurs.onecode.de: secret-leak sweep across all 13 pre-auth-served chunks → **zero** `eyJ*.*.*` JWTs, zero `service_role` / `SUPABASE_SERVICE` / `secret_key` / `JWT_SECRET` strings. Only `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (sha256 870cf518…, KB-catalogued) inside `0-lpao5_i9htd.js`. No privileged key is exposed.
+[CHANGED] kurs.onecode.de: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical → day-7, no deploy; `/login` 200 (no Set-Cookie, `private/no-store`, iad1), `/` 307. Zero surface delta.
+[CHANGED] cto.onecode.de: CNAME `cname.perspective-dns.com` (dig 1.1.1.1), TXT empty, HTTP 409 — day-39, unchanged.
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 with publishable key — zero buckets, unchanged.
+NO_DELTA @ kurs.onecode.de route gates, Supabase REST/functions/realtime, www/mail/hostmaster.
+```
+
+## STEP 2 — PRIORITIZE
+
+```
+[PRIO] kurs.onecode.de,6.60, a7 b8 t8 g7 c2 f4
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.35, a6 b9 t7 g3 c8 f6
+[PRIO] cto.onecode.de,3.60, a2 b4 t5 g1 c3 f5
+```
+
+## STEP 3 — HYPOTHESES
+
+```
+[HYP] Session fixation via application-code setSession() of an attacker-supplied token pair in the URL fragment
+class: AUTH
+asset: kurs.onecode.de (module 34891 HashSessionHandoff; landing route /einladung or /passwort-neu)
+confidence: 66
+reasoning: shipped current-build code parses window.location.hash for access_token+refresh_token and calls supabase.auth.setSession() with them, with no state/nonce/PKCE binding and no check that the fragment came from a GoTrue-issued email; on success it routes the victim into the app as that identity. supabase-js 2.112.0 defaults are detectSessionInUrl:true and flowType:"implicit" and the app overrides neither. The app's createClient wrapper is a memoized singleton keyed on the publishable key. The same code has no open-redirect primitive (next is a two-entry hardcoded map) but no restriction on which identity may be injected.
+evidence_needed: a victim's localStorage["supabase.auth.token"] holding the attacker's access_token after the victim opens a crafted fragment URL; or an authenticated request from the victim browser returning the attacker's user id.
+verify_steps: 1) Sign in as an invited test account, read access_token+refresh_token from localStorage["supabase.auth.token"]. 2) On a clean profile open https://kurs.onecode.de/einladung#access_token=<A>&refresh_token=<R>&type=invite and record the redirect chain and whether the fragment survives the 307 to /login. 3) Read localStorage["supabase.auth.token"] and GET https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user with that bearer; confirm the returned id equals A's user id. Self-owned accounts only.
+impact: HIGH — an unauthenticated attacker can place any victim into an attacker-controlled session; victim submissions, uploads and course activity become attacker-readable. No auth gate is bypassed, the session is supplied.
+testability: AUTH_HELPED
+
+[HYP] Cross-tenant BOLA via Supabase RLS SELECT policy lacking a user_id predicate
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project is the only backend; the app talks to PostgREST directly from the browser (createClient in the client bundle), so RLS is the only authorization boundary and the Next.js middleware is irrelevant to it. UUID PKs make ID-guessing BOLA useless, so the only viable shape is a SELECT policy returning rows without an auth.uid() predicate. 26 anon probes never returned 200+rows (503/401 oscillation) and the gateway now rejects the legacy JWT key format platform-wide, so the gap would be post-auth only. enrollments/profiles carry PII and paid-course entitlement.
+evidence_needed: account A's row identifiers appearing in account B's authenticated GET response.
+verify_steps: POST /auth/v1/token?grant_type=password per account, then GET /rest/v1/enrollments?select=id,user_id&limit=50 with apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 plus each bearer and diff the user_id sets. Read-only GETs inside each caller's own window.
+impact: CRITICAL — cross-tenant PII and paid-course entitlement disclosure; reportable as broken object-level authorization on a multi-tenant store.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: pure CNAME to cname.perspective-dns.com (dig 1.1.1.1, day-39) with zero verification TXT and HTTP 409 "error code:1001"; TLS handshake fails on 443. Signature of a custom-subdomain target with no hostname bound. Stable 39 days, so not transient. No passive probe can advance this.
+evidence_needed: cto.onecode.de serving 200 with third-party content after a hostname is bound in a fresh Perspective account.
+verify_steps: HUMAN_ONLY — vendor and domain-owner consent required. Do not attempt a claim. Report with dig output, the 409 body, and provider documentation only.
+impact: MEDIUM-HIGH — attacker-controlled content on a trusted *.onecode.de hostname for phishing and trust-boundary abuse; no data impact today.
+testability: HUMAN_ONLY
+```
+
+## STEP 4 — SELF-CRITIQUE
+
+```
+[PARKED] Unauthenticated no-interaction fragment injection on /login: the sink code ships pre-auth but its mount page is 307-gated and /login builds the client only on submit — the strong form of the claim is unproven and must not be asserted.
+[PARKED] Next.js lacks CSP / X-Frame-Options on /login (verified absent from response headers): clickjacking without a demonstrated exploit and header-only findings are out-of-scope classes.
+[PARKED] supabase-js 2.112.0 with implicit flow: outdated-library class, not reportable absent a program-specific exploit.
+[FINAL] 1. Fragment session fixation via setSession (66, AUTH_HELPED) — 2. Post-auth RLS/BOLA (65, AUTH_HELPED) — 3. cto CNAME takeover (58, HUMAN_ONLY).
+```
+
+## STEP 5 — NEXT ACTION
+
+```
+[NEXT] HUMAN: request one invited test account via kurs.onecode.de/einladung (contact@onecode.de is public on the legal pages). That single credential is the only missing input for hypothesis 1 — self-mint an access_token/refresh_token pair, then run the two-profile fragment test — and is a prerequisite for hypothesis 2's two-token diff.
+```
+
+## STEP 6 — LEARNING
+
+```
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: the fragment→session sink is first-party code (module 34891 HashSessionHandoff, current build), not merely a supabase-js default — the app takes access_token+refresh_token straight out of window.location.hash and calls setSession() with no state, nonce or PKCE binding. Prior attribution of this behaviour solely to a stale chunk was incorrect.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key is shipped to the browser — 13 pre-auth chunks scanned, zero JWTs, zero service_role/secret/JWT_SECRET references; only the publishable key (sha256 870cf518…).
+[LEARN] REJECTED AUTH @ kurs.onecode.de: no unauthenticated Server Action and no server-side credential handling on /login — the form carries no action/method/name attributes and no $ACTION_ID, so signInWithPassword goes browser→GoTrue directly and there is no Next.js auth route to probe.
+[LEARN] REJECTED OATH @ kurs.onecode.de: HashSessionHandoff's post-setSession redirect is a fixed two-entry map defaulting to "/" — the injected session cannot be redirected off-origin, so this is not an open-redirect chain.
+[LEARN] NO_DELTA @ cto.onecode.de / Supabase storage: CNAME→cname.perspective-dns.com with empty TXT and HTTP 409 at day-39; storage 200 with zero buckets; main chunk byte-identical at day-7.
+```
+
+## STEP 7 — RISK
+
+```
+[RISK] onecode: 44 — the app's own code, not just its dependencies, accepts a session from an unauthenticated URL fragment with no state or PKCE binding, and the shipped client leaves detectSessionInUrl and flowType:"implicit" at their permissive defaults. That is a real design weakness on every route that constructs a Supabase client. It stops short of a demonstrable unauthenticated compromise: the sink's mount page is 307-gated, the client is built lazily on /login, and a valid token pair is required, which signup-disabled prevents an anonymous attacker from minting. Residual risk is therefore split between this authenticated-window session weakness, the untestable RLS model on the single Supabase project, and the unbound first-party CNAME. No passive probe remains that could change any of the three.
+```
