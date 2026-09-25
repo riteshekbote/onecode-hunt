@@ -4934,3 +4934,59 @@ testability: HUMAN_ONLY
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME cto.onecode.de → cname.perspective-dns.com confirmed day-38 with zero verification TXT; still unbound/reclaimable at conf 58, proof path remains HUMAN_ONLY.
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth surface is exactly {/login, /passwort-vergessen, /datenschutz, /rechtliches} at 200; the sole RSC literal in the payload is /passwort-vergessen, so the unauthenticated attack surface is fully characterized.
 [RISK] onecode: 38 — 38 days of continuous probing have produced zero permissive reads or unauthenticated bypasses; the only pre-auth 200s are static legal pages and the login form, and every versioned/debug path 307s. Residual risk is concentrated in two untestable-by-passive-means areas: post-auth RLS on the Supabase project (single point of failure for PII, needs two invited accounts) and the unbound first-party CNAME (needs vendor consent). No evidence supports an exploitable pre-auth finding today.
+## 2026-09-25 20:24:04 UTC [target] (model bigpickle)
+[NEW] kurs.onecode.de: **Supabase client shipped with `flowType:"implicit"` + `detectSessionInUrl:!0` + `persistSession:!0` + `storageKey:"supabase.auth.token"`**, code confined to co-resident old-generation chunk `0-lpao5_i9htd.js` (3× `detectSessionInUrl`, 3× `access_token`, 2× `_saveSession`) — that chunk is **still referenced by all three pre-auth 200 pages** (`/login`, `/passwort-vergessen`, `/datenschutz`) alongside the current build. Current-generation chunks (13 checked) carry zero occurrences.
+[NEW] kurs.onecode.de: middleware **path-normalization bypass sweep falsified** — 10 variants (`/Dashboard`, `//dashboard`, `/dashboard/`, `/./dashboard`, `/dashboard%2F`, `/dashboard..;/`, `/%2Fdashboard`, `/dashboard%2f..%2fdashboard`, `/.//dashboard`, `/dashboard?`) → all 307/308, zero 200s.
+[NEW] kurs.onecode.de: **header-desync bypass falsified** — `X-Original-URL`, `X-Rewrite-URL`, `X-Original-Url`, `X-Forwarded-Prefix` on `/dashboard` all 307→/login; `X-Forwarded-Host: evil.example` leaves `location: /login` relative (no absolute-redirect injection).
+[NEW] kurs.onecode.de: `/.well-known/{openid-configuration,jwks.json,assetlinks.json,security.txt}` + `/sitemap.xml` + `/robots.txt` all 307→/login — no pre-auth well-known surface.
+[NEW] kurs.onecode.de: HTTP:80 edge returns `301` with `Location: https://<verbatim-Host>/path`; reflection exists but **no exploitable primitive** (browser sets Host from URL authority) → informational only.
+[NEW] Supabase: `GET /auth/v1/user` with forged `alg=none` token → **403 `bad_jwt` "signing method none is invalid"** — JWT signature validation sound; bearer-only (no apikey) → 401 `No API key found`.
+[NEW] Supabase: `GET /realtime/v1/websocket` upgrade attempt → **403 with publishable key** (401 without) — the 401 on the HTTP GET does generalize to the WS path; realtime closed pre-auth.
+[NEW] Supabase: `GET /auth/v1/health` → GoTrue `v2.197.0` (version disclosure, OOS class, not reportable).
+[CHANGED] hypothesis "Next.js middleware does not cover RSC/segment negotiation" → **FALSIFIED**: `GET /dashboard?_rsc=k1` with `RSC: 1` + `Next-Router-State-Tree` → **307→/login**, byte-identical to plain GET. Last open PASSIVE lead is now closed.
+[CHANGED] cto.onecode.de: unchanged — CNAME `cname.perspective-dns.com`, TXT zero, HTTP 409. Chunk `0-mbmp1iqb6hj.js` sha256 `f916f314…` byte-identical → day-7, no deploy.
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.25, a6 b8 t7 g2 c8 f6
+[PRIO] kurs.onecode.de,5.90, a5 b8 t7 g2 c6 f7
+[PRIO] cto.onecode.de,4.40, a4 b6 t5 g1 c3 f7
+[HYP] Session fixation via Supabase implicit-flow URL-fragment token injection on pre-auth pages
+class: AUTH
+asset: kurs.onecode.de/login (and /passwort-vergessen, /datenschutz)
+confidence: 62
+reasoning: the shipped client constructs Supabase with `flowType:"implicit"`, `detectSessionInUrl:!0`, `persistSession:!0`, `storageKey:"supabase.auth.token"`, and contains `_getSessionFromURL`→`_saveSession`, which parses `access_token`/`refresh_token` from `window.location.hash` on init and persists to localStorage with no state/PKCE binding. The KB established on 09-04 that recovery/invite use magic links with session tokens in the fragment. All three pre-auth 200 pages still load the chunk carrying this code (`0-lpao5_i9htd.js`), so the injection window is unauthenticated. The current build's 13 chunks contain none of this code, so the vulnerable path is the stale co-resident generation still being served — an unpatched live artifact, not dead code.
+evidence_needed: victim browser's `localStorage["supabase.auth.token"]` equals the attacker-minted session after opening a crafted fragment URL; and/or an authenticated GET reflecting the attacker identity on the victim's side.
+verify_steps: 1) Sign in as an invited test account, read own `access_token`+`refresh_token`+`expires_in` from `localStorage["supabase.auth.token"]`. 2) Have a second user open `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<R>&expires_in=3600&token_type=bearer&type=recovery` on a clean profile. 3) Confirm the victim's `supabase.auth.token` now holds identity A. No customer data touched; use only self-owned accounts.
+impact: HIGH — an attacker fixates any victim's browser into the attacker's session; victim input/uploads and course activity land in the attacker's account, and any PII the victim enters is attacker-readable. No auth gate is bypassed, the session is *supplied*.
+testability: AUTH_HELPED
+[HYP] Cross-tenant BOLA via Supabase RLS SELECT policy lacking a user_id predicate
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project is the only backend (publishable key sha256 `870cf518…`); UUID PKs make ID-guessing BOLA useless, so the only viable shape is a SELECT policy returning rows without a `user_id`/`auth.uid()` predicate. PostgREST is a flat per-table surface reachable directly, bypassing the Next.js middleware. 26 anon probes never returned 200+rows (503↔401), and the gateway now rejects the legacy JWT key format platform-wide, so the gap would be post-auth RLS only. enrollments/profiles carry PII + paid-course entitlement.
+evidence_needed: account A's row identifiers appearing in account B's authenticated GET response.
+verify_steps: `POST /auth/v1/token?grant_type=password` per account → `GET /rest/v1/enrollments?select=id,user_id&limit=50` with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + each bearer → diff the `user_id` sets. Read-only GETs within the caller's own window.
+impact: CRITICAL — cross-tenant PII and paid-course entitlement disclosure; reportable as broken object-level authorization on a multi-tenant store.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: pure CNAME to `cname.perspective-dns.com` (dig 20:2xZ, day-39) with zero verification TXT, HTTP 80 → 409 "error code:1001", TLS handshake failure on 443 — the signature of a custom-subdomain target that exists with no hostname bound. Stable 39 days, so not transient.
+evidence_needed: cto.onecode.de returning 200 with attacker content after binding in a fresh Perspective account.
+verify_steps: HUMAN_ONLY — vendor and domain-owner consent required. Do not attempt a claim. Report-only with dig evidence + 409 body + provider docs.
+impact: MEDIUM-HIGH — attacker content on a trusted *.onecode.de hostname for phishing and trust-boundary abuse; no data impact today.
+testability: HUMAN_ONLY
+[PARKED] RSC/segment-negotiation middleware bypass: falsified live, 307 mirrors plain GET.
+[PARKED] Middleware path-normalization bypass: falsified, 10 variants all 307/308.
+[PARKED] `X-Original-URL`/`X-Rewrite-URL` header desync: falsified, gate intact.
+[PARKED] Supabase `alg=none` JWT forgery: falsified, explicit `bad_jwt` 403.
+[PARKED] Realtime pre-auth WS exposure: falsified, upgrade 403 with publishable key; below threshold 35.
+[PARKED] Host-header open redirect: reflection present but no injection primitive to weaponize it; OOS "descriptive only".
+[PARKED] GoTrue v2.197.0 version disclosure: OOS class, not reportable.
+[FINAL] 1. BOLA via RLS gap (65, AUTH_HELPED) — 2. Session fixation via fragment injection (62, AUTH_HELPED) — 3. cto CNAME takeover (58, HUMAN_ONLY).
+[NEXT] HUMAN: request one invited test account via `kurs.onecode.de/einladung` (plus a second identity for the victim's browser). This single unblock resolves both surviving hypotheses — the fixation PoC needs one self-minted session token, the BOLA PoC needs two bearer tokens — and no further passive probing can advance either.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: pre-auth attack surface is now *characterized, not just enumerated* — all 13 current-build chunks plus the co-resident old chunk verified for session-token handling; only `0-lpao5_i9htd.js` carries `detectSessionInUrl`/`_saveSession`/`flowType:"implicit"`, and it is still loaded by every pre-auth 200 page.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: RSC/segment negotiation, path-normalization (10 variants), and `X-Original-URL`/`X-Rewrite-URL`/`X-Forwarded-Prefix` desync all 307→/login — the middleware matcher is robust across every gate-coverage variant tested to date.
+[LEARN] REJECTED AUTH @ Supabase: `alg=none` and no-apikey bearer both rejected (403 `bad_jwt`, 401 `No API key found`) — signature validation is sound.
+[LEARN] REJECTED MISCONFIG @ Supabase realtime: `/realtime/v1/websocket` upgrade returns 403 with the publishable key — the HTTP-GET 401 does generalize; realtime is closed pre-auth.
+[LEARN] NO_DELTA @ kurs.onecode.de / cto.onecode.de: main chunk `f916f314ea61a8c5…` byte-identical (day-7, no deploy); cto CNAME + 409 stable day-39. Build-diffing must stay event-triggered.
+[RISK] onecode: 42 — day-39 of probing produced zero pre-auth bypasses across every gate-coverage, normalization, header-desync, JWT and WebSocket variant tested today, which is itself a strong signal the app shell is sound. Risk is now concentrated in two authenticated-window issues: the Supabase RLS authorization model, and the still-shipped implicit-flow session handler that accepts a session from a URL fragment with no state binding. Both are real design weaknesses with no unauthenticated path to proof, so they cannot be resolved without an account — but the second is a self-contained, reproducible finding as soon as one session token exists.

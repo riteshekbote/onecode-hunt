@@ -727,3 +727,15 @@ www.onecode.de
 - CHANGED None — kurs.onecode.de chunk `0-mbmp1iqb6hj.js` byte-identical since 09-18 deploy; cto CNAME day-37 stable; storage 200 `[]`; REST monitor closed; auth settings frozen
 
 ## 2026-09-25 16:57:56 UTC
+
+## 2026-09-25 20:24:14 UTC
+- NEW kurs.onecode.de: **Supabase client shipped with `flowType:"implicit"` + `detectSessionInUrl:!0` + `persistSession:!0` + `storageKey:"supabase.auth.token"`**, code confined to co-resident old-generatio
+- NEW kurs.onecode.de: middleware **path-normalization bypass sweep falsified** — 10 variants (`/Dashboard`, `//dashboard`, `/dashboard/`, `/./dashboard`, `/dashboard%2F`, `/dashboard..;/`, `/%2Fdashboard`,
+- NEW kurs.onecode.de: **header-desync bypass falsified** — `X-Original-URL`, `X-Rewrite-URL`, `X-Original-Url`, `X-Forwarded-Prefix` on `/dashboard` all 307→/login; `X-Forwarded-Host: evil.example` leaves 
+- NEW kurs.onecode.de: `/.well-known/{openid-configuration,jwks.json,assetlinks.json,security.txt}` + `/sitemap.xml` + `/robots.txt` all 307→/login — no pre-auth well-known surface.
+- NEW kurs.onecode.de: HTTP:80 edge returns `301` with `Location: https://<verbatim-Host>/path`; reflection exists but **no exploitable primitive** (browser sets Host from URL authority) → informational onl
+- NEW Supabase: `GET /auth/v1/user` with forged `alg=none` token → **403 `bad_jwt` "signing method none is invalid"** — JWT signature validation sound; bearer-only (no apikey) → 401 `No API key found`.
+- NEW Supabase: `GET /realtime/v1/websocket` upgrade attempt → **403 with publishable key** (401 without) — the 401 on the HTTP GET does generalize to the WS path; realtime closed pre-auth.
+- NEW Supabase: `GET /auth/v1/health` → GoTrue `v2.197.0` (version disclosure, OOS class, not reportable).
+- CHANGED hypothesis "Next.js middleware does not cover RSC/segment negotiation" → **FALSIFIED**: `GET /dashboard?_rsc=k1` with `RSC: 1` + `Next-Router-State-Tree` → **307→/login**, byte-identical to plain GET.
+- CHANGED cto.onecode.de: unchanged — CNAME `cname.perspective-dns.com`, TXT zero, HTTP 409. Chunk `0-mbmp1iqb6hj.js` sha256 `f916f314…` byte-identical → day-7, no deploy.
