@@ -4894,3 +4894,4 @@ verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header), alert only on 
 impact: LOW now → MEDIUM if public buckets appear.
 testability: PASSIVE
 [NEXT] HUMAN: obtain two invited test accounts (AUTH_HELPED) → run BOLA test: login each via POST /auth/v1/token?grant_type=password, then GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with `apikey: sb_publishable_…` + cross-exchanged bearer tokens to prove/falsify cross-tenant SELECT. Passive probing has no further value on this hypothesis.
+## 2026-09-25 11:43:40 UTC [target] (model bigpickle)

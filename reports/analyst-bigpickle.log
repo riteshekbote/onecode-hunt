@@ -20195,3 +20195,11 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] onecode: 38 — day-38 fully converged, zero confirmed findings; sole technical lead (BOLA, 65) consent-gated, CNAME (58) consent-gated; exposure concentrated in an unproven post-auth RLS gap and a reclaimable hostname; deploy-gated watch continues.
+===== ANALYST bigpickle 2026-09-25 11:47:27 UTC =====
+[0m
+> build · big-pickle
+[0m
+I’ll perform a minimal, read-only freshness check: DNS, public route status, and the known Supabase storage/auth metadata endpoint, with no authentication or mutation.
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mdate -u +'%Y-%m-%dT%H:%M:%SZ'; printf '%s\n' '--- DNS ---'; for host in kurs.onecode.de cto.onecode.de aygnpacdkgtsfnhgcyjc.supabase.co; do printf '%s\n' "[$host]"; dig +short CNAME "$host"; dig +short A "$host"; done; printf '%s\n' '--- kurs routes ---'; for path in /login / /datenschutz /rechtliches /admin /api/broadcast; do curl --http1.1 -sS -L --max-redirs 0 -o /dev/null -D - --connect-timeout 8 --max-time 15 "https://kurs.onecode.de$path" | awk 'BEGIN{IGNORECASE=1} /^HTTP\// || /^location:/ || /^server:/ || /^set-cookie:/ || /^x-railway-edge:/ || /^x-hikari-trace:/ || /^content-type:/ {print}' | tr '\n' ' '; printf ' path=%s\n' "$path"; sleep 1; done; printf '%s\n' '--- supabase storage ---'; curl --http1.1 -sS --max-time 15 -D - -o /tmp/storage-body -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket' | awk 'BEGIN{IGNORECASE=1} /^HTTP\// || /^content-type:/ || /^content-length:/ || /^server:/ || /^x-/ {print}'; wc -c </tmp/storage-body; sha256sum /tmp/storage-body | cut -d' ' -f1; printf '%s\n' '--- supabase auth settings ---'; curl --http1.1 -sS --max-time 15 -D - -o /tmp/auth-body -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings' | awk 'BEGIN{IGNORECASE=1} /^HTTP\// || /^content-type:/ || /^content-length:/ || /^server:/ || /^x-/ {print}'; python3 -c 'import json; p="/tmp/auth-body"; d=json.load(open(p)); print(json.dumps({k:d.get(k) for k in ("disable_signup","mailer_autoconfirm","external")},sort_keys=True))' 2>/dev/null || true; rm -f /tmp/storage-body /tmp/auth-body failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

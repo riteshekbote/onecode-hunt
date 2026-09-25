@@ -1,6 +1,8 @@
-## 2026-09-25 06:00:19 UTC [target] (model nemotron3)
-[PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
+## 2026-09-25 11:47:15 UTC [target] (model nemotron3)
+[NEW] None — all surfaces identical to 2026-09-25 06:03Z lead update (5.5h ago)
+[CHANGED] None — kurs.onecode.de chunk `0-mbmp1iqb6hj.js` byte-identical since 09-18 deploy; cto CNAME day-37 stable; storage 200 `[]`; REST monitor closed; auth settings frozen
 [PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=9
+[PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.90,attack_surface=5 business_value=5 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5
 [HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
 class: IDOR

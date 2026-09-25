@@ -721,3 +721,7 @@ www.onecode.de
 ## 2026-09-25 00:49:56 UTC
 
 ## 2026-09-25 06:03:32 UTC
+
+## 2026-09-25 11:47:27 UTC
+- NEW None — all surfaces identical to 2026-09-25 06:03Z lead update (5.5h ago)
+- CHANGED None — kurs.onecode.de chunk `0-mbmp1iqb6hj.js` byte-identical since 09-18 deploy; cto CNAME day-37 stable; storage 200 `[]`; REST monitor closed; auth settings frozen
