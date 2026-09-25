@@ -19482,3 +19482,89 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] onecode: 38 — 36 days converged, zero confirmed findings; only live leads are consent-gated (BOLA AUTH_HELPED, CNAME HUMAN_ONLY); residual exposure concentrated in post-auth RLS gap yet unproven; deploy-gated watch continues.
+===== ANALYST bigpickle 2026-09-25 00:49:56 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdig +short CNAME cto.onecode.de; echo "---"; dig +short CNAME kurs.onecode.de
+cname.perspective-dns.com.
+---
+ki8dqcf6.up.railway.app.
+[0m
+[0m$ [0mcurl -sS -I --max-time 20 https://kurs.onecode.de/login 2>&1 | head -20
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Fri, 25 Sep 2026 00:49:11 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: r4COnlFvS8CzinTW63j4Ww
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -sS --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket 2>&1 | head -5
+[]
+[0m
+[0m$ [0mcurl -sS --max-time 30 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" -o /tmp/chunk.js 2>&1; sha256sum /tmp/chunk.js 2>&1
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/chunk.js
+[0m
+[0m$ [0mfor p in /admin /datenschutz /api/broadcast; do code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 -I "https://kurs.onecode.de$p"); echo "$p -> $code"; sleep 0.5; done
+/admin -> 307
+/datenschutz -> 200
+/api/broadcast -> 307
+[0m
+STEP 1 — DELTA:
+- [CHANGED] kurs.onecode.de: fresh probes 00:49Z 09-25 — /login 200 (no Set-Cookie, railway-hikari iad1), admin 307, datenschutz 200, /api/broadcast 307; main chunk 0-mbmp1iqb6hj.js sha256 **f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca byte-identical** → no deploy since 09-19 11:33Z.
+- [CHANGED] cto.onecode.de: dig 09-25 — CNAME→cname.perspective-dns.com day-37 stable; kurs CNAME→ki8dqcf6 stable.
+- [CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` re-confirmed 09-25 — zero buckets.
+- NO_DELTA beyond the above: every surface identical to day-36.
+
+STEP 2 — PRIORITIZE:
+- [PRIO] kurs.onecode.de,5.9,BOLA/RLS (surface 7, value 8, tech 5, gate 3, cloud 8, fresh 2) — unchanged, sole high-value vector
+- [PRIO] cto.onecode.de,3.3,CNAME-takeover (dead-host 3, value 5, tech 2, gate 2, cloud 5, fresh 2)
+- [PRIO] supabase.co/storage/v1,3.2,public-bucket (surface 2, value 6, tech 3, gate 8, cloud 4, fresh 1)
+
+STEP 3 — HYPOTHESES:
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate
+class: IDOR
+asset: kurs.onecode.de → aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: single Supabase project; UUID PKs defeat guessable-id BOLA; day-37 zero permissive pre-auth state across all surfaces (re-confirmed live 00:49Z); only unresolved vector is a SELECT policy missing user_id filter; no deploy/gateway signal since 09-19 11:33Z.
+evidence_needed: account A row-set returned under B's bearer → cross-tenant read.
+verify_steps: AUTH_HELPED only — POST /auth/v1/token?grant_type=password per invited account; GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 with sb_publishable apikey + target bearer. Not executable read-only.
+impact: CRITICAL — cross-tenant PII/enrollment exfiltration.
+testability: AUTH_HELPED
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: day-37 pure CNAME→cname.perspective-dns.com, zero verification TXT, HTTP 409/1001 + TLS handshake-fail → hostname unbound/reclaimable per provider custom-subdomain docs.
+evidence_needed: bind in fresh vendor account → 409→200 serving attacker content.
+verify_steps: HUMAN_ONLY — vendor/domain-owner consent mandatory; else report-only.
+impact: MEDIUM-HIGH — attacker content on trusted *.onecode.de; phishing + TLS/trust abuse.
+testability: HUMAN_ONLY
+[HYP] Supabase Storage public bucket exposure of course resources
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket
+confidence: 35
+reasoning: endpoint live 200 `[]`, zero buckets day-37; creation requires authenticated admin; risk materializes only if app ships public buckets later.
+evidence_needed: non-empty bucket list, or anonymous object GET 200 returning course data.
+verify_steps: PASSIVE — GET /storage/v1/bucket (apikey header), alert only on != `[]`.
+impact: LOW now → MEDIUM if public buckets appear.
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE:
+- [PARKED] Storage public bucket: conf 35 < 40; zero buckets day-37, no pre-auth mutation path; evidence window = `!=[]` alert only.
+- [PARKED] Realtime/functions: 401/404, closed monitors, no pre-auth exposure.
+- [FINAL] #1 BOLA/RLS (65) — only high-severity vector; gated on two invited accounts + OneCode consent. #2 cto CNAME (58) — converged; proof path is consented claim-attempt only. No new sub-40 hypothesis; pre-auth recon exhausted day-37.
+
+STEP 5 — NEXT ACTION:
+- [NEXT] HUMAN: request OneCode program consent + two platform-invited test accounts to execute BOLA chain (POST /auth/v1/token?grant_type=password → GET /rest/v1/{profiles,enrollments,courses}?select=*&limit=1 cross-tenant id swap) — the sole action that can resolve the top finding FALSE/TRUE; passive recon has zero remaining value pending a deploy event.
+
+STEP 6 — LEARNING:
+- [LEARN] REJECTED MISCONFIG @ all: 09-25 cycle — chunk sha256 f916f314… byte-identical, route gates stable, cto CNAME day-37, storage `[]`; zero deltas; time-cadence probing on kurs has no value day-37 (build-diff is event-triggered, not time-based).
+
+STEP 7 — RISK:
+- [RISK] onecode: 38 — 37 days converged, zero confirmed findings; only live leads are consent-gated (BOLA AUTH_HELPED, CNAME HUMAN_ONLY); residual exposure concentrated in post-auth RLS gap, unproven; deploy-gated watch continues.
