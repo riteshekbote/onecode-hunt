@@ -2657,3 +2657,18 @@
 - LEARN: REJECTED AUTH @ kurs.onecode.de: no unauthenticated Server Action and no server-side credential handling on /login — the form carries no action/method/name attr
 - LEARN: REJECTED OATH @ kurs.onecode.de: HashSessionHandoff's post-setSession redirect is a fixed two-entry map defaulting to "/" — the injected session cannot be redir
 - LEARN: NO_DELTA @ cto.onecode.de / Supabase storage: CNAME→cname.perspective-dns.com with empty TXT and HTTP 409 at day-39; storage 200 with zero buckets; main chunk b
+
+## RANKED HYPOTHESES 2026-09-26 07:34:01 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (from art/lead_nemotron3.txt)
+- [65] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}: Cross-tenant BOLA via Supabase RLS SELECT policy lacking a user_id predicate (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request one invited test account through kurs.onecode.de/einladung (contact@onecode.de is published on /datenschutz). That single credential is the only 
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung (contact@onecode.de public on /datenschutz), exchange both be
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `redirect_to` allowlist is exact-origin and holds on the pre-auth unauthenticated verify path. 8 varian
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/logout?returnTo=` returns 405 with `Allow: POST` — the legacy GoTrue GET-logout redirect primiti
+- LEARN: ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: `SITE_URL` = `https://kurs.onecode.de`, established from the observed redirect fallback rather than inferred. 
+- LEARN: NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: 13 chunk refs byte-identical (day-9, no deploy), /login 200 with no Set-Cookie, cto CNAME day-40
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: forged/null session cookies do not bypass the gate. Five variants (garbage value, base64-encoded valid-shape session carrying a
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: the fragment→session sink is app code with no state/nonce/PKCE binding, but it is only reachable on the two 307-gated routes; t
+- LEARN: REJECTED AUTH @ kurs.onecode.de: no PKCE authorization-code injection pre-auth. _isPKCECallback needs both ?code= and a persisted code-verifier, and the app nev
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key is shipped to the browser — 13 pre-auth chunks scanned, zero JWTs, zero service_role/JWT_SECRET
+- LEARN: NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk f916f314 byte-identical day-8, cto CNAME day-40, storage 200 with zero buckets. Build

@@ -762,3 +762,18 @@ www.onecode.de
 - CHANGED kurs.onecode.de: no deploy. Main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical to the 2026-09-19 11:33Z build — day-8. /login 200 (p
 - CHANGED cto.onecode.de: CNAME `cname.perspective-dns.com` unchanged at day-40, zero TXT, HTTP 409 confirmed live this cycle.
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` with publishable key — still zero buckets.
+
+## 2026-09-26 07:34:01 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `redirect_to` allowlist tested LIVE on the pre-auth, unauthenticated `GET /auth/v1/verify?type=recovery` path for the first time — 8 off-origin variants (`http
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `SITE_URL` positively identified as `https://kurs.onecode.de` from the fallback target (previously only inferred from app-side `settings`).
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/logout?returnTo=https://evil.example/` → **405, `Allow: POST`** — the legacy GoTrue GET-logout open-redirect primitive is absent on this gateway version
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/verify` writes the outcome into the **URL fragment** at the app origin (`#error=...&sb=`), not the query string. This confirms the success path of a mag
+- CHANGED kurs.onecode.de: no deploy. 13 chunk refs byte-identical to the 09-19 11:33Z set (`0-lpao5_i9htd.js` + `0-mbmp1iqb6hj.js` + `4310-_brt1a3g.js` + `turbopack-2a8cgfwu75lsu.js`) — day-9. `HEAD /login` 20
+- CHANGED cto.onecode.de: `dig @1.1.1.1` → CNAME `cname.perspective-dns.com`, TXT = SOA only, HTTP 409 — day-40, unchanged.
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` with `sb_publishable_…` — zero buckets, day-40.
+- NEW NULL-SESSION / FORGED-COOKIE class tested for first time: 5 cookie variants (garbage, base64 valid-shape with alg:none, chunked .0 name, Authorization bearer + apikey, chunked against /api/broadcast) 
+- CHANGED "Implicit flow" premise falsified: `flowType:"implicit"` is only supabase-js default constant `rF`, not app-configured; client constructed at module-eval time in module 11795
+- CHANGED HashSessionHandoff (module 34891) has ZERO importers in /login-reachable module graph — dead code, not executed on pre-auth pages
+- CHANGED Session storage is COOKIE `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, @supabase/ssr@0.12.4), not localStorage
+- NEW No PKCE authorization-code injection pre-auth: `_isPKCECallback` requires `?code=` + stored verifier; app uses email magic-link, never persists verifier
+- CHANGED No deploy: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c5...` byte-identical day-8; cto CNAME day-40 stable; storage 200 `[]`

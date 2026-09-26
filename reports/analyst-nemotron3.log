@@ -14203,3 +14203,67 @@ testability: AUTH_HELPED
 
 [STEP 7 — RISK]
 [RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed 20+ days). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
+===== ANALYST nemotron3 2026-09-26 07:34:01 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[NEW] NULL-SESSION / FORGED-COOKIE class tested for first time: 5 cookie variants (garbage, base64 valid-shape with alg:none, chunked .0 name, Authorization bearer + apikey, chunked against /api/broadcast) all 307→/login  
+[CHANGED] "Implicit flow" premise falsified: `flowType:"implicit"` is only supabase-js default constant `rF`, not app-configured; client constructed at module-eval time in module 11795  
+[CHANGED] HashSessionHandoff (module 34891) has ZERO importers in /login-reachable module graph — dead code, not executed on pre-auth pages  
+[CHANGED] Session storage is COOKIE `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, @supabase/ssr@0.12.4), not localStorage  
+[NEW] No PKCE authorization-code injection pre-auth: `_isPKCECallback` requires `?code=` + stored verifier; app uses email magic-link, never persists verifier  
+[CHANGED] No deploy: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c5...` byte-identical day-8; cto CNAME day-40 stable; storage 200 `[]`
+
+### STEP 2 — PRIORITIZE
+[PRIO] kurs.onecode.de,7.15,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6  
+[PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.50,attack_surface=5 business_value=4 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=3
+
+### STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate  
+class: IDOR  
+asset: kurs.onecode.de (/api/* proxied to Supabase aygnpacdkgtsfnhgcyjc)  
+confidence: 65  
+reasoning: Single Supabase project backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only /login, /passwort-vergessen, /datenschutz, /rechtliches at 200); all /api/*, /v1, /dashboard, /admin, /courses auth-gated  
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows  
+verify_steps: AUTH_HELPED: With two invited accounts: A calls GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments/{B_id} comparing response delta; direct Supabase queries via app's client bundle Supabase client  
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH  
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de  
+class: MISCONFIG  
+asset: cto.onecode.de  
+confidence: 58  
+reasoning: cto.onecode.de CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 39+ days, zero verification TXT records  
+evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de  
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain  
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH  
+testability: HUMAN_ONLY
+
+[HYP] Session fixation via application-code setSession() of attacker-supplied token pair in URL fragment  
+class: AUTH  
+asset: kurs.onecode.de (module 34891 HashSessionHandoff in chunk 1a4tqdnsy9k1l.js)  
+confidence: 40  
+reasoning: App ships Supabase client with flowType:"implicit", detectSessionInUrl:true, persistSession:true; HashSessionHandoff (module 34891) parses window.location.hash for access_token+refresh_token and calls supabase.auth.setSession() with no state/nonce/PKCE binding; module loads on all pre-auth 200 pages (/login, /datenschutz, /rechtliches); redirect target hardcoded {invite:"/einladung",recovery:"/passwort-neu"} defaulting to "/" — no open redirect  
+evidence_needed: Victim visits /login#access_token=ATTACKER_TOKEN&refresh_token=ATTACKER_REFRESH&type=bearer → setSession() consumes tokens → victim's browser authenticated as attacker  
+verify_steps: PASSIVE: Confirm HashSessionHandoff executes on /login (already verified in chunk 1a4tqdnsy9k1l.js); AUTH_HELPED: Craft malicious link with attacker's valid token pair in fragment, deliver to victim, observe session adoption  
+impact: Account takeover via session fixation — HIGH (but requires token pair delivery and victim click; no open redirect limits exploitability)  
+testability: AUTH_HELPED
+
+### STEP 4 — SELF-CRITIQUE
+[PARKED] Session fixation via application-code setSession(): confidence 40 but exploitability gated by (a) need valid attacker token pair (requires invited account), (b) HashSessionHandoff has zero importers in /login-reachable graph — dead code not executed, (c) no open redirect — victim lands on "/" post-setSession, (d) token delivery requires social engineering; practical impact lower than BOLA  
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (confidence 65, IDOR, AUTH_HELPED) — highest overall value  
+[FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
+
+### STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung (contact@onecode.de public on /datenschutz), exchange both bearer tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client
+
+### STEP 6 — LEARNING
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: forged/null session cookies do not bypass the gate. Five variants (garbage value, base64-encoded valid-shape session carrying an alg:none bearer, chunked .0 cookie name, Authorization bearer + apikey, and the chunked cookie against /api/broadcast) all returned 307→/login. This class had never been tested in 40 days of probing — every prior test used either no cookie or a real session.  
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: the fragment→session sink is app code with no state/nonce/PKCE binding, but it is only reachable on the two 307-gated routes; the effective evidence artifact is the sb-aygnpacdkgtsfnhgcyjc-auth-token cookie, not localStorage.  
+[LEARN] REJECTED AUTH @ kurs.onecode.de: no PKCE authorization-code injection pre-auth. _isPKCECallback needs both ?code= and a persisted code-verifier, and the app never persists one because it authenticates by emailed link, not by code exchange.  
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key is shipped to the browser — 13 pre-auth chunks scanned, zero JWTs, zero service_role/JWT_SECRET references; only the publishable key (sha256 870cf518...).  
+[LEARN] NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk f916f314 byte-identical day-8, cto CNAME day-40, storage 200 with zero buckets. Build-diffing stays event-triggered, not time-triggered.
+
+### STEP 7 — RISK
+[RISK] onecode: 55 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: only Supabase direct service endpoints (storage/functions/realtime) bypass middleware. Storage accessible but empty buckets (200 `[]` confirmed 20+ days). Functions not deployed. Realtime auth-gated. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Unprobed hostmaster.* subdomains confidence < 50.
