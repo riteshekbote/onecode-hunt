@@ -808,3 +808,12 @@ www.onecode.de
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — platform-level change, not OneCode rotation
 
 ## 2026-09-26 19:38:59 UTC
+
+## 2026-09-26 22:14:42 UTC
+- NEW kurs.onecode.de: `HashSessionHandoff` **is mounted on `/login`**, a pre-auth 200 page. The `/login` RSC flight payload row `18:I[34891,[…],"HashSessionHandoff"]` is instantiated in the rendered tree a
+- CHANGED kurs.onecode.de: the 2026-09-26 16:47Z conclusion "the sink is **not** mounted on either interactive pre-auth page; its consumer remains a chunk belonging to the 307-gated `/einladung` or `/passwort-n
+- NEW kurs.onecode.de: component body re-read from `_next/static/chunks/1a4tqdnsy9k1l.js` (13 880 B). `useEffect(()=>{…parse window.location.hash…; history.replaceState(null,"",pathname+search); if(error) e
+- NEW kurs.onecode.de: `/datenschutz` and `/rechtliches` are byte-identical to each other and a strict **11-chunk subset** of `/login` (missing `0-lpao5_i9htd.js` and `1a4tqdnsy9k1l.js`), with **zero `I[…]`
+- NEW kurs.onecode.de: no deploy. `/_next/static/chunks/0-mbmp1iqb6hj.js` → 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` — byte-identical, day-10. All 13 chunk refs o
+- CHANGED cto.onecode.de: `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = 1 line (SOA only) — day-42, unchanged.
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: `GET /storage/v1/bucket` (apikey + Bearer = publishable key) → **200 `[]`** — zero buckets, day-42.
