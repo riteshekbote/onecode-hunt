@@ -2631,3 +2631,29 @@
 - LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 30
 - LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
+
+## RANKED HYPOTHESES 2026-09-26 02:02:53 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (from art/lead_nemotron3.txt)
+- [62] kurs.onecode.de: Session fixation via app-code setSession() of an attacker-supplied token pair in the URL fragment (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request one invited test account through kurs.onecode.de/einladung (contact@onecode.de is published on /datenschutz). That single credential is the only 
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung (contact@onecode.de public on /datenschutz), exchange both be
+- LEARN: REJECTED AUTH @ kurs.onecode.de: forged/null session cookies do not bypass the gate. Five variants (garbage value, base64- encoded valid-shape session carrying 
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: the fragment→session sink is app code with no state/nonce/PKCE binding, but it is only reachable on the two 307-gated routes; t
+- LEARN: REJECTED AUTH @ kurs.onecode.de: no PKCE authorization-code injection pre-auth. _isPKCECallback needs both ?code= and a persisted code-verifier, and the app nev
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key is shipped to the browser — 13 pre-auth chunks, zero JWTs, zero service_role/JWT_SECRET referen
+- LEARN: NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk f916f314 byte-identical day-8, cto CNAME day-40, storage 200 with zero buckets. Build
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 39+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection p
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16 — /api/v1/health + /dashboard still 30
+- LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive; no image-optimizer open-proxy primitive pre-auth
+- LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) now rejected as "Invalid API key" across all endpoints; sb_publishable_ format 
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: the fragment→session sink is first-party code (module 34891 HashSessionHandoff, current build), not merely a supabase-js defaul
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key is shipped to the browser — 13 pre-auth chunks scanned, zero JWTs, zero service_role/secret/JWT
+- LEARN: REJECTED AUTH @ kurs.onecode.de: no unauthenticated Server Action and no server-side credential handling on /login — the form carries no action/method/name attr
+- LEARN: REJECTED OATH @ kurs.onecode.de: HashSessionHandoff's post-setSession redirect is a fixed two-entry map defaulting to "/" — the injected session cannot be redir
+- LEARN: NO_DELTA @ cto.onecode.de / Supabase storage: CNAME→cname.perspective-dns.com with empty TXT and HTTP 409 at day-39; storage 200 with zero buckets; main chunk b

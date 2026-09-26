@@ -750,3 +750,15 @@ www.onecode.de
 - CHANGED kurs.onecode.de: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical → day-7, no deploy; `/login` 200 (no Set-Cookie, `private/no-sto
 - CHANGED cto.onecode.de: CNAME `cname.perspective-dns.com` (dig 1.1.1.1), TXT empty, HTTP 409 — day-39, unchanged.
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 with publishable key — zero buckets, unchanged.
+
+## 2026-09-26 02:02:53 UTC
+- NEW kurs.onecode.de: NULL-SESSION / FORGED-COOKIE CLASS TESTED FOR THE FIRST TIME (5 read-only GETs, ≤1rps, no valid credential used). Cookie `sb-aygnpacdkgtsfnhgcyjc-auth-token` set to (A) `garbage`, (B)
+- CHANGED kurs.onecode.de: the "implicit flow" premise in all prior leads is FALSIFIED. `flowType:"implicit"` is only the supabase-js DEFAULT-options constant `rF={url:"http://localhost:9999",storageKey:"supaba
+- CHANGED kurs.onecode.de: the Supabase client is constructed at MODULE-EVALUATION time, not lazily. Module 11795 ends `...}("https://aygnpacdkgtsfnhgcyjc.supabase.co","sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6
+- CHANGED kurs.onecode.de: the only control preventing unauthenticated fragment-token ingestion is the flowType guard. `_initialize()` → `_isImplicitGrantCallback()` returns true on `access_token` in the hash (
+- CHANGED kurs.onecode.de: session storage is a COOKIE, not localStorage. `@supabase/ssr@0.12.4 createBrowserClient` with `cookieEncoding:"base64url"`, storageKey `sb-${hostname.split(".")[0]}-auth-token` = `sb
+- CHANGED kurs.onecode.de: module 34891 (HashSessionHandoff) has ZERO importers in the /login-reachable module graph — it occurs exactly twice in 1a4tqdnsy9k1l.js, both as its own `34891,e=>{` definition and `}
+- NEW kurs.onecode.de: no PKCE authorization-code injection is possible pre-auth. `_isPKCECallback` requires `?code=` matching `/^[a-zA-Z0-9_-]{8,64}$/` AND a stored verifier at `sb-...-auth-token-flow-<flo
+- CHANGED kurs.onecode.de: no deploy. Main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical to the 2026-09-19 11:33Z build — day-8. /login 200 (p
+- CHANGED cto.onecode.de: CNAME `cname.perspective-dns.com` unchanged at day-40, zero TXT, HTTP 409 confirmed live this cycle.
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: 200 `[]` with publishable key — still zero buckets.
