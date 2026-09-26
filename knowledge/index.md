@@ -670,3 +670,14 @@
 - 2026-09-26 NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: 13 chunk refs byte-identical (day-9, no deploy), /login 200 with no Set-Cookie, cto CNAME day-40 with TXT zero and HTTP 409, storage 200 `[]`. Build-diffing stays event-triggered.
 - 2026-09-26 ACCEPTED AUTH @ kurs.onecode.de: forged/null session cookies do not bypass the gate. Five variants (garbage value, base64-encoded valid-shape session carrying an alg:none bearer, chunked .0 cookie name, Authorization bearer + apikey, and the chunked cookie against /api/broadcast) all returned 307→/login. This class had never been tested in 40 days of probing — every prior test used either no cookie or a real session.
 - 2026-09-26 REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key is shipped to the browser — 13 pre-auth chunks scanned, zero JWTs, zero service_role/JWT_SECRET references; only the publishable key (sha256 870cf518...).
+- 2026-09-26 REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue redirect_to allowlist is exact-origin and holds on the pre-auth unauthenticated verify path; 8 off-origin variants all 303 to https://kurs.onecode.de#error=...
+- 2026-09-26 REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GET /auth/v1/logout?returnTo= returns 405 Allow: POST — legacy GoTrue GET-logout redirect primitive absent
+- 2026-09-26 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: SITE_URL = https://kurs.onecode.de, established from observed redirect fallback
+- 2026-09-26 REJECTED AUTH @ kurs.onecode.de: forged/null session cookies do not bypass the gate; 5 variants all 307→/login
+- 2026-09-26 ACCEPTED AUTH @ kurs.onecode.de: fragment→session sink is app code with no state/nonce/PKCE binding but only reachable on 307-gated routes; effective artifact is sb-aygnpacdkgtsfnhgcyjc-auth-token cookie
+- 2026-09-26 REJECTED AUTH @ kurs.onecode.de: no PKCE authorization-code injection pre-auth; _isPKCECallback needs ?code= + persisted verifier; app uses email magic-link
+- 2026-09-26 REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key shipped to browser; 13 pre-auth chunks scanned, zero JWTs/secrets; only sb_publishable key
+- 2026-09-26 NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk f916f314 byte-identical day-9, cto CNAME day-40, storage 200 zero buckets
+- 2026-09-26 ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 40+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm pending
+- 2026-09-26 REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16; Next.js patch level > vulnerable
+- 2026-09-26 NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) rejected as "Invalid API key" across all endpoints; sb_publishable_ format accepted — Supabase platform-level change

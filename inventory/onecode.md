@@ -777,3 +777,11 @@ www.onecode.de
 - CHANGED Session storage is COOKIE `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, @supabase/ssr@0.12.4), not localStorage
 - NEW No PKCE authorization-code injection pre-auth: `_isPKCECallback` requires `?code=` + stored verifier; app uses email magic-link, never persists verifier
 - CHANGED No deploy: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c5...` byte-identical day-8; cto CNAME day-40 stable; storage 200 `[]`
+
+## 2026-09-26 12:30:05 UTC
+- NEW Supabase GoTrue redirect_to allowlist tested LIVE on pre-auth unauthenticated verify path: 8 off-origin variants all 303 to https://kurs.onecode.de#error=... — no open redirect, no token leak to attac
+- NEW SITE_URL positively identified as https://kurs.onecode.de from fallback target (previously inferred)
+- NEW GET /auth/v1/logout?returnTo= returns 405 Allow: POST — legacy GoTrue GET-logout redirect primitive absent
+- NEW GET /auth/v1/verify writes outcome to URL fragment at app origin (#error=...&sb=) — confirms magic-link success path delivers fragment at app origin
+- CHANGED HashSessionHandoff (module 34891) confirmed dead code: zero importers in /login-reachable module graph, not executed on pre-auth pages
+- CHANGED Session fixation hypothesis confidence 40→practically 0: sink exists but dead code, no open redirect, requires valid attacker token pair (invited account), victim click — exploitability negligible
