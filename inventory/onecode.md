@@ -806,3 +806,5 @@ www.onecode.de
 - CHANGED Forged/null session cookies (5 variants) tested for first time in 40 days — all 307→/login; middleware gate intact
 - CHANGED No PKCE authorization-code injection pre-auth: `_isPKCECallback` requires `?code=` + stored verifier; app uses email magic-link only
 - CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — platform-level change, not OneCode rotation
+
+## 2026-09-26 19:38:59 UTC

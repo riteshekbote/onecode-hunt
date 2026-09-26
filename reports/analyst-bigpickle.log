@@ -22139,3 +22139,19 @@ testability: HUMAN_ONLY
 ## STEP 7 — RISK
 
 [RISK] onecode: 42 — no new finding, but one prior conclusion was formally retracted on method rather than on a new observation: the fragment→session sink is live shipped client code whose mount point is unverified, not dead code. That moves a hypothesis from "practically 0" back to 55 and keeps the cycle honest rather than letting a bad grep harden into a false negative. The positive side is that the recovery path is now closed from two independent directions — the app passes no `redirectTo` and GoTrue's allowlist is exact-origin — so the token-leak/phishing chain has no remaining leg. Risk stays concentrated in the authenticated window: an RLS model on the only backend that 26 anon probes could never observe, an unbound-state session sink that needs one invited account to test, and a first-party CNAME nobody but the owner can claim.
+===== ANALYST bigpickle 2026-09-26 19:38:59 UTC =====
+[0m
+> build · big-pickle
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/opencode/*, /tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp/opencode 2>/dev/null || cd /tmp; curl -s -o /dev/null -w "login=%{http_code}\n" https://kurs.onecode.de/login; sleep 1; curl -s https://kurs.onecode.de/login | sha256sum; sleep 1; curl -s https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js | sha256sum; sleep 1; curl -s -o /dev/null -w "size=%{size_download}\n" https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+[0m$ [0mdig +short @1.1.1.1 cto.onecode.de CNAME; dig +short @1.1.1.1 cto.onecode.de A; dig +short @1.1.1.1 cto.onecode.de TXT; curl -s -o /dev/null -w "cto=%{http_code}\n" http://cto.onecode.de/
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+cname.perspective-dns.com.
+cto=409
+[0m
