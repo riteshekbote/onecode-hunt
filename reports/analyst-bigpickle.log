@@ -21790,3 +21790,352 @@ code=401 type=application/json
 [93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
 [0m✗ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; B="https://aygnpacdkgtsfnhgcyjc.supabase.co"; echo "=== BASELINE: bucket list (anon) ==="; curl -s -o /tmp/b0 -w "code=%{http_code}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "$B/storage/v1/bucket"; cat /tmp/b0; echo; sleep 1.3; echo "=== BUCKET EXISTENCE DISAMBIGUATION ==="; for n in nonexistent-control-9f3a avatars resources course-materials profile-images content assets; do printf "%-26s " "$n"; curl -s -o /tmp/bx -w "code=%{http_code} " -H "apikey: $K" -H "Authorization: Bearer $K" "$B/storage/v1/bucket/$n"; head -c 200 /tmp/bx; echo; sleep 1.3; done failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST bigpickle 2026-09-26 16:47:59 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mset -u
+echo "=== T0 $(date -u +%FT%TZ) ==="
+echo "--- kurs /login HEAD ---"
+curl -sS -I --max-time 20 https://kurs.onecode.de/login 2>&1 | sed -n '1,14p'
+sleep 2
+echo "--- main chunk sha256 ---"
+curl -sS --max-time 25 -o /tmp/opencode/chunk.js -w 'http=%{http_code} bytes=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js 2>&1
+sha256sum /tmp/opencode/chunk.js 2>&1
+sleep 2
+echo "--- cto DNS ---"
+(dig +short cto.onecode.de CNAME @1.1.1.1; dig +short cto.onecode.de A @1.1.1.1) 2>&1 || echo "dig unavailable"
+sleep 2
+echo "--- cto HTTP 80 ---"
+curl -sS --max-time 20 -o /dev/null -w 'http=%{http_code}\n' http://cto.onecode.de/ 2>&1
+=== T0 2026-09-26T16:45:46Z ===
+--- kurs /login HEAD ---
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Sat, 26 Sep 2026 16:45:46 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: 4PqetniuRW2P0KDH8Hk9cQ
+x-hikari-trace: iad1.trg5
+x-railway-edge: iad1
+
+--- main chunk sha256 ---
+http=200 bytes=154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/chunk.js
+--- cto DNS ---
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+--- cto HTTP 80 ---
+http=409
+[0m
+[0m$ [0mset -u
+sleep 2
+echo "--- /login chunk refs (deploy-signal diff) ---"
+curl -sS --max-time 20 https://kurs.onecode.de/login -o /tmp/opencode/login.html 2>&1
+grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' /tmp/opencode/login.html | sort -u
+echo "--- count ---"
+grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' /tmp/opencode/login.html | sort -u | wc -l
+sleep 2
+echo "--- storage bucket list ---"
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+printf '%s' "$K" | sha256sum
+curl -sS --max-time 20 -o /tmp/opencode/buckets.json -w 'http=%{http_code}\n' \
+  -H "apikey: $K" -H "Authorization: Bearer $K" \
+  https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket 2>&1
+head -c 300 /tmp/opencode/buckets.json; echo
+--- /login chunk refs (deploy-signal diff) ---
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+--- count ---
+13
+--- storage bucket list ---
+43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a  -
+http=200
+[]
+[0m
+[0m$ [0mset -u
+cd /tmp/opencode && mkdir -p chunks && cd chunks
+for c in 0-lpao5_i9htd 0-mbmp1iqb6hj 08ttfj81-47mu 0cz1d0mv5g_q7 1a4tqdnsy9k1l 1ymt1shyhmu-4 2i51e627rllld 2n1zydk_92chn 2ufbqzbeyam3w 3fntmmi971322 3mc6dra1m0098 4310-_brt1a3g turbopack-2a8cgfwu75lsu; do
+  curl -sS --max-time 25 -o "$c.js" "https://kurs.onecode.de/_next/static/chunks/$c.js"
+  sleep 1
+done
+ls -l | tail -n +2 | awk '{print $9, $5}'
+echo "=== where is module 34891 DEFINED (34891,e=>{ ) ==="
+grep -l '34891,e=>{' *.js
+echo "=== where is 34891 REFERENCED as an import/consume ([34891] or ,34891]) ==="
+grep -o -E '.{25}34891.{15}' *.js | head -40
+0-lpao5_i9htd.js 251775
+0-mbmp1iqb6hj.js 154581
+08ttfj81-47mu.js 229078
+0cz1d0mv5g_q7.js 112594
+1a4tqdnsy9k1l.js 13880
+1ymt1shyhmu-4.js 27433
+2i51e627rllld.js 31346
+2n1zydk_92chn.js 11147
+2ufbqzbeyam3w.js 1311
+3fntmmi971322.js 14377
+3mc6dra1m0098.js 12653
+4310-_brt1a3g.js 37519
+turbopack-2a8cgfwu75lsu.js 9652
+=== where is module 34891 DEFINED (34891,e=>{ ) ===
+1a4tqdnsy9k1l.js
+=== where is 34891 REFERENCED as an import/consume ([34891] or ,34891]) ===
+1a4tqdnsy9k1l.js:en:e})]}):null}],76017)},34891,e=>{"use stric
+1a4tqdnsy9k1l.js:,()=>{r=!0}},[e]),null}],34891)},28420,e=>{"u
+[0m
+[0m$ [0mcd /tmp/opencode/chunks
+echo "=== context A: ',34891)}' ==="
+grep -o -E '.{900},34891\)\},28420' 1a4tqdnsy9k1l.js
+echo
+echo "=== context B: 'null}],34891)}' ==="
+grep -o -E '.{900}null\}\],34891\)\}' 1a4tqdnsy9k1l.js
+=== context A: ',34891)}' ===
+HashSessionHandoff",0,function(){let e=(0,r.useRouter)();return(0,t.useEffect)(()=>{let t=function(e){let t=e.startsWith("#")?e.slice(1):e;if(!t)return null;let r=new URLSearchParams(t),i=r.get("error_code")??r.get("error");if(i)return{kind:"error",code:i.includes("expired")?"link-abgelaufen":"link-ungueltig"};let a=r.get("access_token"),l=r.get("refresh_token");return a&&l?{kind:"session",accessToken:a,refreshToken:l,next:n[r.get("type")??""]??"/"}:null}(window.location.hash);if(!t)return;if(window.history.replaceState(null,"",window.location.pathname+window.location.search),"error"===t.kind)return void e.replace(`/login?error=${t.code}`);let r=!1;return(0,i.createClient)().auth.setSession({access_token:t.accessToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login?error=link-abgelaufen");e.replace(t.next),e.refresh()}}),()=>{r=!0}},[e]),null}],34891)},28420
+
+=== context B: 'null}],34891)}' ===
+e.s(["HashSessionHandoff",0,function(){let e=(0,r.useRouter)();return(0,t.useEffect)(()=>{let t=function(e){let t=e.startsWith("#")?e.slice(1):e;if(!t)return null;let r=new URLSearchParams(t),i=r.get("error_code")??r.get("error");if(i)return{kind:"error",code:i.includes("expired")?"link-abgelaufen":"link-ungueltig"};let a=r.get("access_token"),l=r.get("refresh_token");return a&&l?{kind:"session",accessToken:a,refreshToken:l,next:n[r.get("type")??""]??"/"}:null}(window.location.hash);if(!t)return;if(window.history.replaceState(null,"",window.location.pathname+window.location.search),"error"===t.kind)return void e.replace(`/login?error=${t.code}`);let r=!1;return(0,i.createClient)().auth.setSession({access_token:t.accessToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login?error=link-abgelaufen");e.replace(t.next),e.refresh()}}),()=>{r=!0}},[e]),null}],34891)}
+[0m
+[0m$ [0mcd /tmp/opencode/chunks
+echo "=== HashSessionHandoff occurrences across all 13 ==="
+grep -c 'HashSessionHandoff' *.js | grep -v ':0'
+echo
+echo "=== does any pre-auth chunk import by client-reference name (e.g. e.s([...]) consumers)? list all createClientReference names ==="
+grep -o -E '\.s\(\["[A-Za-z0-9_]+"' *.js | sort | uniq -c | sort -rn
+echo
+echo "=== chunk filename manifest inside turbopack runtime chunk? ==="
+grep -o -E '[0-9a-zA-Z_-]+-[A-Za-z0-9_-]{8}\.js' turbopack-2a8cgfwu75lsu.js | sort -u | head -40
+echo
+echo "=== any BUILD_MANIFEST / RSC manifest in login.html ==="
+grep -o -E '__BUILD_MANIFEST|__RSC_SERVER_MANIFEST|buildId' /tmp/opencode/login.html | sort | uniq -c
+=== HashSessionHandoff occurrences across all 13 ===
+1a4tqdnsy9k1l.js:1
+
+=== does any pre-auth chunk import by client-reference name (e.g. e.s([...]) consumers)? list all createClientReference names ===
+      4 2n1zydk_92chn.js:.s(["default"
+      3 1a4tqdnsy9k1l.js:.s(["default"
+      2 2ufbqzbeyam3w.js:.s(["default"
+      2 1a4tqdnsy9k1l.js:.s(["Label"
+      1 4310-_brt1a3g.js:.s(["systemSetTimeoutZero"
+      1 4310-_brt1a3g.js:.s(["pendingThenable"
+      1 4310-_brt1a3g.js:.s(["onlineManager"
+      1 4310-_brt1a3g.js:.s(["notifyManager"
+      1 4310-_brt1a3g.js:.s(["focusManager"
+      1 4310-_brt1a3g.js:.s(["environmentManager"
+      1 4310-_brt1a3g.js:.s(["addConsumeAwareSignal"
+      1 4310-_brt1a3g.js:.s(["Subscribable"
+      1 4310-_brt1a3g.js:.s(["Removable"
+      1 4310-_brt1a3g.js:.s(["QueryProvider"
+      1 4310-_brt1a3g.js:.s(["QueryClientProvider"
+      1 4310-_brt1a3g.js:.s(["Query"
+      1 4310-_brt1a3g.js:.s(["Mutation"
+      1 4310-_brt1a3g.js:.s(["LegalFooter"
+      1 4310-_brt1a3g.js:.s(["GlobalLegalFooter"
+      1 4310-_brt1a3g.js:.s(["CancelledError"
+      1 4310-_brt1a3g.js:.s(["BRAND"
+      1 2ufbqzbeyam3w.js:.s(["mergeClasses"
+      1 2ufbqzbeyam3w.js:.s(["hasA11yProp"
+      1 2n1zydk_92chn.js:.s(["useComposedRefs"
+      1 2n1zydk_92chn.js:.s(["mergeClasses"
+      1 2n1zydk_92chn.js:.s(["hasA11yProp"
+      1 2n1zydk_92chn.js:.s(["cva"
+      1 2n1zydk_92chn.js:.s(["Root"
+      1 2n1zydk_92chn.js:.s(["Button"
+      1 2n1zydk_92chn.js:.s(["BrandMark"
+      1 1ymt1shyhmu-4.js:.s(["cn"
+      1 1ymt1shyhmu-4.js:.s(["clsx"
+      1 1a4tqdnsy9k1l.js:.s(["useComposedRefs"
+      1 1a4tqdnsy9k1l.js:.s(["mergeClasses"
+      1 1a4tqdnsy9k1l.js:.s(["hasA11yProp"
+      1 1a4tqdnsy9k1l.js:.s(["cva"
+      1 1a4tqdnsy9k1l.js:.s(["Root"
+      1 1a4tqdnsy9k1l.js:.s(["LoginForm"
+      1 1a4tqdnsy9k1l.js:.s(["Input"
+      1 1a4tqdnsy9k1l.js:.s(["HashSessionHandoff"
+      1 1a4tqdnsy9k1l.js:.s(["FormError"
+      1 1a4tqdnsy9k1l.js:.s(["Button"
+      1 1a4tqdnsy9k1l.js:.s(["ArrowRight"
+      1 0-lpao5_i9htd.js:.s(["t"
+      1 0-lpao5_i9htd.js:.s(["createClient"
+      1 0-lpao5_i9htd.js:.s(["__assign"
+      1 0-lpao5_i9htd.js:.s(["Primitive"
+      1 0-lpao5_i9htd.js:.s(["FunctionRegion"
+
+=== chunk filename manifest inside turbopack runtime chunk? ===
+
+=== any BUILD_MANIFEST / RSC manifest in login.html ===
+[0m
+[0m$ [0mset -u
+cd /tmp/opencode
+echo "=== /passwort-vergessen (pre-auth 200) chunk refs ==="
+curl -sS --max-time 20 -w '\nhttp=%{http_code}\n' -o /tmp/opencode/pv.html https://kurs.onecode.de/passwort-vergessen/
+grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' pv.html | sort -u > pv.chunks
+wc -l < pv.chunks
+echo "--- chunks on /passwort-vergessen NOT on /login ---"
+grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' login.html | sort -u > login.chunks
+comm -23 pv.chunks login.chunks
+echo "--- route/segment hints in pv.html ---"
+grep -o -E '/(einladung|passwort-neu|passwort-vergessen|dashboard|admin|courses)' pv.html | sort | uniq -c
+=== /passwort-vergessen (pre-auth 200) chunk refs ===
+
+http=308
+0
+--- chunks on /passwort-vergessen NOT on /login ---
+--- route/segment hints in pv.html ---
+      1 /passwort-vergessen
+[0m
+[0m$ [0mset -u
+cd /tmp/opencode
+curl -sS -L --max-time 20 -w 'http=%{http_code} url=%{url_effective}\n' -o pv.html https://kurs.onecode.de/passwort-vergessen
+grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' pv.html | sort -u > pv.chunks
+echo "chunk count: $(wc -l < pv.chunks)"
+echo "--- chunks on /passwort-vergessen NOT on /login ---"
+comm -23 pv.chunks login.chunks
+echo "--- fetch any new chunk(s) and grep for HashSessionHandoff ---"
+for p in $(comm -23 pv.chunks login.chunks | xargs -n1 basename); do
+  curl -sS --max-time 25 -o "chunks/$p" "https://kurs.onecode.de/_next/static/chunks/$p"; sleep 1
+  echo "fetched $p  $(stat -c%s chunks/$p) bytes"
+  grep -c 'HashSessionHandoff' "chunks/$p" || true
+done
+echo "--- all chunk refs on /passwort-vergessen ---"
+cat pv.chunks
+http=200 url=https://kurs.onecode.de/passwort-vergessen
+chunk count: 13
+--- chunks on /passwort-vergessen NOT on /login ---
+/_next/static/chunks/2-fsf9vi38mzv.js
+--- fetch any new chunk(s) and grep for HashSessionHandoff ---
+fetched 2-fsf9vi38mzv.js  13617 bytes
+0
+--- all chunk refs on /passwort-vergessen ---
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2-fsf9vi38mzv.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+[0m
+[0m$ [0mcd /tmp/opencode/chunks
+echo "=== route chunk 2-fsf9vi38mzv.js: supabase calls / redirectTo / action ==="
+grep -o -E 'resetPasswordForEmail|signInWithOtp|signInWithPassword|redirectTo|emailRedirectTo|\$ACTION_ID_[A-Za-z0-9]+|/auth/v1/[a-z]+|captcha[A-Za-z]*' 2-fsf9vi38mzv.js | sort | uniq -c
+echo
+echo "=== the submit handler region ==="
+grep -o -E '.{200}resetPasswordForEmail.{400}' 2-fsf9vi38mzv.js
+echo
+echo "=== any http(s) absolute URL literals in the two route chunks ==="
+grep -o -E 'https?://[A-Za-z0-9._/-]{6,60}' 2-fsf9vi38mzv.js pv.html 2>/dev/null | sort -u | head -20
+=== route chunk 2-fsf9vi38mzv.js: supabase calls / redirectTo / action ===
+      1 resetPasswordForEmail
+
+=== the submit handler region ===
+=(0,r.useState)(""),[p,f]=(0,r.useState)(null),[m,g]=(0,r.useState)(!1),[b,h]=(0,r.useState)(!1);async function x(t){t.preventDefault(),g(!0),f(null);let r=(0,l.createClient)(),{error:i}=await r.auth.resetPasswordForEmail(e.trim());(g(!1),i)?f("Das hat gerade nicht geklappt. Versuch es in ein paar Minuten noch einmal."):h(!0)}return b?(0,t.jsxs)("div",{className:"kr-shadow flex flex-col gap-4 rounded-lg border border-border bg-card p-7",children:[(0,t.jsx)("div",{className:"grid size-10 place-items-center rounded-[11px] bg-(--kr-accent-soft)",children:(0,t.jsx)(a,{className:"size-4.75 text-primary"})}),(0,t.jsxs)(
+
+=== any http(s) absolute URL literals in the two route chunks ===
+2-fsf9vi38mzv.js:http://www.w3.org/2000/svg
+[0m
+[0m$ [0mcd /tmp/opencode/chunks
+echo "=== the redirect map n= immediately before the HashSessionHandoff component ==="
+grep -o -E '.{0,60}n=\{[^}]{0,120}\}[^)]{0,40}\(0,t\.useEffect' 1a4tqdnsy9k1l.js | tail -1
+echo
+echo "=== broader: any n={...} in that file ==="
+grep -o -E 'n=\{invite[^}]*\}' 1a4tqdnsy9k1l.js | sort -u
+=== the redirect map n= immediately before the HashSessionHandoff component ===
+
+=== broader: any n={...} in that file ===
+n={invite:"/einladung",recovery:"/passwort-neu"}
+[0m
+## STEP 1 — DELTA
+
+[NEW] kurs.onecode.de: no deploy. `/_next/static/chunks/0-mbmp1iqb6hj.js` → 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` — byte-identical to the 09-19 11:33Z build, **day-10**. All 13 chunk refs on `/login` unchanged (`0-lpao5_i9htd`, `0-mbmp1iqb6hj`, `08ttfj81-47mu`, `0cz1d0mv5g_q7`, `1a4tqdnsy9k1l`, `1ymt1shyhmu-4`, `2i51e627rllld`, `2n1zydk_92chn`, `2ufbqzbeyam3w`, `3fntmmi971322`, `3mc6dra1m0098`, `4310-_brt1a3g`, `turbopack-2a8cgfwu75lsu`).
+[NEW] kurs.onecode.de: `GET /passwort-vergessen` (308 → trailing-slash form, then 200) serves one route-specific chunk `/_next/static/chunks/2-fsf9vi38mzv.js` (13 617 B) that is **not** referenced by `/login`. This is the first time the recovery-request route's own bundle has been isolated.
+[NEW] kurs.onecode.de: `2-fsf9vi38mzv.js` submits `createClient().auth.resetPasswordForEmail(email.trim())` with **no** `redirectTo` / `emailRedirectTo` option, no `$ACTION_ID`, no `action`/`method` on the form — purely browser→GoTrue. App-side corroboration that the recovery link is minted at `SITE_URL` by default; the app never attempts a redirect override.
+[CHANGED] kurs.onecode.de: **the 12:30Z conclusion "HashSessionHandoff (module 34891) confirmed dead code — zero importers" is RETRACTED as unsound.** Turbopack registers this as a *client component reference*: `1a4tqdnsy9k1l.js` contains `.s(["HashSessionHandoff",0,function(){…},null],34891)`. Consumers import it **by name** from a route's client-entry chunk, so grepping for the module id `34891` can never find a consumer. `34891` occurs exactly twice in the file and both occurrences are inside that registration tuple. Zero numeric-id importers is the expected signature of a *live* client reference, not of dead code.
+[CHANGED] kurs.onecode.de: sink-mount negative extended — `2-fsf9vi38mzv.js` contains **0** occurrences of `HashSessionHandoff`, so the sink is **not** mounted on the pre-auth recovery-request page. Its consumer remains a chunk belonging to the 307-gated `/einladung` or `/passwort-neu` routes, which cannot be enumerated pre-auth (no buildId manifest, `/_next/static` 308).
+[CHANGED] cto.onecode.de: `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.` / A `104.18.2.73`, `104.18.3.73`; `GET http://cto.onecode.de/` → **409** — day-41, unchanged.
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co: `GET /storage/v1/bucket` (apikey + Bearer = publishable key) → **200 `[]`** — zero buckets, day-41. Publishable key still accepted in `sb_publishable_` form.
+[CHANGED] kurs.onecode.de: `HEAD /login` → 200, `private, no-cache, no-store`, **no `Set-Cookie`**, `server: railway-hikari`, `x-railway-edge: iad1`, `x-hikari-trace: iad1.trg5` — pre-auth surface still exactly `{/login, /passwort-vergessen, /datenschutz, /rechtliches}`.
+
+NO_DELTA on: REST gateway (monitor closed 09-17), functions 404, realtime 401, auth settings, redirect_to allowlist, forged-cookie class, CVE-2025-29927, `_next/image` SSRF.
+
+## STEP 2 — PRIORITIZE
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.15, a6 b9 t7 g3 c6 f3
+[PRIO] kurs.onecode.de,5.50, a7 b7 t8 g2 c2 f3
+[PRIO] cto.onecode.de,3.70, a1 b6 t2 g9 c1 f2
+
+## STEP 3 — HYPOTHESES
+
+[HYP] Forced-login session fixation via app-code HashSessionHandoff setSession() of an attacker-supplied token pair in the URL fragment
+class: AUTH
+asset: kurs.onecode.de (`/_next/static/chunks/1a4tqdnsy9k1l.js`, client reference `HashSessionHandoff`, trailing id 34891)
+confidence: 55
+reasoning: The component is first-party code in a chunk served pre-auth (200 on `/login`). Its useEffect reads `window.location.hash`, strips a leading `#`, `new URLSearchParams`, takes `access_token` + `refresh_token`, calls `history.replaceState(null,"",pathname+search)` to scrub, then `createClient().auth.setSession({access_token, refresh_token})`, then `router.replace(next)` + `router.refresh()`. There is no `state`, no `nonce`, no PKCE verifier check and no subject/tenant check on the supplied pair. `next` is `n[type] ?? "/"` with `n={invite:"/einladung",recovery:"/passwort-neu"}` — fixed, so no off-origin steer. `setSession()` does not consult `flowType`, so the library's `flowType:"pkce"` guard that closes the implicit-grant path does not apply here. Session lands in cookie `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, `@supabase/ssr` 0.12.4). Two reachability limits hold it at 55: the consumer chunk belongs to the 307-gated `/einladung` or `/passwort-neu` (a logged-out victim's 307 to `/login` carries the fragment to a page that does not mount the sink), and the attacker must already hold a valid invited account because signup is disabled.
+evidence_needed: an already-authenticated victim who opens the crafted fragment ends up holding cookie `sb-aygnpacdkgtsfnhgcyjc-auth-token` whose `access_token` sub/aud identifies the attacker's user id, confirmed via `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user` with that cookie's bearer.
+verify_steps: 1) `POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password` with `apikey: sb_publishable_…` and an invited test account's credentials; capture A, R, and `id` from `GET /auth/v1/user`. 2) In a second browser profile already signed in as any account, navigate to `https://kurs.onecode.de/einladung#access_token=<A>&refresh_token=<R>&type=invite` (browser navigation only — the fragment never reaches the wire). 3) Read `sb-aygnpacdkgtsfnhgcyjc-auth-token`, decode the base64url JSON, assert `access_token` belongs to step 1's `id`. 4) Negative controls: `type` omitted → `next` must be `/`; garbage token → redirect to `/login?error=link-abgelaufen`. Self-owned test accounts only, no third-party rows.
+impact: MEDIUM — the victim's browser is placed in the attacker's authenticated session; any submission, upload or course activity the victim performs afterwards is readable by the attacker. No auth gate is bypassed and there is no open redirect, so this is CWE-384 forced-login, not ATO of the victim's own account.
+testability: AUTH_HELPED
+
+[HYP] Cross-tenant BOLA via a Supabase RLS SELECT policy lacking an auth.uid() predicate
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: one Supabase project is the entire backend and the browser talks to PostgREST directly through the module-11795 `createBrowserClient` singleton, so RLS — not the Next.js middleware — is the only authorization boundary. UUID PKs make ID-guessing BOLA useless, leaving a missing `auth.uid()` predicate in a SELECT policy as the only viable shape. 26 anon probes (09-04 → 09-17) never produced 200+rows; the gateway then began platform-wide rejecting the legacy JWT anon key so the anon observation window closed. `enrollments`/`profiles` carry PII plus paid-course entitlement. Nothing in the pre-auth surface can observe a policy predicate, so confidence is unchanged and untestable without credentials.
+evidence_needed: row identifiers owned by account A appearing in account B's authenticated `GET` response.
+verify_steps: 1) `POST /auth/v1/token?grant_type=password` for each of two invited test accounts. 2) Per account, `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=id,user_id&limit=50` with `apikey: sb_publishable_…` plus that account's bearer. 3) Diff the two `user_id` sets. Read-only GETs inside each caller's own authorized window; self-owned rows only.
+impact: CRITICAL — cross-tenant PII and paid-course entitlement disclosure on a multi-tenant store; reportable as broken object-level authorization.
+testability: AUTH_HELPED
+
+[HYP] Dangling Perspective funnel CNAME on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: pure CNAME to `cname.perspective-dns.com` (A 104.18.2.73/3.73) with zero verification TXT, HTTP 80 → 409 "error code:1001", TLS handshake failure on 443 — the signature of a custom-subdomain CNAME target with no hostname bound. Stable 41 days, so not transient. No passive request can advance it.
+evidence_needed: cto.onecode.de serving 200 with third-party content after a hostname is bound in a fresh Perspective account.
+verify_steps: HUMAN_ONLY — vendor plus domain-owner consent. Do not attempt a claim. Report with dig output, the 409 body and provider documentation only.
+impact: MEDIUM-HIGH — attacker-controlled content on a trusted *.onecode.de hostname for phishing and trust-boundary abuse; no data impact today.
+testability: HUMAN_ONLY
+
+## STEP 4 — SELF-CRITIQUE
+
+[PARKED] "HashSessionHandoff is dead code / the fragment sink never executes": the supporting evidence was a grep for the Turbopack module id `34891`, which by construction cannot match a client-reference import. Absence of that pattern is not absence of an importer. Hypothesis restored, not dropped.
+[PARKED] Unauthenticated no-interaction fragment injection on a pre-auth 200 page: still falsified. `/login` and `/passwort-vergessen` (the only two interactive pre-auth pages) load no consumer of `HashSessionHandoff` — now positively checked on `/passwort-vergessen` via its own route chunk. The strong form must not be asserted.
+[PARKED] Magic-link / recovery phishing via `redirect_to` and GET-logout: closed twice over — GoTrue's allowlist is exact-origin (8 variants → 303 `https://kurs.onecode.de#error=…`, 405 `Allow: POST` on GET-logout), and the app's own recovery page passes no `redirectTo` at all, so it never even attempts an override.
+[PARKED] cto CNAME confidence raise on further passive probing: dropped. 41 days of identical dig/409 output carry no information; only the owner's claim attempt resolves it.
+[FINAL] 1. Cross-tenant BOLA via RLS SELECT-policy gap (65, AUTH_HELPED) — 2. cto dangling CNAME (58, HUMAN_ONLY) — 3. Forced-login session fixation via HashSessionHandoff (55, AUTH_HELPED).
+
+## STEP 5 — NEXT ACTION
+
+[NEXT] HUMAN: email contact@onecode.de (published on /datenschutz) requesting **one** invited test account via the /einladung flow. That single credential is the only missing input for hypotheses 1 and 3 — it yields an A/R token pair for the fragment test and is the first half of the two-account RLS diff. No further passive request can advance either.
+
+## STEP 6 — LEARNING
+
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: `HashSessionHandoff` is a Turbopack **client component reference** (`.s(["HashSessionHandoff",0,fn,null],34891)`) in pre-auth-served chunk `1a4tqdnsy9k1l.js`, consumed by *name* from a gated route's client-entry chunk. The 12:30Z "zero importers ⇒ dead code" inference is retracted; numeric-id grepping is the wrong instrument for client references.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: the fragment sink is **not** mounted on either interactive pre-auth page. `/login` has no consumer, and `/passwort-vergessen` serves its own route chunk `2-fsf9vi38mzv.js` (13 617 B) with 0 occurrences of `HashSessionHandoff`.
+[LEARN] REJECTED OATH @ kurs.onecode.de: the recovery-request page calls `createClient().auth.resetPasswordForEmail(email)` with no `redirectTo` / `emailRedirectTo` option, no `$ACTION_ID` and no form `action`/`method` — the app never requests a redirect target, so GoTrue's `SITE_URL` fallback is the only possible destination. Independent app-side corroboration of the gateway-side allowlist result.
+[LEARN] NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk sha256 `f916f314…` byte-identical day-10 with all 13 chunk refs stable, cto CNAME day-41 (409, TXT zero), storage 200 `[]` day-41. Build-diffing stays event-triggered, not time-triggered.
+[LEARN] NEW INFO @ kurs.onecode.de: the route-chunk-per-page structure is now mapped for the pre-auth set — `/login` and `/passwort-vergessen` differ by exactly one chunk (`2-fsf9vi38mzv.js`), so route-level bundle diffing is a viable deploy signal independent of the main chunk hash.
+
+## STEP 7 — RISK
+
+[RISK] onecode: 42 — no new finding, but one prior conclusion was formally retracted on method rather than on a new observation: the fragment→session sink is live shipped client code whose mount point is unverified, not dead code. That moves a hypothesis from "practically 0" back to 55 and keeps the cycle honest rather than letting a bad grep harden into a false negative. The positive side is that the recovery path is now closed from two independent directions — the app passes no `redirectTo` and GoTrue's allowlist is exact-origin — so the token-leak/phishing chain has no remaining leg. Risk stays concentrated in the authenticated window: an RLS model on the only backend that 26 anon probes could never observe, an unbound-state session sink that needs one invited account to test, and a first-party CNAME nobody but the owner can claim.

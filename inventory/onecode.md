@@ -785,3 +785,24 @@ www.onecode.de
 - NEW GET /auth/v1/verify writes outcome to URL fragment at app origin (#error=...&sb=) — confirms magic-link success path delivers fragment at app origin
 - CHANGED HashSessionHandoff (module 34891) confirmed dead code: zero importers in /login-reachable module graph, not executed on pre-auth pages
 - CHANGED Session fixation hypothesis confidence 40→practically 0: sink exists but dead code, no open redirect, requires valid attacker token pair (invited account), victim click — exploitability negligible
+
+## 2026-09-26 16:47:59 UTC
+- NEW kurs.onecode.de: no deploy. `/_next/static/chunks/0-mbmp1iqb6hj.js` → 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` — byte-identical to the 09-19 11:33Z build, *
+- NEW kurs.onecode.de: `GET /passwort-vergessen` (308 → trailing-slash form, then 200) serves one route-specific chunk `/_next/static/chunks/2-fsf9vi38mzv.js` (13 617 B) that is **not** referenced by `/logi
+- NEW kurs.onecode.de: `2-fsf9vi38mzv.js` submits `createClient().auth.resetPasswordForEmail(email.trim())` with **no** `redirectTo` / `emailRedirectTo` option, no `$ACTION_ID`, no `action`/`method` on the 
+- CHANGED kurs.onecode.de: **the 12:30Z conclusion "HashSessionHandoff (module 34891) confirmed dead code — zero importers" is RETRACTED as unsound.** Turbopack registers this as a *client component reference*:
+- CHANGED kurs.onecode.de: sink-mount negative extended — `2-fsf9vi38mzv.js` contains **0** occurrences of `HashSessionHandoff`, so the sink is **not** mounted on the pre-auth recovery-request page. Its consume
+- CHANGED cto.onecode.de: `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.` / A `104.18.2.73`, `104.18.3.73`; `GET http://cto.onecode.de/` → **409** — day-41, unchanged.
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: `GET /storage/v1/bucket` (apikey + Bearer = publishable key) → **200 `[]`** — zero buckets, day-41. Publishable key still accepted in `sb_publishable_` form.
+- CHANGED kurs.onecode.de: `HEAD /login` → 200, `private, no-cache, no-store`, **no `Set-Cookie`**, `server: railway-hikari`, `x-railway-edge: iad1`, `x-hikari-trace: iad1.trg5` — pre-auth surface still exactly
+- NEW No deploy signal since 2026-09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical day-9; pre-auth surface frozen at {/log
+- NEW cto.onecode.de CNAME→cname.perspective-dns.com day-40 stable; HTTP 409 "error code:1001" + TLS handshake-fail; zero verification TXT; conf 58 holds
+- NEW Supabase REST monitor formally closed 09-17 after 26 probes (503↔401 oscillation), never 200+rows; platform enforces `sb_publishable_` format only
+- NEW Supabase Storage `/storage/v1/bucket` 200 `[]` with `sb_publishable_` key — zero buckets, stable 20+ days
+- CHANGED Session fixation hypothesis confidence 40→practically 0: HashSessionHandoff (module 34891) confirmed dead code (zero importers in /login-reachable graph), no open redirect, requires valid attacker tok
+- CHANGED GoTrue `redirect_to` allowlist tested LIVE on pre-auth unauthenticated verify path: 8 off-origin variants all 303 to `https://kurs.onecode.de#error=...` — no open redirect, no token leak
+- CHANGED `SITE_URL` positively identified as `https://kurs.onecode.de` from fallback target
+- CHANGED `GET /auth/v1/logout?returnTo=` returns 405 `Allow: POST` — legacy GoTrue GET-logout redirect primitive absent
+- CHANGED Forged/null session cookies (5 variants) tested for first time in 40 days — all 307→/login; middleware gate intact
+- CHANGED No PKCE authorization-code injection pre-auth: `_isPKCECallback` requires `?code=` + stored verifier; app uses email magic-link only
+- CHANGED Supabase platform enforces `sb_publishable_` key format only; legacy JWT anon keys (`eyJhbGci...`) rejected globally as "Invalid API key" — platform-level change, not OneCode rotation
