@@ -2774,3 +2774,34 @@
 - LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16; Next.js patch level > vulnerable
 - LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive
 - LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) rejected as "Invalid API key" across all endpoints; sb_publishable_ format acce
+
+## RANKED HYPOTHESES 2026-09-27 00:44:36 UTC
+- [70] kurs.onecode.de: Forced-login session fixation via the pre-auth-mounted HashSessionHandoff setSession() of an attacker-supplied token pair in the URL fragment (from art/lead_bigpickle.txt)
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: email contact@onecode.de (published on `/datenschutz`) requesting **one** invited test account via the `/einladung` flow. That single self-owned credenti
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung (contact@onecode.de public on /datenschutz), exchange both be
+- LEARN: REJECTED XSS @ kurs.onecode.de: no pre-auth reflected-parameter primitive exists on the only pre-auth page with a client JS boundary. The hash `error` branch is
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in is disabled (`external.anonymous_users: false` in `/auth/v1/settings`, alongside `disab
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: PostgREST schema disclosure is blocked above the table layer — `GET /rest/v1/` with `Accept: application/
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the GoTrue admin plane is unreachable pre-auth — `/auth/v1/admin/users` and `/auth/v1/admin/generate_link
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: the module-34891 sink body is now fully re-read and recorded at `1a4tqdnsy9k1l.js` = 13 880 B, sha256 `5a72d2cd8738ecadfd9ef271
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: `LoginForm` (module 28420) takes `linkError` as its only prop and, after a successful `signInWithPassword`, hardcodes `c.push("
+- LEARN: NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk sha256 `f916f314…` byte-identical day-11 with all 13 chunk refs stable, `GET /login` 
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `redirect_to` allowlist is exact-origin and holds on the pre-auth unauthenticated verify path; 8 off-or
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/logout?returnTo=` returns 405 with `Allow: POST` — the legacy GoTrue GET-logout redirect primiti
+- LEARN: ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: `SITE_URL` = `https://kurs.onecode.de`, established from the observed redirect fallback rather than inferred
+- LEARN: REJECTED AUTH @ kurs.onecode.de: forged/null session cookies do not bypass the gate; 5 variants all 307→/login
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: fragment→session sink is app code with no state/nonce/PKCE binding but only reachable on 307-gated routes; effective artifact i
+- LEARN: REJECTED AUTH @ kurs.onecode.de: no PKCE authorization-code injection pre-auth; _isPKCECallback needs ?code= + persisted verifier; app uses email magic-link
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no privileged Supabase key shipped to browser; 13 pre-auth chunks scanned, zero JWTs/secrets; only sb_publishable key
+- LEARN: NO_DELTA @ kurs.onecode.de / cto.onecode.de / Supabase storage: main chunk f916f314 byte-identical day-9, cto CNAME day-41, storage 200 zero buckets
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: /login 200 + / 307→/login unchanged; pre-auth surface stable, exhausted; no new cookie/session signal
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com stable 40+ days; 409/1001 + TLS handshake-fail; unbound/reclaimable; conf 58, HUMAN confirm
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]` holds — endpoint probeable, zero buckets
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 — 26 probes (503↔401), never 200+rows; publishable-key rejection p
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/: 404 — no deployed functions
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/: 401 — auth required, no pre-auth exposure
+- LEARN: REJECTED OATH @ kurs.onecode.de: all external providers false; whitelist-locked redirects
+- LEARN: REJECTED AUTH @ kurs.onecode.de: x-middleware-subrequest bypass header (CVE-2025-29927) negative live 16:34Z-19:5xZ 09-16; Next.js patch level > vulnerable
+- LEARN: REJECTED SSRF @ kurs.onecode.de/_next/image: external url fetch → 400; remotePatterns not permissive
+- LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/*: JWT anon key format (eyJhbGci...) rejected as "Invalid API key" across all endpoints; sb_publishable_ format acce

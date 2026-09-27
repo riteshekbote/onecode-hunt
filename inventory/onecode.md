@@ -817,3 +817,26 @@ www.onecode.de
 - NEW kurs.onecode.de: no deploy. `/_next/static/chunks/0-mbmp1iqb6hj.js` → 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` — byte-identical, day-10. All 13 chunk refs o
 - CHANGED cto.onecode.de: `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = 1 line (SOA only) — day-42, unchanged.
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: `GET /storage/v1/bucket` (apikey + Bearer = publishable key) → **200 `[]`** — zero buckets, day-42.
+
+## 2026-09-27 00:44:36 UTC
+- NEW kurs.onecode.de: the fragment `error` branch is a two-value enum, not a passthrough. Re-read of module 34891 (`sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`, 13 880 B, first
+- NEW kurs.onecode.de: the server component applies an independent exact-match allowlist on `?error=`. `GET /login?error=link-abgelaufen` → 19 559 B, `linkError:"Dieser Einladungslink ist abgelaufen oder wu
+- NEW kurs.onecode.de: `/login` is dynamic w.r.t. searchParams (payload grows ~700 B only when `error` matches), so query-param enumeration is a usable instrument. 11 candidates (`next, redirect, redirectTo
+- NEW kurs.onecode.de: `LoginForm` (module 28420, same chunk) re-read in full — `linkError` is its only prop, and the post-password path is hardcoded `c.push("/")` after `signInWithPassword`. No attacker-st
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/settings` → 200, `external.anonymous_users: false`, `disable_signup: true`, `mailer_autoconfirm: false`, only `external.email: true`. Anonymous sign-in 
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/admin/users` → 401, `GET /auth/v1/admin/generate_link` → 401 (publishable key, apikey + Bearer). Admin plane not reachable pre-auth.
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /rest/v1/` with `Accept: application/openapi+json` → 401 `{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}`. Th
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: the RLS hypothesis (conf 65) has exactly **one** viable test design and no cheap alternative. An anonymous sign-in would have supplied a second distinct `authenticate
+- CHANGED cto.onecode.de: day-43, unchanged. CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT single SOA line, `GET http://cto.onecode.de/` → 409 `error code: 1001`.
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/: 200 `[]`, day-43, zero buckets.
+- NEW kurs.onecode.de: HashSessionHandoff (module 34891) confirmed mounted on `/login` RSC payload (row `18:I[34891,…]`) — runs `useEffect` on hydration, parses `window.location.hash` for `access_token`+`re
+- NEW kurs.onecode.de: `/datenschutz` and `/rechtliches` are strict 11-chunk subsets of `/login` (missing `0-lpao5_i9htd.js` and `1a4tqdnsy9k1l.js`), zero `I[…]` client references — fully static, no sink.
+- NEW kurs.onecode.de: NULL/FORGED session cookie class tested for first time (5 variants: garbage, base64 valid-shape with alg:none, chunked .0 name, Authorization bearer+apikey, chunked against `/api/broa
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `redirect_to` allowlist tested LIVE on pre-auth unauthenticated `GET /auth/v1/verify?type=recovery` — 8 off-origin variants all 303 to `https://kurs.onecode.de
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/logout?returnTo=` → 405 `Allow: POST` — legacy GoTrue GET-logout redirect primitive absent.
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `SITE_URL` positively identified as `https://kurs.onecode.de` from fallback target.
+- CHANGED Session fixation hypothesis confidence 70→practically 0: sink exists on `/login` but requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed; exploitab
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com day-42 stable; HTTP 409 "error code:1001" + TLS handshake-fail; zero verification TXT; conf 58 holds; HUMAN_ONLY proof path.
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only.
+- CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` with `sb_publishable_` key — zero buckets, stable 20+ days.
+- CHANGED kurs.onecode.de: no deploy since 09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical day-10; all 13 chunk refs stable.
