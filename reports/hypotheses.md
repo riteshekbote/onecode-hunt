@@ -2865,3 +2865,19 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the storage exposure hypothesis is closed. The pre-auth chunks carry the supabase-js storage *library* bu
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: the module-34891 sink body is now fully re-read and recorded at `1a4tqdnsy9k1l.js` = 13 880 B, sha256 `5a72d2cd8738ecadfd9ef271
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: `LoginForm` (module 28420) takes `linkError` as its only prop and, after a successful `signInWithPassword`, hardcodes `c.push("
+
+## RANKED HYPOTHESES 2026-09-27 17:20:30 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (from art/lead_nemotron3.txt)
+- [62] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}: Reflected-origin credentialed CORS on the GoTrue auth gateway allows any website to make the victim's browser issue credentialed, readable cross-origin requests to the full auth API (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: email contact@onecode.de (published on `/datenschutz`) requesting **one** invited test account via the `/einladung` flow. That single self-owned credenti
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung (contact@onecode.de public on /datenschutz), exchange both be
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) confirmed on the entire GoTrue gateway — `/auth/v1/settings`
+- LEARN: REJECTED SSRF @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image: image-transform service exists and reuses the `NoSuchBucket` oracle, but `?url=` is no
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/rpc: PostgREST RPC route returns the same `503 PGRST002` schema-cache anon-block as table paths; n
+- LEARN: NO_DELTA @ kurs.onecode.de: main chunk `f916f314…` and sink chunk `5a72d2cd…` byte-identical (no deploy, day-11/12); `/login` 200 no `Set-Cookie`; `/datenschutz
+- LEARN: REJECTED XSS @ kurs.onecode.de: no pre-auth reflected-parameter primitive exists on the only pre-auth page with a client JS boundary. The hash `error` branch is
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in is disabled (`external.anonymous_users: false` in `/auth/v1/settings`, alongside `disab
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: a **pre-auth, no-credential bucket-existence oracle** is confirmed on `GET /storage/v1/object/public/<nam
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the storage exposure hypothesis is closed. The pre-auth chunks carry the supabase-js storage *library* bu
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: the module-34891 sink body is now fully re-read and recorded at `1a4tqdnsy9k1l.js` = 13 880 B, sha256 `5a72d2cd8738ecadfd9ef271
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: `LoginForm` (module 28420) takes `linkError` as its only prop and, after a successful `signInWithPassword`, hardcodes `c.push("

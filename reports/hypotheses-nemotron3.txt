@@ -1,5 +1,4 @@
-## 2026-09-27 12:28:23 UTC [target] (model nemotron3)
-[NEW] Live probes confirm zero delta vs 2026-09-27 06:28Z knowledge base: kurs.onecode.de /login 200 no Set-Cookie, main chunk f916f314ea61a8c5... byte-identical day-11; cto.onecode.de HTTP 409 "error code:1001" day-44, CNAME→cname.perspective-dns.com stable, TLS handshake fail; Supabase storage/v1/bucket 200 [] with sb_publishable key; bucket existence oracle confirmed (400 NoSuchBucket); auth settings unchanged (anonymous_users:false, only email:true); HashSessionHandoff chunk 5a72d2cd... unchanged; REST monitor closed; no deploy since 09-19 11:33Z.
+## 2026-09-27 17:18:42 UTC [target] (model nemotron3)
 [PRIO] cto.onecode.de,7.35,attack_surface=7 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.45,attack_surface=5 business_value=4 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=3
@@ -21,16 +20,16 @@ evidence_needed: Attacker creates Perspective account, adds custom domain cto.on
 verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
 impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
 testability: HUMAN_ONLY
-[HYP] Supabase Storage bucket enumeration/access via publishable key
-class: MISCONFIG
-asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/
-confidence: 35
-reasoning: Storage endpoint probeable with sb_publishable key (bypasses Next.js middleware), returns 200 with empty bucket list `[]`; bucket existence oracle confirmed via GET /storage/v1/object/public/<name>/<key> → 400 NoSuchBucket; 26 candidate names excluded; zero buckets currently exist but endpoint accessible pre-auth; course platform semantics suggest resources may be stored here if buckets created
-evidence_needed: New bucket created with public/objects readable policy → course resource files accessible without auth
-verify_steps: PASSIVE: Monitor storage/v1/bucket for new buckets (cadence ≤1/day); AUTH_HELPED: If invited account gains access, test bucket creation/upload with anon key to verify RLS on storage.objects
-impact: Course resource files disclosure if bucket misconfigured — MEDIUM
-testability: PASSIVE
-[PARKED] Supabase Storage bucket enumeration/access via publishable key: confidence 35 < 40; zero buckets for 20+ days, no bucket creation signal, bucket names not recoverable from pre-auth chunks, monitor-only value
+[HYP] Forced-login session fixation via pre-auth-mounted HashSessionHandoff setSession() with attacker-supplied token pair in URL fragment
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 70
+reasoning: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; runs useEffect on hydration, parses window.location.hash for access_token+refresh_token, calls setSession() with no state/nonce/PKCE binding; error paths fixed to /login?error=link-abgelaufen; sink chunk 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0 recorded; LoginForm post-password hardcodes push("/") + refresh(); next map inside HashSessionHandoff is {invite:/einladung,recovery:/passwort-neu} defaulting to "/"
+evidence_needed: Attacker crafts URL https://kurs.onecode.de/login#access_token=<valid_token>&refresh_token=<valid_token>&type=recovery (or invite) and delivers to victim; victim clicks, hash parsed, setSession() called, session fixed, redirected to /einladung or /passwort-neu
+verify_steps: AUTH_HELPED: Provision invited account, capture valid access_token+refresh_token from magic-link flow, construct malicious URL, deliver to victim (simulated), observe session fixation
+impact: Forced login (CWE-384) — attacker fixes victim's session to attacker-controlled account; victim actions attributed to attacker — MEDIUM
+testability: AUTH_HELPED
+[PARKED] Forced-login session fixation via pre-auth-mounted HashSessionHandoff setSession() with attacker-supplied token pair in URL fragment: confidence 70 but exploitability negligible — requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed; no PKCE/code injection pre-auth; forged/null cookies all 307→/login; effective artifact is sb-aygnpacdkgtsfnhgcyjc-auth-token cookie only reachable post-auth.
 [FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (confidence 65, IDOR, AUTH_HELPED) — highest overall value
 [FINAL] 2. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [NEXT] HUMAN: Execute BOLA escalation — provision two invited test accounts via kurs.onecode.de/einladung (contact@onecode.de public on /datenschutz), exchange both bearer tokens via POST https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password, then A calls GET /api/courses/{B_course_id}, /api/resources/{B_resource_id}, /api/enrollments/{B_enrollment_id} comparing response delta; also direct Supabase queries via app's client bundle Supabase client

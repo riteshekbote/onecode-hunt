@@ -863,3 +863,10 @@ www.onecode.de
 
 ## 2026-09-27 12:28:33 UTC
 - NEW Live probes confirm zero delta vs 2026-09-27 06:28Z knowledge base: kurs.onecode.de /login 200 no Set-Cookie, main chunk f916f314ea61a8c5... byte-identical day-11; cto.onecode.de HTTP 409 "error code:
+
+## 2026-09-27 17:20:30 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*`: **reflected-origin credentialed CORS** — `/auth/v1/settings`, `/user`, `/verify`, `/authorize` all return `access-control-allow-origin: https://evil.examp
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image/{public,authenticated}/…`: image-transform (imgproxy) service exists, never probed; reuses the `NoSuchBucket` oracle.
+- NEW render/image SSRF **falsified**: `?url=` is not a recognized source option — with a benign RFC-2606 name it returns the identical `NoSuchBucket` control. My one `169.254.169.254` attempt was blocked b
+- NEW `/rest/v1/rpc/` (PostgREST RPC route class, never tested) → `503 PGRST002`, same schema-cache-down anon-block as table paths. No permissive state.
+- CHANGED `/auth/v1/settings` CORS asymmetry: GoTrue = reflected-origin + ACAC:true, while `/rest/v1/` = wildcard `*` + no credentials. Inverted, and uniform across all `/auth/v1/*`.
