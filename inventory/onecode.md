@@ -870,3 +870,14 @@ www.onecode.de
 - NEW render/image SSRF **falsified**: `?url=` is not a recognized source option — with a benign RFC-2606 name it returns the identical `NoSuchBucket` control. My one `169.254.169.254` attempt was blocked b
 - NEW `/rest/v1/rpc/` (PostgREST RPC route class, never tested) → `503 PGRST002`, same schema-cache-down anon-block as table paths. No permissive state.
 - CHANGED `/auth/v1/settings` CORS asymmetry: GoTrue = reflected-origin + ACAC:true, while `/rest/v1/` = wildcard `*` + no credentials. Inverted, and uniform across all `/auth/v1/*`.
+
+## 2026-09-27 20:16:58 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: reflected-origin credentialed CORS confirmed — `/auth/v1/settings`, `/user`, `/verify`, `/authorize` return `access-control-allow-origin: <arbitrary Origin>
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image: imgproxy service exists, reuses `NoSuchBucket` oracle; `?url=` not a fetch source (benign URL returns identical control); single `169.254.169.
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/rpc: PostgREST RPC route returns `503 PGRST002` (same schema-cache anon-block); no permissive state
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: `200 []` inference retracted — listing is uninformative (anon cannot SELECT storage.buckets); "zero buckets exist" conclusion withdrawn
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: pre-auth bucket-existence oracle confirmed via `GET /storage/v1/object/public/<name>/<key>` → `400 {"code":"NoSuchBucket"}`; 26 candidate names excluded; low-severity
+- CHANGED kurs.onecode.de: no deploy since 09-19 11:33Z; main chunk `f916f314ea61a8c5...` byte-identical day-11; all 13 chunk refs stable; `/login` 200 no `Set-Cookie`; pre-auth surface = `{/login,/passwort-ver
+- CHANGED cto.onecode.de: CNAME→`cname.perspective-dns.com` day-44; HTTP 409/1001 + TLS handshake-fail; zero verification TXT; conf 58 holds; HUMAN_ONLY proof path
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — two invited accounts required for BOLA test
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: PostgREST schema disclosure blocked above table layer (`Accept: application/openapi+json` → 401 "Secret API key required"); GoTrue admin plane unreachable pre-auth (4
