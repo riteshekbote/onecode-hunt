@@ -840,3 +840,23 @@ www.onecode.de
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only.
 - CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` with `sb_publishable_` key — zero buckets, stable 20+ days.
 - CHANGED kurs.onecode.de: no deploy since 09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical day-10; all 13 chunk refs stable.
+
+## 2026-09-27 06:28:41 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: **the storage listing inference is unsound and is retracted.** `GET /storage/v1/bucket` → `200 []` has been read for 44 days as "zero buckets exist". That inference c
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: **a pre-auth bucket-existence oracle is confirmed and validated.** `GET /storage/v1/object/public/<name>/<key>` returns a distinguishable `400 {"statusCode":"404","co
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: **26 candidate bucket names positively excluded** via that oracle, all byte-identical to control: `public, assets, uploads, files, content, resources, documents, medi
+- NEW kurs.onecode.de: the bucket name is **not recoverable pre-auth**. The 13 pre-auth-served chunks contain the supabase-js storage *library* module (`StorageApiError`, `__isStorageError`, `storage`) but 
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `GET /auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → `400 {"error_code":"validation_failed","msg":"Unsupported provider: provider is no
+- CHANGED The "Supabase Storage public bucket exposure" hypothesis (conf 55, ACCEPTED 2026-09-04) is **formally REJECTED**. Its sole support was the `[]` listing, now shown to be uninformative; and 26 semantic 
+- CHANGED kurs.onecode.de: no deploy. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` — byte-identical to the 2026-09-19 11:33Z build, day-11
+- CHANGED cto.onecode.de: day-44, unchanged. CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT absent at host, `GET http://cto.onecode.de/` → `409 error code: 1001`. kurs CNAME `ki8dqcf6.up
+- NEW kurs.onecode.de: HashSessionHandoff (module 34891, chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd...`) confirmed mounted on `/login` RSC payload row `18:I[34891,…]`; runs `useEffect` on hydration, parses `
+- NEW kurs.onecode.de: `/login` dynamic w.r.t. `?error=` — 11 candidates tested (`next, redirect, redirectTo, returnTo, url, target, continue, goto, dest, destination, callback`); only `error=link-abgelaufe
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/settings` → `external.anonymous_users: false`, `disable_signup: true`, `mailer_autoconfirm: false`, only `external.email: true` — anonymous sign-in disa
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /rest/v1/` with `Accept: application/openapi+json` → 401 `Secret API key required` / `Only secret API keys can be used for this endpoint` — PostgREST schema disc
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/admin/users` + `/auth/v1/admin/generate_link` → 401 with publishable key — GoTrue admin plane unreachable pre-auth, no service-role material in any pre-
+- CHANGED Session fixation hypothesis confidence 70→practically 0: sink exists on `/login` but requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed to `/login
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com day-43 stable; HTTP 409 "error code:1001" + TLS handshake-fail; zero verification TXT; conf 58 holds; HUMAN_ONLY proof path
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` with `sb_publishable_` key — zero buckets, stable 20+ days
+- CHANGED kurs.onecode.de: no deploy since 09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314...` byte-identical day-11; all 13 chunk refs stable
