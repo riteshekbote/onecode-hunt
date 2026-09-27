@@ -860,3 +860,6 @@ www.onecode.de
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED Supabase Storage `/storage/v1/bucket` 200 `[]` with `sb_publishable_` key — zero buckets, stable 20+ days
 - CHANGED kurs.onecode.de: no deploy since 09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314...` byte-identical day-11; all 13 chunk refs stable
+
+## 2026-09-27 12:28:33 UTC
+- NEW Live probes confirm zero delta vs 2026-09-27 06:28Z knowledge base: kurs.onecode.de /login 200 no Set-Cookie, main chunk f916f314ea61a8c5... byte-identical day-11; cto.onecode.de HTTP 409 "error code:
