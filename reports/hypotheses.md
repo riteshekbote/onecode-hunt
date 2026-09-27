@@ -2901,3 +2901,19 @@
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) on entire GoTrue gateway — `/auth/v1/settings`, `/user`, `/v
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dab
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm (module 28420) takes linkError only; post-password hardcodes `push("/")` + `refresh()`; next map inside HashSessionHa
+
+## RANKED HYPOTHESES 2026-09-27 23:10:52 UTC
+- [85] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}: Reflected-origin credentialed CORS on GoTrue auth gateway allows cross-origin credentialed reads of user session and settings (from art/lead_nemotron3.txt)
+- [72] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,recover,otp,resend,signup,logout}: Blanket reflected-Origin + credentialed CORS policy across the whole Supabase project removes origin isolation from the identity and data plane (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `curl -sS -D- --max-time 20 -H "Origin: https://evil.example" -H "apikey: <sb_publishable_, sha256 870cf518…>" https://aygnpacdkgtsfnhgcyjc.supabase.co/a
+- NEXT(hypotheses-nemotron3.txt): PROBE: `curl -H "Origin: https://evil.example.com" -v https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user` (read-only GET; validates reflected-origin ACAO + A
+- LEARN: REJECTED XSS @ kurs.onecode.de: no pre-auth reflected-parameter primitive on /login (error branch enum + exact-match allowlist server-side); `?error=<script>` y
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — requires inv
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: pre-auth bucket-existence oracle confirmed via `GET /storage/v1/object/public/<name>/<key>` → `400 {"code
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage exposure hypothesis closed — no application storage calls in pre-auth bundles, bucket name unreco
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → 400 "Unsupported provider"; GoTru
+- LEARN: REJECTED SSRF @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image: `?url=` not a fetch source; Cloudflare WAF blocks metadata IP at edge
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/rpc: PostgREST RPC returns 503 PGRST002 (schema-cache anon-block); no permissive state
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) on entire GoTrue gateway — `/auth/v1/settings`, `/user`, `/v
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dab
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm (module 28420) takes linkError only; post-password hardcodes `push("/")` + `refresh()`; next map inside HashSessionHa

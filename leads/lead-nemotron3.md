@@ -8208,3 +8208,61 @@ testability: HUMAN_ONLY
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` recorded; parses URL fragment, calls `setSession()` with no state/nonce/PKCE binding
 [LEARN] ACCEPTED OATH @ kurs.onecode.de: LoginForm (module 28420) takes linkError only; post-password hardcodes `push("/")` + `refresh()`; next map inside HashSessionHandoff is `{invite:/einladung,recovery:/passwort-neu}` defaulting to "/"
 [RISK] onecode: 58 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: 4 pages at 200, all `/api/*` auth-gated. **NEW**: Reflected-origin credentialed CORS on GoTrue auth gateway (conf 85) defeats origin isolation on identity service — allows cross-origin credentialed reads of `/auth/v1/user` (user PII, session state), `/auth/v1/settings`, `/auth/v1/verify` from any origin; owner-fixable via `allowed_origins`. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket oracle confirmed but bucket names unrecoverable pre-auth.
+## 2026-09-27 23:09:19 UTC [target] (model nemotron3)
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: reflected-origin credentialed CORS confirmed — `/auth/v1/settings`, `/user`, `/verify`, `/authorize` return `ACAO: <arbitrary Origin>` + `ACAC: true` (first CORS test in 44 days)  
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image: imgproxy service exists, reuses `NoSuchBucket` oracle; `?url=` not a fetch source (benign URL returns identical control); single `169.254.169.254` probe blocked by Cloudflare WAF (403) — no SSRF primitive  
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/rpc: PostgREST RPC route returns `503 PGRST002` (same schema-cache anon-block); no permissive state  
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: `200 []` inference retracted — listing uninformative (anon cannot SELECT storage.buckets); "zero buckets exist" conclusion withdrawn  
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co: pre-auth bucket-existence oracle confirmed via `GET /storage/v1/object/public/<name>/<key>` → `400 {"code":"NoSuchBucket"}`; 26 candidates excluded; low-severity structural disclosure, bucket name unrecoverable from pre-auth chunks  
+[CHANGED] kurs.onecode.de: no deploy since 09-19 11:33Z; main chunk `f916f314ea61a8c5...` byte-identical day-11; all 13 chunk refs stable; `/login` 200 no `Set-Cookie`; pre-auth surface = `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200, all else 307  
+[CHANGED] cto.onecode.de: CNAME→`cname.perspective-dns.com` day-44; HTTP 409/1001 + TLS handshake-fail; zero verification TXT; conf 58 holds; HUMAN_ONLY proof path  
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — two invited accounts required for BOLA test  
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co: PostgREST schema disclosure blocked above table layer (`Accept: application/openapi+json` → 401 "Secret API key required"); GoTrue admin plane unreachable pre-auth (401 with publishable key)  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/,8.45,attack_surface=9 business_value=7 tech_exposure=9 gate_ease=10 cloud_surface=8 freshness=10  
+[PRIO] kurs.onecode.de,7.10,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6  
+[PRIO] cto.onecode.de,6.90,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/,4.60,attack_surface=5 business_value=4 tech_exposure=5 gate_ease=3 cloud_surface=7 freshness=5  
+[HYP] Reflected-origin credentialed CORS on GoTrue auth gateway allows cross-origin credentialed reads of user session and settings  
+class: MISCONFIG  
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}  
+confidence: 85  
+reasoning: Live probes 2026-09-27 17:20Z confirm `/auth/v1/settings`, `/user`, `/verify`, `/authorize` return `ACAO: <attacker-controlled-origin>` + `ACAC: true`; `/rest/v1/` uses wildcard `*` without credentials — inverted asymmetry; GoTrue gateway sets no auth cookie on this origin (only `__cf_bm`), and app session cookie scoped to `kurs.onecode.de` — but defeats origin isolation on identity service; no prior CORS test in 44 days  
+evidence_needed: Attacker-controlled page at `https://evil.example/` makes `fetch("https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user", {credentials:"include"})` with victim logged into kurs.onecode.de → reads authenticated response  
+verify_steps: PASSIVE: `curl -H "Origin: https://evil.example.com" -H "Cookie: <victim-cookie>" https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user -v` (read-only, requires victim session); PASSIVE: verify `ACAO` reflection across all 4 endpoints with arbitrary Origin  
+impact: Cross-origin credentialed read of `/auth/v1/user` (current user PII, email, roles), `/auth/v1/settings` (auth config), `/auth/v1/verify` (magic-link verification state) — MEDIUM; enables session validation, user enumeration, auth-state leakage; owner-fixable via `allowed_origins` config  
+testability: AUTH_HELPED  
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id/tenant predicate  
+class: IDOR  
+asset: kurs.onecode.de (/api/* proxied to Supabase aygnpacdkgtsfnhgcyjc)  
+confidence: 65  
+reasoning: Single Supabase project backs invite-only course platform; authenticated access via RLS; UUID PKs prevent ID enumeration; missing user_id/tenant filter in SELECT policies enables cross-tenant reads of courses/enrollments/resources; pre-auth surface fully exhausted (only 4 pages at 200); all `/api/*`, `/v1`, `/dashboard`, `/admin`, `/courses` auth-gated; anonymous sign-in disabled (requires 2 invited accounts)  
+evidence_needed: Account A GET `/api/courses/{B_course_id}` returns 200 with B's data vs 403/404; authenticated Supabase query from A returns B's rows  
+verify_steps: AUTH_HELPED: Provision two invited accounts via `/einladung` (contact@onecode.de public on `/datenschutz`); A calls GET `/api/courses/{B_id}`, `/api/resources/{B_id}`, `/api/enrollments/{B_id}` comparing response delta; direct Supabase queries via app's client bundle Supabase client  
+impact: Cross-tenant course content, enrollment PII, resource files disclosure — HIGH  
+testability: AUTH_HELPED  
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de  
+class: MISCONFIG  
+asset: cto.onecode.de  
+confidence: 58  
+reasoning: CNAME → `cname.perspective-dns.com` (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 44+ days, zero verification TXT records  
+evidence_needed: Attacker creates Perspective account, adds custom domain `cto.onecode.de`, verifies ownership via CNAME, serves content on `cto.onecode.de`  
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain `cto.onecode.de` (CNAME already resolves to `cname.perspective-dns.com`); if successful, attacker controls subdomain  
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH  
+testability: HUMAN_ONLY  
+[PARKED] Forced-login session fixation via pre-auth-mounted HashSessionHandoff: confidence 70 but exploitability negligible — requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed to `/login?error=link-abgelaufen`; forged/null cookies all 307→/login; effective artifact is `sb-aygnpacdkgtsfnhgcyjc-auth-token` cookie only reachable post-auth  
+[PARKED] Supabase Storage bucket enumeration/access via publishable key: confidence 35 < 40; zero buckets for 20+ days, no bucket creation signal, bucket names not recoverable from pre-auth chunks, monitor-only value  
+[FINAL] 1. Reflected-origin credentialed CORS on GoTrue auth gateway (confidence 85, MISCONFIG, AUTH_HELPED) — novel, pre-auth, credential-free, impacts identity service  
+[FINAL] 2. Post-auth cross-tenant BOLA via Supabase RLS SELECT policy lacking user_id predicate (confidence 65, IDOR, AUTH_HELPED) — highest overall value, requires 2 invited accounts  
+[FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account  
+[NEXT] PROBE: `curl -H "Origin: https://evil.example.com" -v https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user` (read-only GET; validates reflected-origin ACAO + ACAC on /user endpoint; requires victim session for credentialed read — initial probe confirms CORS headers without auth)  
+[LEARN] REJECTED XSS @ kurs.onecode.de: no pre-auth reflected-parameter primitive on /login (error branch enum + exact-match allowlist server-side); `?error=<script>` yields zero bytes, `linkError:null`  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — requires invited accounts for second authenticated principal  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: pre-auth bucket-existence oracle confirmed via `GET /storage/v1/object/public/<name>/<key>` → `400 {"code":"NoSuchBucket"}`; 26 candidates excluded  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage exposure hypothesis closed — no application storage calls in pre-auth bundles, bucket name unrecoverable  
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → 400 "Unsupported provider"; GoTrue authorize endpoint inert  
+[LEARN] REJECTED SSRF @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image: `?url=` not a fetch source; Cloudflare WAF blocks metadata IP at edge  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/rpc: PostgREST RPC returns 503 PGRST002 (schema-cache anon-block); no permissive state  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) on entire GoTrue gateway — `/auth/v1/settings`, `/user`, `/verify`, `/authorize` return `ACAO: <arbitrary Origin>` + `ACAC: true`  
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` recorded; parses URL fragment, calls `setSession()` with no state/nonce/PKCE binding  
+[LEARN] ACCEPTED OATH @ kurs.onecode.de: LoginForm (module 28420) takes linkError only; post-password hardcodes `push("/")` + `refresh()`; next map inside HashSessionHandoff is `{invite:/einladung,recovery:/passwort-neu}` defaulting to "/"  
+[RISK] onecode: 58 — Primary asset kurs.onecode.de is Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface minimal: 4 pages at 200, all `/api/*` auth-gated. **NEW**: Reflected-origin credentialed CORS on GoTrue auth gateway (conf 85) defeats origin isolation on identity service — allows cross-origin credentialed reads of `/auth/v1/user` (user PII, session state), `/auth/v1/settings`, `/auth/v1/verify` from any origin; owner-fixable via `allowed_origins`. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket oracle confirmed but bucket names unrecoverable pre-auth.
