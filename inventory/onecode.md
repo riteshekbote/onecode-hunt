@@ -892,3 +892,14 @@ www.onecode.de
 - CHANGED cto.onecode.de: CNAME→`cname.perspective-dns.com` day-44; HTTP 409/1001 + TLS handshake-fail; zero verification TXT; conf 58 holds; HUMAN_ONLY proof path
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — two invited accounts required for BOLA test
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: PostgREST schema disclosure blocked above table layer (`Accept: application/openapi+json` → 401 "Secret API key required"); GoTrue admin plane unreachable pre-auth (4
+
+## 2026-09-28 01:47:24 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*` reflects `Origin: null` with `access-control-allow-credentials: true` (live, 01:45Z 09-28: `/auth/v1/settings` 200 `ACAO: null` `ACAC: true`; `/auth/v1/use
+- NEW `/auth/v1/user` emits `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version` alongside the reflection — the gateway explicitly permits cross-origin JS to read PostgREST paginatio
+- NEW `/analytics/v1/*` (Supabase hosted log analytics) returns `404 {"error":"requested path is invalid"}` with the publishable key — the analytics/log-read plane is not deployed on this project. The prior
+- NEW HS256 secret-guess / `service_role` token-forgery class tested live for the first time, 4 candidate secrets × 2 endpoints. `super-secret-jwt-token-with-at-least-32-characters-long`, the publishable ke
+- CHANGED `/storage/v1/bucket` with `Origin: null` returns `ACAO: *` (not reflected) — the storage plane serves the wildcard preflight form, distinct from the reflected form on GoTrue, now confirmed for the `nu
+- NEW `kurs.onecode.de`: 13 chunk refs, main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c5…`, sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecad…` — both byte-identical, no de
+- CHANGED `cto.onecode.de` CNAME `cname.perspective-dns.com.` + HTTP 409 — day-46, no delta.
+- NEW No new passive probes executed since 2026-09-27 23:10Z knowledge base update; all surfaces identical to last lead (kurs.onecode.de main chunk f916f314ea61a8c5... byte-identical day-11, cto CNAME day-4
+- CHANGED Time delta: ~24h since last live verification cycle; event-triggered build-diff on kurs.onecode.de remains the only deploy signal (none since 09-19 11:33Z)
