@@ -915,3 +915,18 @@ www.onecode.de
 - NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: reflects `Origin: null` with `ACAC: true` (live 01:45Z 09-28); `/auth/v1/user` emits `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Ver
 - NEW aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery tested live (4 candidates × 2 endpoints) — all 403/401; JWT key confusion + secret guessing excluded
 - NEW aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed, log-disclosure path closed
+
+## 2026-09-28 17:06:47 UTC
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co — NEW HOST, never probed in 26 days. S3-compatible
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co — PRE-AUTH S3 ACCESS-KEY-ID ORACLE. Two distinguishable
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — SIGNED-URL ROUTE CLASS, never probed. The router
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — BUCKET-EXISTENCE ORACLE IS ON THREE ROUTES, not one.
+- NEW 20 further candidate bucket names excluded via the oracle (46 total): downloads, material, module,
+- NEW CORS MATRIX EXTENDED to a 4th host and a 4th plane. OPTIONS
+- CHANGED kurs.onecode.de: no deploy. HEAD /login → 200, cache-control private/no-cache/no-store, server railway-hikari,
+- CHANGED cto.onecode.de: CNAME cname.perspective-dns.com. → 104.18.2.73/104.18.3.73, TXT = CNAME line only,
+- CHANGED storage/v1/bucket → 200 [] with ACAO: * (wildcard, no ACAC), cf-cache-status DYNAMIC. Unchanged.
+- NEW CORS on aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* returns wildcard `ACAO: *` without `ACAC: true` (live probe 2026-09-28 17:00Z) — contradicts KB claim of reflected-origin + ACAC; no credentialed cro
+- NEW CORS on aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/* returns wildcard `ACAO: *` without `ACAC: true` — storage plane CORS-clean for credentialed requests
+- NEW `/auth/v1/user` returns 401 `UNAUTHORIZED_MISSING_API_KEY` without publishable key — confirms auth required
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` does not match plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual sha256 `43ccb834...`)

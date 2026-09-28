@@ -2964,3 +2964,26 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` (hosted log analytics) returns `404 {"error":"requested path is invalid"}` with the pub
 - LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy. Main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314ea61a8c5…`) and sink chunk `1a4tqdnsy9k1l.js` (13 880
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` + HTTP 409 unchanged at day-46; passive probing of this asset is fully converged and onl
+
+## RANKED HYPOTHESES 2026-09-28 17:06:47 UTC
+- [60] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}: Wildcard CORS without credentials on Supabase GoTrue gateway allows unauthenticated cross-origin reads of public endpoints (from art/lead_nemotron3.txt)
+- [60] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: A second, RLS-bypassing SigV4 storage plane is deployed pre-auth and sits outside every control applied to date (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `curl -sS -D- -X POST "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign/public/probe.txt" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRi
+- NEXT(hypotheses-nemotron3.txt): PROBE: `curl -sS -D- -H "Origin: https://evil.example" https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify -v` (read-only GET; validates wildcard CORS on /v
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co: an S3-compatible storage API is deployed and pre-auth reachable on a host never probed in 26 days
+- LEARN: ACCEPTED OTHER @ aygnpacdkgtsfnhgcyjc.storage.supabase.co: pre-auth S3 access-key-ID existence oracle confirmed by taxonomy, not by enumeration — no Authorizati
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign: no pre-auth private-object read via GET. Signature verification precedes bucket lookup 
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the pre-auth bucket-existence oracle is wider than catalogued — byte-identical NoSuchBucket on
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co + .storage.supabase.co: CORS matrix extended to a 4th host and 4th plane with no change in character — S3 
+- LEARN: REJECTED OTHER @ own KB: the publishable-key provenance defect is RESOLVED, not a key compromise. sha256("sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30\n") = 8
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de / cto.onecode.de: no deploy, no delta. Main chunk 0-mbmp1iqb6hj.js = 154 581 B sha256 f916f314… byte-identical day-13 (no d
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) — live probes show wildcard `ACAO: *` without `ACAC: true` o
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning — `vary: Origin, Accept-Encoding` + `cf-cache-status: DYNAMIC` confirmed; no cache a
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: wildcard CORS (no credentials) on entire GoTrue gateway — preflight uniformly `ACAO: *` with full destruc
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves `ACAO: *` on bucket-existence oracle (`400 NoSuchBucket`) for arbitrary and `null` o
+- LEARN: REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery closed — 4 candidates × 2 endpoints all 403/401
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy — main chunk `f916f314ea61a8c5...` byte-identical day-12; build-diffing event-triggered only
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default 
