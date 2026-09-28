@@ -25017,3 +25017,310 @@ STEP 6 — LEARNING
 STEP 7 — RISK
 [RISK] onecode: 48 — up one, for surface, not for access. The cycle found an entire authentication plane that no prior control covered: the S3 SigV4 storage gateway on aygnpacdkgtsfnhgcyjc.storage.supabase.co, live, pre-auth reachable, with a distinguishable key-ID oracle and, critically, an authorization model that ignores the RLS boundary this whole program treats as the only authz control. That materially widens the pre-auth attack surface, and it also widens the CORS finding to a fourth host. I am deliberately not inflating beyond that: demonstrated impact is unchanged — no key, no signature bypass, no data read, no ATO, and the S3 plane serves the endpoint whether or not keys exist, so "keys exist" remains unproven and may be false. Risk stays flat in character and the increase reflects an unmodelled plane, not a new exploit. The honest read is that the program's authorization model is now visibly incomplete in a way the owner should know about, while the one unblock that would convert hypothesis space into impact is still two invited test accounts from the owner.
 ```
+===== ANALYST bigpickle 2026-09-28 22:35:39 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll start by verifying the current state of the highest-value surfaces before committing to any hypothesis.
+[0m$ [0mdate -u '+%Y-%m-%dT%H:%M:%SZ'
+2026-09-28T22:30:17Z
+[0m
+Last cycle was 17:06Z; now 22:30Z. Running read-only verification of the deploy signal and the two priority planes.
+[0m$ [0mcurl -sS -m 20 -o /tmp/opencode/login.html -D /tmp/opencode/login.hdr -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/login 2>&1; echo "---HEADERS---"; cat /tmp/opencode/login.hdr
+code=200 size=18702
+---HEADERS---
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Mon, 28 Sep 2026 22:31:03 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: fQOnpsz0R46wdNvWYqdHTg
+x-railway-edge: lax1
+x-hikari-trace: lax1.z1hw
+[0m
+`/login` 200, no `Set-Cookie`, 18 702 B — byte-size consistent with the frozen build. Now the two chunk hashes that are my deploy signal.
+[0m$ [0mcd /tmp/opencode && curl -sS -m 30 -o m.js -w 'main code=%{http_code} bytes=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js && sha256sum m.js && sleep 1 && curl -sS -m 30 -o s.js -w 'sink code=%{http_code} bytes=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js && sha256sum s.js
+main code=200 bytes=154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  m.js
+sink code=200 bytes=13880
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  s.js
+[0m
+Now the key question on the new S3 plane: does it accept the public key that works on every other plane?
+[0m$ [0mcd /tmp/opencode && echo "=== A: publishable key as Bearer + apikey on S3 ListBuckets ===" && curl -sS -m 20 -D - -o body_a.txt -w '\n[code=%{http_code}]\n' "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3?list-type=2" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" | head -30; echo "=== BODY A ==="; cat body_a.txt
+=== A: publishable key as Bearer + apikey on S3 ListBuckets ===
+HTTP/2 403 
+date: Mon, 28 Sep 2026 22:31:13 GMT
+content-type: text/plain
+content-length: 190
+cf-ray: a4263272bce4e9e3-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+content-security-policy: default-src 'none'; sandbox
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0ea24-c3bb-774e-bebc-5ef1d371e0f6
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=9Od4fCqfEWbJDjlKibZpGZHpF8ZrSOkTpgpxEbMsDgg-1790634673.0801055-1.0.1.1-vn3NDXLzhDu93_FlApSYFEzqgs75jB4q5Yr6OtLGMW8AP194Tb.UYbotDDzqp0_i34F02JjNtPqNKhOUUZA8PxVvPlsi2x4kmYFT5P5aUWcBXgmuAA9uVrFmEBOHc8zQ; HttpOnly; SameSite=None; Secure; Path=/; Domain=storage.supabase.co; Expires=Mon, 28 Sep 2026 23:01:13 GMT
+
+
+[code=403]
+=== BODY A ===
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource/><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+Publishable key is **not** accepted as S3 auth — plane is closed to the public key. Now completing the CORS matrix on this 4th plane (simple requests, incl. `null` origin).
+[0m$ [0mcd /tmp/opencode && sleep 1 && echo "=== S3 simple GET, Origin: null ===" && curl -sS -m 20 -D - -o /dev/null "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" -H "Origin: null" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | grep -iE '^(HTTP|access-control|vary|cf-cache|set-cookie|www-auth)' ; echo; sleep 1 && echo "=== S3 bucket-path form (does msg differ per bucket?) ===" && curl -sS -m 20 -o b1.txt -w '[code=%{http_code}]\n' "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/kurs-material/" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; cat b1.txt
+=== S3 simple GET, Origin: null ===
+HTTP/2 403 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+set-cookie: __cf_bm=Jcp4pKvb5_O8dY2g8may2.Mt04U2c32dmAnmtWI7ikw-1790634682.7576811-1.0.1.1-Kh8mMXkpqMAEa1FqASivXupR2wsva_blMRl7sIOnNalFK4Aw6qTffVNw5eP1cpm5H_TyuFb5Awo1jAgTwuYawGdfQ5gmQ6WWS1ifUvVrEedxMsBe.JxQjQXj3bbXdDsn; HttpOnly; SameSite=None; Secure; Path=/; Domain=storage.supabase.co; Expires=Mon, 28 Sep 2026 23:01:23 GMT
+
+=== S3 bucket-path form (does msg differ per bucket?) ===
+[code=403]
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource>kurs-material</Resource><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+S3 `Resource` echo is a client-path reflection, not an oracle. Now re-reading GoTrue settings in full — the security block and redirect allowlist have never been mined.
+[0m$ [0mcd /tmp/opencode && sleep 1 && curl -sS -m 20 -D s.hdr -o settings.json "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -w '[code=%{http_code}]\n'; grep -iE '^(HTTP|content-type|sb-gateway|set-cookie|access-control)' s.hdr; echo "=== SETTINGS BODY ==="; python3 -m json.tool settings.json
+[code=200]
+HTTP/2 200 
+content-type: application/json
+set-cookie: __cf_bm=jvfG5PdTLbajlQHb4DnLq.l3Lhv8g3VEzIw_BaPK5qM-1790634690.2834625-1.0.1.1-dvsg4AGTOzqu1cpf0bFjRF8rjZQMAM90lj6E55yN_HVpoDztmAiMP3hsTrU9K4MUwgxR4vBFf2_LUti3unHxNTwjgWGjstRBAeyMGB2AAceOcniJ3kKvsbLkNCO8x..i; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Mon, 28 Sep 2026 23:01:30 GMT
+sb-gateway-version: 2
+=== SETTINGS BODY ===
+{
+    "external": {
+        "anonymous_users": false,
+        "apple": false,
+        "azure": false,
+        "bitbucket": false,
+        "discord": false,
+        "facebook": false,
+        "snapchat": false,
+        "figma": false,
+        "fly": false,
+        "github": false,
+        "gitlab": false,
+        "google": false,
+        "keycloak": false,
+        "kakao": false,
+        "linkedin": false,
+        "linkedin_oidc": false,
+        "notion": false,
+        "spotify": false,
+        "slack": false,
+        "slack_oidc": false,
+        "workos": false,
+        "twitch": false,
+        "twitter": false,
+        "email": true,
+        "phone": false,
+        "zoom": false
+    },
+    "disable_signup": true,
+    "mailer_autoconfirm": false,
+    "phone_autoconfirm": false,
+    "sms_provider": "twilio",
+    "saml_enabled": false,
+    "saml_private_key_next_configured": true,
+    "passkeys_enabled": false
+}
+[0m
+`saml_private_key_next_configured: true` while `saml_enabled: false` — a private key is provisioned for a plane flagged off. That SSO route class has never been probed. Testing it read-only.
+[0m$ [0mcd /tmp/opencode && for p in "/auth/v1/sso/metadata" "/auth/v1/sso" "/auth/v1/sso/acs"; do echo "=== GET $p ==="; sleep 1; curl -sS -m 20 -D - -o sso_out.txt -w '\n[code=%{http_code}]\n' "https://aygnpacdkgtsfnhgcyjc.supabase.co$p" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" 2>&1 | grep -iE '^(HTTP|content-type|location|sb-gateway|set-cookie)'; echo "--- body ---"; head -c 400 sso_out.txt; echo; done
+=== GET /auth/v1/sso/metadata ===
+HTTP/2 404 
+content-type: application/json
+sb-gateway-version: 2
+set-cookie: __cf_bm=n0LJ7x_VX_mNJbLwGjFmhjrtVi_Fq3K5eidGJqONjZk-1790634702.1824596-1.0.1.1-tw3GO539GiNKsCOzpkUtTxv7EJUL.blwbabF.cENM5M0Or5h3TBK4npmAkiJYMdUL4JjfpQbBocnHkE2iae0ir_F8TJwdrzvxuAw_vAO_fjlATKgY.CVUNYDGMYUqlYE; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Mon, 28 Sep 2026 23:01:42 GMT
+--- body ---
+{"code":404,"error_code":"saml_provider_disabled","msg":"SAML 2.0 is disabled"}
+=== GET /auth/v1/sso ===
+HTTP/2 404 
+content-type: application/json
+sb-gateway-version: 2
+set-cookie: __cf_bm=AqCCukRGF3iwsPvodIu_EzXHkfOREZpM9n59rW82E9g-1790634703.496719-1.0.1.1-inn8EXOM78EZx3XQC_BQcuZ87tZSsZRrcOyAWlZ6dIuCkI7TeIGXFoW6LC34Wa.0IxBJ2tk54ZdpffcrCGC8rGqxP25BzqW_23MpWxQch33TP2ZS6zzSGDUWOYA2ljol; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Mon, 28 Sep 2026 23:01:43 GMT
+--- body ---
+{"code":404,"error_code":"saml_provider_disabled","msg":"SAML 2.0 is disabled"}
+=== GET /auth/v1/sso/acs ===
+HTTP/2 404 
+content-type: application/json
+sb-gateway-version: 2
+set-cookie: __cf_bm=.u8X5P7iF2kEXdI6eyCKWHtFAhdlaiJ8hXwVZoR1WKE-1790634704.7606864-1.0.1.1-NK3ZKIuJ2b3Ms74EYQvaVbpZORmqtip.S3XYeFoz8ypbMi1jdVLdVZ1I3VoqstOGZ1AEtNdXhR._KNbooKHXzH9J.iF8IcSFoDNzxMcmKnEpQuqInkuzyycfc6sA3Ji9; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Mon, 28 Sep 2026 23:01:44 GMT
+--- body ---
+{"code":404,"error_code":"saml_provider_disabled","msg":"SAML 2.0 is disabled"}
+[0m
+SAML is hard-refused with a distinct code — the configured key is unreachable. Completing the never-probed auth-relevant route map (breadth pass).
+[0m$ [0mcd /tmp/opencode && for p in "/auth/v1/reverify" "/auth/v1/user/identities" "/auth/v1/otp"; do echo "=== GET $p ==="; sleep 1; curl -sS -m 20 -o o.txt -w '[code=%{http_code}] ' "https://aygnpacdkgtsfnhgcyjc.supabase.co$p" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; head -c 220 o.txt; echo; done
+=== GET /auth/v1/reverify ===
+[code=404] 404 page not found
+
+=== GET /auth/v1/user/identities ===
+[code=401] {"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+=== GET /auth/v1/otp ===
+[code=405]
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME @1.1.1.1; echo "--- TXT ---"; dig +short cto.onecode.de TXT @1.1.1.1; echo "--- HTTP ---"; curl -sS -m 15 -o /dev/null -w 'code=%{http_code}\n' http://cto.onecode.de/ 2>&1
+cname.perspective-dns.com.
+--- TXT ---
+cname.perspective-dns.com.
+--- HTTP ---
+code=409
+[0m
+The KB holds **contradictory** records on the top finding — one entry says GoTrue reflects Origin with `ACAC: true`, another says wildcard without ACAC. My settings request sent no Origin, so it settles nothing. Verifying directly.
+[0m$ [0mcd /tmp/opencode && for o in "https://evil.example" "null"; do echo "=== GET /auth/v1/settings  Origin: $o ==="; sleep 1; curl -sS -m 20 -D - -o /dev/null "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Origin: $o" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'; echo; done
+=== GET /auth/v1/settings  Origin: https://evil.example ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== GET /auth/v1/settings  Origin: null ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: null
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+[0m
+My probe confirms reflection + `ACAC: true` for both arbitrary and `null` origins — the "wildcard" KB entry is the wrong one. Now the load-bearing detail: can a browser actually complete that credentialed flow? Checking preflight behaviour on the token endpoint.
+[0m$ [0mcd /tmp/opencode && echo "=== GET /auth/v1/user  Origin: https://evil.example ===" && sleep 1 && curl -sS -m 20 -D - -o /dev/null "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Origin: https://evil.example" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'; echo; echo "=== OPTIONS /auth/v1/token  (preflight, POST + content-type) ==="; sleep 1 && curl -sS -m 20 -X OPTIONS -D - -o /dev/null "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token?grant_type=password" -H "Origin: https://evil.example" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: authorization,apikey,content-type" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'
+=== GET /auth/v1/user  Origin: https://evil.example ===
+HTTP/2 401 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== OPTIONS /auth/v1/token  (preflight, POST + content-type) ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+access-control-allow-headers: authorization,apikey,content-type
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+[0m
+Now the decisive test for whether that CORS defect has teeth: `apikey` in a **query string** would make a simple request (no preflight) sufficient, making the whole identity API cross-origin reachable with the *public* key.
+[0m$ [0mcd /tmp/opencode && K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" && echo "=== A: query-string apikey, NO apikey/Authorization header, Origin evil ===" && curl -sS -m 20 -D - -o qa.txt "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=$K" -H "Origin: https://evil.example" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'; echo "--- body ---"; head -c 300 qa.txt; echo; sleep 1; echo "=== B: no apikey at all, Origin evil (control) ==="; curl -sS -m 20 -D - -o qb.txt "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" -H "Origin: https://evil.example" 2>&1 | grep -iE '^(HTTP/|access-control)'; echo "--- body ---"; head -c 300 qb.txt
+=== A: query-string apikey, NO apikey/Authorization header, Origin evil ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":f
+=== B: no apikey at all, Origin evil (control) ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+--- body ---
+{"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+[0m
+**Material escalation.** `?apikey=` in the query string is accepted with no auth headers → 200, and the 401 control literally documents the mechanism ("no `apikey` request header **or url param**"). Since the publishable key is public and query-param apikey needs no preflight, the credential channel the KB declared absent now exists. Testing whether this is gateway-wide.
+[0m$ [0mcd /tmp/opencode && K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" && echo "=== STORAGE plane: ?apikey only, no headers, Origin evil ===" && curl -sS -m 20 -D - -o sa.txt "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket?apikey=$K" -H "Origin: https://evil.example" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'; echo "--- body ---"; head -c 200 sa.txt; echo; sleep 1; echo "=== STORAGE bucket-existence oracle, ?apikey only, Origin evil ==="; curl -sS -m 20 -D - -o sb.txt "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/probe-test/probe.txt?apikey=$K" -H "Origin: https://evil.example" 2>&1 | grep -iE '^(HTTP/|access-control)'; echo "--- body ---"; head -c 200 sb.txt
+=== STORAGE plane: ?apikey only, no headers, Origin evil ===
+HTTP/2 400 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+--- body ---
+{"statusCode":"400","error":"Error","message":"headers must have required property 'authorization'","code":"InvalidRequest"}
+=== STORAGE bucket-existence oracle, ?apikey only, Origin evil ===
+HTTP/2 400 
+access-control-allow-origin: *
+--- body ---
+{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+[0m
+## STEP 1 — DELTA
+
+- [NEW] GoTrue accepts `apikey` as a **query parameter**: `GET /auth/v1/settings?apikey=<publishable>` with *no* auth headers → **200 + full JSON body**; control with no apikey → `401 "No API key found"` whose own hint reads *"No \`apikey\` request header **or url param** was found."*
+- [CHANGED] CORS contradiction in my own KB **resolved by direct probe**: simple requests **do** reflect Origin + `ACAC: true` (`/auth/v1/settings` 200 and `/auth/v1/user` 401, for both `https://evil.example` and `null`). The "wildcard without ACAC" record is wrong.
+- [CHANGED] **"No credential channel / not browser-exploitable" is falsified.** `apikey`/`Authorization` are non-safelisted so they force a preflight, and preflight is `ACAO: *` with **no ACAC** (measured on `/auth/v1/token`) — but query-param apikey removes the preflight requirement entirely, so the request becomes *simple* and the reflected `ACAC: true` response is readable.
+- [CHANGED] The defect is **GoTrue-plane-specific, not gateway-wide** (correction in the opposite direction): `?apikey=` alone on storage → `400 headers must have required property 'authorization'`; storage serves `ACAO: *`. REST likewise needs the header.
+- [NEW] `saml_private_key_next_configured: true` in `/auth/v1/settings` while `saml_enabled: false` — a private key is provisioned for a disabled plane. First time this field has been read.
+- [NEW] SSO route class probed for the first time: `/auth/v1/sso`, `/sso/metadata`, `/sso/acs` → all `404 saml_provider_disabled`. The configured key is **unreachable**; IdP-initiated assertion injection closed.
+- [NEW] `phone_autoconfirm: false`, `phone: false`, `sms_provider: twilio` → the SMS-OTP-autoconfirm ATO class is falsified by live data.
+- [NEW] S3 plane **rejects the publishable key**: `GET /storage/v1/s3?list-type=2` with apikey+Bearer → `403 AccessDenied / Missing signature`. Last cycle's S3 hypothesis is materially reduced.
+- [NEW] S3 `<Resource>kurs-material</Resource>` echo is a **client-path reflection, not a bucket oracle** (identical `Missing signature` for any name) — recorded to foreclose a false-positive read.
+- [NEW] GoTrue route map completed: `/auth/v1/reverify` → router-level `404 page not found` (different body shape = route absent on gw v2), `/auth/v1/user/identities` → `401 no_authorization`, `/auth/v1/otp` → `405` (POST-only; **not** sent — it mails real addresses).
+- [CHANGED] No deploy: main chunk `0-mbmp1iqb6hj.js` 154 581 B sha256 `f916f314ea61a8c5…` and sink `1a4tqdnsy9k1l.js` 13 880 B sha256 `5a72d2cd8738ecad…` both byte-identical, **day-14**; `/login` 200, 18 702 B, no `Set-Cookie`, `lax1.z1hw`.
+- [CHANGED] `cto.onecode.de` day-49: CNAME `cname.perspective-dns.com.`, TXT = CNAME line, HTTP 409.
+
+## STEP 2 — PRIORITIZE
+
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/{auth,rest,storage}/v1/*, 8.25, a=9 b=9 t=8 g=9 c=5 f=7
+- [PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3, 7.30, a=6 b=9 t=7 g=8 c=4 f=9
+- [PRIO] kurs.onecode.de/login, 6.80, a=6 b=8 t=7 g=9 c=6 f=3
+- [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}, 6.30, a=7 b=10 t=6 g=1 c=6 f=4
+- [PRIO] cto.onecode.de, 4.25, a=3 b=6 t=2 g=8 c=3 f=2
+
+## STEP 3 — HYPOTHESES
+
+[HYP] GoTrue reflects arbitrary Origin with ACAC:true, and query-parameter apikey removes the preflight barrier, making the identity API cross-origin readable and invocable with no attacker domain and no credentials
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*
+confidence: 78
+reasoning: Measured directly this cycle, with a control. Simple GET `/auth/v1/settings` with `Origin: https://evil.example` → `ACAO: https://evil.example` + `ACAC: true` + `expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`, `cf-cache-status: DYNAMIC` (no cache amplifier), `vary: Origin, Accept-Encoding`. Same for `Origin: null`. The 401 control on the same route returns the hint "No `apikey` request header **or url param** was found", and supplying `?apikey=<publishable>` with no auth headers returns 200 with the full body — so the gateway accepts the key in the query string, and the key is public (shipped in the client bundle). Because `apikey`/`Authorization` are non-safelisted, the normal path needs a preflight, and preflight is `ACAO: *` with no `ACAC` (measured on `/auth/v1/token`) which a browser would reject for a credentialed request — the query-param form removes that requirement, leaving a *simple* request whose response is readable. Explicitly NOT established: any read of user data or course material. `/auth/v1/user` returns 401 and a real user bearer would have to travel in a header, reintroducing the preflight barrier. Scoping correction: the mechanism is GoTrue-only — the storage plane returns `400 headers must have required property 'authorization'` for `?apikey=` and serves `ACAO: *`, so the earlier "gateway-wide" framing was wrong.
+evidence_needed: A browser PoC from a `null`-origin context (sandboxed iframe or `data:` document) issuing `fetch('https://.../auth/v1/settings?apikey=<publishable>')` with no custom headers and reading the parsed body; plus one GoTrue POST invoked cross-origin with `Content-Type: text/plain` to show the no-preflight write leg. Either would convert a config defect into a demonstrated cross-origin identity-API primitive.
+verify_steps: 1) DONE: `GET /auth/v1/settings?apikey=<publishable>` with only `Origin: https://evil.example` → 200, body, ACAO reflected, ACAC true. 2) DONE: same with `Origin: null` → ACAO: null, ACAC true. 3) DONE: control without apikey → 401 "No API key found" (hint names the url-param form). 4) DONE: `OPTIONS /auth/v1/token` with `Access-Control-Request-Method: POST` → `ACAO: *`, no ACAC, full destructive method list — this is the barrier the query form sidesteps. 5) DONE: storage `?apikey=` → 400 requiring `authorization` header — defect is GoTrue-scoped. 6) NOT DONE, deliberately: any POST to `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/signup`, `/auth/v1/token` — these mail real addresses or touch account state, and password-grant testing is the program's out-of-scope credential class.
+impact: MEDIUM as demonstrated — full GoTrue auth configuration readable cross-origin by any origin including `null`, and GoTrue POST endpoints invocable without preflight, using only a publicly-shipped key. CRITICAL the moment any route authorized by that key returns user data, or a GoTrue-issued cookie appears on this origin (it does not; only `__cf_bm` is set, Domain=supabase.co, HttpOnly). One allowlist config change is the whole fix.
+testability: PASSIVE
+
+[HYP] Unbound URL-fragment session injection on the pre-auth /login page allows forced-login to an attacker-controlled account
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: First-party code, not platform config. `HashSessionHandoff` (module 34891) is mounted on the `/login` RSC flight payload and runs in `useEffect` on hydration with no user interaction, parsing `window.location.hash` and calling `setSession()` on any `access_token`+`refresh_token` pair with no `state`, `nonce`, PKCE or `sub` binding (chunk `1a4tqdnsy9k1l.js`, 13 880 B, sha256 `5a72d2cd8738ecad…`, byte-identical day-14). `/login` is one of only four pre-auth 200 pages and the only one carrying a client boundary; the other three are strict chunk subsets with zero client references. Post-`setSession` redirect is the fixed `{invite:/einladung, recovery:/passwort-neu}` map defaulting to `/`, and error paths land on `/login?error=link-abgelaufen`, so this is forced-login (CWE-384), not an open redirect, and cannot be dressed as a credential prompt.
+evidence_needed: Two invited test accounts: attacker signs in as account A, captures its own token pair, and serves `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>` to a victim; the victim's browser should land authenticated as A. Requires the victim to open a link and to be a logged-out user.
+verify_steps: 1) DONE: sink chunk re-hashed, `5a72d2cd…`, unchanged — the mount and body are still exactly as catalogued. 2) DONE (code): no `state`/`nonce`/PKCE/`sub` check anywhere in the sink; `LoginForm` (module 28420) takes `linkError` only and hardcodes `push("/")` after `signInWithPassword`, so the `{invite,recovery}` map is the complete post-`setSession` target set. 3) NOT DONE, requires accounts: the live forced-login demonstration. 4) NOT DONE: PKCE code injection is independently closed — `_isPKCECallback` needs `?code=` plus a persisted verifier, and the app authenticates by emailed link, never persisting one.
+impact: MEDIUM — a victim who clicks the link performs all subsequent course actions inside an account the attacker controls, which is a credible path to tricking a paying customer into entering payment or personal data. Requires an attacker-held invited account and one victim click, which is why this is not HIGH.
+testability: AUTH_HELPED
+
+[HYP] The pre-auth S3 SigV4 plane is deployed and authorization-bypassing, but is closed to the publishable key and gated entirely on the existence of S3 credentials
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
+confidence: 40
+reasoning: Deliberately decomposed, because the two halves have very different support. Plane-existence half, measured: `GET /storage/v1/s3` → 403 `AccessDenied/Missing signature` (AWS S3 XML), `sb-project-ref: aygnpacdkgtsfnhgcyjc`, and the bucket-path form echoes `<Resource>kurs-material</Resource>`. Signature-before-lookup means it is not a bucket oracle, and the Resource echo is a client-path reflection. Reachability half, newly falsified: `GET /storage/v1/s3?list-type=2` with `apikey` + `Authorization: Bearer` publishable key → still `403 Missing signature`, so the plane does **not** accept the public key that authorizes every other plane. That matters because the S3 layer is a different credential store and does not evaluate `storage.objects` RLS — so it is the only plane where a single key pair would bypass the RLS boundary this whole program treats as the sole authz control. The keys-exist half is entirely unproven: Supabase serves this endpoint for every project whether or not keys were ever created.
+evidence_needed: The owner confirming in the dashboard whether any S3 access/secret pair exists on this project; if one does, `GET /storage/v1/s3` with a SigV4-signed ListBuckets returning private buckets, which are not listable on the apikey plane.
+verify_steps: 1) DONE: publishable key as Bearer+apikey on `?list-type=2` → `403 Missing signature` — public key rejected. 2) DONE: no `Authorization` at all → same 403, so the error is not key-identity dependent. 3) DONE: `Origin: null` on the S3 plane → `ACAO: *`, no ACAC, `cf-cache-status: DYNAMIC`. 4) NOT DONE and will not be: enumeration of key IDs, which is the program's rate-limit/credential class. 5) OWNER-SIDE, non-intrusive: dashboard check for S3 keys; if none exist the plane is a dead endpoint and this closes as informational.
+impact: HIGH if a key pair exists and is obtainable, CRITICAL if leaked — complete bypass of the RLS boundary and a pre-auth read of paid course material. LOW/informational today: no key, no signature bypass, no data read. This is a configuration-hygiene item, not a demonstrated vulnerability.
+testability: HUMAN_ONLY
+
+## STEP 4 — SELF-CRITIQUE
+
+- [PARKED] Supabase CORS cache-poisoning amplification: falsified by header inspection (`vary: Origin, Accept-Encoding`, `cf-cache-status: DYNAMIC` on every reflected response I measured). No new information; not re-argued.
+- [PARKED] Cross-origin escalation to app data: now provably blocked, and I am recording it as blocked rather than leaving it open. A real user bearer must travel in a header → preflight → `ACAO: *` without `ACAC` → browser refuses. Only the query-param apikey form escapes the preflight, and it is satisfied by the anon key, which authorizes no user-scoped route. Chains considered and rejected rather than manufactured: the fragment sink sits on `kurs.onecode.de`, which emits no `access-control-*` header on a foreign Origin, so the GoTrue CORS leg cannot reach it; `Origin: null` removes the need for an attacker domain but grants nothing extra.
+- [PARKED] SAML IdP-initiated assertion injection: `saml_private_key_next_configured: true` is genuinely new information, but all three SSO routes hard-refuse with `saml_provider_disabled`, so the configured key is unreachable and the class is closed on measurement.
+- [PARKED] SMS-OTP autoconfirm ATO: `phone_autoconfirm: false` and `phone: false` falsify it on live data.
+- [PARKED] Post-auth RLS cross-tenant BOLA (conf 65 impact, AUTH_HELPED): untouched this cycle. Every cheap route to a second principal remains closed by live test, and today's S3 result removes the one shortcut that could have supplied a second principal without an invited account.
+- [PARKED] Bucket existence oracle: broadened to three routes and now confirmed cross-origin-readable, but with `ACAO: *` and no ACAC it adds nothing exploitable, and 46 names are already excluded.
+- [FINAL] Survivors ranked: (1) GoTrue CORS with the query-param apikey preflight bypass, conf 78, PASSIVE, provable with zero credentials and one config fix, bounded MEDIUM. (2) Fragment forced-login on `/login`, conf 55, AUTH_HELPED, the only first-party logic flaw in the program. (3) S3 plane, conf 40, HUMAN_ONLY, sole RLS-bypassing plane but closed to the public key and unproven to have keys at all. (4) RLS cross-tenant BOLA, AUTH_HELPED-gated. (5) cto.onecode.de, HUMAN_ONLY, converged day-49.
+
+## STEP 5 — NEXT ACTION
+
+[NEXT] PROBE: `curl -sS -D- -X POST "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign/public/probe.txt?apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Content-Type: text/plain" -d '{}'` — still awaiting explicit approval, second cycle. It mints a stateless read token and writes no object, but it is a POST. This is the last pre-auth data-read primitive: the GET side is proven to reach token validation and to reject a forged signature, and a signed-URL mint would be a pre-auth private-object read. I have deliberately folded the credential into the query string and used a safelisted `text/plain` content type so that the same call doubles as the cross-origin no-preflight write leg of hypothesis 1. If it is denied, the next move is requesting two invited test accounts, which resolves hypotheses 2 and 4 together.
+
+## STEP 6 — LEARNING
+
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: reflected-origin credentialed CORS is real and **browser-exploitable**, because `apikey` is accepted as a query parameter — documented by the gateway's own 401 hint — which downgrades the request to a CORS-simple one and sidesteps the `ACAO: *`-without-`ACAC` preflight. My prior belief that "the credential channel is absent, so this is bounded" was wrong.
+- [LEARN] REJECTED MISCONFIG @ own KB (self-correction, two directions): the "wildcard without ACAC" record is falsified by direct probe (reflection + `ACAC: true`, arbitrary and `null`), and the "gateway-wide" framing is falsified because storage and REST require the `Authorization` header and serve `ACAO: *`. The defect is GoTrue-plane-specific.
+- [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: the RLS-bypassing SigV4 plane is deployed, pre-auth reachable, and **closed to the publishable key** — `?list-type=2` with apikey + Bearer → `403 Missing signature`. Hypothesis dropped 60→40 because the public key does not reach it and key existence remains unproven.
+- [LEARN] ACCEPTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: `saml_private_key_next_configured: true` alongside `saml_enabled: false`; first read of this field. A private key is provisioned for a disabled plane.
+- [LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: SSO/ACS/SSO-metadata all return `404 saml_provider_disabled`, so the configured SAML key is unreachable and IdP-initiated assertion injection is closed on measurement.
+- [LEARN] REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: `phone: false` and `phone_autoconfirm: false` falsify the SMS-OTP autoconfirm ATO class; GoTrue route map completed with `/auth/v1/reverify` absent on gw v2, `/auth/v1/user/identities` 401, `/auth/v1/otp` POST-only and deliberately not sent.
+- [LEARN] REJECTED MISCONFIG @ kurs.onecode.de / cto.onecode.de: no deploy, day-14. Main chunk `f916f314ea61a8c5…` (154 581 B) and sink `5a72d2cd8738ecad…` (13 880 B) both byte-identical; `/login` 200 no `Set-Cookie`; cto CNAME day-49 with 409. Build-diffing stays event-triggered.
+- [LEARN] REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.storage.supabase.co: the `<Resource>` element in S3 error XML is a reflection of the client-supplied path, not a bucket-existence signal — recorded so a future cycle does not misread it as an oracle.
+
+## STEP 7 — RISK
+
+[RISK] onecode: 46 — down two, and deliberately. Demonstrated impact is unchanged: no user data read, no course material exposed, no ATO, no key compromise. What changed is accuracy in both directions. I raised the top finding by showing the credential channel the program believed absent does exist in a usable form — `?apikey=` is accepted, so the GoTrue CORS defect is browser-exploitable from any origin including `null` with only a publicly-shipped key. I simultaneously cut its scope: the defect is GoTrue-only, storage and REST still require a header and serve `ACAO: *`, and the exposed data today is auth configuration, not user records. The escalation to user data is provably blocked because a real bearer must travel in a header, reintroducing the preflight barrier the query form cannot bypass. Separately I closed three latent auth classes on live data (SAML assertion injection, SMS autoconfirm, public-key access to the S3 plane), which is a real reduction in the program's uncertainty even though none of them was ever live. The honest read is that the owner has one config defect worth fixing, one first-party forced-login flaw needing two test accounts to prove, and no demonstrated path to customer data.

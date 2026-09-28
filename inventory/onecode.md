@@ -930,3 +930,12 @@ www.onecode.de
 - NEW CORS on aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/* returns wildcard `ACAO: *` without `ACAC: true` — storage plane CORS-clean for credentialed requests
 - NEW `/auth/v1/user` returns 401 `UNAUTHORIZED_MISSING_API_KEY` without publishable key — confirms auth required
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` does not match plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual sha256 `43ccb834...`)
+
+## 2026-09-28 22:35:39 UTC
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co — NEW HOST discovered (S3-compatible storage API), never probed in 26 days; pre-auth reachable
+- NEW S3 access-key-ID existence oracle confirmed on aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 — Missing signature vs InvalidAccessKeyId distinguishable
+- NEW Signed URL route class on aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign — never probed, creates presigned URLs
+- NEW Bucket-existence oracle confirmed on THREE routes (/object/public, /object/info, /bucket) not one; 46 candidate names excluded
+- CHANGED CORS on aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* is wildcard `ACAO: *` WITHOUT `ACAC: true` (live probe 17:00Z) — contradicts prior KB claim of reflected-origin + ACAC; no credentialed cross-origin 
+- CHANGED CORS on aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/* is wildcard `ACAO: *` WITHOUT `ACAC: true` — storage plane CORS-clean for credentialed requests
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
