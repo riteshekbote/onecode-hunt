@@ -903,3 +903,15 @@ www.onecode.de
 - CHANGED `cto.onecode.de` CNAME `cname.perspective-dns.com.` + HTTP 409 — day-46, no delta.
 - NEW No new passive probes executed since 2026-09-27 23:10Z knowledge base update; all surfaces identical to last lead (kurs.onecode.de main chunk f916f314ea61a8c5... byte-identical day-11, cto CNAME day-4
 - CHANGED Time delta: ~24h since last live verification cycle; event-triggered build-diff on kurs.onecode.de remains the only deploy signal (none since 09-19 11:33Z)
+
+## 2026-09-28 08:32:21 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: queued question RESOLVED — preflight on the storage OBJECT PATH (not just plane root) grants PUT and DELETE. `OPTIONS /storage/v1/object/public/<b>/<k>` → 200 `ACAO: 
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: CORS CACHE-AMPLIFICATION AMPLIFIER FALSIFIED. Reflected responses carry `vary: Origin, Accept-Encoding` and `cf-cache-status: DYNAMIC` (never HIT). A CF-cached `ACAO:
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: CORS COVERAGE MATRIX COMPLETE. Preflight is uniformly `ACAO: *` (wildcard, no ACAC) with the full destructive method list on EVERY plane AND path tested — `/storage/v
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves `ACAO: *` (not reflected) on simple requests, including on the bucket-existence oracle (`400 {"code":"NoSuchBucket"}`) for both `Origin: https://
+- CHANGED kurs.onecode.de: 13 chunk refs, main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c5…`, sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecad…` — both byte-identical, day-12,
+- CHANGED cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.3.73/104.18.2.73, TXT = CNAME line only, `GET http://cto.onecode.de/` → 409 (CF-RAY a42161506a06198a-IAD) — day-47, byte-identical.
+- CHANGED KB PROVENANCE DEFECT (own audit, not a surface delta): the catalogued hash `870cf518…` does not reproduce from the catalogued plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (that hashes to
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: reflects `Origin: null` with `ACAC: true` (live 01:45Z 09-28); `/auth/v1/user` emits `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Ver
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery tested live (4 candidates × 2 endpoints) — all 403/401; JWT key confusion + secret guessing excluded
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed, log-disclosure path closed

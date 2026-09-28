@@ -2938,3 +2938,29 @@
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) on entire GoTrue gateway — `/auth/v1/settings`, `/user`, `/v
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dab
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm (module 28420) takes linkError only; post-password hardcodes `push("/")` + `refresh()`; next map inside HashSessionHa
+
+## RANKED HYPOTHESES 2026-09-28 08:32:21 UTC
+- [90] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}: Null-origin credentialed CORS on GoTrue auth gateway allows cross-origin reads from sandboxed iframes/data: documents (from art/lead_nemotron3.txt)
+- [80] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*,: Blanket CORS policy with no origin allowlist on the Supabase project gateway defeats origin isolation across the identity and data planes (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request one invited test account for kurs.onecode.de from the program owner. This single unblock is worth more than any further passive probe: it carries
+- NEXT(hypotheses-nemotron3.txt): PROBE: `curl -sS -D- -H "Origin: null" https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user -v` (read-only GET; validates null-origin ACAO + ACAC + expose-head
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the CORS coverage matrix is now complete and the finding is no longer a sampling. Preflight is uniformly 
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning amplification is falsified by live header inspection, not by assumption — `vary: Ori
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the pre-auth bucket-existence oracle is cross-origin readable — the storage plane returns `ACAO: *` on th
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de / cto.onecode.de: no deploy. Main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314…`) and sink chunk `1a4tqdnsy9k1l.js
+- LEARN: REJECTED MISCONFIG @ own KB (provenance defect found by audit): the catalogued publishable-key digest `870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264e
+- LEARN: REJECTED XSS @ kurs.onecode.de: no pre-auth reflected-parameter primitive on /login (error branch enum + exact-match allowlist server-side); `?error=<script>` y
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — requires inv
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: pre-auth bucket-existence oracle confirmed via `GET /storage/v1/object/public/<name>/<key>` → `400 {"code
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage exposure hypothesis closed — no application storage calls in pre-auth bundles, bucket name unreco
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: `GET /auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → 400 "Unsupported provider"; GoTru
+- LEARN: REJECTED SSRF @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image: `?url=` not a fetch source; Cloudflare WAF blocks metadata IP at edge
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/rpc: PostgREST RPC returns 503 PGRST002 (schema-cache anon-block); no permissive state
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) on entire GoTrue gateway — `/auth/v1/settings`, `/user`, `/v
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) mounted on /login RSC payload row 18; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dab
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm (module 28420) takes linkError only; post-password hardcodes `push("/")` + `refresh()`; next map inside HashSessionHa
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the reflected-origin credentialed CORS policy also reflects the `null` origin with `ACAC: true` and, on `
+- LEARN: REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery is closed. Four candidate secrets (Supabase documented default, the publis
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` (hosted log analytics) returns `404 {"error":"requested path is invalid"}` with the pub
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy. Main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314ea61a8c5…`) and sink chunk `1a4tqdnsy9k1l.js` (13 880
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` + HTTP 409 unchanged at day-46; passive probing of this asset is fully converged and onl
