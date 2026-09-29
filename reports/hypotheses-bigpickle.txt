@@ -1,1 +1,51 @@
-## 2026-09-29 08:45:35 UTC [target] (model bigpickle)
+## 2026-09-29 15:36:28 UTC [target] (model bigpickle)
+[NEW]      aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — PostgREST plane ALSO accepts the publishable key as a
+[NEW]      aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — reflects Origin WITHOUT `vary: Origin`
+[NEW]      Scoping correction: storage plane does NOT accept `?apikey=` — `GET /storage/v1/bucket?apikey=<pub>`
+[CHANGED]  GoTrue CORS re-measured WITH a control this cycle: `Origin: https://evil.example` → ACAO reflected +
+[CHANGED]  GoTrue emits CORS headers BEFORE the auth check: `GET /auth/v1/user` + forged `alg:none` bearer →
+[CHANGED]  S3 plane `<Resource/>` element is now empty on `GET /storage/v1/s3` (last cycle it echoed
+[CHANGED]  `/auth/v1/authorize?provider=github&redirect_to=https://evil.example/` re-confirmed inert:
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* + /rest/v1/*   score=8.1
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3   score=5.5
+[PRIO] kurs.onecode.de/login                                    score=4.9
+[HYP] No origin allowlist on the Supabase gateway, combined with query-string API-key acceptance, lets any
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* and /rest/v1/*
+confidence: 76
+reasoning: Both halves are measured this cycle with controls. Credential channel: `GET /auth/v1/settings?apikey=<publishable>`
+evidence_needed: A browser PoC from a `null`-origin context (sandboxed iframe or `data:` document) issuing
+verify_steps:
+impact: MEDIUM as measured — full GoTrue auth configuration (provider matrix, disable_signup, autoconfirm,
+testability: PASSIVE
+[HYP] The PostgREST plane reflects Origin while omitting `vary: Origin`, a cache-key defect that GoTrue on the
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*
+confidence: 52
+reasoning: A side-by-side header audit on one host shows the two planes disagree. GoTrue: `vary: Origin,
+evidence_needed: A cached reflection. Concretely: any PostgREST response that returns 200 or 404 (both
+verify_steps:
+impact: LOW now, MEDIUM latent. No cacheable response currently exists, so there is no live amplifier; a
+testability: PASSIVE
+[HYP] URL-fragment session injection on the pre-auth /login page forces a victim to operate inside an
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: First-party code, not platform config. `HashSessionHandoff` (module 34891) is mounted on the /login
+evidence_needed: Two invited test accounts. Attacker signs in as account A, captures its own token pair, serves
+verify_steps:
+impact: MEDIUM — a victim who clicks the link performs all subsequent course actions inside an account the
+testability: AUTH_HELPED
+[PARKED] S3 SigV4 plane (aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3, conf 40): retained at the
+[PARKED] PostgREST REST-plane `vary: Origin` omission (conf 52): survivor, but I am not inflating it. No
+[FINAL] 1. Reflected-credential CORS + query-string apikey across GoTrue AND PostgREST — conf 76, PASSIVE, MEDIUM/HIGH.
+[FINAL] 2. PostgREST `vary: Origin` omission — conf 52, PASSIVE, LOW-now/latent-MEDIUM.
+[FINAL] 3. Forced-login via URL fragment on /login — conf 55, AUTH_HELPED, MEDIUM.
+[NEXT] HUMAN: request two invited test accounts (onecode.de course accounts, distinct emails) from the program
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* + /rest/v1/*: the reflected-origin
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: the PostgREST plane reflects Origin
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/*: "the query-string apikey channel
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `/auth/v1/authorize` re-confirmed inert on
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy. Main chunk `f916f314ea61a8c5…` and sink chunk
+[LEARN] REJECTED MISCONFIG @ own KB (self-audit, corrects an earlier entry): the KB line "CORS cache-poisoning
+[RISK] onecode: 47 — up one, for scope, not for access. Demonstrated impact is unchanged: no user data read,

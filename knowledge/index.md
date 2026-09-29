@@ -803,3 +803,9 @@
 - 2026-09-29 REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
 - 2026-09-29 ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires valid attacker token pair
 - 2026-09-29 ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default `/`
+- 2026-09-29 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* + /rest/v1/*: the reflected-origin
+- 2026-09-29 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: the PostgREST plane reflects Origin
+- 2026-09-29 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/*: "the query-string apikey channel
+- 2026-09-29 REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `/auth/v1/authorize` re-confirmed inert on
+- 2026-09-29 REJECTED MISCONFIG @ kurs.onecode.de: no deploy. Main chunk `f916f314ea61a8c5…` and sink chunk
+- 2026-09-29 REJECTED MISCONFIG @ own KB (self-audit, corrects an earlier entry): the KB line "CORS cache-poisoning

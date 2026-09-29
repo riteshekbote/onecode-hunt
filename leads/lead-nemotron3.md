@@ -8606,3 +8606,63 @@ testability: HUMAN_ONLY
 [LEARN] ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires valid attacker token pair
 [LEARN] ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default `/`
 [RISK] onecode: 65 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. **CRITICAL NEW**: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid `apikey` (allows cross-origin authenticated identity reads). Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed but bucket names unrecoverable pre-auth.
+## 2026-09-29 15:37:25 UTC [target] (model nemotron3)
+[NEW] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage API confirmed live (403 `Missing signature`), never probed in 26 days; separate SigV4 authz plane bypasses Supabase RLS  
+[NEW] S3 access-key-ID oracle confirmed: `403 Missing signature` (no auth) vs `400 InvalidSignature` (bogus credential) distinguishable  
+[NEW] Signed URL route class on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional)  
+[NEW] Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded  
+[CHANGED] CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z) — contradicts prior KB claim of reflected-origin+ACAC on all requests  
+[CHANGED] CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible  
+[CHANGED] KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)  
+[PRIO] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`,8.50,attack_surface=9 business_value=7 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=10  
+[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/`,7.75,attack_surface=8 business_value=7 tech_exposure=8 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign`,7.25,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9  
+[PRIO] `cto.onecode.de`,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public`,6.60,attack_surface=6 business_value=5 tech_exposure=7 gate_ease=8 cloud_surface=8 freshness=8  
+[PRIO] `kurs.onecode.de`,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6  
+[HYP] S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
+confidence: 75
+reasoning: New host `aygnpacdkgtsfnhgcyjc.storage.supabase.co` serves S3-compatible API (GET `/storage/v1/s3` → 403 S3 XML `Missing signature`). SigV4 keys are a separate credential store from apikey/Bearer plane; S3 layer does not evaluate `storage.objects` RLS policies. Pre-auth access-key-ID oracle confirmed (distinguishable errors: 403 Missing signature vs 400 InvalidSignature). Host unprobed for 26 days.
+evidence_needed: Valid S3 credentials (access key ID + secret) that authorize bucket operations; or bucket policy allowing anonymous `s3:GetObject`/`s3:ListBucket`
+verify_steps: PASSIVE: `curl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3"` (confirms S3 XML error); PASSIVE: `curl -sS -D- -H "Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/20260929/us-east-1/s3/aws4_request,SignedHeaders=host,Signature=dummy" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3"` (validates InvalidSignature vs MissingSignature distinction)
+impact: If valid SigV4 credentials obtained or bucket policy permissive → full storage access bypassing RLS, course resources, user uploads — HIGH
+testability: PASSIVE
+[HYP] Reflected-origin credentialed CORS on GoTrue gateway enables cross-origin authenticated reads
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}
+confidence: 80
+reasoning: Live probe 2026-09-29 15:34Z: with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, `GET /auth/v1/settings` returns 200 with `ACAO: https://evil.example` + `ACAC: true` + `expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. Unauthenticated requests get wildcard `ACAO: *` without ACAC. `/auth/v1/user` requires valid JWT (401 without) but reflects Origin with ACAC. Preflight uniformly allows full destructive method list. No origin allowlist configured.
+evidence_needed: Victim visits attacker page with `fetch('https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings', {headers:{apikey:'...'}}).then(r=>r.json()).then(console.log)` → reads auth config cross-origin with credentials
+verify_steps: PASSIVE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings"` (validates reflected ACAO + ACAC:true); PASSIVE: same for `/auth/v1/user` with valid JWT
+impact: Cross-origin read of authenticated identity data (user profile, session, factors) by any origin — MEDIUM (requires valid apikey/JWT; session cookie host `kurs.onecode.de` is CORS-clean so no direct app session theft); owner-fixable via `allowed_origins` config
+testability: PASSIVE
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME → `cname.perspective-dns.com` (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure; hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 47+ days, zero verification TXT records.
+evidence_needed: Attacker creates Perspective account, adds custom domain `cto.onecode.de`, verifies ownership via CNAME, serves content on `cto.onecode.de`
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain `cto.onecode.de` (CNAME already resolves to `cname.perspective-dns.com`); if successful, attacker controls subdomain
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
+testability: HUMAN_ONLY
+[PARKED] Post-auth cross-tenant BOLA via Supabase RLS gap: confidence 65, requires 2 invited accounts (AUTH_HELPED), pre-auth surface exhausted; no new vectors in 12 days  
+[PARKED] Forced-login session fixation via HashSessionHandoff: confidence 70, exploitability negligible — requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed to `/login?error=link-abgelaufen`  
+[PARKED] Supabase Storage bucket enumeration via publishable key: confidence 35 < 40; zero buckets for 20+ days, bucket names not recoverable from pre-auth chunks  
+[PARKED] S3 access-key-ID enumeration: confidence 30 — only taxonomy oracle confirmed (InvalidSignature vs MissingSignature); actual ID enumeration is credential-class and rate-limited  
+[FINAL] 1. Reflected-origin credentialed CORS on GoTrue gateway (confidence 80, MISCONFIG, PASSIVE) — cross-origin authenticated identity reads  
+[FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found  
+[FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account  
+[NEXT] PROBE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v` (validates reflected-origin+ACAC on authenticated user endpoint; requires valid JWT for 200 but CORS headers present on 401 too)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) — live probes show wildcard `ACAO: *` without `ACAC: true` on UNAUTHENTICATED requests; credentialed requests reflect Origin WITH `ACAC: true` — both behaviors confirmed, not mutually exclusive  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning — `vary: Origin, Accept-Encoding` + `cf-cache-status: DYNAMIC` confirmed; no cache amplification  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: wildcard CORS (no credentials) on entire GoTrue gateway — preflight uniformly `ACAO: *` with full destructive method list  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves `ACAO: *` on bucket-existence oracle (`400 NoSuchBucket`) for arbitrary and `null` origins  
+[LEARN] REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery closed — 4 candidates × 2 endpoints all 403/401  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed  
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy — main chunk `f916f314ea61a8c5...` byte-identical day-12; build-diffing event-triggered only  
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged  
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires valid attacker token pair  
+[LEARN] ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default `/`  
+[RISK] onecode: 65 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. **CRITICAL NEW**: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid `apikey` (allows cross-origin authenticated identity reads). Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed but bucket names unrecoverable pre-auth.

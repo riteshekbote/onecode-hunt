@@ -957,3 +957,19 @@ www.onecode.de
 - CHANGED CORS on GoTrue gateway (`/auth/v1/*`) is **wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests**; with valid `apikey` it reflects arbitrary `Origin` **with `ACAC: true`** — contradicts
 - CHANGED CORS on storage plane (`/storage/v1/object/public/*`) is wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+
+## 2026-09-29 15:37:36 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — PostgREST plane ALSO accepts the publishable key as a
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — reflects Origin WITHOUT `vary: Origin`
+- NEW Scoping correction: storage plane does NOT accept `?apikey=` — `GET /storage/v1/bucket?apikey=<pub>`
+- CHANGED GoTrue CORS re-measured WITH a control this cycle: `Origin: https://evil.example` → ACAO reflected +
+- CHANGED GoTrue emits CORS headers BEFORE the auth check: `GET /auth/v1/user` + forged `alg:none` bearer →
+- CHANGED S3 plane `<Resource/>` element is now empty on `GET /storage/v1/s3` (last cycle it echoed
+- CHANGED `/auth/v1/authorize?provider=github&redirect_to=https://evil.example/` re-confirmed inert:
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage API confirmed live (403 `Missing signature`), never probed in 26 days; separate SigV4 authz plane bypasses Supabase RLS
+- NEW S3 access-key-ID oracle confirmed: `403 Missing signature` (no auth) vs `400 InvalidSignature` (bogus credential) distinguishable
+- NEW Signed URL route class on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional)
+- NEW Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z) — 
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
