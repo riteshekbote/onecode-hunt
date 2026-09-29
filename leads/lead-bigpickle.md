@@ -5725,3 +5725,4 @@ evidence_needed: The owner confirming in the Supabase dashboard whether any S3 a
 verify_steps: 1) DONE: `curl -D- https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` → 403 AccessDenied/Missing signature. 2) DONE (prior cycle): publishable key as Bearer+apikey on `?list-type=2` → still 403 Missing signature; public key rejected. 3) DONE: no `Authorization` at all → same 403, so the error is not key-identity dependent. 4) NOT DONE and will not be: enumeration of key IDs, which is the program's rate-limit/credential class. 5) OWNER-SIDE, non-intrusive: dashboard check for S3 keys; if none exist this closes as informational.
 impact: HIGH if a key pair exists and is obtainable; CRITICAL if leaked. LOW/informational today: no key, no signature bypass, no data read. This is a configuration-hygiene item, not a demonstrated vulnerability.
 testability: HUMAN_ONLY
+## 2026-09-29 08:45:35 UTC [target] (model bigpickle)

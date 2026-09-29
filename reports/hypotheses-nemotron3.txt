@@ -1,4 +1,4 @@
-## 2026-09-29 02:20:37 UTC [target] (model nemotron3)
+## 2026-09-29 08:46:15 UTC [target] (model nemotron3)
 [NEW] `aygnpacdkgtsfnhgcyjc.storage.supabase.co` — S3-compatible storage API host confirmed live, never probed in 26 days; returns S3 XML `403 Missing signature` on GET `/storage/v1/s3`
 [NEW] S3 access-key-ID oracle confirmed: bogus `Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/...` returns `400 InvalidSignature` (distinguishable from `403 Missing signature`)
 [NEW] Signed URL route class confirmed on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional, bucket/existence oracle)
@@ -20,7 +20,7 @@ reasoning: New host `aygnpacdkgtsfnhgcyjc.storage.supabase.co` serves S3-compati
 evidence_needed: Valid S3 credentials (access key ID + secret) that authorize bucket operations; or bucket policy allowing anonymous `s3:GetObject`/`s3:ListBucket`
 verify_steps: PASSIVE: `curl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3"` (confirms S3 XML error); PASSIVE: `curl -sS -D- -H "Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/20260928/us-east-1/s3/aws4_request,SignedHeaders=host,Signature=dummy" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3"` (validates InvalidSignature vs MissingSignature distinction)
 impact: If valid SigV4 credentials obtained or bucket policy permissive → full storage access bypassing RLS, course resources, user uploads — HIGH
-testability: PASSIVE (oracle); AUTH_HELPED (signed URL creation, bucket ops)
+testability: PASSIVE
 [HYP] Reflected-origin credentialed CORS on GoTrue gateway enables cross-origin authenticated reads
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}

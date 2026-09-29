@@ -25642,3 +25642,492 @@ testability: HUMAN_ONLY
 **STEP 7 — RISK**
 
 `[RISK]` onecode: **47** — up one, narrowly, and for a reason I want to be precise about rather than inflate. Demonstrated impact is still unchanged: no user data read, no course material exposed, no ATO, no credential compromise, and the credential channel on the cookie-bearing host remains clean (kurs.onecode.de emits no `access-control-*` on a foreign Origin, confirmed this cycle). What changed is that a finding the program had twice recorded with opposite conclusions, and which one agent had closed on an incorrect reading of CORS, is now measured cleanly: reflection plus `ACAC: true` on both the anon and header-auth paths, on two planes, including `null` origin. So the config defect is real and wider than catalogued, and the header-auth leg is no longer provably blocked. I am holding the score near flat because the escalation still requires a bearer token I have never had, and the cache amplifier remains dead. The single most useful thing the owner can do is set an origin allowlist and hand over two test accounts — one is a one-line config change, the other converts three parked hypotheses into resolved ones.
+===== ANALYST bigpickle 2026-09-29 08:46:27 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll check the workspace tooling, then run a small read-only probe set.
+[0m$ [0mdate -u; echo "---"; cat AGENTS.md 2>/dev/null | head -60
+Tue Sep 29 08:44:14 UTC 2026
+---
+[0m
+[0m$ [0mls -la; echo "---"; ls art 2>/dev/null | head -50; echo "---"; cat scope.yml 2>/dev/null | head -40
+total 672
+drwxr-xr-x 12 runner runner   4096 Sep 29 08:43 .
+drwxr-xr-x  3 runner runner   4096 Sep 29 08:43 ..
+drwxr-xr-x  7 runner runner   4096 Sep 29 08:44 .git
+drwxr-xr-x  3 runner runner   4096 Sep 29 08:43 .github
+-rw-r--r--  1 runner runner   1692 Sep 29 08:43 README.md
+-rw-r--r--  1 runner runner    104 Sep 29 08:44 analyst-out.txt
+-rw-r--r--  1 runner runner 292837 Sep 29 08:43 analyst-prompt.txt
+-rw-r--r--  1 runner runner 288988 Sep 29 08:43 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 leads
+-rw-r--r--  1 runner runner   4901 Sep 29 08:43 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 reports
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Sep 29 08:43 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 scripts
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Sep 29 08:43 triage
+---
+---
+programs:
+  onecode:
+    name: OneCode GmbH Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "*.onecode.de, kurs.onecode.de; All company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH"
+        priority: In
+    out_of_scope:
+      - "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+[0m
+[0m$ [0mls -la scripts reports leads knowledge triage 2>/dev/null | head -60
+knowledge:
+total 164
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner   4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner 158792 Sep 29 08:43 index.md
+
+leads:
+total 2008
+drwxr-xr-x  2 runner runner    4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner  774775 Sep 29 08:43 lead-bigpickle.md
+-rw-r--r--  1 runner runner    8364 Sep 29 08:43 lead-laguna.md
+-rw-r--r--  1 runner runner    8200 Sep 29 08:43 lead-ling3.md
+-rw-r--r--  1 runner runner    8528 Sep 29 08:43 lead-longcat.md
+-rw-r--r--  1 runner runner      18 Sep 29 08:43 lead-mimo.md
+-rw-r--r--  1 runner runner 1192970 Sep 29 08:43 lead-nemotron3.md
+-rw-r--r--  1 runner runner   31257 Sep 29 08:43 reposcan-onecode.md
+
+reports:
+total 4248
+drwxr-xr-x  2 runner runner    4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner 1964455 Sep 29 08:43 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   35588 Sep 29 08:43 analyst-laguna.log
+-rw-r--r--  1 runner runner   35424 Sep 29 08:43 analyst-ling3.log
+-rw-r--r--  1 runner runner   35752 Sep 29 08:43 analyst-longcat.log
+-rw-r--r--  1 runner runner 1807649 Sep 29 08:43 analyst-nemotron3.log
+-rw-r--r--  1 runner runner    8518 Sep 29 08:43 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Sep 29 08:43 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Sep 29 08:43 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Sep 29 08:43 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   10262 Sep 29 08:43 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  413683 Sep 29 08:43 hypotheses.md
+-rw-r--r--  1 runner runner     782 Sep 29 08:43 valid-bugs.md
+
+scripts:
+total 28
+drwxr-xr-x  2 runner runner  4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner  4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner 16987 Sep 29 08:43 sync-issues.py
+
+triage:
+total 756
+drwxr-xr-x  2 runner runner 12288 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner  4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner    13 Sep 29 08:43 .gitkeep
+-rw-r--r--  1 runner runner   183 Sep 29 08:43 run-2026-09-02-21-38.md
+-rw-r--r--  1 runner runner   176 Sep 29 08:43 run-2026-09-02-23-33.md
+-rw-r--r--  1 runner runner   180 Sep 29 08:43 run-2026-09-03-01-26.md
+-rw-r--r--  1 runner runner   239 Sep 29 08:43 run-2026-09-03-06-29.md
+-rw-r--r--  1 runner runner   152 Sep 29 08:43 run-2026-09-03-11-42.md
+-rw-r--r--  1 runner runner   171 Sep 29 08:43 run-2026-09-03-16-02.md
+-rw-r--r--  1 runner runner   175 Sep 29 08:43 run-2026-09-03-19-19.md
+-rw-r--r--  1 runner runner  5113 Sep 29 08:43 run-2026-09-03-21-46.md
+-rw-r--r--  1 runner runner   148 Sep 29 08:43 run-2026-09-03-23-51.md
+-rw-r--r--  1 runner runner   224 Sep 29 08:43 run-2026-09-04-03-36.md
+-rw-r--r--  1 runner runner   174 Sep 29 08:43 run-2026-09-04-08-13.md
+-rw-r--r--  1 runner runner   175 Sep 29 08:43 run-2026-09-04-12-46.md
+-rw-r--r--  1 runner runner   249 Sep 29 08:43 run-2026-09-04-16-47.md
+-rw-r--r--  1 runner runner   673 Sep 29 08:43 run-2026-09-04-19-20.md
+[0m
+[0m$ [0mcat analyst-out.txt; echo "==="; cat state_bigpickle.json; echo; ls reports/ 2>/dev/null
+[0m
+> build · big-pickle
+[0m
+I'll check the workspace tooling, then run a small read-only probe set.
+[0m$ [0mdate -u; echo "---"; cat AGENTS.md 2>/dev/null | head -60
+Tue Sep 29 08:44:14 UTC 2026
+---
+[0m
+[0m$ [0mls -la; echo "---"; ls art 2>/dev/null | head -50; echo "---"; cat scope.yml 2>/dev/null | head -40
+total 672
+drwxr-xr-x 12 runner runner   4096 Sep 29 08:43 .
+drwxr-xr-x  3 runner runner   4096 Sep 29 08:43 ..
+drwxr-xr-x  7 runner runner   4096 Sep 29 08:44 .git
+drwxr-xr-x  3 runner runner   4096 Sep 29 08:43 .github
+-rw-r--r--  1 runner runner   1692 Sep 29 08:43 README.md
+-rw-r--r--  1 runner runner    104 Sep 29 08:44 analyst-out.txt
+-rw-r--r--  1 runner runner 292837 Sep 29 08:43 analyst-prompt.txt
+-rw-r--r--  1 runner runner 288988 Sep 29 08:43 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 leads
+-rw-r--r--  1 runner runner   4901 Sep 29 08:43 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 reports
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Sep 29 08:43 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 scripts
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 29 08:43 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Sep 29 08:43 triage
+---
+---
+programs:
+  onecode:
+    name: OneCode GmbH Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "*.onecode.de, kurs.onecode.de; All company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH"
+        priority: In
+    out_of_scope:
+      - "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+[0m
+[0m$ [0mls -la scripts reports leads knowledge triage 2>/dev/null | head -60
+knowledge:
+total 164
+drwxr-xr-x  2 runner runner   4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner   4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner 158792 Sep 29 08:43 index.md
+
+leads:
+total 2008
+drwxr-xr-x  2 runner runner    4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner  774775 Sep 29 08:43 lead-bigpickle.md
+-rw-r--r--  1 runner runner    8364 Sep 29 08:43 lead-laguna.md
+-rw-r--r--  1 runner runner    8200 Sep 29 08:43 lead-ling3.md
+-rw-r--r--  1 runner runner    8528 Sep 29 08:43 lead-longcat.md
+-rw-r--r--  1 runner runner      18 Sep 29 08:43 lead-mimo.md
+-rw-r--r--  1 runner runner 1192970 Sep 29 08:43 lead-nemotron3.md
+-rw-r--r--  1 runner runner   31257 Sep 29 08:43 reposcan-onecode.md
+
+reports:
+total 4248
+drwxr-xr-x  2 runner runner    4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner    4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner 1964455 Sep 29 08:43 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   35588 Sep 29 08:43 analyst-laguna.log
+-rw-r--r--  1 runner runner   35424 Sep 29 08:43 analyst-ling3.log
+-rw-r--r--  1 runner runner   35752 Sep 29 08:43 analyst-longcat.log
+-rw-r--r--  1 runner runner 1807649 Sep 29 08:43 analyst-nemotron3.log
+-rw-r--r--  1 runner runner    8518 Sep 29 08:43 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Sep 29 08:43 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Sep 29 08:43 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Sep 29 08:43 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   10262 Sep 29 08:43 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  413683 Sep 29 08:43 hypotheses.md
+-rw-r--r--  1 runner runner     782 Sep 29 08:43 valid-bugs.md
+
+scripts:
+total 28
+drwxr-xr-x  2 runner runner  4096 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner  4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner 16987 Sep 29 08:43 sync-issues.py
+
+triage:
+total 756
+drwxr-xr-x  2 runner runner 12288 Sep 29 08:43 .
+drwxr-xr-x 12 runner runner  4096 Sep 29 08:43 ..
+-rw-r--r--  1 runner runner    13 Sep 29 08:43 .gitkeep
+-rw-r--r--  1 runner runner   183 Sep 29 08:43 run-2026-09-02-21-38.md
+-rw-r--r--  1 runner runner   176 Sep 29 08:43 run-2026-09-02-23-33.md
+-rw-r--r--  1 runner runner   180 Sep 29 08:43 run-2026-09-03-01-26.md
+-rw-r--r--  1 runner runner   239 Sep 29 08:43 run-2026-09-03-06-29.md
+-rw-r--r--  1 runner runner   152 Sep 29 08:43 run-2026-09-03-11-42.md
+-rw-r--r--  1 runner runner   171 Sep 29 08:43 run-2026-09-03-16-02.md
+-rw-r--r--  1 runner runner   175 Sep 29 08:43 run-2026-09-03-19-19.md
+-rw-r--r--  1 runner runner  5113 Sep 29 08:43 run-2026-09-03-21-46.md
+-rw-r--r--  1 runner runner   148 Sep 29 08:43 run-2026-09-03-23-51.md
+-rw-r--r--  1 runner runner   224 Sep 29 08:43 run-2026-09-04-03-36.md
+-rw-r--r--  1 runner runner   174 Sep 29 08:43 run-2026-09-04-08-13.md
+-rw-r--r--  1 runner runner   175 Sep 29 08:43 run-2026-09-04-12-46.md
+-rw-r--r--  1 runner runner   249 Sep 29 08:43 run-2026-09-04-16-47.md
+-rw-r--r--  1 runner runner   673 Sep 29 08:43 run-2026-09-04-19-20.md
+[0m
+===
+{"phase": "POC", "target": "api"}
+analyst-bigpickle.log
+analyst-laguna.log
+analyst-ling3.log
+analyst-longcat.log
+analyst-nemotron3.log
+hypotheses-bigpickle.txt
+hypotheses-laguna.txt
+hypotheses-ling3.txt
+hypotheses-longcat.txt
+hypotheses-nemotron3.txt
+hypotheses.md
+valid-bugs.md
+[0m
+KB contains a direct self-contradiction on the top finding (GoTrue CORS: "reflected Origin + ACAC:true" vs "wildcard `*` without ACAC"). That contradiction must be resolved before the finding can go to an owner. Resolving it with read-only probes.
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+echo "=== T1 GET settings, Origin evil, NO apikey ==="
+curl -sS -o /tmp/t1.body -D /tmp/t1.hdr -w "HTTP=%{http_code}\n" "https://$SUP/auth/v1/settings" -H "Origin: https://evil.example"
+grep -iE '^(access-control|vary|cf-cache)' /tmp/t1.hdr || echo "(no access-control headers)"
+echo "--- body head:"; head -c 120 /tmp/t1.body; echo
+=== T1 GET settings, Origin evil, NO apikey ===
+HTTP=401
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+--- body head:
+{"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+[0m
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== T2 GET settings, Origin evil, apikey HEADER ==="
+curl -sS -o /tmp/t2.body -D /tmp/t2.hdr -w "HTTP=%{http_code}\n" "https://$SUP/auth/v1/settings" -H "Origin: https://evil.example" -H "apikey: $K"
+grep -iE '^(access-control|vary|cf-cache)' /tmp/t2.hdr || echo "(none)"
+echo "--- body head:"; head -c 100 /tmp/t2.body; echo
+=== T2 GET settings, Origin evil, apikey HEADER ===
+HTTP=200
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body head:
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"
+[0m
+CORS contradiction resolved — behavior is state-dependent, not contradictory. Continuing characterization.
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== T3 Origin: null + apikey ==="
+curl -sS -o /dev/null -D /tmp/t3.hdr -w "HTTP=%{http_code}\n" "https://$SUP/auth/v1/settings" -H "Origin: null" -H "apikey: $K"
+grep -iE '^access-control-allow-(origin|credentials)' /tmp/t3.hdr
+sleep 1
+echo "=== T4 no Origin at all, apikey ==="
+curl -sS -o /dev/null -D /tmp/t4.hdr -w "HTTP=%{http_code}\n" "https://$SUP/auth/v1/settings" -H "apikey: $K"
+grep -icE '^access-control' /tmp/t4.hdr | xargs -I{} echo "access-control header count: {}"
+=== T3 Origin: null + apikey ===
+HTTP=200
+access-control-allow-origin: null
+access-control-allow-credentials: true
+=== T4 no Origin at all, apikey ===
+HTTP=200
+access-control header count: 0
+[0m
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== T5 REST /rest/v1/profiles apikey + Origin (state?) ==="
+curl -sS -o /tmp/t5.body -D /tmp/t5.hdr -w "HTTP=%{http_code}\n" "https://$SUP/rest/v1/profiles?select=*" -H "Origin: https://evil.example" -H "apikey: $K" -H "Authorization: Bearer $K"
+grep -iE '^(access-control-allow-origin|access-control-allow-credentials|cf-cache|vary)' /tmp/t5.hdr
+head -c 200 /tmp/t5.body; echo
+=== T5 REST /rest/v1/profiles apikey + Origin (state?) ===
+HTTP=503
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Accept-Encoding
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[0m
+Notable: REST reflects Origin but emits `vary: Accept-Encoding` **without** `Origin` — unlike GoTrue. Testing whether that is a real cache-confusion vector.
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== T6 REST same path, different Origin (vary/cache check) ==="
+curl -sS -o /dev/null -D /tmp/t6.hdr -w "HTTP=%{http_code}\n" "https://$SUP/rest/v1/profiles?select=*" -H "Origin: https://attacker.test" -H "apikey: $K" -H "Authorization: Bearer $K"
+grep -iE '^(access-control-allow-origin|access-control-allow-credentials|vary|cf-cache-status|age)' /tmp/t6.hdr
+echo "=== T6b explicit Age/etag check ==="
+curl -sS -o /dev/null -D - -w "" "https://$SUP/rest/v1/profiles?select=*" -H "Origin: https://second.test" -H "apikey: $K" 2>/dev/null | grep -iE '^(age|etag|cf-cache-status|vary|access-control-allow-origin)'
+=== T6 REST same path, different Origin (vary/cache check) ===
+HTTP=503
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://attacker.test
+vary: Accept-Encoding
+=== T6b explicit Age/etag check ===
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://second.test
+vary: Accept-Encoding
+[0m
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== T7 REST ACAC present? ==="
+curl -sS -o /dev/null -D - "https://$SUP/rest/v1/profiles" -H "Origin: https://evil.example" -H "apikey: $K" 2>/dev/null | grep -icE '^access-control-allow-credentials' | xargs -I{} echo "ACAC count: {}"
+sleep 1
+echo "=== T8 storage object/public oracle + Origin ==="
+curl -sS -o /tmp/t8.body -D /tmp/t8.hdr -w "HTTP=%{http_code}\n" "https://$SUP/storage/v1/object/public/kurs-material/probe.pdf" -H "Origin: https://evil.example" -H "apikey: $K"
+grep -iE '^(access-control-allow-origin|access-control-allow-credentials|vary|cf-cache)' /tmp/t8.hdr
+head -c 150 /tmp/t8.body; echo
+=== T7 REST ACAC present? ===
+ACAC count: 0
+=== T8 storage object/public oracle + Origin ===
+HTTP=400
+cf-cache-status: BYPASS
+access-control-allow-origin: *
+{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+[0m
+REST reflects Origin with **no** `Vary: Origin` and no ACAC. Testing the preflight and whether that combination is exploitable for header-auth.
+[0m$ [0mSUP=aygnpacdkgtsfnhgcyjc.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== T9 REST preflight w/ authorization+apikey ==="
+curl -sS -o /dev/null -D - -X OPTIONS "https://$SUP/rest/v1/profiles" \
+ -H "Origin: https://evil.example" \
+ -H "Access-Control-Request-Method: GET" \
+ -H "Access-Control-Request-Headers: authorization,apikey" 2>/dev/null \
+ | grep -iE '^(HTTP/|access-control|vary|cf-cache)'
+=== T9 REST preflight w/ authorization+apikey ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: authorization,apikey
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+[0m
+REST is cross-origin-readable for header-auth (preflight `ACAO:*` + reflected response, no ACAC needed since `credentials:'omit'` sends no cookies). Now testing CORS on the app's pre-auth 200 pages — the three static/recovery pages were never CORS-tested.
+[0m$ [0mfor p in /login /passwort-vergessen /datenschutz /rechtliches; do
+  echo "=== $p ==="
+  curl -sS -o /dev/null -D - "https://kurs.onecode.de$p" -H "Origin: https://evil.example" 2>/dev/null \
+   | grep -iE '^(HTTP/|access-control|set-cookie|cf-cache|vary)' | head -8
+  sleep 1
+done
+=== /login ===
+HTTP/2 200 
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+=== /passwort-vergessen ===
+HTTP/2 200 
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+=== /datenschutz ===
+HTTP/2 200 
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+=== /rechtliches ===
+HTTP/2 200 
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+[0m
+App origin is CORS-clean and sets no cookies pre-auth — confirms no escalation to app data. Now the S3 plane, the second-ranked lead.
+[0m$ [0mS3H=aygnpacdkgtsfnhgcyjc.storage.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+echo "=== S1 GET /storage/v1/s3 with apikey ==="
+curl -sS -o /tmp/s1.body -D /tmp/s1.hdr -w "HTTP=%{http_code}\n" "https://$S3H/storage/v1/s3" -H "apikey: $K"
+head -c 200 /tmp/s1.body; echo
+sleep 1
+echo "=== S2 same, list-type=2 + apikey + Origin null ==="
+curl -sS -o /tmp/s2.body -D /tmp/s2.hdr -w "HTTP=%{http_code}\n" "https://$S3H/storage/v1/s3?list-type=2" -H "apikey: $K" -H "Origin: null"
+grep -iE '^(access-control|vary|cf-cache|x-amz|server)' /tmp/s2.hdr
+head -c 200 /tmp/s2.body; echo
+=== S1 GET /storage/v1/s3 with apikey ===
+HTTP=403
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource/><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+=== S2 same, list-type=2 + apikey + Origin null ===
+HTTP=403
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource/><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+[0m$ [0mS3H=aygnpacdkgtsfnhgcyjc.storage.supabase.co
+K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+sleep 1
+echo "=== S3 preflight (S3 plane) ==="
+curl -sS -o /dev/null -D - -X OPTIONS "https://$S3H/storage/v1/s3" \
+ -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" \
+ -H "Access-Control-Request-Headers: authorization,x-amz-content-sha256,x-amz-date" 2>/dev/null \
+ | grep -iE '^(HTTP/|access-control|vary)'
+echo
+sleep 1
+echo "=== S4 bucket-path form (Resource reflection) ==="
+curl -sS -o /tmp/s4.body -D /tmp/s4.hdr -w "HTTP=%{http_code}\n" "https://$S3H/storage/v1/s3/kurs-material?list-type=2"
+grep -iE '^(x-amz|x-supabase|server)' /tmp/s4.hdr | head
+head -c 300 /tmp/s4.body; echo
+=== S3 preflight (S3 plane) ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: authorization,x-amz-content-sha256,x-amz-date
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+
+=== S4 bucket-path form (Resource reflection) ===
+HTTP=403
+server: cloudflare
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource>kurs-material</Resource><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp && curl -sS -o login.html -D login.hdr -w "HTTP=%{http_code}\n" https://kurs.onecode.de/login
+echo "--- chunk refs:"; grep -oE '_next/static/chunks/[A-Za-z0-9._-]+\.js' login.html | sort -u
+echo "--- main chunk hash:"
+M=$(grep -oE '_next/static/chunks/0-mbmp1iqb6hj\.js' login.html | head -1)
+if [ -n "$M" ]; then curl -sS -o m.js -w "bytes=%{size_download} HTTP=%{http_code}\n" "https://kurs.onecode.de/$M"; sha256sum m.js; fi failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+S3 plane confirmed closed. Quick deploy-delta check on the app (event-triggered, single HEAD) then wrap up.
