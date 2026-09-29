@@ -1,17 +1,19 @@
-## 2026-09-29 15:37:25 UTC [target] (model nemotron3)
+## 2026-09-29 20:16:42 UTC [target] (model nemotron3)
 [NEW] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage API confirmed live (403 `Missing signature`), never probed in 26 days; separate SigV4 authz plane bypasses Supabase RLS  
 [NEW] S3 access-key-ID oracle confirmed: `403 Missing signature` (no auth) vs `400 InvalidSignature` (bogus credential) distinguishable  
 [NEW] Signed URL route class on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional)  
 [NEW] Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded  
-[CHANGED] CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z) — contradicts prior KB claim of reflected-origin+ACAC on all requests  
+[CHANGED] CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z) — contradicts prior KB claim  
 [CHANGED] CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible  
 [CHANGED] KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)  
-[PRIO] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`,8.50,attack_surface=9 business_value=7 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=10  
-[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/`,7.75,attack_surface=8 business_value=7 tech_exposure=8 gate_ease=10 cloud_surface=8 freshness=9  
-[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign`,7.25,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9  
-[PRIO] `cto.onecode.de`,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9  
-[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public`,6.60,attack_surface=6 business_value=5 tech_exposure=7 gate_ease=8 cloud_surface=8 freshness=8  
-[PRIO] `kurs.onecode.de`,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6  
+[NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects `Origin` WITHOUT `vary: Origin`  
+[NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — CORS preflight uniformly `ACAO: *` with full destructive method list  
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,8.75,attack_surface=9 business_value=7 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=10  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/,8.15,attack_surface=8 business_value=7 tech_exposure=8 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign,7.50,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9  
+[PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] kurs.onecode.de,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public,6.60,attack_surface=6 business_value=5 tech_exposure=7 gate_ease=8 cloud_surface=8 freshness=8  
 [HYP] S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3

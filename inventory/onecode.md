@@ -973,3 +973,19 @@ www.onecode.de
 - CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z) — 
 - CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+
+## 2026-09-29 20:17:04 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* — the credentialed Origin reflection is reachable through the apikey QUERY STRING, not only the apikey header. `GET /auth/v1/settings?apikey=sb_publishable_g
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — the `vary: Origin` omission is now measured on a live *reflected* response, not inferred. `GET /rest/v1/profiles?select=*` with `Origin: https://evil.examp
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — 22 further bucket names excluded via the pre-auth oracle (68 total), now including project-ref-derived (`aygnpacdkgtsfnhgcyjc`, `aygnpacdkgtsfnhgcyjc-stor
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings — unauthenticated form confirmed as a genuinely different policy: no apikey → 401 + `ACAO: *` + no `ACAC`; with apikey (header *or* query) → 200 + ref
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user — the 401 path emits `vary: Origin` only (no `Accept-Encoding`) while the 403 forged-JWT path emits `vary: Origin, Accept-Encoding`; CORS headers are emit
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage API confirmed live (403 `Missing signature`), never probed in 26 days; separate SigV4 authz plane bypasses Supabase RLS
+- NEW S3 access-key-ID oracle confirmed: `403 Missing signature` (no auth) vs `400 InvalidSignature` (bogus credential) distinguishable
+- NEW Signed URL route class on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional)
+- NEW Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z) — 
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects `Origin` WITHOUT `vary: Origin`
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — CORS preflight uniformly `ACAO: *` with full destructive method list

