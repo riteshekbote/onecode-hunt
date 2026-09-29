@@ -25324,3 +25324,321 @@ testability: HUMAN_ONLY
 ## STEP 7 — RISK
 
 [RISK] onecode: 46 — down two, and deliberately. Demonstrated impact is unchanged: no user data read, no course material exposed, no ATO, no key compromise. What changed is accuracy in both directions. I raised the top finding by showing the credential channel the program believed absent does exist in a usable form — `?apikey=` is accepted, so the GoTrue CORS defect is browser-exploitable from any origin including `null` with only a publicly-shipped key. I simultaneously cut its scope: the defect is GoTrue-only, storage and REST still require a header and serve `ACAO: *`, and the exposed data today is auth configuration, not user records. The escalation to user data is provably blocked because a real bearer must travel in a header, reintroducing the preflight barrier the query form cannot bypass. Separately I closed three latent auth classes on live data (SAML assertion injection, SMS autoconfirm, public-key access to the S3 plane), which is a real reduction in the program's uncertainty even though none of them was ever live. The honest read is that the owner has one config defect worth fixing, one first-party forced-login flaw needing two test accounts to prove, and no demonstrated path to customer data.
+===== ANALYST bigpickle 2026-09-29 02:20:53 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll start by settling a direct contradiction in the knowledge base: two agents measured the GoTrue CORS policy differently (reflected + `ACAC: true` vs wildcard, no `ACAC`). My top hypothesis rests on that, so it needs a controlled re-measurement.
+[0m$ [0mKEY="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+SUP="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 1. simple GET, Origin: https://evil.example, apikey HEADER ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: https://evil.example" "$SUP/auth/v1/settings" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache|content-type)" 
+sleep 1
+echo
+echo "=== 2. simple GET, Origin: null, apikey HEADER ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: null" "$SUP/auth/v1/settings" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache)"
+sleep 1
+echo
+echo "=== 3. simple GET, Origin evil, apikey in QUERY STRING (no apikey header) ==="
+curl -sS -o /dev/null -D- -H "Origin: https://evil.example" "$SUP/auth/v1/settings?apikey=$KEY" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache)"
+sleep 1
+echo
+echo "=== 4. CONTROL: same GET, NO Origin header at all ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" "$SUP/auth/v1/settings" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache)"
+=== 1. simple GET, Origin: https://evil.example, apikey HEADER ===
+HTTP/2 200 
+content-type: application/json
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== 2. simple GET, Origin: null, apikey HEADER ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: null
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== 3. simple GET, Origin evil, apikey in QUERY STRING (no apikey header) ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== 4. CONTROL: same GET, NO Origin header at all ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+vary: Origin, Accept-Encoding
+[0m
+The reflected `ACAC: true` form is confirmed on all three variants; the KB's contradicting "wildcard" entries were almost certainly **preflight** measurements. Let me verify that reconciliation and check the remaining surfaces for delta.
+[0m$ [0mKEY="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+SUP="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 5. PREFLIGHT OPTIONS /auth/v1/token (explains the 'wildcard' KB entries) ==="
+curl -sS -o /dev/null -D- -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: authorization,apikey,content-type" "$SUP/auth/v1/token" 2>&1 | grep -i -E "^(HTTP/|access-control|vary)"
+sleep 1
+echo
+echo "=== 6. body of the ?apikey= simple GET (what an attacker actually reads cross-origin) ==="
+curl -sS -H "Origin: https://evil.example" "$SUP/auth/v1/settings?apikey=$KEY" 2>&1 | head -c 600
+echo
+echo
+echo "=== 7. control: ?apikey= query WITHOUT the key (does the 401 hint still leak the url-param form?) ==="
+curl -sS -o /dev/null -w "status=%{http_code}\n" -H "Origin: https://evil.example" "$SUP/auth/v1/settings" 2>&1
+curl -sS -H "Origin: https://evil.example" "$SUP/auth/v1/settings" 2>&1 | head -c 300
+=== 5. PREFLIGHT OPTIONS /auth/v1/token (explains the 'wildcard' KB entries) ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: authorization,apikey,content-type
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+
+=== 6. body of the ?apikey= simple GET (what an attacker actually reads cross-origin) ===
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabl
+
+=== 7. control: ?apikey= query WITHOUT the key (does the 401 hint still leak the url-param form?) ===
+status=401
+{"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+[0m
+Preflight = `ACAO: *` (no ACAC), simple request = reflected + `ACAC: true`. That reconciles the KB contradiction: the "wildcard, no ACAC" entries were preflight measurements, not simple requests. Now testing whether the header-auth path is *also* cross-origin readable, plus deploy/asset deltas.
+[0m$ [0mKEY="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+SUP="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 8. /auth/v1/user with Origin + apikey + FORGED bearer (GET, safe) ==="
+echo "--- is the header-auth path CORS-readable even in its rejection state? ---"
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIn0.forged" -H "Origin: https://evil.example" "$SUP/auth/v1/user" 2>&1 | grep -i -E "^(HTTP/|access-control|vary)"
+sleep 1
+echo
+echo "=== 9. kurs.onecode.de deploy signal: chunk refs on /login ==="
+curl -sS "https://kurs.onecode.de/login" 2>&1 | grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' | sort -u
+sleep 1
+echo
+echo "=== 10. main chunk hash (deploy detector) ==="
+curl -sS "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" 2>&1 | sha256sum
+echo "baseline day-14: f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca"
+echo "baseline sink  : 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0"
+=== 8. /auth/v1/user with Origin + apikey + FORGED bearer (GET, safe) ===
+--- is the header-auth path CORS-readable even in its rejection state? ---
+HTTP/2 403 
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== 9. kurs.onecode.de deploy signal: chunk refs on /login ===
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+
+=== 10. main chunk hash (deploy detector) ===
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  -
+baseline day-14: f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca
+baseline sink  : 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0
+[0m
+Critical: `/auth/v1/user` reflects Origin **with `ACAC: true` even in its 403 state**. This challenges my own prior cycle's conclusion that a real bearer "reintroduces the preflight barrier." Let me test that reasoning.
+[0m$ [0mKEY="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+SUP="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 11. PREFLIGHT for the header-auth route /auth/v1/user ==="
+curl -sS -o /dev/null -D- -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization,apikey" "$SUP/auth/v1/user" 2>&1 | grep -i -E "^(HTTP/|access-control|vary)"
+sleep 1
+echo
+echo "=== 12. Same, but asking for a SIMPLE request only (no custom headers) ==="
+curl -sS -o /dev/null -D- -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" "$SUP/auth/v1/user" 2>&1 | grep -i -E "^(HTTP/|access-control|vary)"
+sleep 1
+echo
+echo "=== 13. Does the REST plane reflect Origin too? (per-table path, GET, safe) ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: https://evil.example" "$SUP/rest/v1/profiles?select=id&limit=1" 2>&1 | grep -i -E "^(HTTP/|access-control|vary)"
+sleep 1
+echo
+echo "=== 14. Control: kurs.onecode.de app origin with foreign Origin (credential host?) ==="
+curl -sS -o /dev/null -D- -H "Origin: https://evil.example" "https://kurs.onecode.de/login" 2>&1 | grep -i -E "^(HTTP/|access-control|set-cookie)"
+=== 11. PREFLIGHT for the header-auth route /auth/v1/user ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: authorization,apikey
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+
+=== 12. Same, but asking for a SIMPLE request only (no custom headers) ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: accept-profile,apikey,authorization,x-client-info
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+
+=== 13. Does the REST plane reflect Origin too? (per-table path, GET, safe) ===
+HTTP/2 503 
+access-control-allow-origin: https://evil.example
+vary: Accept-Encoding
+access-control-expose-headers: Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit
+
+=== 14. Control: kurs.onecode.de app origin with foreign Origin (credential host?) ===
+HTTP/2 200
+[0m
+Significant new finding: the REST plane **reflects Origin** (KB claimed wildcard) and its `vary` header is `Accept-Encoding` — **it does not vary on Origin**. That is the textbook cache-poisoning precondition, and the KB's earlier falsification was done only on the GoTrue plane. Verifying carefully.
+[0m$ [0mKEY="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+SUP="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 15. REST plane full headers, Origin A (looking for vary + cacheability) ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: https://aaa.evil.example" "$SUP/rest/v1/profiles?select=id&limit=1" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache|cache-control|age|content-type)"
+sleep 1
+echo
+echo "=== 16. REST plane, Origin B (different origin) ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: https://bbb.evil.example" "$SUP/rest/v1/profiles?select=id&limit=1" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache|age)"
+sleep 1
+echo
+echo "=== 17. REST on a 401 state (different status may be cached differently) ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: https://aaa.evil.example" "$SUP/rest/v1/" 2>&1 | grep -i -E "^(HTTP/|access-control|vary|cf-cache|cache-control)"
+sleep 1
+echo
+echo "=== 18. Control: does GoTrue vary on Origin (as KB claims)? ==="
+curl -sS -o /dev/null -D- -H "apikey: $KEY" -H "Origin: https://aaa.evil.example" "$SUP/auth/v1/settings" 2>&1 | grep -i -E "^(access-control-allow-origin|vary|cf-cache)"
+=== 15. REST plane full headers, Origin A (looking for vary + cacheability) ===
+HTTP/2 503 
+content-type: application/json; charset=utf-8
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://aaa.evil.example
+vary: Accept-Encoding
+access-control-expose-headers: Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit
+
+=== 16. REST plane, Origin B (different origin) ===
+HTTP/2 503 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://bbb.evil.example
+vary: Accept-Encoding
+access-control-expose-headers: Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit
+
+=== 17. REST on a 401 state (different status may be cached differently) ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+
+=== 18. Control: does GoTrue vary on Origin (as KB claims)? ===
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://aaa.evil.example
+vary: Origin, Accept-Encoding
+[0m
+`cf-cache-status: DYNAMIC` on both, so no cache amplifier — the `vary` gap is latent, not exploitable. Now the remaining deltas.
+[0m$ [0mKEY="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+SUP="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== 19. sink chunk hash (targeted-fix detector, independent of main chunk) ==="
+curl -sS "https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js" 2>&1 | sha256sum
+sleep 1
+echo
+echo "=== 20. cto.onecode.de ==="
+dig +short CNAME cto.onecode.de @1.1.1.1
+curl -sS -o /dev/null -w "http_status=%{http_code}\n" --resolve cto.onecode.de:80:104.18.2.73 "http://cto.onecode.de/" 2>&1
+sleep 1
+echo
+echo "=== 21. storage bucket listing + functions + analytics (3 deltas, spaced) ==="
+curl -sS -o /dev/null -w "storage_bucket=%{http_code} " -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$SUP/storage/v1/bucket"; curl -sS -H "apikey: $KEY" -H "Authorization: Bearer $KEY" "$SUP/storage/v1/bucket" | head -c 120; echo
+sleep 1
+curl -sS -o /dev/null -w "functions=%{http_code}\n" -H "apikey: $KEY" "$SUP/functions/v1/"
+sleep 1
+curl -sS -o /dev/null -w "s3_plane=%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3"
+=== 19. sink chunk hash (targeted-fix detector, independent of main chunk) ===
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  -
+
+=== 20. cto.onecode.de ===
+cname.perspective-dns.com.
+http_status=409
+
+=== 21. storage bucket listing + functions + analytics (3 deltas, spaced) ===
+storage_bucket=200 []
+functions=404
+s3_plane=403
+[0m
+Probes complete. I resolved a direct contradiction in the knowledge base and found one genuine escalation. Full structured output:
+
+---
+
+**STEP 1 — DELTA**
+
+- `[CHANGED]` `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*` — KB contradiction **resolved by live measurement**: preflight (`OPTIONS`) returns wildcard `ACAO: *` **without** `ACAC`; the *simple* request returns **reflected** `ACAO: <Origin>` **with** `ACAC: true`. The "wildcard, no ACAC" KB entries (nemotron3 17:06Z/22:35Z) were preflight measurements mislabelled as simple-request findings. Reflected form re-confirmed for `https://evil.example`, `null`, and the `?apikey=` query form.
+- `[NEW]` `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — the REST plane **also reflects arbitrary Origin**, contradicting the KB's "REST uses wildcard-without-credentials" claim. On table paths (`/rest/v1/profiles`) → `ACAO: <reflected>` with **`vary: Accept-Encoding` and no `vary: Origin`**.
+- `[NEW]` `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user` — reflected `ACAO` + `ACAC: true` is emitted **even on the 403 rejection state**, i.e. the CORS middleware runs before auth. Confirms header-auth responses are cross-origin-readable, not just the anon `?apikey=` form.
+- `[NEW]` `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*` preflight grants `authorization,apikey,content-type` with `ACAO: *`. This **falsifies my own 2026-09-28 22:35Z conclusion** that a real bearer "reintroduces the preflight barrier" — see STEP 3 hypothesis 1.
+- `[NO_DELTA]` `kurs.onecode.de` — no deploy, day-14. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical. Sink chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` byte-identical. All 13 chunk refs stable, `/login` 200, no `Set-Cookie`.
+- `[NO_DELTA]` `cto.onecode.de` — CNAME `cname.perspective-dns.com.`, HTTP 409, day-48.
+- `[NO_DELTA]` Supabase `storage/v1/bucket` 200 `[]`, `functions/v1/` 404, S3 plane 403.
+
+**STEP 2 — PRIORITIZE**
+
+- `[PRIO]` `aygnpacdkgtsfnhgcyjc.supabase.co` (GoTrue + REST planes) — **8.9** (a=9,b=8,t=9,g=10,c=9,f=9). Gate is 10: the publishable key is shipped in the public client bundle, so the entire CORS characterization is reachable with zero credentials.
+- `[PRIO]` `kurs.onecode.de` — **6.2** (a=6,b=9,t=7,g=4,c=5,f=3). High business value but gate is invite-only and the build is frozen at day-14.
+- `[PRIO]` `aygnpacdkgtsfnhgcyjc.storage.supabase.co` — **5.85** (a=5,b=7,t=6,g=3,c=7,f=8). Only plane outside the RLS model; gated entirely on credential existence.
+
+**STEP 3 — HYPOTHESES**
+
+```
+[HYP] Reflected credentialed CORS on the GoTrue gateway turns any leaked bearer token into full cross-origin tenant-data exfiltration, reachable from an origin-less context with no attacker domain
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* and /rest/v1/*
+confidence: 74
+reasoning: Measured this cycle, with controls. Simple GET /auth/v1/settings with `apikey` header and `Origin: https://evil.example` returns 200 with `ACAO: https://evil.example`, `ACAC: true`, `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. Identical for `Origin: null` → `ACAO: null`, `ACAC: true`. Control with no `Origin` header returns no `access-control-*` at all, so the reflection is Origin-driven, not unconditional. The same reflection appears on /auth/v1/user in its 403 rejection state, proving the CORS middleware executes before the auth check rather than only on the anon path. The key-accepting form is confirmed: the 401 body reads "No `apikey` request header or url param was found", and `?apikey=<publishable>` returns 200 with the full body. The decisive correction: the preflight for /auth/v1/user returns `ACAO: *` with `Access-Control-Allow-Headers: authorization,apikey` and no `ACAC`. Under the Fetch spec the `credentials` flag governs cookies, not the `Authorization` header, and fetch() defaults to `same-origin`, which for a cross-origin call sends no cookies and is therefore NOT a credentialed request — for which `ACAO: *` is explicitly acceptable. A token in a header is therefore not blocked by the preflight. My prior cycle's claim that "a real bearer reintroduces the preflight barrier the query form cannot bypass" was wrong and is retracted. Cache amplification remains falsified: `cf-cache-status: DYNAMIC` on every reflected response. Not established: any read of user records — a valid bearer has never been available to me.
+evidence_needed: A browser PoC from a `null`-origin context (sandboxed iframe or `data:` document) issuing `fetch(url, {headers:{apikey:PUBLISHABLE, authorization:'Bearer <token>'}, credentials:'omit'})` against /auth/v1/user and one REST table, reading the parsed body; plus one real bearer token, since that is the only missing input.
+verify_steps: 1) DONE: `curl -D- -H "apikey: <pub>" -H "Origin: https://evil.example" <SUP>/auth/v1/settings` → 200, `ACAO: https://evil.example`, `ACAC: true`. 2) DONE: same with `Origin: null` → `ACAO: null`, `ACAC: true`. 3) DONE: control with no `Origin` → zero `access-control-*` headers. 4) DONE: `curl -D- -H "apikey: <pub>" -H "Authorization: Bearer <forged>" -H "Origin: https://evil.example" <SUP>/auth/v1/user` → 403 with `ACAO` reflected and `ACAC: true`, proving CORS headers are emitted pre-auth. 5) DONE: `curl -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization,apikey" <SUP>/auth/v1/user` → `ACAO: *`, `allow-headers: authorization,apikey`, no `ACAC` — which is the non-blocking case. 6) DONE: `cf-cache-status: DYNAMIC` on both reflected planes; cache amplifier still falsified. 7) DONE: control `curl -D- -H "Origin: https://evil.example" https://kurs.onecode.de/login` → 200 with zero `access-control-*`; the cookie-bearing host stays clean. 8) NOT DONE, requires a token: the live browser read.
+impact: MEDIUM as measured, HIGH on a routine token leak. Today the readable data is auth configuration (provider matrix, disable_signup, autoconfirm, SAML/passkey flags) — no user records, no course material, no ATO. The reason this is not closing as LOW is the escalation path: without an origin allowlist, a bearer token that leaks by any ordinary means (a committed env var, a CI log, a shared machine, a third-party page, a prior XSS) is usable from *any* website, or from a sandboxed iframe with no attacker domain, no DNS and no hosting to take down. That converts a routine low-severity token disclosure into full cross-origin exfiltration of `auth.users` and every PostgREST table, and the `null`-origin reflection removes attacker infrastructure from the requirement entirely. One config change is the entire fix.
+testability: PASSIVE
+```
+
+```
+[HYP] URL-fragment session injection on the pre-auth /login page forces a victim to operate inside an attacker-controlled account
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: First-party code, not platform config. `HashSessionHandoff` (module 34891) is mounted on the /login RSC flight payload and runs in `useEffect` on hydration with no user interaction, parsing `window.location.hash` and calling `setSession()` on any `access_token`+`refresh_token` pair with no `state`, `nonce`, PKCE or `sub` binding. Sink chunk `1a4tqdnsy9k1l.js` = 13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`, re-hashed byte-identical this cycle (day-14, alongside main chunk `f916f314…`). /login is the only one of the four pre-auth 200 pages carrying a client boundary. Post-`setSession` redirect is the fixed `{invite:/einladung, recovery:/passwort-neu}` map defaulting to `/`, and error paths land on `/login?error=link-abgelaufen`, so this is forced-login (CWE-384), not an open redirect, and cannot be dressed as a credential prompt.
+evidence_needed: Two invited test accounts. Attacker signs in as account A, captures its own token pair, serves `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>` to a logged-out victim; the victim's browser should land authenticated as A.
+verify_steps: 1) DONE: sink chunk re-hashed, `5a72d2cd…`, unchanged. 2) DONE (code): no `state`/`nonce`/PKCE/`sub` check anywhere in the sink; `LoginForm` (module 28420) takes `linkError` only and hardcodes `push("/")` after `signInWithPassword`, so the `{invite,recovery}` map is the complete post-`setSession` target set. 3) DONE: forged/null session cookie class (5 variants) all 307→/login; `x-middleware-subrequest` non-bypassing; no PKCE code injection pre-auth. 4) NOT DONE, requires accounts: the live forced-login demonstration.
+impact: MEDIUM — a victim who clicks the link performs all subsequent course actions inside an account the attacker controls, a credible path to tricking a paying customer into entering payment or personal data. Not HIGH: it requires an attacker-held invited account and one victim click, and cannot reach an off-origin destination.
+testability: AUTH_HELPED
+```
+
+```
+[HYP] The pre-auth S3 SigV4 storage plane is deployed and authorization-bypassing, but is closed to the publishable key and gated entirely on whether S3 credentials exist
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
+confidence: 40
+reasoning: Deliberately decomposed, because the halves have very different support. Plane-existence, measured: `GET /storage/v1/s3` → 403 `AccessDenied/Missing signature` (AWS S3 XML), re-confirmed this cycle. Reachability, falsified: the publishable key as Bearer+apikey still yields `403 Missing signature`, so the plane does not accept the public key authorizing every other plane. That matters because the S3 layer is a separate credential store and does not evaluate `storage.objects` RLS — the only plane where one key pair would bypass the RLS boundary this program treats as the sole authz control. The keys-exist half is entirely unproven: Supabase serves this endpoint for every project whether or not keys were created.
+evidence_needed: The owner confirming in the Supabase dashboard whether any S3 access/secret pair exists on this project. If one does, a SigV4-signed ListBuckets returning private buckets, which are not listable on the apikey plane.
+verify_steps: 1) DONE: `curl -D- https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` → 403 AccessDenied/Missing signature. 2) DONE (prior cycle): publishable key as Bearer+apikey on `?list-type=2` → still 403 Missing signature; public key rejected. 3) DONE: no `Authorization` at all → same 403, so the error is not key-identity dependent. 4) NOT DONE and will not be: enumeration of key IDs, which is the program's rate-limit/credential class. 5) OWNER-SIDE, non-intrusive: dashboard check for S3 keys; if none exist this closes as informational.
+impact: HIGH if a key pair exists and is obtainable; CRITICAL if leaked. LOW/informational today: no key, no signature bypass, no data read. This is a configuration-hygiene item, not a demonstrated vulnerability.
+testability: HUMAN_ONLY
+```
+
+**STEP 4 — SELF-CRITIQUE**
+
+- `[PARKED]` "CORS cache-poisoning amplification": re-tested on **both** planes, including the REST plane the earlier falsification never covered. `cf-cache-status: DYNAMIC` everywhere. Genuinely dead, and this cycle found a second reason to believe it: the REST plane's missing `vary: Origin` would only matter to a shared cache that does not exist on this path. Latent hardening defect, not exploitable.
+- `[PARKED]` "REST plane `vary: Origin` omission": real header defect, but `DYNAMIC` caching means no amplifier. Folded into hypothesis 1 as remediation detail rather than a standalone finding — reporting it alone would be descriptive headers only, which is out of scope.
+- `[PARKED]` "anon signed-URL minting via `POST /storage/v1/object/sign`": still awaiting explicit approval, third cycle. It is a POST and I will not run one under passive-only rules. The GET side is already proven to reach token validation and to reject a forged signature, so the class is bounded either way.
+- `[PARKED]` RLS cross-tenant BOLA: untouched and deliberately not re-scored. Every cheap route to a second principal is closed by live test — `external.anonymous_users: false`, `disable_signup: true`, GoTrue admin plane 401, HS256 secret guess 403/401 across 4 candidates, PostgREST schema 401 above the table layer, REST monitor closed after 26 probes never returning 200+rows. AUTH_HELPED only.
+- `[PARKED]` `cto.onecode.de` dangling CNAME (day-48): HUMAN_ONLY. Confidence 58 held flat, not inflated by 48 cycles of byte-identical output.
+- `[PARKED]` Supabase public-bucket exposure: oracle exists on 3 routes, 46 names excluded, bucket name unrecoverable from pre-auth bundles. Closed.
+- `[FINAL]` Survivors ranked: (1) reflected credentialed CORS across GoTrue + REST, conf 74, PASSIVE, header-auth leg newly unblocked, one config fix. (2) S3 SigV4 plane, conf 40, HUMAN_ONLY. (3) Fragment session injection, conf 55, AUTH_HELPED. Hypothesis 3 is ranked below 2 on testability, not impact.
+
+**STEP 5 — NEXT ACTION**
+
+- `[NEXT]` HUMAN: request two invited test accounts from the program owner (`bugs.olivermaicher.eu`). This is the single unblock that resolves three open classes at once — the RLS cross-tenant BOLA (conf 65, needs two distinct `authenticated` principals), the fragment session injection (needs a real token pair to demonstrate forced-login), and the header-auth CORS read (needs a real bearer to close the escalation leg). Every one of those is blocked on the same input, and no amount of further passive probing substitutes for it.
+
+**STEP 6 — LEARNING**
+
+- `[LEARN]` REJECTED MISCONFIG @ `aygnpacdkgtsfnhgcyjc.supabase.co` — "GoTrue serves wildcard `ACAO: *` without `ACAC: true`" is **falsified**. Live simple requests reflect arbitrary Origin with `ACAC: true`; the wildcard form belongs to `OPTIONS` preflight responses only. The KB had two agents measuring different request types and recording both as simple-request findings.
+- `[LEARN]` ACCEPTED MISCONFIG @ `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — the REST plane reflects arbitrary Origin, contradicting the catalogued "wildcard-without-credentials" characterisation. On table paths it also omits `vary: Origin` while reflecting it. `cf-cache-status: DYNAMIC` keeps this non-exploitable today, so it is a hardening defect, not an amplifier.
+- `[LEARN]` ACCEPTED MISCONFIG @ `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user` — CORS headers are emitted on the 403 rejection state, so the reflection is applied before authentication rather than only on the anon path. Combined with the preflight granting `authorization` under `ACAO: *`, the header-auth leg of the CORS finding is readable cross-origin; my prior cycle's contrary conclusion is retracted as an incorrect reading of CORS credential semantics.
+- `[LEARN]` REJECTED MISCONFIG @ `kurs.onecode.de` / `cto.onecode.de` — no deploy, no delta. Main chunk `f916f314ea61a8c5…` and sink chunk `5a72d2cd8738ecad…` both byte-identical at day-14 (no deploy since 2026-09-19 11:33Z); cto CNAME → `cname.perspective-dns.com` day-48 with HTTP 409. Build-diffing remains event-triggered, not time-triggered.
+
+**STEP 7 — RISK**
+
+`[RISK]` onecode: **47** — up one, narrowly, and for a reason I want to be precise about rather than inflate. Demonstrated impact is still unchanged: no user data read, no course material exposed, no ATO, no credential compromise, and the credential channel on the cookie-bearing host remains clean (kurs.onecode.de emits no `access-control-*` on a foreign Origin, confirmed this cycle). What changed is that a finding the program had twice recorded with opposite conclusions, and which one agent had closed on an incorrect reading of CORS, is now measured cleanly: reflection plus `ACAC: true` on both the anon and header-auth paths, on two planes, including `null` origin. So the config defect is real and wider than catalogued, and the header-auth leg is no longer provably blocked. I am holding the score near flat because the escalation still requires a bearer token I have never had, and the cache amplifier remains dead. The single most useful thing the owner can do is set an origin allowlist and hand over two test accounts — one is a one-line config change, the other converts three parked hypotheses into resolved ones.

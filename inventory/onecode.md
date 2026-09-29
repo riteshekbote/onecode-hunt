@@ -939,3 +939,12 @@ www.onecode.de
 - CHANGED CORS on aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* is wildcard `ACAO: *` WITHOUT `ACAC: true` (live probe 17:00Z) — contradicts prior KB claim of reflected-origin + ACAC; no credentialed cross-origin 
 - CHANGED CORS on aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/* is wildcard `ACAO: *` WITHOUT `ACAC: true` — storage plane CORS-clean for credentialed requests
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+
+## 2026-09-29 02:20:53 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co` — S3-compatible storage API host confirmed live, never probed in 26 days; returns S3 XML `403 Missing signature` on GET `/storage/v1/s3`
+- NEW S3 access-key-ID oracle confirmed: bogus `Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/...` returns `400 InvalidSignature` (distinguishable from `403 Missing signature`)
+- NEW Signed URL route class confirmed on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional, bucket/existence oracle)
+- NEW Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`) is **wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests**; with valid `apikey` it reflects arbitrary `Origin` **with `ACAC: true`** — contradicts
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`) is wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)

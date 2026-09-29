@@ -793,3 +793,13 @@
 - 2026-09-28 REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
 - 2026-09-28 ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires valid attacker token pair
 - 2026-09-28 ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default `/`
+- 2026-09-29 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) — live probes show wildcard `ACAO: *` without `ACAC: true` on UNAUTHENTICATED requests; credentialed requests reflect Origin WITH `ACAC: true` — both behaviors confirmed, not mutually exclusive
+- 2026-09-29 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning — `vary: Origin, Accept-Encoding` + `cf-cache-status: DYNAMIC` confirmed; no cache amplification
+- 2026-09-29 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: wildcard CORS (no credentials) on entire GoTrue gateway — preflight uniformly `ACAO: *` with full destructive method list
+- 2026-09-29 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves `ACAO: *` on bucket-existence oracle (`400 NoSuchBucket`) for arbitrary and `null` origins
+- 2026-09-29 REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery closed — 4 candidates × 2 endpoints all 403/401
+- 2026-09-29 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed
+- 2026-09-29 REJECTED MISCONFIG @ kurs.onecode.de: no deploy — main chunk `f916f314ea61a8c5...` byte-identical day-12; build-diffing event-triggered only
+- 2026-09-29 REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
+- 2026-09-29 ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires valid attacker token pair
+- 2026-09-29 ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default `/`
