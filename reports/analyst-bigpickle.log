@@ -28677,3 +28677,338 @@ testability: AUTH_HELPED
 ```
 [RISK] onecode: 47 — held, and holding is the deliberate outcome rather than a default. This cycle bought three genuinely new tests — the per-`type` allowlist coverage, the `email_change` shape variants, and the previously unprobed `/auth/v1/callback` route — and all three came back negative, which is deflation rather than exposure. The gateway has now been tested for open redirect on every redirect primitive it actually exposes, and the last one is pinned to the allowlisted origin. The two reportable CORS facts re-reproduced exactly as catalogued with no new scope, and the fragment-injection finding is byte-identical for a 13th day. What keeps the score off the floor is structural, not new: the highest-value lead in the program (fragment injection, 55) and the highest-confidence lead in the program (RLS/BOLA, 65) are both blocked on the same single human ask, the takeover item needs the owner to attempt a claim, and the S3 plane needs a dashboard answer about the owner's own keys. Four of five assets are converged and the fifth is frozen on a build. Movement in either direction is gated on a person, not a probe, and manufacturing confidence from re-readings of unchanged headers would be the wrong use of the remaining budget.
 ```
+===== ANALYST bigpickle 2026-09-30 21:22:57 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll establish a delta baseline first, then run targeted read-only probes on the one axis I think has never been tested.
+[0m$ [0mset -e
+echo "=== A1: kurs /login HEAD (delta base) ==="
+curl -sS -o /dev/null -D- -m 20 https://kurs.onecode.de/login 2>&1 | sed -n '1,25p'
+sleep 1
+echo
+echo "=== A2: main chunk hash (deploy signal) ==="
+curl -sS -m 30 https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js -o /tmp/opencode/main.js -w "bytes=%{size_download} http=%{http_code}\n"
+sha256sum /tmp/opencode/main.js
+sleep 1
+echo
+echo "=== A3: sink chunk hash (fragment-sink regression) ==="
+curl -sS -m 30 https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js -o /tmp/opencode/sink.js -w "bytes=%{size_download} http=%{http_code}\n"
+sha256sum /tmp/opencode/sink.js
+sleep 1
+echo
+echo "=== A4: cto CNAME + TXT ==="
+dig +short @1.1.1.1 cto.onecode.de CNAME
+dig +short @1.1.1.1 cto.onecode.de A
+dig +short @1.1.1.1 cto.onecode.de TXT
+=== A1: kurs /login HEAD (delta base) ===
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Wed, 30 Sep 2026 21:20:39 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: WTw-4uZVRty1yByYs_GTAg
+x-railway-edge: lax1
+x-hikari-trace: lax1.e74w
+
+
+=== A2: main chunk hash (deploy signal) ===
+bytes=154581 http=200
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/main.js
+
+=== A3: sink chunk hash (fragment-sink regression) ===
+bytes=13880 http=200
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  /tmp/opencode/sink.js
+
+=== A4: cto CNAME + TXT ===
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+cname.perspective-dns.com.
+[0m
+No deploy, cto unchanged. Now the CORS reconciliation (the KB holds contradictory ACAC claims from two models) and the never-tested `X-Forwarded-Host` axis on GoTrue's allowlist.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== B1: GoTrue /auth/v1/settings, apikey QUERY, Origin evil.example ==="
+curl -sS -o /dev/null -D- -m 20 -H "Origin: https://evil.example" "$H/auth/v1/settings?apikey=$K" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)' 
+sleep 1
+echo
+echo "=== B2: CONTROL - no apikey, same Origin (the 'wildcard' claim) ==="
+curl -sS -o /dev/null -D- -m 20 -H "Origin: https://evil.example" "$H/auth/v1/settings" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'
+sleep 1
+echo
+echo "=== B3: GoTrue /auth/v1/user, apikey QUERY, Origin evil.example ==="
+curl -sS -o /dev/null -D- -m 20 -H "Origin: https://evil.example" "$H/auth/v1/user?apikey=$K" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache)'
+sleep 1
+echo
+echo "=== B4: PostgREST /rest/v1/profiles?select=* apikey HEADER, Origin evil.example (vary test) ==="
+curl -sS -o /dev/null -D- -m 20 -H "Origin: https://evil.example" -H "apikey: $K" "$H/rest/v1/profiles?select=*" 2>&1 | grep -iE '^(HTTP/|access-control|vary|cf-cache|cache-control|etag)'
+=== B1: GoTrue /auth/v1/settings, apikey QUERY, Origin evil.example ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== B2: CONTROL - no apikey, same Origin (the 'wildcard' claim) ===
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+
+=== B3: GoTrue /auth/v1/user, apikey QUERY, Origin evil.example ===
+HTTP/2 401 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== B4: PostgREST /rest/v1/profiles?select=* apikey HEADER, Origin evil.example (vary test) ===
+HTTP/2 503 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Accept-Encoding
+access-control-expose-headers: Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit
+[0m
+Reconciled: the wildcard form is the *unauthenticated* response, the reflected+`ACAC:true` form is the *apikey-bearing* one. Now the axis neither model has tested in 50 days — whether GoTrue's `redirect_to` allowlist is validated against a client-supplied `X-Forwarded-Host`.
+[0m$ [0mH="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+TOK="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+echo "=== C1: CONTROL - off-origin redirect_to, no XFH ==="
+curl -sS -o /dev/null -D- -m 20 "$H/auth/v1/verify?type=recovery&token=$TOK&redirect_to=https%3A%2F%2Fevil.example%2Fsteal" 2>&1 | grep -iE '^(HTTP/|location)'
+sleep 1
+echo
+echo "=== C2: X-Forwarded-Host: evil.example, off-origin redirect_to ==="
+curl -sS -o /dev/null -D- -m 20 -H "X-Forwarded-Host: evil.example" "$H/auth/v1/verify?type=recovery&token=$TOK&redirect_to=https%3A%2F%2Fevil.example%2Fsteal" 2>&1 | grep -iE '^(HTTP/|location)'
+sleep 1
+echo
+echo "=== C3: X-Forwarded-Host: evil.example, plus Forwarded header ==="
+curl -sS -o /dev/null -D- -m 20 -H "X-Forwarded-Host: evil.example" -H "Forwarded: host=evil.example;proto=https" "$H/auth/v1/verify?type=recovery&token=$TOK&redirect_to=https%3A%2F%2Fevil.example%2Fsteal" 2>&1 | grep -iE '^(HTTP/|location)'
+sleep 1
+echo
+echo "=== C4: X-Forwarded-Host on /auth/v1/callback (2nd redirect surface) ==="
+curl -sS -o /dev/null -D- -m 20 -H "X-Forwarded-Host: evil.example" "$H/auth/v1/callback?redirect_to=https%3A%2F%2Fevil.example%2Fsteal" 2>&1 | grep -iE '^(HTTP/|location)'
+sleep 1
+echo
+echo "=== C5: encoded-@ userinfo collision (never tried) ==="
+curl -sS -o /dev/null -D- -m 20 "$H/auth/v1/verify?type=recovery&token=$TOK&redirect_to=https%3A%2F%2Fkurs.onecode.de%2540evil.example%2F" 2>&1 | grep -iE '^(HTTP/|location)'
+sleep 1
+echo
+echo "=== C6: userinfo with explicit port (never tried) ==="
+curl -sS -o /dev/null -D- -m 20 "$H/auth/v1/verify?type=recovery&token=$TOK&redirect_to=https%3A%2F%2Fkurs.onecode.de%3A443%40evil.example%2F" 2>&1 | grep -iE '^(HTTP/|location)'
+=== C1: CONTROL - off-origin redirect_to, no XFH ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+
+=== C2: X-Forwarded-Host: evil.example, off-origin redirect_to ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+
+=== C3: X-Forwarded-Host: evil.example, plus Forwarded header ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+
+=== C4: X-Forwarded-Host on /auth/v1/callback (2nd redirect surface) ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_callback&error_description=OAuth+state+parameter+missing
+
+=== C5: encoded-@ userinfo collision (never tried) ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+
+=== C6: userinfo with explicit port (never tried) ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+[0m
+Allowlist holds against every header and URL-shape variant. Completing the GoTrue route map on routes never probed in 50 days — `405` vs `404` distinguishes registered from unregistered.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+for p in /auth/v1/no_such_zzz_control /auth/v1/otp /auth/v1/otp/verify /auth/v1/magiclink /auth/v1/recover /auth/v1/invite /auth/v1/confirm /auth/v1/signup /auth/v1/token/refresh /auth/v1/anonymous /auth/v1/sso /auth/v1/identities /auth/v1/logout /auth/v1/reauthenticate; do
+  out=$(curl -sS -o /dev/null -D- -m 20 -H "apikey: $K" "$H$p" 2>&1 | grep -iE '^(HTTP/|allow:)' | tr -d '\r' | paste -sd' ')
+  printf '%-34s %s\n' "$p" "$out"
+  sleep 1
+done
+sleep 1
+echo "--- storage plane, main host ---"
+for p in /storage/v1/s3 /storage/v1/object/list/x /storage/v1/object/sign/x/y; do
+  out=$(curl -sS -o /dev/null -D- -m 20 -H "apikey: $K" -H "Authorization: Bearer $K" "$H$p" 2>&1 | grep -iE '^(HTTP/|allow:)' | tr -d '\r' | paste -sd' ')
+  printf '%-34s %s\n' "$p" "$out"
+  sleep 1
+done
+/auth/v1/no_such_zzz_control       HTTP/2 404 
+/auth/v1/otp                       HTTP/2 405  allow: POST
+/auth/v1/otp/verify                HTTP/2 404 
+/auth/v1/magiclink                 HTTP/2 405  allow: POST
+/auth/v1/recover                   HTTP/2 405  allow: POST
+/auth/v1/invite                    HTTP/2 405  allow: POST
+/auth/v1/confirm                   HTTP/2 404 
+/auth/v1/signup                    HTTP/2 405  allow: POST
+/auth/v1/token/refresh             HTTP/2 404 
+/auth/v1/anonymous                 HTTP/2 404 
+/auth/v1/sso                       HTTP/2 404 
+/auth/v1/identities                HTTP/2 404 
+/auth/v1/logout                    HTTP/2 405  allow: POST
+/auth/v1/reauthenticate            HTTP/2 401 
+--- storage plane, main host ---
+/storage/v1/s3                     HTTP/2 403 
+/storage/v1/object/list/x          HTTP/2 400 
+/storage/v1/object/sign/x/y        HTTP/2 400
+[0m
+Two new facts. Now the CORS headers on those newly-mapped (mutating) routes — that's the scope question I haven't answered.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+for p in /auth/v1/otp /auth/v1/recover /auth/v1/invite /auth/v1/signup /auth/v1/magiclink; do
+  echo "--- $p  (Origin: null, apikey query) ---"
+  curl -sS -o /dev/null -D- -m 20 -H "Origin: null" "$H$p?apikey=$K" 2>&1 | grep -iE '^(HTTP/|access-control-allow-origin|access-control-allow-credentials|vary:)' | tr -d '\r'
+  sleep 1
+done
+echo
+echo "--- S3 plane on MAIN host, foreign Origin (does credentialed reflection extend here?) ---"
+curl -sS -o /dev/null -D- -m 20 -H "Origin: https://evil.example" -H "apikey: $K" -H "Authorization: Bearer $K" "$H/storage/v1/s3" 2>&1 | grep -iE '^(HTTP/|access-control|vary:)' | tr -d '\r'
+sleep 1
+echo
+echo "--- preflight on the mutating OTP route ---"
+curl -sS -o /dev/null -D- -m 20 -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type,authorization" "$H/auth/v1/otp" 2>&1 | grep -iE '^(HTTP/|access-control)' | tr -d '\r'
+--- /auth/v1/otp  (Origin: null, apikey query) ---
+HTTP/2 405 
+access-control-allow-origin: null
+vary: Origin
+access-control-allow-credentials: true
+--- /auth/v1/recover  (Origin: null, apikey query) ---
+HTTP/2 405 
+access-control-allow-origin: null
+vary: Origin
+access-control-allow-credentials: true
+--- /auth/v1/invite  (Origin: null, apikey query) ---
+HTTP/2 405 
+access-control-allow-origin: null
+vary: Origin
+access-control-allow-credentials: true
+--- /auth/v1/signup  (Origin: null, apikey query) ---
+HTTP/2 405 
+access-control-allow-origin: null
+vary: Origin
+access-control-allow-credentials: true
+--- /auth/v1/magiclink  (Origin: null, apikey query) ---
+HTTP/2 405 
+access-control-allow-origin: null
+vary: Origin
+access-control-allow-credentials: true
+
+--- S3 plane on MAIN host, foreign Origin (does credentialed reflection extend here?) ---
+HTTP/2 403 
+access-control-allow-origin: *
+
+--- preflight on the mutating OTP route ---
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: content-type,authorization
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+[0m
+## STEP 1 — DELTA
+
+```
+[NEW]      kurs.onecode.de: no deploy. GET /login → 200, private/no-cache/no-store, zero Set-Cookie, railway-hikari, x-railway-edge lax1, x-hikari-trace lax1.e74w. Main chunk 0-mbmp1iqb6hj.js = 154581 B sha256 f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca; sink chunk 1a4tqdnsy9k1l.js = 13880 B sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0 — both byte-identical, day-14 since 2026-09-19 11:33Z.
+[NEW]      CORS DISCRIMINATOR RESOLVED, resolving a live contradiction between two models. The wildcard form is the UNAUTHENTICATED response, the reflected+ACAC form is the apikey-BEARING response — the discriminator is auth state, not the plane. Measured live with a matched control: `/auth/v1/settings?apikey=<pub>` + Origin evil.example → 200, `ACAO: https://evil.example`, `ACAC: true`, `vary: Origin, Accept-Encoding`. Identical path, no apikey → 401, `ACAO: *`, no ACAC, full 9-method list, max-age 3600. The KB line "REJECTED … wildcard ACAO:* without ACAC:true … no credentialed cross-origin read" is a mis-attribution: it measured the unauthenticated state only.
+[NEW]      REJECTED OATH @ /auth/v1/*: the `redirect_to` allowlist is NOT influenceable by a client-supplied host header — an axis untested in 50 days. `X-Forwarded-Host: evil.example` alone (303 → https://kurs.onecode.de#error=…) and `X-Forwarded-Host` + `Forwarded: host=evil.example;proto=https` (byte-identical 303) both land on the allowlisted origin, matching the no-header control exactly. Same negative on the second redirect surface: `/auth/v1/callback` + XFH → 303 to `https://kurs.onecode.de?error=…`.
+[NEW]      REJECTED OATH @ /auth/v1/verify: two further allowlist-bypass URL shapes, neither previously tried, both closed. Encoded-at userinfo `https://kurs.onecode.de%40evil.example/` and port-userinfo `https://kurs.onecode.de:443@evil.example/` both 303 to `https://kurs.onecode.de#error=…`. Off-origin attempt count on this primitive is now 13 shapes across 4 headers and 4 verify types; zero off-origin redirects.
+[NEW]      GoTrue ROUTE MAP EXPANDED by 5 registered routes, never mapped in 50 days. 405 `Allow: POST` (route mounted) on `/auth/v1/otp`, `/auth/v1/magiclink`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`. 404 (not mounted) on `/auth/v1/anonymous`, `/auth/v1/sso`, `/auth/v1/identities`, `/auth/v1/confirm`, `/auth/v1/otp/verify`, `/auth/v1/token/refresh`. Every email-sending primitive in the service is registered.
+[NEW]      `/auth/v1/anonymous` returning 404 — not 405 — is independent routing-layer corroboration of `external.anonymous_users: false`. The free second `authenticated` principal is not merely disabled in settings; the route is not mounted at all. This closes the RLS hypothesis' last cheap execution path at the router, not just the config.
+[NEW]      CORS scope widened to the five mutating primitives: `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`, `/auth/v1/magiclink` all return `ACAO: null` + `ACAC: true` + `vary: Origin` on a null-origin request, and preflight on `/auth/v1/otp` returns 200 `ACAO: *` with POST and `content-type,authorization`. Any origin can therefore drive this tenant's email-sending primitives cross-origin.
+[NEW]      `/storage/v1/s3` is mounted on the MAIN api host as well as on the dedicated storage host: 403, `ACAO: *` only, no reflection, no ACAC. The S3 plane is reachable on two origins; the credentialed reflection does not extend to it on either.
+[CHANGED]   cto.onecode.de: CNAME `cname.perspective-dns.com.`, A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, unchanged. Passive probing converged.
+NO_DELTA    kurs.onecode.de pre-auth surface still {/login,/passwort-vergessen,/datenschutz,/rechtliches} at 200; all /api/*, /v1, /admin, /dashboard 307→/login. REST monitor remains formally closed (26 probes, 503↔401, never 200+rows).
+```
+
+## STEP 2 — PRIORITIZE
+
+```
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*   7.6  a=8 b=6 t=8 g=10 c=6 f=8
+       (g=10: the publishable key is public and is accepted in the query string, so the request is CORS-simple — no preflight, no attacker-set header, no credential at all. Scope now covers all five mutating email primitives, not just the read paths.)
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*  7.2  a=6 b=8 t=7 g=9 c=6 f=7
+       (b=8: course-platform PII behind RLS; holds the only open item with a remediation implication that is not a person-gated proof.)
+[PRIO] kurs.onecode.de/login                      6.8  a=6 b=8 t=7 g=9 c=5 f=4
+       (f=4: build frozen 14 days, freshness is a function of a deploy event that has not occurred.)
+```
+
+## STEP 3 — HYPOTHESES
+
+```
+[HYP] GoTrue reflects any request Origin with allow-credentials across its entire router including all five email-sending primitives, so origin isolation does not exist on the identity service
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*
+confidence: 55
+reasoning: Live 21:2xZ with a matched control, which is what resolved a contradiction two models had been carrying for days. Unauthenticated `/auth/v1/settings` → 401 + `ACAO: *` + no ACAC + full 9-method list + max-age 3600. The same path with `?apikey=<pub>` → 200 + `ACAO: https://evil.example` + `ACAC: true` + `vary: Origin, Accept-Encoding` + expose-headers `X-Total-Count, Link, X-Supabase-Api-Version` + `cf-cache-status: DYNAMIC`. `Origin: null` → `ACAO: null` + `ACAC: true`, so no attacker-controlled domain is required; a `data:` document or a sandboxed `srcdoc` iframe suffices. The key travels as a query parameter, which makes every probe a simple request. Reflection now verified on 405 paths too: `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`, `/auth/v1/magiclink` all return `ACAO: null` + `ACAC: true`, and preflight on `/auth/v1/otp` grants POST. Three caps are measured, not assumed: the plane is Bearer-only, so `credentials:'include'` yields nothing an attacker does not already hold; `cf-cache-status` is DYNAMIC and `vary: Origin` is present, so there is no cache amplifier; and the app origin emits no `access-control-*` at all on a foreign Origin, so the CORS gap does not extend to session-cookie data.
+evidence_needed: A cross-origin response on this origin carrying data the attacker did not already hold — that needs a credential channel this origin does not have, which is the same negative that caps severity. Failing that, one dashboard answer: has the Auth API "Allowed Origins" field ever been set, and were the two response forms (unauthenticated wildcard vs apikey-bearing reflection) both in scope of whatever was configured.
+verify_steps: 1) DONE — `curl -sS -o /dev/null -D- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"` → 200, ACAO reflected, ACAC true. 2) DONE — identical request minus the apikey → 401, `ACAO: *`, no ACAC. This is the pair that establishes auth state, not plane, as the discriminator. 3) DONE — `Origin: null` on `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`, `/auth/v1/magiclink` → 405 with `ACAO: null` + `ACAC: true` on all five. 4) DONE — `OPTIONS /auth/v1/otp` with `Access-Control-Request-Method: POST` → 200, `ACAO: *`, POST granted, `content-type,authorization` allowed.
+impact: LOW-MEDIUM standalone. The identity service answers and, for the five email primitives, is drivable by any origin. Nothing is disclosed today because there is no cookie to ride on this origin, and the app's own origin is CORS-clean. The reporting value is remediation specificity: because the unauthenticated and apikey-bearing responses are two different policy forms, a partial fix that sets an allowlist on one path may leave the other reflecting. Rises to HIGH the moment any cookie-based auth mode lands on this origin, with no further code change.
+testability: PASSIVE
+
+[HYP] PostgREST reflects the request Origin while omitting vary: Origin, so any shared cache in front of the gateway could serve one origin's ACAO to another
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*
+confidence: 50
+reasoning: Re-measured live with the minimal possible request: a bare `apikey` header and a foreign `Origin` on `/rest/v1/profiles?select=*` → 503 PGRST002 carrying `ACAO: https://evil.example` and `vary: Accept-Encoding` only. No forged token, no `cache-control`, no `etag`, no `age`, no `expires`, `cf-cache-status: DYNAMIC`. The sibling plane on the same host with the same key returns `vary: Origin, Accept-Encoding`. One host, two CORS policies, one missing allowlist. ACAC is a measured plane discriminator: GoTrue reflects with `ACAC: true`, PostgREST reflects with ACAC absent (0 of 3 probes), and the S3 plane is `ACAO: *` with ACAC absent.
+evidence_needed: Any PostgREST response returning 200 or 404 — both heuristically cacheable — served with a CF hit or X-Cache status while carrying an ACAO that does not match the requested Origin. That becomes observable the moment the schema cache recovers and a table is readable, or if a CDN rule is ever applied to *.supabase.co paths. Secondarily, owner confirmation that no such rule exists.
+verify_steps: 1) DONE — `curl -sS -o /dev/null -D- -H "Origin: https://evil.example" -H "apikey: <pub>" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*"` → 503, ACAO reflected, `vary: Accept-Encoding` only, DYNAMIC. 2) DONE — control on the sibling plane: `/auth/v1/settings` with the identical Origin and key → 200, ACAO reflected, `vary: Origin, Accept-Encoding`. 3) NOT ATTEMPTED — writing to or warming a cache; outside passive scope.
+impact: LOW now, MEDIUM latent. No live amplifier and no disclosure today. Reported for the remediation implication: a future permissive RLS state or a CDN rule converts this into a cross-origin data read with no further code change. A cache-busting workaround would be the wrong fix; the origin allowlist is the whole fix.
+testability: PASSIVE
+
+[HYP] A forced-login session fix persists because /login mounts a first-party client component that calls setSession() on any attacker-supplied access_token+refresh_token pair with no state, nonce or PKCE binding
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: Re-verified 21:20Z by hash, not by presence: `GET /login` → 200 with zero `Set-Cookie`, so no session pre-exists; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`, byte-identical; main chunk byte-identical at day-14. The mount is at RSC payload row 18 (module 34891, `HashSessionHandoff`), immediately followed by row 19 = `I[28420…]` (LoginForm), both carrying the identical five-chunk dependency set. It runs in a useEffect on hydration with no user interaction. Three caps are measured: the post-setSession redirect is a fixed `{invite,recovery}` map defaulting to `/`, so no open redirect — and this cycle added a fourth, the allowlist is not header-influenceable either; the `?error=` branch is a two-value enum exact-match-allowlisted server-side, so the injection cannot be dressed as a credential prompt; the Supabase origin is Bearer-only, so a victim session cannot be laundered cross-origin. The deciding fact is unprovable pre-auth — the attacker must present a genuine token pair, and this cycle established at the routing layer that `/auth/v1/anonymous` is not even mounted, so that account must arrive by invitation.
+evidence_needed: Two invited OneCode course accounts on distinct addresses. Account A signs in; the attacker extracts A's own access_token+refresh_token; the attacker serves `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>&expires_in=3600&token_type=bearer&type=magiclink` to an uninvolved second participant. Proof is a HAR showing `Set-Cookie: sb-aygnpacdkgtsfnhgcyjc-auth-token` in the victim's browser plus a 200 on the 307-gated /dashboard. The owner must additionally confirm the actionable consequence: whether enrolment, progress writes or uploaded material performed inside the injected account are billable against, or visible to, the account owner.
+verify_steps: 1) DONE — `curl -sS -o /dev/null -D- https://kurs.onecode.de/login` → 200, zero Set-Cookie, private/no-cache/no-store, railway-hikari, lax1.e74w. 2) DONE — main chunk sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` and sink chunk sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`, both byte-identical, day-14, no deploy. 3) DONE — token supply closed by routing, not just config: `GET /auth/v1/anonymous` → 404 while `GET /auth/v1/otp` → 405 `Allow: POST`, so the anonymous provider is not mounted. 4) NOT POSSIBLE pre-auth — every route that could mint a pair is closed: signup disabled, autoconfirm off, `/auth/v1/authorize` → 400 Unsupported provider, `GET /auth/v1/logout` → 405, and the `redirect_to` allowlist survived 13 off-origin shapes across 4 host headers and 4 verify types this cycle.
+impact: MEDIUM. A victim who follows the link performs every later course action inside an account the attacker controls, and if that account is a paid seat the victim unknowingly consumes someone else's licence. The attacker obtains neither the victim's credentials nor their data, so this is a business-logic integrity and attribution failure, not account takeover. Rises to HIGH if course material or completed assignments are non-transferable value, which only the owner can judge.
+testability: AUTH_HELPED
+```
+
+## STEP 4 — SELF-CRITIQUE
+
+```
+[PARKED] Cross-origin triggering of the five email primitives (implied by today's /auth/v1/otp finding): dropped at 40 and folded into the CORS hypothesis's scope rather than reported separately. An attacker page can POST recover/otp/invite for an arbitrary address, but every consequence that follows is an out-of-scope class — email flooding is a DoS-adjacent nuisance, and any account-existence signal it returned would be username enumeration, explicitly rejected. The defensible content is the scope fact, not an impact, so it belongs as scope on the CORS finding.
+[PARKED] S3 plane RLS bypass (40, unchanged): four auth shapes on `/storage/v1/s3` still return 403 `Missing signature` on both hosts, and a bogus key ID is still rejected. "Does not evaluate RLS" is a true statement about Supabase's architecture, not an observed defect here. Proof path is the owner testing their own keys — HUMAN_ONLY.
+[PARKED] cto.onecode.de takeover (58): CNAME and 409/1001 stable at day-53, TXT still contains only the CNAME line, so still no verification record. The owner's claim attempt is the only proof path; re-digging has no expected value.
+[PARKED] Post-auth BOLA via Supabase RLS gap (65): unchanged and still the highest-confidence item in the program. Every cheap route to a second principal is closed, and today added a fourth closure at the routing layer. Two invited accounts remain the only non-intrusive path.
+
+[FINAL] 1. GoTrue reflected-origin credentialed CORS across the full router incl. all five email primitives. conf 55, PASSIVE, LOW-MEDIUM. The auth-state-vs-plane discriminator is now measured with a matched control, and a contradictory KB entry is corrected.
+[FINAL] 2. Forced-login fragment session injection on /login. conf 55, AUTH_HELPED, MEDIUM. Mount, row position and both chunk hashes re-confirmed byte-identical at day-14.
+[FINAL] 3. PostgREST reflects Origin without vary: Origin. conf 50, PASSIVE, LOW now / MEDIUM latent. Re-measured on the minimal request; held at 50 deliberately, no cacheable reflected response exists on this host.
+[FINAL] 4. S3 plane independent authz plane, now on two origins. conf 40, HUMAN_ONLY, no impact demonstrated. Retained so it closes with a reason rather than being silently dropped.
+```
+
+## STEP 5 — NEXT ACTION
+
+```
+[NEXT] PROBE: whether the pre-auth settings response enumerates the redirect allowlist contents. Never checked in 50 days despite /auth/v1/settings being fetched constantly, and it decides whether a PoC can state the configured policy or must only state the observed behaviour. Read-only GET, ≤1 rps:
+curl -sS -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings"
+→ inspect the body for `uri_allow_list`, `additional_redirect_urls`, `site_url`, `uri_allow_list_enabled`. A populated `uri_allow_list` is an unauthenticated disclosure of the owner's redirect policy and would also cross-check the SITE_URL established from redirect fallbacks; an empty or absent field closes the axis.
+```
+
+## STEP 6 — LEARNING
+
+```
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the CORS discriminator is AUTHENTICATION STATE, not the plane. Proven with a matched control on one path: `/auth/v1/settings?apikey=<pub>` → 200 `ACAO: <reflected>` `ACAC: true` `vary: Origin, Accept-Encoding` expose-headers `X-Total-Count, Link, X-Supabase-Api-Version` DYNAMIC; the same path minus the apikey → 401 `ACAO: *` no ACAC full 9-method list max-age 3600. Both prior models' observations were correct measurements of different states; the KB's "REJECTED … wildcard without ACAC … no credentialed cross-origin read" is a mis-attribution and is withdrawn. Remediation must cover both forms.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the credentialed reflection extends to the five mutating email primitives — `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`, `/auth/v1/magiclink` all return `ACAO: null` + `ACAC: true` on a null-origin GET, and `OPTIONS /auth/v1/otp` grants POST with `content-type,authorization`. Scope grew; impact did not, because the consequences of cross-origin email triggering are out-of-scope classes.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/s3: the S3 plane is mounted on the MAIN api host as well as the dedicated storage host — 403 on both, `ACAO: *` only with no ACAC and no reflection. The credentialed reflection does not extend to it on either origin, and the plane is now known to be reachable on two hosts.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the `redirect_to` allowlist is not influenceable by a client-supplied host header — an axis untouched for 50 days. `X-Forwarded-Host: evil.example` alone, and `X-Forwarded-Host` + `Forwarded: host=evil.example;proto=https`, both 303 to `https://kurs.onecode.de#error=…`, byte-identical to the no-header control. Same on `/auth/v1/callback`, the second redirect surface.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: two further allowlist-bypass URL shapes closed. Encoded-at userinfo `https://kurs.onecode.de%40evil.example/` and port-userinfo `https://kurs.onecode.de:443@evil.example/` both 303 to the allowlisted origin. Off-origin attempt count on this primitive is now 13 shapes across 4 host headers and 4 verify types, with zero off-origin redirects.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: token supply is closed at the ROUTER, not only in config. `GET /auth/v1/anonymous` → 404 while the five real auth primitives return 405 `Allow: POST`, so the anonymous provider is not mounted at all. This independently corroborates `external.anonymous_users: false` and removes the last cheap route to a second `authenticated` principal for the RLS hypothesis.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-14. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; both byte-identical. `GET /login` → 200, zero Set-Cookie, `private, no-cache, no-store`, `railway-hikari`, `x-railway-edge: lax1`, `x-hikari-trace: lax1.e74w`. Build-diffing stays event-triggered; a time cadence here costs requests and returns the same hash.
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, unchanged. Passive probing of this asset is fully converged; only the owner's claim attempt advances it.
+[LEARN] REJECTED MISCONFIG @ own KB (self-correction of a 2-day-old entry): the line "REJECTED MISCONFIG @ …/auth/v1/*: live probes show wildcard ACAO:* without ACAC:true … no credentialed cross-origin read" measured the unauthenticated response only and generalised it to the plane. Live with a matched control today, the apikey-bearing response reflects the Origin with ACAC:true. The REJECTED verdict is withdrawn; scope and the MEDIUM ceiling are unaffected because the Bearer-only negative still holds.
+```
+
+## STEP 7 — RISK
+
+```
+[RISK] onecode: 47 — held, and holding is the outcome of the work rather than a default. This cycle's substantive product was correction, not exposure: a live contradiction between two models over the GoTrue CORS finding was resolved with a matched control, and a two-day-old REJECTED verdict was withdrawn as a mis-attribution. That materially improves the accuracy of what gets reported and changes the actual risk score not at all. The two KB's own error modes — generalising "uniform across paths" from a sample, and generalising an unauthenticated response to an authenticated one — have now each been caught by live measurement on this asset. New coverage is real but consequence-free: five newly-mapped email primitives do reflect Origin with ACAC, but the only things reachable through them are email flooding and possible account enumeration, both out-of-scope classes, so I am not converting scope into severity. Four hosts are converged, the fifth is frozen on a 14-day-old build, and both the highest-value lead (fragment injection, 55) and the highest-confidence lead (RLS/BOLA, 65) are blocked on the same single human ask. I will not move this number in either direction from re-readings of unchanged headers.
+```

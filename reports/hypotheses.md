@@ -3173,3 +3173,28 @@
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-52, HTTP 409, zero TXT — passive probing fully converged
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default 
+
+## RANKED HYPOTHESES 2026-09-30 21:22:57 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [55] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: GoTrue reflects any request Origin with allow-credentials across its entire router including all five email-sending primitives, so origin isolation does not exist on the identity service (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: whether the pre-auth settings response enumerates the redirect allowlist contents. Never checked in 50 days despite /auth/v1/settings being fetched const
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the CORS discriminator is AUTHENTICATION STATE, not the plane. Proven with a matched control on
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the credentialed reflection extends to the five mutating email primitives — `/auth/v1/otp`, `/a
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/s3: the S3 plane is mounted on the MAIN api host as well as the dedicated storage host — 403 on
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the `redirect_to` allowlist is not influenceable by a client-supplied host header — an axis untouche
+- LEARN: REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: two further allowlist-bypass URL shapes closed. Encoded-at userinfo `https://kurs.onecode.de%40
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: token supply is closed at the ROUTER, not only in config. `GET /auth/v1/anonymous` → 404 while 
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-14. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, u
+- LEARN: REJECTED MISCONFIG @ own KB (self-correction of a 2-day-old entry): the line "REJECTED MISCONFIG @ …/auth/v1/*: live probes show wildcard ACAO:* without ACAC:tr
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) — live probes show wildcard ACAO: * without ACAC: true on UN
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning — vary: Origin, Accept-Encoding + cf-cache-status: DYNAMIC confirmed; no cache ampli
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: wildcard CORS (no credentials) on entire GoTrue gateway — preflight uniformly ACAO: * with full destructi
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves ACAO: * on bucket-existence oracle (400 NoSuchBucket) for arbitrary and null origins
+- LEARN: REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 service_role token forgery closed — 4 candidates × 2 endpoints all 403/401
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: /analytics/v1/* returns 404 — analytics plane not deployed
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy — main chunk f916f314ea61a8c5... byte-identical day-13; build-diffing event-triggered only
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-52, HTTP 409, zero TXT — passive probing fully converged
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on /login RSC payload; parses URL fragment, calls setSession() no state/nonce/PKCE; but requires val
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes push("/") post-login; HashSessionHandoff next-map = {invite:/einladung,recovery:/passwort-neu} default /

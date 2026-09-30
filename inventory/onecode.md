@@ -1060,3 +1060,21 @@ www.onecode.de
 - CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
 - CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+
+## 2026-09-30 21:22:57 UTC
+- NEW kurs.onecode.de: no deploy. GET /login → 200, private/no-cache/no-store, zero Set-Cookie, railway-hikari, x-railway-edge lax1, x-hikari-trace lax1.e74w. Main chunk 0-mbmp1iqb6hj.js = 154581 B sha256 f
+- NEW CORS DISCRIMINATOR RESOLVED, resolving a live contradiction between two models. The wildcard form is the UNAUTHENTICATED response, the reflected+ACAC form is the apikey-BEARING response — the discrimi
+- NEW REJECTED OATH @ /auth/v1/*: the `redirect_to` allowlist is NOT influenceable by a client-supplied host header — an axis untested in 50 days. `X-Forwarded-Host: evil.example` alone (303 → https://kurs.
+- NEW REJECTED OATH @ /auth/v1/verify: two further allowlist-bypass URL shapes, neither previously tried, both closed. Encoded-at userinfo `https://kurs.onecode.de%40evil.example/` and port-userinfo `https:
+- NEW GoTrue ROUTE MAP EXPANDED by 5 registered routes, never mapped in 50 days. 405 `Allow: POST` (route mounted) on `/auth/v1/otp`, `/auth/v1/magiclink`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/s
+- NEW `/auth/v1/anonymous` returning 404 — not 405 — is independent routing-layer corroboration of `external.anonymous_users: false`. The free second `authenticated` principal is not merely disabled in sett
+- NEW CORS scope widened to the five mutating primitives: `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`, `/auth/v1/magiclink` all return `ACAO: null` + `ACAC: true` + `vary: Origi
+- NEW `/storage/v1/s3` is mounted on the MAIN api host as well as on the dedicated storage host: 403, `ACAO: *` only, no reflection, no ACAC. The S3 plane is reachable on two origins; the credentialed refle
+- CHANGED cto.onecode.de: CNAME `cname.perspective-dns.com.`, A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, unchanged. Passive probing converged.
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage API confirmed live (403 Missing signature), independent SigV4 authz plane bypassing Supabase RLS, never probed in 26 da
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*` — 5th CORS plane (edge functions); simple requests return ACAO:* no ACAC vary:Accept-Encoding only; preflight grants NO access-control-allow-methods; 
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket` — 6th CORS plane; preflight grants full 9-method destructive list (max-age 3600, ACAO:*); apikey query now reaches Cloudflare WS tunnel (500 er
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/callback` — REGISTERED GoTrue OAuth callback route reachable pre-auth despite all external.* providers false; GET → 303 to SITE_URL with error_code=bad_oauth_
+- CHANGED `kurs.onecode.de` — no deploy day-13; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; HashSessionHandoff still mou
+- CHANGED `cto.onecode.de` — CNAME cname.perspective-dns.com day-52, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
+- CHANGED Supabase GoTrue CORS — re-verified router-wide: /auth/v1/ root and /auth/v1/no_such_zzz both return 404 with ACAO:<reflected> + ACAC:true + vary: Origin; credentialed reflection works via apikey query
