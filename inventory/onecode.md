@@ -1011,3 +1011,23 @@ www.onecode.de
 - CHANGED `cto.onecode.de`: CNAME `cname.perspective-dns.com` day-50, HTTP 409, zero verification TXT — passive probing fully converged
 - CHANGED `kurs.onecode.de`: no deploy day-12; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+
+## 2026-09-30 05:02:48 UTC
+- NEW Supabase edge-functions plane (`/functions/v1/*`) is a 5th plane never entered into the CORS matrix. Simple requests return `ACAO: *`, no `ACAC`, `vary: Accept-Encoding` only, and `Origin: null` yield
+- NEW The edge-plane preflight grants **NO** `access-control-allow-methods` line at all — it returns only `ACAO: *` + `access-control-allow-headers: authorization, x-client-info, apikey`. This FALSIFIES the
+- NEW Named edge-function probing (13 semantic candidates: admin, stripe-webhook, send-email, email, cron, cleanup, delete-account, export, import, webhook, course, progress, enroll) returns byte-identical 
+- NEW Realtime plane is a 6th plane never CORS-tested. `/realtime/v1/websocket?apikey=<pub>` now returns **500 `error code: 1101`** (Cloudflare WS-tunnel failure), NOT the 403 recorded on 2026-09-25. The ap
+- NEW Realtime preflight grants the **full destructive method list** (`GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT`, max-age 3600) with `ACAO: *`. This is the only plane besides GoTrue/PostgREST/st
+- CHANGED kurs.onecode.de `/login` page sha256 `99798c7d94a15abf…`, 18 702 B, `private, no-cache, no-store`, zero `Set-Cookie`, `railway-hikari`, `x-railway-edge: lax1`, `x-hikari-trace: lax1.v9kt`. Main chunk 
+- CHANGED `HashSessionHandoff` (module 34891) still mounted on `/login` RSC payload and still immediately followed by row 19 = `I[28420…]` (LoginForm), same 5-chunk dependency set. Sink mount unchanged.
+- CHANGED cto.onecode.de day-52: CNAME `cname.perspective-dns.com.`, A 104.18.3.73/104.18.2.73, TXT = CNAME line only (zero verification records), HTTP 409, CF-RAY a430a7e15a4edfe0-SEA. Unchanged.
+- CHANGED GoTrue primary finding re-verified alive: `/auth/v1/settings?apikey=<pub>` + `Origin: https://evil.example` → 200, `ACAO: https://evil.example`, `ACAC: true`, `vary: Origin, Accept-Encoding`, expose-h
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), never probed in 26 days; independent SigV4 authz bypasses Supabase RLS
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects `Origin` WITHOUT `vary: Origin`
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — CORS preflight uniformly `ACAO: *` with full destructive method list
+- CHANGED `cto.onecode.de`: CNAME `cname.perspective-dns.com` day-50, HTTP 409, zero verification TXT — passive probing fully converged
+- CHANGED `kurs.onecode.de`: no deploy day-12; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)

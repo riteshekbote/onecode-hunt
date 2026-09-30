@@ -3108,3 +3108,28 @@
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default 
+
+## RANKED HYPOTHESES 2026-09-30 05:02:48 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [55] aygnpacdkgtsfnhgcyjc.supabase.co: Supabase's six service planes share one root cause — no origin allowlist anywhere — but the edge plane is the only one whose preflight withholds the method list, so the destructive cross-origin surface is bounded by the edge runtime rather than by CORS alone (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request two invited OneCode course accounts on distinct email addresses from bugs.olivermaicher.eu, stating that account A's own access_token + refresh_t
+- NEXT(hypotheses-nemotron3.txt): PROBE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/aut
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co (edge plane, /functions/v1/*): the edge-functions plane is a fifth CORS plane that had never been entered 
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co (realtime plane, /realtime/v1/*): realtime is a sixth CORS plane, also never tested. Its preflight grants 
+- LEARN: REJECTED MISCONFIG @ own KB (self-correction of a 48-day-old generalisation): the claim that CORS preflight is "uniformly ACAO:* with the full destructive metho
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*: no deployed edge functions, and this negative is sound rather than an artefact. 13 semanti
+- LEARN: CHANGED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: the publishable key is accepted and the request now reaches the Cloudflare WS tunnel
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-13. `GET /login` → 200, 18 702 B, page sha256 99798c7d94a15abf…, private/no-cache/no-store, zero Set-Cookie
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff (module 34891) still mounted on the /login RSC payload at row 18, immediately followed by row 19 = I[28420 (
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com. → A 104.18.3.73/104.18.2.73, TXT = CNAME line only with zero verification records, HTTP 40
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the primary CORS finding re-verified live and unchanged — /auth/v1/settings?apikey=<pub> with O
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) — live probes show wildcard `ACAO: *` without `ACAC: true` o
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning — `vary: Origin, Accept-Encoding` + `cf-cache-status: DYNAMIC` confirmed; no cache a
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: wildcard CORS (no credentials) on entire GoTrue gateway — preflight uniformly `ACAO: *` with full destruc
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves `ACAO: *` on bucket-existence oracle (`400 NoSuchBucket`) for arbitrary and `null` o
+- LEARN: REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery closed — 4 candidates × 2 endpoints all 403/401
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy — main chunk `f916f314ea61a8c5...` byte-identical day-12; build-diffing event-triggered only
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default 

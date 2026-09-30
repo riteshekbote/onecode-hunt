@@ -1,23 +1,19 @@
-## 2026-09-29 23:49:07 UTC [target] (model nemotron3)
-[NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` confirmed live (GET /storage/v1/s3 → 403 S3 XML), never probed in 26 days; independent SigV4 authz bypasses Supabase RLS
-[NEW] S3 access-key-ID oracle confirmed: `403 Missing signature` (no auth) vs `400 InvalidSignature` (bogus credential) distinguishable
-[NEW] Signed URL route class on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional)
-[NEW] Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded
-[CHANGED] CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z 09-29)
-[CHANGED] CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
-[CHANGED] KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+## 2026-09-30 04:59:05 UTC [target] (model nemotron3)
+[NEW] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), never probed in 26 days; independent SigV4 authz bypasses Supabase RLS
 [NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects `Origin` WITHOUT `vary: Origin`
 [NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — CORS preflight uniformly `ACAO: *` with full destructive method list
 [CHANGED] `cto.onecode.de`: CNAME `cname.perspective-dns.com` day-50, HTTP 409, zero verification TXT — passive probing fully converged
 [CHANGED] `kurs.onecode.de`: no deploy day-12; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
 [CHANGED] Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+[CHANGED] CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (live probe 15:34Z 09-29)
+[CHANGED] CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+[CHANGED] KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
 [PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,8.75,attack_surface=9 business_value=7 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=10
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/,8.15,attack_surface=8 business_value=7 tech_exposure=8 gate_ease=10 cloud_surface=8 freshness=9
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign,7.50,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.20,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
 [PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public,6.60,attack_surface=6 business_value=5 tech_exposure=7 gate_ease=8 cloud_surface=8 freshness=8
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.20,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign,7.50,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9
 [HYP] S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
@@ -31,7 +27,7 @@ testability: PASSIVE
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize}
 confidence: 80
-reasoning: Live probe 2026-09-29 15:34Z: with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, `GET /auth/v1/settings` returns 200 with `ACAO: https://evil.example` + `ACAC: true` + `expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. Unauthenticated requests get wildcard `ACAO: *` without ACAC. `/auth/v1/user` requires valid JWT (401 without) but reflects Origin with ACAC. Preflight uniformly allows full destructive method list. No origin allowlist configured.
+reasoning: Live probe 2026-09-29 15:34Z: with `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, `GET /auth/v1/settings` returns 200 with `ACAO: https://evil.example` + `ACAC: true` + `expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. Unauthenticated requests get wildcard `ACAO: *` without ACAC. `/auth/v1/user` requires valid JWT (401 without) but reflects Origin with ACAC. Preflight uniformly allows full destructive method list. No origin allowlist configured. Apikey accepted as query parameter (preflight-free simple GET).
 evidence_needed: Victim visits attacker page with `fetch('https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings', {headers:{apikey:'...'}}).then(r=>r.json()).then(console.log)` → reads auth config cross-origin with credentials
 verify_steps: PASSIVE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings"` (validates reflected ACAO + ACAC:true); PASSIVE: same for `/auth/v1/user` with valid JWT
 impact: Cross-origin read of authenticated identity data (user profile, session, factors) by any origin — MEDIUM (requires valid apikey/JWT; session cookie host `kurs.onecode.de` is CORS-clean so no direct app session theft); owner-fixable via `allowed_origins` config
