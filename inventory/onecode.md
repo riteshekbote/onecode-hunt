@@ -1031,3 +1031,15 @@ www.onecode.de
 - CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
 - CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+
+## 2026-09-30 11:06:36 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage API confirmed live (403 Missing signature), never probed in 26 days; independent SigV4 authz plane bypasses Supabase RL
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*` — edge-functions plane is 5th CORS plane; simple requests return ACAO:* no ACAC vary:Accept-Encoding only; preflight grants NO access-control-allow-me
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket` — realtime is 6th CORS plane; preflight grants full 9-method destructive list with max-age 3600 ACAO:*; apikey query now reaches Cloudflare WS 
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects Origin WITHOUT vary:Origin; CORS preflight uniformly ACAO:* with full destructive metho
+- CHANGED `cto.onecode.de`: CNAME `cname.perspective-dns.com` day-52, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
+- CHANGED `kurs.onecode.de`: no deploy day-13; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; HashSessionHandoff still 
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)

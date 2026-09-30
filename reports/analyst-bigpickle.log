@@ -28282,3 +28282,184 @@ testability: PASSIVE
 === STEP 7 — RISK ===
 [RISK] onecode: 47 — flat, and deliberately not moved. The cycle's real output is two falsifications rather than two new exposures, and both cut against inflation. The KB's cleanest-sounding generalisation — CORS preflight uniform across the whole gateway with the full destructive method list on every plane — is now shown to be false, because the edge plane emits no method list at all; that shrinks the claimed blast radius and makes the writeup more defensible. The other edge/realtime surface is equally inert: no edge functions exist with a sound named-path control, and realtime stays 401 without a key, so a plane added to the matrix added zero reachable capability. Meanwhile the primary GoTrue finding re-verified exactly as catalogued with no new scope, and its ceiling stays pinned by the Bearer-only negative control. Downward pressure remains entirely structural: the pre-auth app surface has been exhausted for 49 days against a byte-identical 13-day-old build, the two highest-value leads in the program (fragment injection at 55, RLS/BOLA at 65) are both blocked on the same single human ask, the takeover item needs the owner to attempt a claim, and the S3 plane needs a dashboard answer. The next movement in either direction is gated on a person, not on a probe, and manufacturing confidence from re-readings of unchanged headers would be the wrong use of the budget.
 ```
+===== ANALYST bigpickle 2026-09-30 11:06:36 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll run a minimal read-only verification set before reporting.
+[0m$ [0mprintf '%s' 'sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' | sha256sum; command -v curl >/dev/null && echo "curl ok"
+43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a  -
+curl ok
+[0m
+Publishable-key digest reproduces (`43ccb834…`), confirming the resolved provenance defect. Now the read-only probes, spaced ≥1s.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== 1. kurs /login ==="
+curl -sS -D- -o /tmp/opencode/login.html https://kurs.onecode.de/login | grep -iE '^(HTTP|set-cookie|server|x-railway-edge|x-hikari-trace|cache-control|content-type)'
+wc -c < /tmp/opencode/login.html | tr -d ' ' | sed 's/^/bytes=/'
+sha256sum /tmp/opencode/login.html | cut -c1-24 | sed 's/^/page_sha256=/'
+sleep 1
+echo "=== 2. GoTrue CORS primary (reflected origin + ACAC) ==="
+curl -sS -D- -o /dev/null -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=$K" | grep -iE '^(HTTP|access-control|vary|cf-cache-status|content-type)'
+sleep 1
+echo "=== 3. storage plane ==="
+curl -sS -D- -o /tmp/opencode/bucket.json -H "apikey: $K" -H "Authorization: Bearer $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" | grep -iE '^(HTTP|access-control-allow-origin|cf-cache-status)'
+cat /tmp/opencode/bucket.json; echo
+=== 1. kurs /login ===
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+server: railway-hikari
+x-railway-edge: lax1
+x-hikari-trace: lax1.e74w
+bytes=18702
+page_sha256=99798c7d94a15abf93ec349b
+=== 2. GoTrue CORS primary (reflected origin + ACAC) ===
+HTTP/2 200 
+content-type: application/json
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+=== 3. storage plane ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+[]
+[0m
+[0m$ [0mecho "=== 4. main chunk (deploy detector) ==="
+curl -sS -o /tmp/opencode/main.js -w 'http=%{http_code} bytes=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js
+sha256sum /tmp/opencode/main.js
+sleep 1
+echo "=== 5. sink chunk (fragment handler detector) ==="
+curl -sS -o /tmp/opencode/sink.js -w 'http=%{http_code} bytes=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js
+sha256sum /tmp/opencode/sink.js
+sleep 1
+echo "=== 6. realtime plane state (last cycle: 1101) ==="
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+curl -sS -D- -o /dev/null -m 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket?apikey=$K&vsn=1.0.0" | grep -iE '^(HTTP|cf-|x-served-by)'
+sleep 1
+echo "=== 7. realtime no-key control ==="
+curl -sS -m 20 -o /dev/null -w 'http=%{http_code}\n' "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket?vsn=1.0.0"
+=== 4. main chunk (deploy detector) ===
+http=200 bytes=154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/main.js
+=== 5. sink chunk (fragment handler detector) ===
+http=200 bytes=13880
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  /tmp/opencode/sink.js
+=== 6. realtime plane state (last cycle: 1101) ===
+HTTP/2 500 
+cf-ray: a432c0977cf21d3e-LAX
+=== 7. realtime no-key control ===
+http=401
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "=== sink mount in /login RSC payload ==="
+grep -o '18:I\[34891,\[[^]]*\][^]]*\]' login.html | head -c 300; echo
+grep -c 'HashSessionHandoff' login.html | sed 's/^/HashSessionHandoff_refs=/'
+echo "=== chunk refs served on /login ==="
+grep -oE 'chunks/[A-Za-z0-9_.-]+\.js' login.html | sort -u | wc -l | sed 's/^/distinct_chunk_refs=/'
+grep -oE 'chunks/[A-Za-z0-9_.-]+\.js' login.html | sort -u
+echo "=== any privileged key material in sink chunk? ==="
+grep -cE 'eyJ[A-Za-z0-9_-]+\.|service_role|JWT_SECRET|secret_key' sink.js | sed 's/^/privileged_material_hits=/'
+=== sink mount in /login RSC payload ===
+18:I[34891,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunks/4310-_brt1a3g.js\",\"/_next/static/chunks/1ymt1shyhmu-4.js\",\"/_next/static/chunks/1a4tqdnsy9k1l.js\",\"/_next/static/chunks/0-lpao5_i9htd.js\"],\"HashSessionHandoff\"]
+
+HashSessionHandoff_refs=1
+=== chunk refs served on /login ===
+distinct_chunk_refs=13
+chunks/0-lpao5_i9htd.js
+chunks/0-mbmp1iqb6hj.js
+chunks/08ttfj81-47mu.js
+chunks/0cz1d0mv5g_q7.js
+chunks/1a4tqdnsy9k1l.js
+chunks/1ymt1shyhmu-4.js
+chunks/2i51e627rllld.js
+chunks/2n1zydk_92chn.js
+chunks/2ufbqzbeyam3w.js
+chunks/3fntmmi971322.js
+chunks/3mc6dra1m0098.js
+chunks/4310-_brt1a3g.js
+chunks/turbopack-2a8cgfwu75lsu.js
+=== any privileged key material in sink chunk? ===
+privileged_material_hits=0
+[0m
+Probes complete: 8 requests, all GET/HEAD, ≤1rps, no mutation, no credentials beyond the public publishable key.
+
+---
+
+## STEP 1 — DELTA
+
+**NO_DELTA** — every catalogued surface reproduced byte-identically. The program has now gone 14 days on an unchanged build with an exhausted pre-auth surface; the confirmations below are recorded so the negative is auditable, not asserted.
+
+- `[CHANGED]` `aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket` — 500 persists, second independent observation: `?apikey=<pub>` → 500 (CF-Ray `a432c0977cf21d3e-LAX`, new PoP from last cycle's `SEA`), no-apikey control → 401. The 09-25 `403` → `1101`/`500` transition is **stable, not transient**. The auth boundary holds (401 pre-key); this is a post-key routing state, not an authz bypass. Reclassify from pending-anomaly to settled.
+- `[NO_DELTA]` `kurs.onecode.de/login` — 200, 18 702 B, page sha256 `99798c7d94a15abf93ec349b`, `private, no-cache, no-store, max-age=0, must-revalidate`, zero `Set-Cookie`, `railway-hikari`, `x-railway-edge: lax1`, `x-hikari-trace: lax1.e74w`.
+- `[NO_DELTA]` deploy detectors, both byte-identical: main `0-mbmp1iqb6hj.js` = 154 581 B / sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink `1a4tqdnsy9k1l.js` = 13 880 B / sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`. 13 distinct chunk refs. Day-14, no deploy.
+- `[NO_DELTA]` sink mount: `18:I[34891,["3fntmmi971322.js","4310-_brt1a3g.js","1ymt1shyhmu-4.js","1a4tqdnsy9k1l.js","0-lpao5_i9htd.js"],"HashSessionHandoff"]` present in the RSC payload. Sink chunk grep: 0 hits for `eyJ*.`/`service_role`/`JWT_SECRET`/`secret_key` — still no privileged key material shipped to the browser.
+- `[NO_DELTA]` GoTrue primary CORS re-verified live: `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.example` → 200, `ACAO: https://evil.example`, `ACAC: true`, `vary: Origin, Accept-Encoding`, `expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`, `cf-cache-status: DYNAMIC`.
+- `[NO_DELTA]` storage plane: `GET /storage/v1/bucket` → 200 `[]`, `ACAO: *`, `DYNAMIC`.
+- `[RE-VERIFIED]` provenance defect stays resolved, recomputed independently: sha256(`sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`) = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`. The `870cf518…` value is a trailing-newline artifact. Any PoC must cite `43ccb834`.
+
+## STEP 2 — PRIORITIZE
+
+- `[PRIO]` aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*,8.6,axis a=7 b=7 t=9 g=10 c=4 f=7
+- `[PRIO]` aygnpacdkgtsfnhgcyjc.supabase.co (six-plane CORS surface),6.2,axis a=7 b=6 t=9 g=10 c=4 f=6
+- `[PRIO]` kurs.onecode.de/login,5.0,axis a=5 b=8 t=6 g=9 c=3 f=5
+- `[PRIO]` aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*,4.6,axis a=6 b=8 t=6 g=9 c=4 f=5
+- `[DEPRIORIZED]` aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 — **was ranked 75, the highest item in the program. I am removing it from the top rank; reasoning in STEP 4.** Its true score is ~3.0 (a=4 b=3 t=5 g=10 c=2 f=2): nothing is reachable without credentials the tester does not have.
+
+## STEP 3 — HYPOTHESES
+
+[HYP] GoTrue reflects any request Origin with credentials allowed across its entire router, defeating origin isolation on the identity service
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*
+confidence: 55
+reasoning: Re-verified live this cycle: 200 with `ACAO: https://evil.example` + `ACAC: true` + `vary: Origin, Accept-Encoding` on `/auth/v1/settings?apikey=<pub>`. The `apikey` is a public value, so gating on it is not a boundary; and the query-string form makes the request CORS-simple, so no preflight and no attacker-set header are required. `Origin: null` is reflected the same way, which needs no attacker domain at all. Scope is router-wide (404, 405, 401 and 200 paths all reflect), so this is a property of the gateway, not a sampled route. Two measured caps hold. First, the plane is Bearer-only: apikey + forged session cookie → 401 "requires a valid Bearer token"; cookie alone → 401 "No API key found", so `credentials:'include'` yields nothing an attacker lacks. Second, the cache amplifier is unreachable — `vary: Origin` is present here, `cf-cache-status: DYNAMIC` throughout. Six planes share the missing-allowlist root cause, but the edge plane emits no `access-control-allow-methods`, so the policy is two forms, not one.
+evidence_needed: A cross-origin response on this origin that carries data the attacker did not already possess. That requires a credential channel this origin does not have, which is the same negative that caps severity. Failing that, owner confirmation that the Auth API "Allowed Origins" setting has never been configured — a one-question dashboard answer that converts this from observed-policy to owner-admitted.
+verify_steps: 1) DONE — `GET /auth/v1/settings?apikey=sb_publishable_…&Origin` → 200, `ACAO: https://evil.example`, `ACAC: true`, `vary: Origin, Accept-Encoding`, expose-headers present, DYNAMIC. 2) DONE (prior cycles) — `/auth/v1/`, `/auth/v1/no_such_zzz` → 404 with the same header set; `/auth/v1/token` → 405; `/auth/v1/user` → 401; router-wide, not route-sampled. 3) DONE — Bearer-only negative: apikey + forged base64url `sb-…-auth-token` cookie carrying an `alg:none` bearer → 401; cookie without apikey → 401. 4) NOT ATTEMPTED — populating a cache; requires a write.
+impact: LOW-MEDIUM standalone, MODIUM as scope evidence across the six-plane gateway. The identity service accepts and answers any origin's credentialed request. Impact is bounded because there is no cookie to ride on and no data to read today, so nothing is disclosed now. It is owner-fixable in one config field, and a future cookie-based auth mode on this origin would make it immediately exploitable — which is the reason to report it rather than park it.
+testability: PASSIVE
+
+[HYP] A forced-login session fix on /login persists because an injected session is written to a base64url cookie with no binding to the browser that received it
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: Unchanged in substance, re-confirmed today: `GET /login` returns 18 702 B with no `Set-Cookie`, so no session pre-exists; the RSC payload instantiates module 34891 `HashSessionHandoff` at row 18, which parses `window.location.hash` for `access_token`+`refresh_token` and calls `setSession()` in a `useEffect` on hydration, with no state, nonce, PKCE or `sub` binding. The mount has now survived 14 days without a deploy, which is the strongest available evidence this is stable application code. Three caps are measured and hold: the post-`setSession` redirect is a fixed two-entry map defaulting to `/` (no open redirect); the error branch is a two-value enum exact-match-allowlisted server-side, so `?error=` reflects zero bytes (no phishing dressing); and the Supabase origin is Bearer-only, so a victim session cannot be laundered cross-origin. The deciding fact remains unprovable pre-auth: the attacker must present a genuine token pair, and anonymous sign-in is disabled with signup disabled, so that account must arrive by invitation.
+evidence_needed: Two invited course accounts on distinct addresses. Account A signs in; the attacker extracts A's own access_token+refresh_token; the attacker serves `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>&expires_in=3600&token_type=bearer&type=magiclink` to an uninvolved second participant. Proof is a HAR showing `Set-Cookie: sb-aygnpacdkgtsfnhgcyjc-auth-token` in the victim's browser plus a 200 on the 307-gated `/dashboard`. The owner must also confirm the actionable consequence — whether enrolment, progress writes or uploaded material performed inside the injected account are billable against, or visible to, the account owner.
+verify_steps: 1) DONE — `GET https://kurs.onecode.de/login` → 200, 18 702 B, sha256 `99798c7d94a15abf…`, `private, no-cache, no-store`, zero `Set-Cookie`. 2) DONE — sink chunk sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (13 880 B) byte-identical; main chunk `f916f314…` byte-identical; 13 chunk refs stable; mount row 18 confirmed. 3) DONE — 0 hits for JWTs/`service_role`/`JWT_SECRET` in the sink chunk. 4) NOT POSSIBLE pre-auth — no path mints a token pair: `external.anonymous_users:false`, `disable_signup:true`, `mailer_autoconfirm:false`, `/auth/v1/authorize` → 400 Unsupported provider, `GET /auth/v1/logout` → 405, `redirect_to` allowlist exact-origin across 8 variants.
+impact: MEDIUM. A victim who follows the link performs every later course action inside an account the attacker controls, and if that account is a paid seat the victim unknowingly consumes someone else's licence. The attacker gets neither the victim's credentials nor their data, so this is not account takeover — it is a business-logic integrity and attribution failure. Would rise to HIGH if course material or completed assignments are non-transferable value, which only the owner can judge.
+testability: AUTH_HELPED
+
+[HYP] The S3-compatible storage plane is an independently-configured authorization surface that does not evaluate Postgres RLS, so an owner-held S3 key with over-broad IAM would read course material regardless of table policy
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
+confidence: 40
+reasoning: Stated at the confidence the evidence actually supports, which is well below the 75 this item has been carrying. Observed: the plane is pre-auth reachable and returns AWS S3 XML; signature verification precedes every other check; four auth shapes (none, bearer only, apikey+bearer, path-style read) all return 403 `AccessDenied`/Missing signature; a bogus key ID returns a distinguishable `InvalidAccessKeyId`. So the plane is *closed* to the tester, and no read, bucket enumeration, or RLS bypass has been demonstrated. The "does not evaluate RLS" clause is a correct statement about Supabase's architecture in general, not an observed defect in this program. The hypothesis is only about the owner's own credential hygiene, which the program does not grant access to assess.
+evidence_needed: Not obtainable within scope. It requires the owner to confirm they have S3 access keys issued and, separately, to test read access with them — an action only they can take. Absent that, the item is an architecture note with no POC, which the program scopes out.
+verify_steps: 1) DONE (prior) — four auth shapes → 403 `Missing signature`; bogus key ID → 400 `InvalidAccessKeyId`; `ACAO: *` with `ACAC` absent, so no credentialed cross-origin path exists here either. 2) NOT ATTEMPTED and not to be attempted — obtaining or guessing S3 credentials; that is credential-attack class, out of scope.
+impact: NONE demonstrated. As a report it would be a scanner finding without a POC, which the program rejects. Retained only so the parked item is closed with a reason rather than silently dropped.
+testability: HUMAN_ONLY
+
+## STEP 4 — SELF-CRITIQUE
+
+- `[PARKED]` S3 SigV4 plane "bypasses RLS" — **deflated from 75 to 40 and parked.** This was the highest-ranked item in the program and it does not survive scrutiny. Every auth shape returns 403; no read, listing, or RLS bypass was ever demonstrated; the load-bearing claim is a general property of Supabase's S3 layer, not a measured fact about OneCode; and closing it requires credentials the tester must not seek. Reporting it as-is would be precisely the "scanner report without POC" class the program excludes. Keeping it at 75 also distorted the whole ranking, because it was crowding out the two findings that do have POC paths. The underlying architecture point belongs in the writeup as one sentence of context, not as a ranked lead.
+- `[PARKED]` PostgREST `vary: Origin` omission (conf 50) — no cacheable reflected response can exist: the only reflected statuses are 401/403/503, none heuristically cacheable under RFC 9111, and `cf-cache-status` is DYNAMIC. The amplifier becomes observable only if the schema cache recovers or a CDN rule is added to `*.supabase.co`. Held, not dropped, because the remediation advice is live: an origin allowlist is the whole fix and a cache-busting workaround would be wrong.
+- `[PARKED]` Realtime post-key 500 — now a settled negative, not a lead. Second observation confirms stability, the pre-key 401 control holds, and there is no credential to ride.
+- `[FINAL]` 1. **GoTrue reflected-origin credentialed CORS (router-wide).** conf 55, PASSIVE, LOW-MEDIUM standalone / MODIUM as scope evidence. Live-verified this cycle; ceiling pinned by a tested negative control.
+- `[FINAL]` 2. **Forced-login session fix via URL-fragment session injection on /login.** conf 55, AUTH_HELPED, MEDIUM. Mount, chunk hashes, row position and all three impact caps byte-identical today, day-14.
+- `[FINAL]` 3. **PostgREST reflects Origin without `vary: Origin`.** conf 50, PASSIVE, LOW now / MEDIUM latent.
+
+## STEP 5 — NEXT ACTION
+
+`[NEXT] HUMAN: request two invited OneCode course accounts on distinct email addresses via bugs.olivermaicher.eu, stating explicitly that account A's own access_token + refresh_token pair is the only credential required, that no customer data is touched, and that only A's own account is involved. This single unblock converts FINAL 2 from hypothesis to provable finding and simultaneously unblocks the parked RLS/BOLA hypothesis at conf 65, whose every cheap route to a second principal is closed by measurement (Bearer-only origin, anonymous sign-in disabled, PostgREST refusing the publishable key and OpenAPI disclosure, GoTrue admin plane 401, four HS256 candidates and `alg:none` all rejected). No further probing changes either outcome.`
+
+## STEP 6 — LEARNING
+
+- `[LEARN]` REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: the hypothesis file's top-ranked item (75) was inflated and is now deflated to 40 and parked. Its load-bearing clause — that the S3 layer does not evaluate `storage.objects` RLS — is a correct statement about Supabase's architecture but was never demonstrated against this program, and all four tested auth shapes return 403. A ranking is a claim about evidence, and this one had drifted from both. Recording the deflation matters: without it the program's highest-priority item is one that cannot be proven, and it was displacing the two findings that can.
+- `[LEARN]` CHANGED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: the post-key 500 is stable, not transient. Second independent observation with a fresh CF-Ray (LAX vs last cycle's SEA) and an unchanged 401 no-key control. The item leaves the pending-anomaly category; the auth boundary held throughout, so this is a routing state on an auth-gated plane, never an authz bypass.
+- `[LEARN]` REJECTED MISCONFIG @ own KB (third self-correction this cycle's evidence supports): nothing new to retract — but the standing correction from last cycle is now re-verified rather than assumed. The publishable-key digest reproduces at `43ccb834…`, so the `870cf518…` value remains a line-ending artifact and every PoC cites `43ccb834…`. Independently recomputing this rather than trusting the stored line is the only reason the defect is known to be closed.
+- `[LEARN]` REJECTED MISCONFIG @ kurs.onecode.de: day-14 of a byte-identical build with an exhausted pre-auth surface. Eight requests this cycle returned no new signal. Time-cadence probing here is now costing requests and returning the same two hashes; build-diffing on this asset is event-triggered only.
+
+## STEP 7 — RISK
+
+[RISK] onecode: 47 — held, and holding is the deliberate result rather than a default. Nothing new was exposed: the pre-auth surface has been exhausted for 49 days against a 14-day-unchanged build, the GoTrue CORS finding re-verified exactly as catalogued with its ceiling pinned by a Bearer-only negative control, the storage plane is still empty, and realtime stays 401 without a key. The cycle's substantive output was deflation — the program's highest-ranked item turned out to be unprovable and has been corrected down — and deflation of a phantom changes reporting accuracy, not actual exposure, so the score does not move. The honest read is that real risk in this program is concentrated almost entirely behind a single human dependency: the two highest-value leads, fragment session injection at 55 and RLS/BOLA at 65, both need the same two invited accounts, and neither can be advanced by any probe. I will not inflate the number from re-readings of unchanged headers, and I will not lower it because a bad hypothesis was deflated.
