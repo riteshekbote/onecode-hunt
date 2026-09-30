@@ -1043,3 +1043,20 @@ www.onecode.de
 - CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
 - CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+
+## 2026-09-30 16:54:45 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — `redirect_to` allowlist now proven per-TYPE, not just on `type=recovery`. Live 16:52Z: type=recovery|email_change|signup + 32-byte garbage token + off
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/callback — REGISTERED ROUTE, never probed in 49 days. `GET /auth/v1/callback` → 303 `https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_callbac
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — the 400 no-token validation path emits `vary: Origin` alone; the 303 token-error path emits `vary: Origin, Accept-Encoding`. Both carry Origin, so the
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* — primary CORS finding re-reproduced live 16:53Z: `/auth/v1/settings?apikey=<pub>` + `Origin: https://evil.example` → 200, ACAO reflected, ACAC: true, vary: 
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — PostgREST vary omission re-reproduced live 16:53Z: bare `apikey` header + `Origin: https://evil.example` on `/rest/v1/profiles?select=*` → 503 with `ACAO: 
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane, never probed in 26 days; access-key-ID ora
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket` — 6th CORS plane; preflight grants full 9-method destructive list (max-age 3600, ACAO:*); apikey query now reaches Cloudflare WS tunnel (500 er
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects Origin WITHOUT vary:Origin (only vary:Accept-Encoding); CORS preflight uniformly ACAO:*
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*` — 5th CORS plane (edge); simple requests ACAO:* no ACAC vary:Accept-Encoding only; preflight grants NO access-control-allow-methods; 13 semantic candi
+- CHANGED `cto.onecode.de`: CNAME `cname.perspective-dns.com` day-52, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
+- CHANGED `kurs.onecode.de`: no deploy day-13; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; HashSessionHandoff still 
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
