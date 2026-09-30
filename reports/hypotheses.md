@@ -3079,3 +3079,32 @@
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default 
+
+## RANKED HYPOTHESES 2026-09-30 00:01:50 UTC
+- [78] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: The Supabase gateway has no origin allowlist and accepts the apikey as a URL query parameter, so any web origin — including one with no attacker-controlled domain — can read every GoTrue response with a preflight-free simple GET (from art/lead_bigpickle.txt)
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request two invited OneCode course accounts on distinct email addresses from bugs.olivermaicher.eu, stating that account A's own access_token + refresh_t
+- NEXT(hypotheses-nemotron3.txt): PROBE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/aut
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the reflected-origin credentialed CORS is a property of the whole GoTrue router, not of four sa
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the Supabase origin does not authenticate by cookie. /auth/v1/user with apikey plus a forged sb-aygnpacdk
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: the vary: Origin omission does not require a forged token. A bare apikey header with a foreign 
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: ACAC is a plane discriminator, now measured rather than inferred. GoTrue reflects Origin with ACAC:true (
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: the latent cache-amplification ceiling is now stated with a reason. The reflected 503 carries n
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the storage plane does not accept the apikey as a query parameter, and the mechanism is now kn
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: SigV4 is enforced and the plane is not reachable with the publishable key. Four sha
+- LEARN: REJECTED MISCONFIG @ *.onecode.de: inventory confirmed complete by a second, independent instrument. 26 additional plausible hostnames resolved by direct DNS ag
+- LEARN: REJECTED XSS @ kurs.onecode.de/datenschutz + /rechtliches: the two static legal pages reflect no query parameter. ?q=%3Cscript%3Ealert(1)%3C/script%3E yields 38
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: the 307 gate leaks no page data. GET /dashboard with RSC: 1 returns 307 to /login with a 6-byte body, so RSC segment negot
+- LEARN: REJECTED MISCONFIG @ own KB (provenance defect, re-verified and still resolved): sha256 of the key bytes sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 is 43ccb
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-12. Main chunk 0-mbmp1iqb6hj.js is 154581 B sha256 f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500e
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com. to 104.18.2.73/104.18.3.73, TXT = CNAME line only, HTTP 409 "error code: 1001", CF-RAY a42
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: reflected-origin credentialed CORS (CWE-942) — live probes show wildcard `ACAO: *` without `ACAC: true` o
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: CORS cache-poisoning — `vary: Origin, Accept-Encoding` + `cf-cache-status: DYNAMIC` confirmed; no cache a
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: wildcard CORS (no credentials) on entire GoTrue gateway — preflight uniformly `ACAO: *` with full destruc
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: storage plane serves `ACAO: *` on bucket-existence oracle (`400 NoSuchBucket`) for arbitrary and `null` o
+- LEARN: REJECTED OTHER @ aygnpacdkgtsfnhgcyjc.supabase.co: HS256 `service_role` token forgery closed — 4 candidates × 2 endpoints all 403/401
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: `/analytics/v1/*` returns 404 — analytics plane not deployed
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy — main chunk `f916f314ea61a8c5...` byte-identical day-12; build-diffing event-triggered only
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-47, HTTP 409, zero TXT — passive probing fully converged
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on `/login` RSC payload; parses URL fragment, calls `setSession()` no state/nonce/PKCE; but requires
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes `push("/")` post-login; HashSessionHandoff next-map = `{invite:/einladung,recovery:/passwort-neu}` default 

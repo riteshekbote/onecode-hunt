@@ -989,3 +989,25 @@ www.onecode.de
 - CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
 - NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects `Origin` WITHOUT `vary: Origin`
 - NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — CORS preflight uniformly `ACAO: *` with full destructive method list
+
+## 2026-09-30 00:01:50 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: reflection is ROUTER-WIDE, not route-sampled. Untested paths /auth/v1/ (root) and /auth/v1/no_such_zzz both return 404 with ACAO:<reflected> + ACAC:true + v
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: the vary:Origin omission is now measured on the DEFAULT path — apikey header + Origin, no forged token at all, yields 503 PGRST002 with ACAO:<reflected> and
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co: the Supabase origin does NOT authenticate by cookie. GET /auth/v1/user with apikey + a forged sb-aygnpacdkgtsfnhgcyjc-auth-token cookie (base64url, alg:none bearer in
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: MECHANISM for the "storage rejects ?apikey=" claim is now identified, and the claim is confirmed rather than merely asserted. ?apikey= alone -> 400 {"code"
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: the ACAC discriminator between planes is now measured rather than inferred. GoTrue reflects Origin WITH ACAC:true (2/2 on /auth/v1/user). PostgREST reflects Origin wi
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* latent-amplifier ceiling is now pinned with a cacheability measurement: the reflected 503 carries NO cache-control, no etag, no age, no expires; 503 is not i
+- NEW *.onecode.de inventory: 26 additional plausible hostnames brute-forced by direct DNS (api, app, auth, supabase, db, storage, media, cdn, files, assets, dev, staging, test, admin, panel, beta, v2, lear
+- CHANGED kurs.onecode.de: no deploy. 13 chunk refs identical; 0-mbmp1iqb6hj.js = 154581 B sha256 f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca and sink 1a4tqdnsy9k1l.js = 13880 B sha256 5a72
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` confirmed live (GET /storage/v1/s3 → 403 S3 XML), never probed in 26 days; independent SigV4 authz bypasses Supabase RLS
+- NEW S3 access-key-ID oracle confirmed: `403 Missing signature` (no auth) vs `400 InvalidSignature` (bogus credential) distinguishable
+- NEW Signed URL route class on `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign` — POST with `apikey` + `expiresIn` returns `404 NoSuchKey` (route functional)
+- NEW Bucket-existence oracle spans THREE routes (`/object/public`, `/object/info`, `/bucket`) — 46 candidate names excluded
+- CHANGED CORS on GoTrue gateway (`/auth/v1/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` on unauthenticated requests; WITH valid `apikey` (header or query) reflects arbitrary `Origin` **with `ACAC: true`** (liv
+- CHANGED CORS on storage plane (`/storage/v1/object/public/*`): wildcard `ACAO: *` WITHOUT `ACAC: true` — credentialed cross-origin read not possible
+- CHANGED KB provenance defect: catalogued publishable-key digest `870cf518...` ≠ sha256 of `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (actual `43ccb834...`)
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — PostgREST plane accepts publishable key as query-string; reflects `Origin` WITHOUT `vary: Origin`
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*` — CORS preflight uniformly `ACAO: *` with full destructive method list
+- CHANGED `cto.onecode.de`: CNAME `cname.perspective-dns.com` day-50, HTTP 409, zero verification TXT — passive probing fully converged
+- CHANGED `kurs.onecode.de`: no deploy day-12; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
