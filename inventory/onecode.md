@@ -1085,3 +1085,15 @@ www.onecode.de
 - NEW `/auth/v1/` root **with** apikey → 404, `ACAO: <reflected>`, `ACAC: true`, `vary: Origin`. Prior cycles only ever tested this path without the key.
 - NEW Storage plane CORS characterisation closed. `ACAO: *`, no `ACAC`, no reflection — with apikey AND Bearer present — on all four route classes: `/storage/v1/bucket` (200), `/object/public/{b}/{k}` (400 
 - NEW PostgREST `access-control-expose-headers` on `/rest/v1/profiles` is `Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit` — a differe
+
+## 2026-10-01 06:38:06 UTC
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 — S3-compatible storage API confirmed live (403 Missing signature), independent SigV4 authz plane bypassing Supabase RLS, never probed in 26 days
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/callback — REGISTERED GoTrue OAuth callback route reachable pre-auth despite all external.* providers false; GET → 303 to SITE_URL with error_code=bad_oauth_ca
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — redirect_to allowlist proven per-TYPE (recovery, email_change, signup), 13 off-origin shapes tested, zero bypass; 400 path emits vary: Origin only, 30
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — PostgREST reflect Origin WITHOUT vary: Origin on credentialed requests (measured live 2026-10-01 00:39Z)
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/* — 5th CORS plane: simple requests ACAO:* no ACAC vary:Accept-Encoding only; preflight grants NO access-control-allow-methods (falsifies "uniform across 
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket — 6th CORS plane: preflight grants full 9-method destructive list (max-age 3600, ACAO:*); apikey query reaches Cloudflare WS tunnel (500 error co
+- CHANGED kurs.onecode.de — no deploy day-14; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; HashSessionHandoff still mount
+- CHANGED cto.onecode.de — CNAME cname.perspective-dns.com day-53, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* — CORS discriminator is AUTHENTICATION STATE (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-01 00:39Z
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only

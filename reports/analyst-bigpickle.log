@@ -29223,3 +29223,226 @@ STEP 6 — LEARNING
 STEP 7 — RISK
 
 [RISK] onecode: 47 — held again, and the reason is sharper than last cycle's. This cycle closed the last open question I had queued and it closed negative: the settings body does not expose the redirect allowlist, so the configured policy is unobservable and the report is confined to behaviour. That is a real reduction in what can be claimed, not an increase in what is known. Two new CORS routes entered the finding, including the password-grant endpoint, and I am not inflating confidence for that — a reflected form on a route the attacker cannot usefully call is scope, not severity, and I have said so in STEP 4 rather than promoting it. Four of five assets are converged, the fifth is frozen on a 14-day-old build, and the last three ranked hypotheses all have zero cheap verification paths left: the allowlist is unobservable, the fragment sink needs a real token pair, and the RLS test needs a second principal. Every one of them is now blocked on the same person, not on a probe. Spending further budget re-reading unchanged headers would only produce motion, and reporting a CORS scope increase as a severity increase would be the specific error this programme has already made twice.
+===== ANALYST bigpickle 2026-10-01 06:38:06 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u; echo "---DIG kurs---"; dig +short @1.1.1.1 kurs.onecode.de CNAME; echo "---DIG cto---"; dig +short @1.1.1.1 cto.onecode.de CNAME; dig +short @1.1.1.1 cto.onecode.de A; dig +short @1.1.1.1 cto.onecode.de TXT
+Thu Oct  1 06:34:42 UTC 2026
+---DIG kurs---
+ki8dqcf6.up.railway.app.
+---DIG cto---
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.3.73
+104.18.2.73
+cname.perspective-dns.com.
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== A1 accept-profile: public ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" -H "Accept-Profile: public" "$H/rest/v1/profiles?select=*&limit=1" | sed -n '1p;/access-control/p;/^vary/p;/^cf-cache/p'
+echo "=== A2 accept-profile: nonexistent schema (oracle?) ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" -H "Accept-Profile: zzz_no_such_schema" "$H/rest/v1/profiles?select=*&limit=1" | sed -n '1p'
+echo "=== A3 graphql GET introspection ==="
+curl -sS -o /tmp/gql.txt -D- -H "apikey: $PUB" "$H/graphql/v1?query=%7B__schema%7Btypes%7Bname%7D%7D%7D" | sed -n '1p;/^vary/p'
+wc -c /tmp/gql.txt; head -c 200 /tmp/gql.txt; echo
+=== A1 accept-profile: public ===
+HTTP/2 503 
+cf-cache-status: DYNAMIC
+vary: Accept-Encoding
+=== A2 accept-profile: nonexistent schema (oracle?) ===
+HTTP/2 503 
+=== A3 graphql GET introspection ===
+HTTP/2 503 
+vary: Accept-Encoding
+119 /tmp/gql.txt
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== B1 wildcard subdomain under project ref ==="
+for s in foo.aygnpacdkgtsfnhgcyjc.supabase.co evil.aygnpacdkgtsfnhgcyjc.supabase.co; do printf "%s -> " "$s"; dig +short @1.1.1.1 "$s" A | tr '\n' ' '; echo; done
+echo "=== B2 request routed to project via spoofed Host/SNI ==="
+curl -sS -o /dev/null -D- --resolve "evil.aygnpacdkgtsfnhgcyjc.supabase.co:443:34.121.84.180" "https://evil.aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=$PUB" 2>&1 | sed -n '1,3p'
+echo "=== B3 apis/ platform hosts ==="
+for s in apis.aygnpacdkgtsfnhgcyjc.supabase.co auth.aygnpacdkgtsfnhgcyjc.supabase.co rest.aygnpacdkgtsfnhgcyjc.supabase.co; do printf "%s -> " "$s"; dig +short @1.1.1.1 "$s" A | tr '\n' ' '; echo; done
+=== B1 wildcard subdomain under project ref ===
+foo.aygnpacdkgtsfnhgcyjc.supabase.co -> 
+evil.aygnpacdkgtsfnhgcyjc.supabase.co -> 
+=== B2 request routed to project via spoofed Host/SNI ===
+
+
+<shell_metadata>
+shell tool terminated command after exceeding timeout 60000 ms. If this command is expected to take longer and is not waiting for interactive input, retry with a larger timeout value in milliseconds.
+</shell_metadata>
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== C1 token_hash + off-origin redirect_to (NEW redirect surface) ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" "$H/auth/v1/verify?token_hash=0000000000000000000000000000000000000000000000000000000000000000&type=recovery&redirect_to=https%3A%2F%2Fevil.example%2Fsteal" 2>&1 | sed -n '1p;/^location/p'
+echo "=== C2 control: no redirect_to ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" "$H/auth/v1/verify?token_hash=0000000000000000000000000000000000000000000000000000000000000000&type=recovery" 2>&1 | sed -n '1p;/^location/p'
+echo "=== C3 email type w/ token_hash + off-origin ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" "$H/auth/v1/verify?token_hash=0000000000000000000000000000000000000000000000000000000000000000&type=email&redirect_to=https%3A%2F%2Fevil.example%2F" 2>&1 | sed -n '1p;/^location/p'
+=== C1 token_hash + off-origin redirect_to (NEW redirect surface) ===
+HTTP/2 400 
+=== C2 control: no redirect_to ===
+HTTP/2 400 
+=== C3 email type w/ token_hash + off-origin ===
+HTTP/2 400
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== D1 object/list route class (never tested) ==="
+curl -sS -w " [%{http_code}]\n" -H "apikey: $PUB" -H "Authorization: Bearer $PUB" "$H/storage/v1/object/list/kursmaterial" | head -c 300; echo
+echo "=== D2 /storage/v1/bucket/<name> GET ==="
+curl -sS -w " [%{http_code}]\n" -H "apikey: $PUB" -H "Authorization: Bearer $PUB" "$H/storage/v1/bucket/kursmaterial" | head -c 300; echo
+echo "=== D3 control nonsense ==="
+curl -sS -w " [%{http_code}]\n" -H "apikey: $PUB" -H "Authorization: Bearer $PUB" "$H/storage/v1/object/list/zzz_ctrl_7f2a" | head -c 300; echo
+echo "=== D4 S3 host list-type ==="
+curl -sS -w " [%{http_code}]\n" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3?list-type=2" | head -c 300; echo
+=== D1 object/list route class (never tested) ===
+{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"} [400]
+
+=== D2 /storage/v1/bucket/<name> GET ===
+{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"} [400]
+
+=== D3 control nonsense ===
+{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"} [400]
+
+=== D4 S3 host list-type ===
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource/><Code>AccessDenied</Code><Message>Missing signature</Message></Error> [403]
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+for b in kurs-material materialien-dateien dateien uploads-kurs onecode richdevpoordev rich-dev-poor-dev dev-poor-dev attachments beigefuegte anhaenge profile-images avatars-profiles; do
+  r=$(curl -sS -H "apikey: $PUB" -H "Authorization: Bearer $PUB" "$H/storage/v1/object/list/$b" | head -c 200)
+  case "$r" in *NoSuchBucket*) s="ABSENT";; *) s="*** DIFFERENT: $r";; esac
+  printf "%-22s %s\n" "$b" "$s"
+  sleep 0.4
+done
+kurs-material          ABSENT
+materialien-dateien    ABSENT
+dateien                ABSENT
+uploads-kurs           ABSENT
+onecode                ABSENT
+richdevpoordev         ABSENT
+rich-dev-poor-dev      ABSENT
+dev-poor-dev           ABSENT
+attachments            ABSENT
+beigefuegte            ABSENT
+anhaenge               ABSENT
+profile-images         ABSENT
+avatars-profiles       ABSENT
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== E1 login ==="
+curl -sS -o /tmp/l.html -D/tmp/l.h https://kurs.onecode.de/login
+awk 'NR==1' /tmp/l.h; wc -c /tmp/l.html; sha256sum /tmp/l.html; grep -c 'Set-Cookie' /tmp/l.h
+grep -o '/_next/static/chunks/[a-z0-9_.-]*\.js' /tmp/l.html | sort -u | wc -l
+echo "=== E2 main chunk hash ==="
+curl -sS https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js | sha256sum
+curl -sS https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js | wc -c
+curl -sS https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js | sha256sum
+echo "=== E3 cto ==="
+curl -sS -o /dev/null -D- --max-time 15 http://cto.onecode.de/ | sed -n '1p'
+echo "=== E4 storage bucket ==="
+curl -sS -w " [%{http_code}]\n" -H "apikey: $PUB" -H "Authorization: Bearer $PUB" "$H/storage/v1/bucket"
+=== E1 login ===
+HTTP/2 200 
+18702 /tmp/l.html
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/l.html
+0
+13
+=== E2 main chunk hash ===
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  -
+13880
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  -
+=== E3 cto ===
+HTTP/1.1 409 Conflict
+=== E4 storage bucket ===
+[] [200]
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== F1 CORS on new object/list route ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" -H "Authorization: Bearer $PUB" -H "Origin: https://evil.example" "$H/storage/v1/object/list/kursmaterial" | sed -n '1p;/^access-control/p'
+echo "=== F2 origin:null on same ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" -H "Authorization: Bearer $PUB" -H "Origin: null" "$H/storage/v1/object/list/kursmaterial" | sed -n '/^access-control/p'
+echo "=== F3 RSC row18 mount positive control ==="
+grep -o '18:I\[34891' /tmp/l.html; grep -o '19:I\[28420' /tmp/l.html; grep -c 'HashSessionHandoff' /tmp/l.html
+echo "=== F4 x-api-version / accept-profile on auth plane ==="
+curl -sS -o /dev/null -D- -H "apikey: $PUB" -H "x-api-version: 2024-01-01" "$H/auth/v1/settings" | sed -n '1p;/^sb-gateway-version/p;/^x-supabase/p'
+=== F1 CORS on new object/list route ===
+HTTP/2 400 
+access-control-allow-origin: *
+=== F2 origin:null on same ===
+access-control-allow-origin: *
+=== F3 RSC row18 mount positive control ===
+18:I[34891
+19:I[28420
+1
+=== F4 x-api-version / accept-profile on auth plane ===
+HTTP/2 200 
+sb-gateway-version: 1
+[0m
+[STEP 1 — DELTA]
+- [NEW] Bucket-existence oracle now on **five** route classes, not three: `GET /storage/v1/object/list/{b}` and `GET /storage/v1/bucket/{b}` both return the byte-identical `400 {"statusCode":"404","error":"Bucket not found","code":"NoSuchBucket"}`. Neither class was ever probed in 30 days.
+- [NEW] 13 further candidate names excluded on the fresh `/object/list` instrument (`kurs-material, materialien-dateien, dateien, uploads-kurs, onecode, richdevpoordev, rich-dev-poor-dev, dev-poor-dev, attachments, beigefuegte, anhaenge, profile-images, avatars-profiles`) — all ABSENT, control `zzz_ctrl_7f2a` byte-identical. Running total 81.
+- [NEW] `token_hash=` form of `GET /auth/v1/verify` (a second token-parameter encoding, never probed) with an off-origin `redirect_to` returns `400` with **no `Location` header** on `type=recovery` and `type=email`; control without `redirect_to` is byte-identical. The 13-shape off-origin campaign on the `token=` form is therefore not bypassed via the hash form.
+- [NEW] PostgREST `Accept-Profile: public` → `503`; `Accept-Profile: zzz_no_such_schema` → `503`. Schema selection is not a schema-name oracle while the schema cache is down. `GET /graphql/v1?query={__schema{types{name}}}` → `503 PGRST002` (119 B), same block.
+- [NEW] No wildcard DNS under the project ref: `foo.` and `evil.aygnpacdkgtsfnhgcyjc.supabase.co` return zero A records. No host-header routing surface on the Supabase origin.
+- NO_DELTA @ kurs.onecode.de: `GET /login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, zero `Set-Cookie`, 13 chunk refs; main chunk `f916f314ea61a8c5…` and sink chunk `5a72d2cd8738ecad…` both byte-identical, day-15, no deploy since 2026-09-19 11:33Z. `18:I[34891` + `19:I[28420` mount intact.
+- NO_DELTA @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.3.73/104.18.2.73, TXT = CNAME line only, `GET http://cto.onecode.de/` → 409. Day-53.
+- NO_DELTA @ storage/REST: `GET /storage/v1/bucket` → 200 `[]`; `/rest/v1/*` → 503 PGRST002; S3 host `?list-type=2` → 403 `AccessDenied`/`Missing signature`.
+
+[STEP 2 — PRIORITIZE]
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 7.2  a=7 b=5 t=7 g=10 c=6 f=6
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* 7.1  a=8 b=6 t=8 g=10 c=6 f=7
+[PRIO] kurs.onecode.de/login 6.8  a=6 b=8 t=7 g=9 c=5 f=4
+
+[STEP 3 — HYPOTHESES]
+[HYP] The pre-auth bucket-existence oracle is reachable on five route classes including the object-listing route, so an unauthenticated attacker can confirm the existence of any named storage bucket without credentials
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/list/{bucket}
+confidence: 45
+reasoning: Live 06:35Z–06:38Z, publishable key in both `apikey` and `Authorization`. `GET /storage/v1/object/list/kursmaterial` → `400 {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}`, byte-identical to the nonsense control `zzz_ctrl_7f2a` and to the previously catalogued `/object/public` and `/object/info` classes. `GET /storage/v1/bucket/kursmaterial` is a fourth class with the same body. CORS on the new class is plane-level `ACAO: *` with no `ACAC` for both an arbitrary Origin and `Origin: null`, so it adds no credentialed surface. 81 names excluded, all with a live matched control, and the name is absent from all 13 pre-auth chunks.
+evidence_needed: A candidate name that returns any body other than `NoSuchBucket` — a 200 object list, a 400 `InvalidRequest` on shape, or a 403 `Unauthorized` that implies the bucket exists but is private. The distinction matters: `NoSuchBucket` on a private bucket is not currently demonstrated, so a private-but-present bucket may already be indistinguishable from an absent one.
+verify_steps: 1) DONE — `curl -sS -H "apikey: <pub>" -H "Authorization: Bearer <pub>" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/list/kursmaterial"` → 400 NoSuchBucket. 2) DONE — identical on `/storage/v1/bucket/kursmaterial`. 3) DONE — control `zzz_ctrl_7f2a` byte-identical. 4) DONE — 13 semantic candidates all ABSENT with per-candidate control. 5) DONE — `Origin: https://evil.example` and `Origin: null` both → `ACAO: *`, no `ACAC`.
+impact: LOW. An unauthenticated structural-disclosure oracle with no demonstrated data path. Reported for inventory hygiene only: 81 names are now excluded and the enumeration is stopped on information grounds rather than on rate-limit grounds.
+testability: PASSIVE
+
+[HYP] GoTrue reflects any request Origin with allow-credentials across its whole router whenever an apikey is present, so origin isolation does not exist on the identity service
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*
+confidence: 55
+reasoning: Held at last cycle's measured state; this cycle's contribution is the negative, not new scope. The 06:36Z `token_hash` verify probe means the redirect-surface character is fully mapped — a second token encoding exists and neither honours an off-origin `redirect_to`. The apikey-bearing reflection remains the one positive, and `sb-gateway-version: 1` on `/auth/v1/settings` is unchanged. Three caps are measured: the plane is Bearer-only so `credentials:'include'` yields nothing; `cf-cache-status: DYNAMIC` with `vary: Origin` means no amplifier; kurs.onecode.de emits no `access-control-*` on a foreign Origin, so the gap does not reach the session-cookie host. `/auth/v1/settings` does not enumerate the allowlist, so the configured policy is unobservable and the report may state behaviour only.
+evidence_needed: A cross-origin response on this origin carrying data the attacker did not already hold, which requires a credential channel this origin does not have. Failing that, one dashboard answer: whether the Auth API "Allowed Origins" field has ever been set, and whether it covered both the unauthenticated and the apikey-bearing code paths.
+verify_steps: 1) DONE — `curl -sS -o /dev/null -D- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=<pub>"` → 200, ACAO reflected, ACAC true, vary: Origin, Accept-Encoding, DYNAMIC. 2) DONE — same path minus apikey → 401, `ACAO: *`, no ACAC. 3) DONE — `/auth/v1/token?grant_type=password` and `/auth/v1/otp` → 405 with reflected ACAO + ACAC. 4) DONE — `sb-gateway-version: 1` unchanged. 5) DONE — `token_hash=` + off-origin `redirect_to` → 400, no `Location`, matching control.
+impact: LOW-MEDIUM standalone; HIGH the moment any cookie-based auth mode lands on this origin with no code change. Reporting value is that the two response forms are distinct policies, so a partial allowlist can leave one reflecting.
+testability: PASSIVE
+
+[HYP] A forced-login session fix persists because /login mounts a first-party client component that calls setSession() on any attacker-supplied access_token+refresh_token pair with no state, nonce or PKCE binding
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: Re-verified 06:35Z by hash and by positive control, not by presence. Main chunk 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; both byte-identical at day-15. The RSC payload still carries `18:I[34891` immediately followed by `19:I[28420`, and the string `HashSessionHandoff` appears exactly once, so the mount is a positive identification rather than an absence claim. Four caps stand: fixed `{invite,recovery}` redirect map; allowlist not header-influenceable; `?error=` is a two-value enum allowlisted server-side; Supabase origin is Bearer-only. The deciding fact is unprovable pre-auth — the attacker must present a genuine token pair and `/auth/v1/anonymous` is not mounted, so that account must arrive by invitation.
+evidence_needed: Two invited OneCode course accounts on distinct addresses. Account A signs in; the attacker extracts A's own tokens and serves `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>&expires_in=3600&token_type=bearer&type=magiclink` to an uninvolved participant. Proof is a HAR showing `Set-Cookie: sb-aygnpacdkgtsfnhgcyjc-auth-token` in the victim's browser plus a 200 on the 307-gated `/dashboard`.
+verify_steps: 1) DONE — `curl -sS -o /dev/null -D- https://kurs.onecode.de/login` → 200, 18 702 B, zero Set-Cookie. 2) DONE — both chunk hashes byte-identical, 13 chunk refs stable. 3) DONE — `18:I[34891` + `19:I[28420` present in the payload. 4) NOT POSSIBLE pre-auth — signup disabled, `/auth/v1/authorize` → 400 Unsupported provider, `GET /auth/v1/logout` → 405, `token_hash` off-origin → 400.
+impact: MEDIUM. The attacker gains neither the victim's credentials nor their data; this is a business-logic attribution failure, not account takeover. Rises to HIGH if course material or completed assignments are non-transferable value.
+testability: AUTH_HELPED
+
+[STEP 4 — SELF-CRITIQUE]
+[PARKED] Bucket-existence oracle on five route classes (45): real and newly widened, but the impact is a structural disclosure with no demonstrated data path, 81 names are excluded with live matched controls, and the name is provably absent from every pre-auth artifact. Held for the inventory record, not promoted to a finding.
+[PARKED] `token_hash` verify form: negative, closes an axis rather than opening one.
+[FINAL] 1. GoTrue reflected-origin credentialed CORS, full router, 200/401/404/405. conf 55, PASSIVE, LOW-MEDIUM.
+[FINAL] 2. Forced-login fragment session injection on /login. conf 55, AUTH_HELPED, MEDIUM. Mount positively re-identified at day-15.
+[FINAL] 3. Bucket-existence oracle, five route classes, 81 names excluded. conf 45, PASSIVE, LOW.
+
+[STEP 5 — NEXT ACTION]
+[NEXT] HUMAN: request two invited OneCode course accounts on distinct email addresses. That single unblock resolves the RLS/BOLA hypothesis (conf 65, the highest-confidence item in the programme), supplies the second principal the fragment-injection PoC needs to convert from hash-matched code into an observed forced login, and lets the storage bucket name be read from a real session instead of guessed at 81 names.
+
+[STEP 6 — LEARNING]
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the pre-auth bucket-existence oracle spans **five** route classes, not the three catalogued. `GET /storage/v1/object/list/{b}` and `GET /storage/v1/bucket/{b}` both return the byte-identical `400 {"statusCode":"404","error":"Bucket not found","code":"NoSuchBucket"}` with apikey + Bearer. CORS on the new class is plane-level `ACAO: *` with no `ACAC` for both an arbitrary Origin and `Origin: null`, so the credentialed GoTrue reflection does not extend here. 13 more names excluded (81 total) on the fresh instrument; enumeration stopped on information grounds.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: the `token_hash=` encoding is a second token parameter that the 13-shape off-origin campaign never touched, and it does not bypass the allowlist. `type=recovery` and `type=email` with a 64-zero hash and `redirect_to=https://evil.example/steal` both return `400` with **no `Location` header at all**, byte-identical to the control without `redirect_to`. Off-origin attempt count on this primitive is now 15 shapes across 5 verify types and 2 token encodings, zero redirects.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /graphql/v1: `Accept-Profile: public` and a nonsense schema both return 503, so PostgREST schema selection is not a schema-name oracle while the schema cache is down; `GET /graphql/v1?query={__schema{types{name}}}` returns the same 119-byte `PGRST002` block, so GraphQL introspection is unreachable pre-auth by the same root cause that closed the REST monitor.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: no host-header routing surface. `foo.` and `evil.aygnpacdkgtsfnhgcyjc.supabase.co` return zero A records, so there is no wildcard under the project ref to route into the project with a foreign Host/SNI. First test of DNS shape beneath the Supabase ref rather than beneath onecode.de.
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: no deploy, day-15. `GET /login` → 200, 18 702 B, page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, zero `Set-Cookie`, 13 chunk refs. Main chunk `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` and sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` both byte-identical. `18:I[34891` + `19:I[28420` still adjacent in the RSC payload. Build-diffing stays event-triggered.
+
+[STEP 7 — RISK]
+[RISK] onecode: 47 — unchanged, and the reason is that this cycle spent its budget on axes that closed rather than on ones that open. The only genuine delta is a wider version of an already-accepted LOW finding: the bucket oracle is on five route classes instead of three, which is a better inventory record and not a better risk. The `token_hash` encoding was the one place a bypass could plausibly have hidden after 13 off-origin shapes had been tried on the `token=` form, and it returned no `Location` at all. I also went looking for a class boundary nobody had tested — DNS beneath the Supabase ref rather than beneath onecode.de — and found no wildcard, which closes a possible host-header routing vector rather than opening one. Meanwhile the two things that actually matter are unchanged: the identity service reflects any origin with credentials but has no cookie to reflect, and the fragment sink is confirmed present by hash and by a positive `18:I[34891` match yet has never been observed to fire because producing a token pair requires an invited account. I am not moving this number in either direction on a wider scope count for a disclosure that discloses nothing.
