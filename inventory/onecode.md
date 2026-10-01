@@ -1078,3 +1078,10 @@ www.onecode.de
 - CHANGED `kurs.onecode.de` — no deploy day-13; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; HashSessionHandoff still mou
 - CHANGED `cto.onecode.de` — CNAME cname.perspective-dns.com day-52, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
 - CHANGED Supabase GoTrue CORS — re-verified router-wide: /auth/v1/ root and /auth/v1/no_such_zzz both return 404 with ACAO:<reflected> + ACAC:true + vary: Origin; credentialed reflection works via apikey query
+
+## 2026-10-01 00:41:52 UTC
+- NEW `GET /auth/v1/settings` body does NOT enumerate any redirect allowlist. Full body read 00:39Z: only `external.*` (26 providers, `email:true` sole truthy), `disable_signup:true`, `mailer_autoconfirm:fa
+- NEW GoTrue credentialed reflection extended to two route classes never CORS-tested in the apikey-BEARING state: `/auth/v1/token?grant_type=password` → 405 with `ACAO: https://evil.example` + `ACAC: true` 
+- NEW `/auth/v1/` root **with** apikey → 404, `ACAO: <reflected>`, `ACAC: true`, `vary: Origin`. Prior cycles only ever tested this path without the key.
+- NEW Storage plane CORS characterisation closed. `ACAO: *`, no `ACAC`, no reflection — with apikey AND Bearer present — on all four route classes: `/storage/v1/bucket` (200), `/object/public/{b}/{k}` (400 
+- NEW PostgREST `access-control-expose-headers` on `/rest/v1/profiles` is `Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit` — a differe

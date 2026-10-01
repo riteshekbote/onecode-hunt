@@ -3198,3 +3198,22 @@
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-52, HTTP 409, zero TXT — passive probing fully converged
 - LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on /login RSC payload; parses URL fragment, calls setSession() no state/nonce/PKCE; but requires val
 - LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes push("/") post-login; HashSessionHandoff next-map = {invite:/einladung,recovery:/passwort-neu} default /
+
+## RANKED HYPOTHESES 2026-10-01 00:41:52 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [55] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: GoTrue reflects any request Origin with allow-credentials across its entire router whenever an apikey is present, including the password-grant and OTP routes, so origin isolation does not exist on the identity service (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: the entire remaining programme is gated on one ask. Request two invited OneCode course accounts on distinct email addresses. That single unblock resolves
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: the settings response does NOT enumerate the redirect allowlist. Full body read 00:39Z c
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the auth-state discriminator generalises to 401, 404 and 405 response classes, not just 200. `/
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the storage plane's CORS is plane-level wildcard, not auth-state-dependent, and is now closed 
+- LEARN: NEW INFO @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*: PostgREST's `access-control-expose-headers` is `Content-Encoding, Content-Location, Content-Range, Conten
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-14. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.`, `GET http://cto.onecode.de/` → 409. Day-53, zero verification TXT. Passive probing of t
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS discriminator is AUTHENTICATION STATE (unauthenticated→wildcard no ACAC; apikey-bearing→re
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live, independent SigV4 authz, never probed i
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-53, HTTP 409, zero TXT — passive probing fully converged
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-14; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/d
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/: monitor formally closed 09-17 (26 probes 503↔401), never 200+rows; platform enforces sb_publisha
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: HashSessionHandoff mounted on /login RSC payload; parses URL fragment, calls setSession() no state/nonce/PKCE; but requires val
+- LEARN: ACCEPTED OATH @ kurs.onecode.de: LoginForm hardcodes push("/") post-login; HashSessionHandoff next-map = {invite:/einladung,recovery:/passwort-neu} default /
