@@ -1102,3 +1102,12 @@ www.onecode.de
 - NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co` is a **single-plane host**: `/auth/v1/settings`, `/rest/v1/profiles`, `/functions/v1/`, `/realtime/v1/`, `/graphql/v1` all → `404` `Invalid Storage request` 
 - NEW S3 path-style is reachable **only** under the `/storage/v1/s3` prefix. `/s3` →404 `Invalid Storage request`; bare `/zzz_ctrl_7f2a` → 404 `Invalid Storage request`; `/storage/v1/s3/zzz_ctrl_7f2a/x.txt`
 - CHANGED `/rest/v1/profiles?select=*` with apikey + Bearer → `503 PGRST002` "Could not query the database for the schema cache. Retrying." Schema cache still down; closed REST monitor stays closed (never200+ro
+
+## 2026-10-01 19:25:25 UTC
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co confirmed as single-plane S3 host (no GoTrue/PostgREST/Realtime/Functions/GraphQL) — cross-plane routing test 2026-10-01 13:57Z
+- NEW S3 path-style reachable ONLY under `/storage/v1/s3` prefix (not `/s3` or bare) — 2026-10-01 13:57Z
+- NEW PostgREST `access-control-expose-headers` differs from GoTrue (`Content-Encoding, Content-Location, Content-Range, Content-Type, Date, Location, Server, Transfer-Encoding, Range-Unit` vs `X-Total-Coun
+- NEW GoTrue credentialed reflection extends to password-grant (`/auth/v1/token?grant_type=password`) and OTP (`/auth/v1/otp`) — both 405 with reflected ACAO+ACAC:true — 2026-10-01 00:41Z
+- CHANGED cto.onecode.de CNAME day-53, HTTP 409, zero verification TXT — passive probing fully converged
+- CHANGED kurs.onecode.de no deploy day-14; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen
+- CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
