@@ -1,20 +1,19 @@
-## 2026-10-01 06:36:41 UTC [target] (model nemotron3)
-[NEW] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 — S3-compatible storage API confirmed live (403 Missing signature), independent SigV4 authz plane bypassing Supabase RLS, never probed in 26 days; access-key-ID oracle confirmed (403 vs 400 distinguishable)
-[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/callback — REGISTERED GoTrue OAuth callback route reachable pre-auth despite all external.* providers false; GET → 303 to SITE_URL with error_code=bad_oauth_callback
-[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — redirect_to allowlist proven per-TYPE (recovery, email_change, signup), 13 off-origin shapes tested, zero bypass; 400 path emits vary: Origin only, 303 path emits vary: Origin, Accept-Encoding
-[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/* — PostgREST reflect Origin WITHOUT vary: Origin on credentialed requests (measured live 2026-10-01 00:39Z)
-[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/* — 5th CORS plane: simple requests ACAO:* no ACAC vary:Accept-Encoding only; preflight grants NO access-control-allow-methods (falsifies "uniform across planes")
-[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket — 6th CORS plane: preflight grants full 9-method destructive list (max-age 3600, ACAO:*); apikey query reaches Cloudflare WS tunnel (500 error code: 1101)
-[CHANGED] kurs.onecode.de — no deploy day-14; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; HashSessionHandoff still mounted on /login RSC row 18
-[CHANGED] cto.onecode.de — CNAME cname.perspective-dns.com day-53, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
-[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* — CORS discriminator is AUTHENTICATION STATE (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-01 00:39Z
-[CHANGED] Supabase REST monitor formally closed 09-17 (26 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
-[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,8.75,attack_surface=9 business_value=7 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=10
+## 2026-10-01 13:56:58 UTC [target] (model nemotron3)
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/,8.15,attack_surface=8 business_value=7 tech_exposure=8 gate_ease=10 cloud_surface=8 freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,7.50,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9
 [PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/,7.20,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign,7.50,attack_surface=7 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=9
 [PRIO] kurs.onecode.de,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6
+[HYP] Reflected-origin credentialed CORS on GoTrue gateway enables cross-origin authenticated identity reads
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink}
+confidence: 80
+reasoning: Live probe 2026-10-01 00:39Z: with apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, GET /auth/v1/settings returns 200 with ACAO: https://evil.example + ACAC: true + expose-headers: X-Total-Count, Link, X-Supabase-Api-Version. Unauthenticated requests get wildcard ACAO: * without ACAC. /auth/v1/user requires valid JWT (401 without) but reflects Origin with ACAC on 401. Preflight uniformly allows full destructive method list. No origin allowlist configured. Apikey accepted as query parameter (preflight-free simple GET). Credentialed reflection extends to password-grant (/auth/v1/token?grant_type=password) and OTP (/auth/v1/otp) routes — both 405 with reflected ACAO + ACAC:true.
+evidence_needed: Victim visits attacker page with fetch('https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings', {headers:{apikey:'...'}}).then(r=>r.json()).then(console.log) → reads auth config cross-origin with credentials
+verify_steps: PASSIVE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" (validates reflected ACAO + ACAC:true); PASSIVE: same for /auth/v1/user with valid JWT
+impact: Cross-origin read of authenticated identity data (user profile, session, factors) by any origin — MEDIUM (requires valid apikey/JWT; session cookie host kurs.onecode.de is CORS-clean so no direct app session theft); owner-fixable via allowed_origins config
+testability: PASSIVE
 [HYP] S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
@@ -23,15 +22,6 @@ reasoning: New host aygnpacdkgtsfnhgcyjc.storage.supabase.co serves S3-compatibl
 evidence_needed: Valid S3 credentials (access key ID + secret) that authorize bucket operations; or bucket policy allowing anonymous s3:GetObject/s3:ListBucket
 verify_steps: PASSIVE: curl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" (confirms S3 XML error); PASSIVE: curl -sS -D- -H "Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/20261001/us-east-1/s3/aws4_request,SignedHeaders=host,Signature=dummy" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" (validates InvalidSignature vs MissingSignature distinction)
 impact: If valid SigV4 credentials obtained or bucket policy permissive → full storage access bypassing RLS, course resources, user uploads — HIGH
-testability: PASSIVE
-[HYP] Reflected-origin credentialed CORS on GoTrue gateway enables cross-origin authenticated reads
-class: MISCONFIG
-asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink}
-confidence: 80
-reasoning: Live probe 2026-10-01 00:39Z: with apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30, GET /auth/v1/settings returns 200 with ACAO: https://evil.example + ACAC: true + expose-headers: X-Total-Count, Link, X-Supabase-Api-Version. Unauthenticated requests get wildcard ACAO: * without ACAC. /auth/v1/user requires valid JWT (401 without) but reflects Origin with ACAC on 401. Preflight uniformly allows full destructive method list. No origin allowlist configured. Apikey accepted as query parameter (preflight-free simple GET). Credentialed reflection extends to password-grant (/auth/v1/token?grant_type=password) and OTP (/auth/v1/otp) routes — both 405 with reflected ACAO + ACAC:true.
-evidence_needed: Victim visits attacker page with fetch('https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings', {headers:{apikey:'...'}}).then(r=>r.json()).then(console.log) → reads auth config cross-origin with credentials
-verify_steps: PASSIVE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" (validates reflected ACAO + ACAC:true); PASSIVE: same for /auth/v1/user with valid JWT
-impact: Cross-origin read of authenticated identity data (user profile, session, factors) by any origin — MEDIUM (requires valid apikey/JWT; session cookie host kurs.onecode.de is CORS-clean so no direct app session theft); owner-fixable via allowed_origins config
 testability: PASSIVE
 [HYP] Dangling Perspective CNAME takeover on cto.onecode.de
 class: MISCONFIG
@@ -45,6 +35,7 @@ testability: HUMAN_ONLY
 [PARKED] Post-auth cross-tenant BOLA via Supabase RLS gap: confidence 65, requires 2 invited accounts (AUTH_HELPED), pre-auth surface exhausted; no new vectors in 14 days
 [PARKED] Forced-login session fixation via HashSessionHandoff: confidence 70, exploitability negligible — requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed to /login?error=link-abgelaufen
 [PARKED] Supabase Storage bucket enumeration via publishable key: confidence 35 < 40; zero buckets for 20+ days, bucket names not recoverable from pre-auth chunks
+[PARKED] S3 access-key-ID enumeration: confidence 30 — only taxonomy oracle confirmed (InvalidSignature
 [PARKED] S3 access-key-ID enumeration: confidence 30 — only taxonomy oracle confirmed (InvalidSignature vs MissingSignature); actual ID enumeration is credential-class and rate-limited
 [FINAL] 1. Reflected-origin credentialed CORS on GoTrue gateway (confidence 80, MISCONFIG, PASSIVE) — cross-origin authenticated identity reads
 [FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found

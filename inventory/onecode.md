@@ -1097,3 +1097,8 @@ www.onecode.de
 - CHANGED cto.onecode.de — CNAME cname.perspective-dns.com day-53, HTTP 409, zero verification TXT — passive probing fully converged; only owner claim attempt advances it
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* — CORS discriminator is AUTHENTICATION STATE (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-01 00:39Z
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
+
+## 2026-10-01 13:57:10 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co` is a **single-plane host**: `/auth/v1/settings`, `/rest/v1/profiles`, `/functions/v1/`, `/realtime/v1/`, `/graphql/v1` all → `404` `Invalid Storage request` 
+- NEW S3 path-style is reachable **only** under the `/storage/v1/s3` prefix. `/s3` →404 `Invalid Storage request`; bare `/zzz_ctrl_7f2a` → 404 `Invalid Storage request`; `/storage/v1/s3/zzz_ctrl_7f2a/x.txt`
+- CHANGED `/rest/v1/profiles?select=*` with apikey + Bearer → `503 PGRST002` "Could not query the database for the schema cache. Retrying." Schema cache still down; closed REST monitor stays closed (never200+ro
