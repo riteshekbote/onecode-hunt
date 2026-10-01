@@ -17809,3 +17809,188 @@ testability: HUMAN_ONLY
 
 # STEP 7 — RISK
 [RISK] onecode: 70 — Primary asset kurs.onecode.de: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all /api/* auth-gated. CRITICAL NEW: S3-compatible storage plane aygnpacdkgtsfnhgcyjc.storage.supabase.co deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads). Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed but bucket names unrecoverable pre-auth.
+===== ANALYST nemotron3 2026-10-01 23:26:13 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-10-01 23:24:49 UTC
+[0m
+[0m$ [0mcurl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" 2>&1 | head -30
+HTTP/2 401 
+date: Thu, 01 Oct 2026 23:24:55 GMT
+content-type: application/json
+content-length: 96
+cf-ray: a43f39381ddec8a1-IAD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin
+x-content-type-options: nosniff
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0f9c8-ff0f-7f56-bf85-f233fd26f352
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 49
+x-sb-error-code: no_authorization
+set-cookie: __cf_bm=Q.AmqxiQI4nFGO.dz9u5UqxxwijAumQ5_Vve4t6eluw-1790897094.4122767-1.0.1.1-bux8d8T33uk4rUEIaj6SPi6yrD0bHvdseb2_G9kFN43xddl5diCiTapXSB92AAOJ9gGJ1MJJBQc7Ui.0KCpvPW2yScoIAGFBScPSJwbetq1ogF70b8KxdpJxYuh2K0Uf; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 01 Oct 2026 23:54:55 GMT
+alt-svc: h3=":443"; ma=86400
+
+{"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+[0m
+[0m$ [0mcurl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" 2>&1 | head -20
+HTTP/2 403 
+date: Thu, 01 Oct 2026 23:24:57 GMT
+content-type: text/plain
+content-length: 190
+cf-ray: a43f3949e889f274-IAD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+content-security-policy: default-src 'none'; sandbox
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a0f9c9-0a3a-7f17-9fd9-31bcd2000576
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=LODPjSMCDjp3C1MszWjjGQeqcvcr5LTd4k0wl1dMFdg-1790897097.271169-1.0.1.1-V0TUPcjcRpXRUv9d10Pk05zte1YcPpmwhZGHeKgWtMGScN5hJ8uNaFRZ3w7mKuac1nyBrvyzgqETRf6aDKi088dQ_2JXiEegwtzbYeRLJgpZBm4CKSlRYN_P44c83CX9; HttpOnly; SameSite=None; Secure; Path=/; Domain=storage.supabase.co; Expires=Thu, 01 Oct 2026 23:54:57 GMT
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource/><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME && curl -sS -D- --resolve "cto.onecode.de:80:104.18.2.73" http://cto.onecode.de/ 2>&1 | head -15
+cname.perspective-dns.com.
+HTTP/1.1 409 Conflict
+Date: Thu, 01 Oct 2026 23:25:01 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Expires: Thu, 01 Jan 1970 00:00:01 GMT
+Server: cloudflare
+CF-RAY: a43f3961abdadb71-IAD
+
+error code: 1001
+[0m
+[0m$ [0mcurl -sS -D- "https://kurs.onecode.de/login" 2>&1 | head -20
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Thu, 01 Oct 2026 23:25:05 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: HtMIvrosS1qoDt9bss7a6g
+x-railway-edge: iad1
+x-hikari-trace: iad1.trg5
+
+<!DOCTYPE html><html lang="de" class="archivo_d976246c-module__pvw2IW__variable antialiased"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/chunks/2n8375xih-hg0.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/3mc6dra1m0098.js"/><script src="/_next/static/chunks/2i51e627rllld.js" async=""></script><script src="/_next/static/chunks/08ttfj81-47mu.js" async=""></script><script src="/_next/static/chunks/0-mbmp1iqb6hj.js" async=""></script><script src="/_next/static/chunks/turbopack-2a8cgfwu75lsu.js" async=""></script><script src="/_next/static/chunks/3fntmmi971322.js" async="" crossorigin=""></script><script src="/_next/static/chunks/4310-_brt1a3g.js" async="" crossorigin=""></script><script src="/_next/static/chunks/1ymt1shyhmu-4.js" async="" crossorigin=""></script><script src="/_next/static/chunks/2n1zydk_92chn.js" async="" crossorigin=""></script><script src="/_next/static/chunks/2ufbqzbeyam3w.js" async="" crossorigin=""></script><script src="/_next/static/chunks/1a4tqdnsy9k1l.js" async="" crossorigin=""></script><script src="/_next/static/chunks/0-lpao5_i9htd.js" async="" crossorigin=""></script><title>Rich Dev Poor Dev</title><meta name="description" content="Online-Kursplattform für Video-Lerninhalte."/><link rel="icon" href="/favicon.ico?favicon.2vob68tjqpejf.ico" sizes="256x256" type="image/x-icon"/><meta name="next-size-adjust" content=""/><script>
+(function () {
+  try {
+    var stored = localStorage.getItem("kr-theme");
+    var theme = stored === "dark" || stored === "light"
+      ? stored
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+[0m
+---
+
+**STEP 1 — DELTA**
+
+[NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (HTTP 403 S3 XML "Missing signature"), independent SigV4 authz plane never probed in 26 days — separate credential store bypasses Supabase RLS policies on storage.objects  
+[NEW] GoTrue `/auth/v1/token?grant_type=password` and `/auth/v1/otp` return 405 with reflected `ACAO: <Origin>` + `ACAC: true` (live 2026-10-01 00:41Z) — credentialed CORS extends to password-grant and OTP mutating primitives  
+[NEW] `/auth/v1/callback` registered GoTrue OAuth callback route reachable pre-auth despite all `external.*` providers false; returns 303 to `SITE_URL` with `error_code=bad_oauth_callback`  
+[CHANGED] `kurs.onecode.de` no deploy day-14; main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`) and sink chunk `1a4tqdnsy9k1l.js` (13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`) byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200  
+[CHANGED] `cto.onecode.de` CNAME `cname.perspective-dns.com` day-53, HTTP 409 "error code:1001", zero verification TXT records — passive probing fully converged, only owner claim attempt advances it  
+[CHANGED] `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only  
+[CHANGED] Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey AND Bearer present — on all four route classes (`/bucket`, `/object/public`, `/object/info`, `/object/sign`)  
+[CHANGED] GoTrue credentialed reflection discriminator confirmed: authentication STATE (unauthenticated → wildcard no ACAC; apikey-bearing → reflected Origin with `ACAC: true`) — live re-verified 2026-10-01 00:39Z  
+
+---
+
+**STEP 2 — PRIORITIZE**
+
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,8.20,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink},7.85,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8  
+[PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9  
+[PRIO] kurs.onecode.de,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6  
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/*,6.55,attack_surface=6 business_value=7 tech_exposure=7 gate_ease=9 cloud_surface=7 freshness=5  
+
+---
+
+**STEP 3 — HYPOTHESES**
+
+[HYP] S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS  
+class: MISCONFIG  
+asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3  
+confidence: 75  
+reasoning: New host `aygnpacdkgtsfnhgcyjc.storage.supabase.co` serves S3-compatible API (GET /storage/v1/s3 → 403 S3 XML "Missing signature", re-confirmed 2026-10-01 13:57Z). SigV4 keys are a separate credential store from apikey/Bearer plane; S3 layer does not evaluate storage.objects RLS policies. Pre-auth access-key-ID oracle confirmed (distinguishable errors: 403 Missing signature vs 400 InvalidSignature). Host unprobed for 26+ days. Path-style only under /storage/v1/s3 prefix.  
+evidence_needed: Valid S3 credentials (access key ID + secret) that authorize bucket operations; or bucket policy allowing anonymous s3:GetObject/s3:ListBucket  
+verify_steps: PASSIVE: curl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" (confirms S3 XML error); PASSIVE: curl -sS -D- -H "Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/20261001/us-east-1/s3/aws4_request,SignedHeaders=host,Signature=dummy" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" (validates InvalidSignature vs MissingSignature distinction)  
+impact: If valid SigV4 credentials obtained or bucket policy permissive → full storage access bypassing RLS, course resources, user uploads — HIGH  
+testability: PASSIVE  
+
+[HYP] Reflected-origin credentialed CORS on GoTrue gateway enables cross-origin authenticated identity reads  
+class: MISCONFIG  
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink}  
+confidence: 85  
+reasoning: Live probe 2026-10-01 00:39Z: with apikey query param `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, GET /auth/v1/settings returns 200 with ACAO: https://evil.example + ACAC: true + expose-headers: X-Total-Count, Link, X-Supabase-Api-Version. Unauthenticated requests get wildcard ACAO: * without ACAC. Reflection extends to /auth/v1/token?grant_type=password and /auth/v1/otp (both 405 with reflected ACAO+ACAC:true). Preflight uniformly allows full destructive method list. No origin allowlist configured. Apikey accepted as query parameter (preflight-free simple GET).  
+evidence_needed: Victim visits attacker page with fetch('https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings', {headers:{apikey:'sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30'}}).then(r=>r.json()).then(console.log) → reads auth config cross-origin with credentials  
+verify_steps: PASSIVE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" (validates reflected ACAO + ACAC:true); PASSIVE: same for /auth/v1/user with valid JWT  
+impact: Cross-origin read of authenticated identity data (user profile, session, factors) by any origin — MEDIUM (requires valid apikey/JWT; session cookie host kurs.onecode.de is CORS-clean so no direct app session theft); owner-fixable via allowed_origins config  
+testability: PASSIVE  
+
+[HYP] Dangling Perspective CNAME takeover on cto.onecode.de  
+class: MISCONFIG  
+asset: cto.onecode.de  
+confidence: 58  
+reasoning: CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure (re-confirmed 2026-10-01 06:38Z); hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 53+ days, zero verification TXT records.  
+evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de  
+verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain  
+impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH  
+testability: HUMAN_ONLY  
+
+---
+
+**STEP 4 — SELF-CRITIQUE**
+
+[PARKED] Post-auth cross-tenant BOLA via Supabase RLS gap: confidence 65, requires 2 invited accounts (AUTH_HELPED), pre-auth surface exhausted; no new vectors in 14 days  
+[PARKED] Forced-login session fixation via HashSessionHandoff: confidence 70, exploitability negligible — requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed to /login?error=link-abgelaufen  
+[PARKED] Supabase Storage bucket enumeration via publishable key: confidence 35 < 40; zero buckets for 20+ days, bucket names not recoverable from pre-auth chunks  
+[PARKED] S3 access-key-ID enumeration: confidence 30 — only taxonomy oracle confirmed (InvalidSignature vs MissingSignature); actual ID enumeration is credential-class and rate-limited  
+
+[FINAL] 1. Reflected-origin credentialed CORS on GoTrue gateway (confidence 85, MISCONFIG, PASSIVE) — cross-origin authenticated identity reads  
+[FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found  
+[FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account  
+
+---
+
+**STEP 5 — NEXT ACTION**
+
+[NEXT] PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v (validates reflected-origin+ACAC on authenticated user endpoint; CORS headers present on 401 too)
+
+---
+
+**STEP 6 — LEARNING**
+
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS discriminator is AUTHENTICATION STATE (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-01 00:39Z  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the credentialed reflection extends to the five mutating email primitives — `/auth/v1/otp`, `/auth/v1/recover`, `/auth/v1/invite`, `/auth/v1/signup`, `/auth/v1/magiclink` all return `ACAO: null` + `ACAC: true` on null-origin GET  
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/s3: the S3 plane is mounted on the MAIN api host as well as the dedicated storage host — 403 on both, ACAO:* with no ACAC and no reflection  
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the `redirect_to` allowlist is not influenceable by a client-supplied host header — an axis untouched for 50 days; X-Forwarded-Host + Forwarded headers all 303 to allowlisted origin  
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: two further allowlist-bypass URL shapes closed. Encoded-at userinfo `https://kurs.onecode.de%40evil.example/` and port-userinfo `https://kurs.onecode.de:443@evil.example/` both 303 to allowlisted origin  
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: token supply is closed at the ROUTER, not only in config. `GET /auth/v1/anonymous` → 404 while the five real auth primitives return 405 Allow: POST  
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-14. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200  
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, unchanged. Passive probing fully converged  
+[LEARN] REJECTED MISCONFIG @ own KB (self-correction of a 2-day-old entry): the line "REJECTED MISCONFIG @ …/auth/v1/*: live probes show wildcard ACAO:* without ACAC:true … no credentialed cross-origin read" measured the unauthenticated response only and generalised it to the plane. Live with a matched control today, the apikey-bearing response reflects the Origin with ACAC:true. The REJECTED verdict is withdrawn; scope and the MEDIUM ceiling are unaffected because the Bearer-only negative still holds.  
+
+---
+
+**STEP 7 — RISK**
+
+[RISK] onecode: 70 — Primary asset kurs.onecode.de: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all /api/* auth-gated. CRITICAL NEW: S3-compatible storage plane aygnpacdkgtsfnhgcyjc.storage.supabase.co deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads). Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed but bucket names unrecoverable pre-auth.

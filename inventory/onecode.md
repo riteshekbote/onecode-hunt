@@ -1111,3 +1111,13 @@ www.onecode.de
 - CHANGED cto.onecode.de CNAME day-53, HTTP 409, zero verification TXT — passive probing fully converged
 - CHANGED kurs.onecode.de no deploy day-14; main chunk `f916f314ea61a8c5...` byte-identical; pre-auth surface frozen
 - CHANGED Supabase REST monitor formally closed 09-17 (26 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+
+## 2026-10-01 23:26:13 UTC
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (HTTP 403 S3 XML "Missing signature"), independent SigV4 authz plane never probed in 26 days — separ
+- NEW GoTrue `/auth/v1/token?grant_type=password` and `/auth/v1/otp` return 405 with reflected `ACAO: <Origin>` + `ACAC: true` (live 2026-10-01 00:41Z) — credentialed CORS extends to password-grant and OTP 
+- NEW `/auth/v1/callback` registered GoTrue OAuth callback route reachable pre-auth despite all `external.*` providers false; returns 303 to `SITE_URL` with `error_code=bad_oauth_callback`
+- CHANGED `kurs.onecode.de` no deploy day-14; main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`) and sink chunk `1a4tqdnsy9k1l.js` (13 880 B, sh
+- CHANGED `cto.onecode.de` CNAME `cname.perspective-dns.com` day-53, HTTP 409 "error code:1001", zero verification TXT records — passive probing fully converged, only owner claim attempt advances it
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey AND Bearer present — on all four route classes (`/bucket`, `/object/public`, `/object/info`, `/object/sign
+- CHANGED GoTrue credentialed reflection discriminator confirmed: authentication STATE (unauthenticated → wildcard no ACAC; apikey-bearing → reflected Origin with `ACAC: true`) — live re-verified 2026-10-01 00:
