@@ -3368,3 +3368,13 @@
 - LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-14. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, u
 - LEARN: REJECTED MISCONFIG @ own KB (self-correction of a 2-day-old entry): the line "REJECTED MISCONFIG @ …/auth/v1/*: live probes show wildcard ACAO:* without ACAC:tr
+
+## RANKED HYPOTHESES 2026-10-02 15:50:07 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: pre-auth bucket-existence oracle is ROUTE-TABLE-COMPLETE (10 mounted GET routes return byte-id
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-15. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, u
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces

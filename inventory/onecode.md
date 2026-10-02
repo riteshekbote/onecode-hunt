@@ -1143,3 +1143,12 @@ www.onecode.de
 - CHANGED cto.onecode.de — day-53, unchanged. `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only, zero verification records. `GET http://cto.onecode.de/` →
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /graphql/v1 — closed monitor sampled once for state only: `/rest/v1/` → `401 {"message":"Secret API key required","hint":"Only secret API keys can be used fo
 - CHANGED kurs.onecode.de response headers — `/login` emits NO `content-security-policy`, NO `strict-transport-security`, NO `x-frame-options`, NO `x-content-type-options`, NO `referrer-policy`, NO `permissions
+
+## 2026-10-02 15:50:07 UTC
+- NEW S3-compatible storage plane at `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 Invali
+- NEW GoTrue credentialed CORS reflection on `/auth/v1/*` re-verified live: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no `
+- NEW Signed URL route `/storage/v1/object/upload/sign/{bucket}/{key}` mounted and bucket-resolves pre-auth (400 NoSuchBucket) — 10th GET route class in complete route table
+- CHANGED `kurs.onecode.de` no deploy day-15: main chunk `f916f314ea61a8c5...` (154581 B) and sink chunk `5a72d2cd...` (13880 B) byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datensch
+- CHANGED `cto.onecode.de` CNAME→`cname.perspective-dns.com` day-53, HTTP 409, zero verification TXT — passive probing fully converged
+- CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes

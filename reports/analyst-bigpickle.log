@@ -30220,3 +30220,28 @@ testability: AUTH_HELPED
 
 [RISK] OneCode GmbH: 47 — unchanged. The cycle produced one real delta and it is a completeness correction, not new exposure: the storage oracle is now provably route-complete (10 classes) with the GET route table closed by routing-404 counter-examples, which raises confidence in an existing LOW finding without raising its impact. The primary accepted issue, GoTrue reflected-origin credentialed CORS, re-reproduced live with a matched control and its ceiling re-verified by two negatives (Bearer-only auth on that origin, no `access-control-*` on the session-cookie host, `cf-cache-status: DYNAMIC` ruling out cache amplification). The S3 plane is formally downgraded to untestable-in-environment, which is a small reduction in asserted risk. Nothing permissive was observed on any of the six Supabase planes; `/rest/v1/` is 401 secret-key-required, `/graphql/v1` is 503 PGRST002, `/functions/v1/*` 404, `/realtime/v1/` 401, `/analytics/v1/` 404. kurs.onecode.de is day-15 with zero deploys and 13 byte-identical chunks. The only material unblock in the whole program remains two invited accounts, which would convert the single highest-value lead (RLS/BOLA, conf 65) plus one conf-55 lead into demonstrable findings in one request.
 ```
+===== ANALYST bigpickle 2026-10-02 15:50:07 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll run live read-only probes (≤1 rps, GET/HEAD/OPTIONS only) to establish the current surface, then produce the 8 structured blocks.
+[93m[1m! [0mpermission requested: external_directory (/tmp/opencode/*, /tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp/opencode 2>/dev/null || cd /tmp; K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+echo "=== A: /login ==="
+curl -sS -D /tmp/opencode/h_login.txt -o /tmp/opencode/b_login.html -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/login
+sha256sum /tmp/opencode/b_login.html
+echo "--- headers ---"; grep -iE '^(set-cookie|cache-control|server|x-railway-edge|x-hikari-trace|content-type|strict-transport|content-security|x-frame|x-content-type|referrer-policy|permissions-policy):' /tmp/opencode/h_login.txt
+sleep 1.2
+echo "=== B: main chunk ==="
+curl -sS -o /tmp/opencode/main.js -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js
+sha256sum /tmp/opencode/main.js
+sleep 1.2
+echo "=== C: sink chunk ==="
+curl -sS -o /tmp/opencode/sink.js -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js
+sha256sum /tmp/opencode/sink.js
+sleep 1.2
+echo "=== D: gate ==="
+for p in / /admin /dashboard /api/broadcast /datenschutz /rechtliches /passwort-vergessen; do
+  curl -sS -o /dev/null -w "$p -> %{http_code}\n" "https://kurs.onecode.de$p"; sleep 1.2
+done failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
