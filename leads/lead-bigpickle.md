@@ -6319,3 +6319,46 @@ testability: PASSIVE
 [LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: redirect_to allowlist enforced per-type across 15 off-origin shapes with zero off-origin redirects; X-Forwarded-Host does not influence allowlist.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (26 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only.
 [RISK] onecode: 47 — unchanged. Passive scope reductions offset broader CORS characterization. The identity service reflects any origin with credentials but no auth cookie exists on that origin (Bearer-only). Fragment sink is present by hash but unexploitable without valid token pairs. Only material unblock is two invited accounts for AUTH_HELPED hypothesis.
+## 2026-10-02 02:36:57 UTC [target] (model bigpickle)
+[NEW] None
+[CHANGED] None
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,7.5,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=10,cloud_surface=9,freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*,7.1,attack_surface=8,business_value=6,tech_exposure=8,gate_ease=10,cloud_surface=6,freshness=7
+[PRIO] kurs.onecode.de/login,6.8,attack_surface=6,business_value=8,tech_exposure=7,gate_ease=9,cloud_surface=5,freshness=4
+[HYP] S3-compatible storage plane (independent SigV4 authz)
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
+confidence: 75
+reasoning: S3-compatible storage API lives on storage host separate from main api host. SigV4 enforces its own authz; the public publishable key does not authenticate S3 requests. A SigV4 misconfiguration (e.g. world-readable bucket policy / anonymous PUT/GET to an unprotected S3-style prefix) could bypass Supabase RLS if the bucket is shared across planes.
+evidence_needed: Object readable/writeable without valid AWS SigV4 (or with weak policy) returning 200 with data; or any GET to /storage/v1/s3/<bucket>/<key> without Authorization returning non-403-oracle response distinct from "Missing signature"/"InvalidSignature".
+verify_steps: 
+impact: HIGH if private course assets readable via S3 plane. Bypasses Supabase RLS. Severity HIGH.
+testability: PASSIVE
+[HYP] GoTrue reflected-origin credentialed CORS across router
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*
+confidence: 55
+reasoning: With apikey present (header or query string, publishable key shipped pre-auth), GoTrue reflects arbitrary Origin with Access-Control-Allow-Credentials:true across the whole router (200/401/404/405). Reflection is router-wide on GoTrue when apikey-bearing; storage host is single-plane with no CORS headers on non-storage paths. Bearer-only control shows no auth cookie on that origin. Impact bounded because no auth cookie issued on that origin and app session cookie is on different host; still violates origin isolation on identity service.
+evidence_needed: Cross-origin response from /auth/v1/* with foreign Origin and ACAC:true that returns data attacker does not already hold (prove credentialed reflection exploitable for cross-origin read of identity state).
+verify_steps:
+impact: LOW-MEDIUM standalone; rises to HIGH only if cookie-based auth mode appears on that origin. No data exfiltration demonstrated. Severity LOW-MEDIUM.
+testability: PASSIVE
+[HYP] Forced-login via fragment session injection on /login
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: HashSessionHandoff (module 34891) is mounted on /login RSC payload and parses window.location.hash for access_token+refresh_token on hydration, calling setSession() with no state/nonce/PKCE binding. Redirect map fixed to {invite:/einladung, recovery:/passwort-neu} defaulting to / (no off-origin redirect). Exploitability requires valid attacker token pair from invited account. Sink chunk byte-identical since 2026-09-19 11:33Z.
+evidence_needed: Two invited OneCode course accounts on distinct addresses. Serve attacker-controlled https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>&expires_in=3600&token_type=bearer to victim; observe Set-Cookie sb-aygnpacdkgtsfnhgcyjc-auth-token issued and 200 on 307-gated /dashboard in victim context.
+verify_steps:
+impact: MEDIUM. Forced login to attacker's session context (business logic attribution failure). Rises if course material/assignments are non-transferable value. Severity MEDIUM.
+testability: AUTH_HELPED
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65): requires two invited test accounts (AUTH_HELPED), highest value but blocked on account acquisition; pre-auth surface exhausted.
+[FINAL] S3-compatible storage plane (independent SigV4 authz) — conf 75, PASSIVE, HIGH.
+[FINAL] Forced-login via fragment session injection on /login — conf 55, AUTH_HELPED, MEDIUM.
+[FINAL] GoTrue reflected-origin credentialed CORS across router — conf 55, PASSIVE, LOW-MEDIUM.
+[NEXT] HUMAN: Request two invited OneCode course accounts on distinct email addresses. This single unblock resolves RLS/BOLA hypothesis (conf 65), supplies second principal needed to convert fragment-injection hypothesis into observed forced login, and allows reading a real bucket name from session context instead of guessing.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane; bucket oracle not demonstrated pre-auth (requires session context). Structural risk only without concrete bucket/object access.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected Origin with ACAC:true). Reflection router-wide (200/401/404/405); no auth cookie on that origin (Bearer-only) caps impact to LOW-MEDIUM.
+[LEARN] REJECTED OATH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: redirect_to allowlist enforced per-type across 15 off-origin shapes with zero off-origin redirects; X-Forwarded-Host does not influence allowlist.
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de/login: HashSessionHandoff mounted on /login RSC payload parses URL fragment and calls setSession() with no state/nonce/PKCE binding; error paths fixed to /login?error=link-abgelaufen. Requires valid token pair (invited accounts) to exploit.
+[RISK] OneCode GmbH: 47 — Passive scope reductions (single-plane storage host, S3 plane oracle-negative pre-auth) offset broader CORS characterization. Identity service reflects any origin with credentials but no auth cookie exists on that origin (Bearer-only). Fragment sink present but unexploitable without valid token pairs. Only material unblock is two invited accounts for AUTH_HELPED hypotheses (fragment injection and BOLA/RLS).

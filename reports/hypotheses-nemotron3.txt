@@ -1,4 +1,4 @@
-## 2026-10-01 23:25:48 UTC [target] (model nemotron3)
+## 2026-10-02 02:35:48 UTC [target] (model nemotron3)
 [NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (HTTP 403 S3 XML "Missing signature"), independent SigV4 authz plane never probed in 26 days — separate credential store bypasses Supabase RLS policies on storage.objects  
 [NEW] GoTrue `/auth/v1/token?grant_type=password` and `/auth/v1/otp` return 405 with reflected `ACAO: <Origin>` + `ACAC: true` (live 2026-10-01 00:41Z) — credentialed CORS extends to password-grant and OTP mutating primitives  
 [NEW] `/auth/v1/callback` registered GoTrue OAuth callback route reachable pre-auth despite all `external.*` providers false; returns 303 to `SITE_URL` with `error_code=bad_oauth_callback`  
