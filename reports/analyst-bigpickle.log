@@ -29844,3 +29844,379 @@ testability: AUTH_HELPED
 
 ## STEP 7 — RISK
 [RISK] OneCode GmbH: 47 — Passive scope reductions (single-plane storage host, S3 plane oracle-negative pre-auth) offset broader CORS characterization. Identity service reflects any origin with credentials but no auth cookie exists on that origin (Bearer-only). Fragment sink present but unexploitable without valid token pairs. Only material unblock is two invited accounts for AUTH_HELPED hypotheses (fragment injection and BOLA/RLS).
+===== ANALYST bigpickle 2026-10-02 09:03:04 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la; ls -la art 2>/dev/null | head -30; which curl dig sha256sum python3 2>/dev/null
+total 800
+drwxr-xr-x 12 runner runner   4096 Oct  2 09:00 .
+drwxr-xr-x  3 runner runner   4096 Oct  2 08:59 ..
+drwxr-xr-x  7 runner runner   4096 Oct  2 09:00 .git
+drwxr-xr-x  3 runner runner   4096 Oct  2 08:59 .github
+-rw-r--r--  1 runner runner   1692 Oct  2 08:59 README.md
+-rw-r--r--  1 runner runner     32 Oct  2 09:00 analyst-out.txt
+-rw-r--r--  1 runner runner 357138 Oct  2 09:00 analyst-prompt.txt
+-rw-r--r--  1 runner runner 353289 Oct  2 09:00 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 leads
+-rw-r--r--  1 runner runner   5307 Oct  2 08:59 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 reports
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Oct  2 08:59 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  2 08:59 scripts
+-rw-r--r--  1 runner runner     33 Oct  2 08:59 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  2 08:59 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  2 08:59 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  2 08:59 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  2 08:59 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  2 08:59 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  2 08:59 triage
+/usr/bin/curl
+/usr/bin/dig
+/usr/bin/sha256sum
+/usr/bin/python3
+[0m
+[0m$ [0mcat > /tmp/opencode/p1.sh <<'EOF'
+set -u
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== T0 $(date -u +%H:%M:%SZ) ==="
+echo "--- HEAD /login"
+curl -sS -I --max-time 20 https://kurs.onecode.de/login | tr -d '\r' | egrep -i '^(HTTP|content-length|content-type|set-cookie|cache-control|server|x-railway-edge|x-hikari-trace|x-powered-by|x-frame-options|content-security-policy|strict-transport)' 
+sleep 1
+echo "--- GET /login body"
+curl -sS --max-time 25 -o /tmp/opencode/login.html -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/login
+sha256sum /tmp/opencode/login.html
+sleep 1
+echo "--- chunk main"
+curl -sS --max-time 30 -o /tmp/opencode/main.js -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js
+sha256sum /tmp/opencode/main.js
+sleep 1
+echo "--- chunk sink"
+curl -sS --max-time 30 -o /tmp/opencode/sink.js -w 'code=%{http_code} size=%{size_download}\n' https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js
+sha256sum /tmp/opencode/sink.js
+EOF
+bash /tmp/opencode/p1.sh 2>&1
+=== T0 09:00:39Z ===
+--- HEAD /login
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+server: railway-hikari
+x-powered-by: Next.js
+x-hikari-trace: iad1.dh1s
+x-railway-edge: iad1
+--- GET /login body
+code=200 size=18702
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/opencode/login.html
+--- chunk main
+code=200 size=154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/main.js
+--- chunk sink
+code=200 size=13880
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  /tmp/opencode/sink.js
+[0m
+[0m$ [0mcat > /tmp/opencode/p2.sh <<'EOF'
+set -u
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+P="zzz_ctrl_9x7"
+echo "=== $(date -u +%H:%M:%SZ) storage route-class probe (read-only GET, apikey+Bearer publishable) ==="
+for path in \
+  "/storage/v1/bucket" \
+  "/storage/v1/object/public/$P/x.txt" \
+  "/storage/v1/object/info/$P/x.txt" \
+  "/storage/v1/object/list/$P" \
+  "/storage/v1/bucket/$P" \
+  "/storage/v1/object/authenticated/$P/x.txt" \
+  "/storage/v1/object/$P/x.txt" \
+  "/storage/v1/object/$P" \
+  "/storage/v1/render/image/public/$P/x.txt" \
+  "/storage/v1/s3/$P/x.txt" ; do
+  out=$(curl -sS --max-time 20 -o /tmp/opencode/b.txt -w '%{http_code}|%{size_download}' \
+    -H "apikey: $K" -H "Authorization: Bearer $K" -H 'Origin: https://evil.example' \
+    -H 'Access-Control-Request-Method: GET' "$H$path")
+  acao=$(curl -sS --max-time 20 -D - -o /dev/null -H "apikey: $K" -H "Authorization: Bearer $K" -H 'Origin: https://evil.example' "$H$path" 2>/dev/null | tr -d '\r' | egrep -i '^(access-control-allow-origin|access-control-allow-credentials|vary):' | tr '\n' ';')
+  printf '%-55s %s\n    acao: %s\n    body: %s\n' "$path" "$out" "$acao" "$(head -c 220 /tmp/opencode/b.txt | tr -d '\n')"
+  sleep 1
+done
+EOF
+bash /tmp/opencode/p2.sh 2>&1
+=== 09:00:47Z storage route-class probe (read-only GET, apikey+Bearer publishable) ===
+/storage/v1/bucket                                      200|2
+    acao: access-control-allow-origin: *;
+    body: []
+/storage/v1/object/public/zzz_ctrl_9x7/x.txt            400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/info/zzz_ctrl_9x7/x.txt              400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/list/zzz_ctrl_9x7                    400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/bucket/zzz_ctrl_9x7                         400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/authenticated/zzz_ctrl_9x7/x.txt     400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/zzz_ctrl_9x7/x.txt                   400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/zzz_ctrl_9x7                         404|117
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Not Found","message":"Route GET:/object/zzz_ctrl_9x7 not found","code":"InvalidRequest"}
+/storage/v1/render/image/public/zzz_ctrl_9x7/x.txt      400|98
+    acao: access-control-allow-origin: *;
+    body: {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/s3/zzz_ctrl_9x7/x.txt                       403|218
+    acao: access-control-allow-origin: *;
+    body: <?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource>zzz_ctrl_9x7/x.txt</Resource><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+[0m$ [0mcat > /tmp/opencode/p3.sh <<'EOF'
+set -u
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+P="zzz_ctrl_9x7"
+echo "=== $(date -u +%H:%M:%SZ) storage GET route-table mapping ==="
+for path in \
+  "/storage/v1/object/sign/$P/x.txt" \
+  "/storage/v1/object/upload/sign/$P/x.txt" \
+  "/storage/v1/object/public/$P" \
+  "/storage/v1/object/info/authenticated/$P/x.txt" \
+  "/storage/v1/object/list/authenticated/$P" \
+  "/storage/v1/object/move/copy" \
+  "/storage/v1/render/image/authenticated/$P/x.txt" \
+  "/storage/v1/render/image/$P/x.txt?width=10" \
+  "/storage/v1/vector/$P/query" \
+  "/storage/v1/s3/$P?list-type=2" \
+  "/storage/v1/object/$P/x.txt?download=" \
+  "/storage/v1/object/$P/.metadata/x" ; do
+  out=$(curl -sS --max-time 20 -o /tmp/opencode/c.txt -w '%{http_code}|%{size_download}' \
+    -H "apikey: $K" -H "Authorization: Bearer $K" "$H$path")
+  printf '%-52s %s\n    %s\n' "$path" "$out" "$(head -c 200 /tmp/opencode/c.txt | tr -d '\n')"
+  sleep 1
+done
+EOF
+bash /tmp/opencode/p3.sh 2>&1
+=== 09:01:11Z storage GET route-table mapping ===
+/storage/v1/object/sign/zzz_ctrl_9x7/x.txt           400|120
+    {"statusCode":"400","error":"Error","message":"querystring must have required property 'token'","code":"InvalidRequest"}
+/storage/v1/object/upload/sign/zzz_ctrl_9x7/x.txt    400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/public/zzz_ctrl_9x7               400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/info/authenticated/zzz_ctrl_9x7/x.txt 400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/list/authenticated/zzz_ctrl_9x7   400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/move/copy                         400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/render/image/authenticated/zzz_ctrl_9x7/x.txt 400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/render/image/zzz_ctrl_9x7/x.txt?width=10 404|138
+    {"statusCode":"404","error":"Not Found","message":"Route GET:/render/image/zzz_ctrl_9x7/x.txt?width=10 not found","code":"InvalidRequest"}
+/storage/v1/vector/zzz_ctrl_9x7/query                404|123
+    {"statusCode":"404","error":"Not Found","message":"Route GET:/vector/zzz_ctrl_9x7/query not found","code":"InvalidRequest"}
+/storage/v1/s3/zzz_ctrl_9x7?list-type=2              403|212
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource>zzz_ctrl_9x7</Resource><Code>AccessDenied</Code><Message>Missing signature</Mess
+/storage/v1/object/zzz_ctrl_9x7/x.txt?download=      400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+/storage/v1/object/zzz_ctrl_9x7/.metadata/x          400|98
+    {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}
+[0m
+[0m$ [0mcat > /tmp/opencode/p4.sh <<'EOF'
+set -u
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+echo "=== $(date -u +%H:%M:%SZ) planes ==="
+for path in "/functions/v1/" "/functions/v1/zzz_ctrl_9x7" "/realtime/v1/" "/rest/v1/" "/graphql/v1" "/analytics/v1/" "/storage/v1/" ; do
+  out=$(curl -sS --max-time 20 -o /tmp/opencode/d.txt -w '%{http_code}|%{size_download}' -H "apikey: $K" -H "Authorization: Bearer $K" "$H$path")
+  printf '%-32s %s  %s\n' "$path" "$out" "$(head -c 150 /tmp/opencode/d.txt | tr -d '\n')"
+  sleep 1
+done
+echo
+echo "=== GoTrue CORS re-verify (matched control, apikey query-string) ==="
+for u in "$H/auth/v1/settings?apikey=$K" "$H/auth/v1/settings"; do
+  curl -sS --max-time 20 -D - -o /tmp/opencode/e.txt -H 'Origin: https://evil.example' "$u" \
+   | tr -d '\r' | egrep -i '^(HTTP/|access-control-allow-origin|access-control-allow-credentials|vary|cf-cache-status|sb-gateway-version|x-supabase-api-version)'
+  echo "  -- body: $(head -c 160 /tmp/opencode/e.txt|tr -d '\n')"
+  sleep 1
+done
+echo
+echo "=== null-origin ==="
+curl -sS --max-time 20 -D - -o /dev/null -H 'Origin: null' "$H/auth/v1/settings?apikey=$K" | tr -d '\r' | egrep -i '^(HTTP/|access-control-allow-origin|access-control-allow-credentials|vary)'
+EOF
+bash /tmp/opencode/p4.sh 2>&1
+=== 09:01:33Z planes ===
+/functions/v1/                   404|65  {"code":"NOT_FOUND","message":"Requested function was not found"}
+/functions/v1/zzz_ctrl_9x7       404|65  {"code":"NOT_FOUND","message":"Requested function was not found"}
+/realtime/v1/                    401|30  {"error":"API key is missing"}
+/rest/v1/                        401|98  {"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+/graphql/v1                      503|119  {"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+/analytics/v1/                   404|37  {"error":"requested path is invalid"}
+/storage/v1/                     404|72  {"message":"Route GET:/ not found","error":"Not Found","statusCode":404}
+
+=== GoTrue CORS re-verify (matched control, apikey query-string) ===
+HTTP/2 200 
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+sb-gateway-version: 1
+  -- body: {"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"
+HTTP/2 401 
+access-control-allow-origin: *
+sb-gateway-version: 1
+  -- body: {"message":"No API key found in request","hint":"No `apikey` request header or url param was found."}
+
+=== null-origin ===
+HTTP/2 200 
+access-control-allow-origin: null
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+[0m
+[0m$ [0mcat > /tmp/opencode/p5.sh <<'EOF'
+set -u
+echo "=== $(date -u +%H:%M:%SZ) cto.onecode.de ==="
+dig +short @1.1.1.1 cto.onecode.de CNAME
+dig +short @1.1.1.1 cto.onecode.de A
+echo "TXT(host):"; dig +short @1.1.1.1 cto.onecode.de TXT
+sleep 1
+curl -sS --max-time 20 -o /tmp/opencode/f.txt -w 'http80 code=%{http_code}\n' http://cto.onecode.de/
+head -c 200 /tmp/opencode/f.txt; echo
+sleep 1
+echo "--- kurs route gate spot-check"
+for p in / /datenschutz /rechtliches /passwort-vergessen /admin /dashboard /api/broadcast; do
+  code=$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' "https://kurs.onecode.de$p")
+  loc=$(curl -sS --max-time 20 -D - -o /dev/null "https://kurs.onecode.de$p" | tr -d '\r' | egrep -i '^location:' | head -1)
+  printf '%-22s %s %s\n' "$p" "$code" "$loc"
+  sleep 1
+done
+EOF
+bash /tmp/opencode/p5.sh 2>&1
+=== 09:01:50Z cto.onecode.de ===
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+TXT(host):
+cname.perspective-dns.com.
+http80 code=409
+error code: 1001
+--- kurs route gate spot-check
+/                      307 location: /login
+/datenschutz           200 
+/rechtliches           200 
+/passwort-vergessen    200 
+/admin                 307 location: /login
+/dashboard             307 location: /login
+/api/broadcast         307 location: /login
+[0m
+[0m$ [0mcd /tmp/opencode
+echo "--- RSC client-ref rows in /login"
+grep -o '1[0-9]:I\[[0-9]*,\[[^]]*\],"[A-Za-z]*"\]' login.html | head -20
+echo "--- HashSessionHandoff / LoginForm occurrences"
+grep -c 'HashSessionHandoff' login.html; grep -o '"HashSessionHandoff"' login.html | head -2
+grep -o '28420' login.html | head -2
+echo "--- chunk refs"
+grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' login.html | sort -u
+echo "--- count"; grep -o '/_next/static/chunks/[A-Za-z0-9_.-]*\.js' login.html | sort -u | wc -l
+echo "--- storage/bucket literals in login.html"; grep -o 'storage/v1[^"]*' login.html | head -5; echo "(none above = no leak)"
+echo "--- security headers on 200 page"
+curl -sS --max-time 20 -D - -o /dev/null https://kurs.onecode.de/login | tr -d '\r' | egrep -i '^(strict-transport|content-security|x-frame|x-content-type|referrer|permissions|cross-origin)' 
+--- RSC client-ref rows in /login
+--- HashSessionHandoff / LoginForm occurrences
+1
+28420
+--- chunk refs
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+--- count
+13
+--- storage/bucket literals in login.html
+(none above = no leak)
+--- security headers on 200 page
+[0m
+[0m$ [0mcd /tmp/opencode; grep -o '.\{40\}HashSessionHandoff.\{80\}' login.html; echo "---"; grep -o 'I\[[0-9]\+,\[[^]]\{0,120\}\]' login.html | head -6
+ext/static/chunks/0-lpao5_i9htd.js\"],\"HashSessionHandoff\"]\n19:I[28420,[\"/_next/static/chunks/3fntmmi971322.js\",\"/_next/static/chunk
+---
+[0m
+```
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — the pre-auth `NoSuchBucket` oracle is ROUTE-TABLE-COMPLETE, not sampled. Live GETs (apikey + Bearer = publishable, Origin: https://evil.example) return byte-identical `400 {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}` (98 B) on 9 GET route classes: `/object/public/{b}/{k}`, `/object/info/{b}/{k}`, `/object/list/{b}`, `/bucket/{b}`, `/object/authenticated/{b}/{k}`, `/object/info/authenticated/{b}/{k}`, `/object/list/authenticated/{b}`, `/render/image/public/{b}/{k}`, `/render/image/authenticated/{b}/{k}`, plus bare `/object/{b}/{k}`. All serve `ACAO: *`, no `ACAC`.
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — the GET route table is now CLOSED by counter-example, which is what makes the 9-class oracle claim sound rather than sampled: `/object/{bucket}` → `404 {"statusCode":"404","error":"Not Found","message":"Route GET:/object/zzz_ctrl_9x7 not found","code":"InvalidRequest"}`; `/render/image/{b}/{k}?width=10` → same routing-404; `/vector/{b}/query` → same routing-404. So there is no bare-bucket LIST route and no Vectors plane; the enumerated object route set is exhaustive for GET.
+[NEW] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — `/storage/v1/object/upload/sign/{b}/{k}` (presigned-upload issuer) is MOUNTED and bucket-resolves pre-auth (400 NoSuchBucket with a control bucket). This is a 10th mounted route class and the only one whose success path would mint a credential without an account.
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1 — CORS auth-state discriminator re-reproduced live 09:01Z with a matched control on ONE path. `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.example` → `200`, `ACAO: https://evil.example`, `ACAC: true`, `vary: Origin, Accept-Encoding`, `cf-cache-status: DYNAMIC`, `sb-gateway-version: 1`. Same path minus the key → `401 {"message":"No API key found in request"}`, `ACAO: *`, **no** `ACAC`. `Origin: null` + apikey → `ACAO: null` + `ACAC: true`.
+[CHANGED] kurs.onecode.de — NO deploy, day-15. `GET /login` → `200`, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical), zero `Set-Cookie`, `private, no-cache, no-store, max-age=0, must-revalidate`, `server: railway-hikari`, `x-railway-edge: iad1`, `x-hikari-trace: iad1.dh1s` (iad1, load-balancer noise). Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6c6dcedd0`; both byte-identical. 13 chunk refs exactly. `18:I[34891,…,"HashSessionHandoff"]` still immediately followed by `19:I[28420,…]` (LoginForm) — sink mount survives day-15. Gate spot-check: `/` 307→/login, `/admin` 307→/login, `/dashboard` 307→/login, `/api/broadcast` 307→/login, `/datenschutz` 200, `/rechtliches` 200, `/passwort-vergessen` 200.
+[CHANGED] cto.onecode.de — day-53, unchanged. `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only, zero verification records. `GET http://cto.onecode.de/` → `409` `error code: 1001`.
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /graphql/v1 — closed monitor sampled once for state only: `/rest/v1/` → `401 {"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}`; `/graphql/v1` → `503 PGRST002 "Could not query the database for the schema cache. Retrying."` `/functions/v1/` + `/functions/v1/<control>` → `404 NOT_FOUND` byte-identical; `/realtime/v1/` → `401 {"error":"API key is missing"}`; `/analytics/v1/` → `404 {"error":"requested path is invalid"}`; `/storage/v1/` → `404 {"message":"Route GET:/ not found","code":"InvalidRequest"}`. Nothing permissive on any plane.
+[CHANGED] kurs.onecode.de response headers — `/login` emits NO `content-security-policy`, NO `strict-transport-security`, NO `x-frame-options`, NO `x-content-type-options`, NO `referrer-policy`, NO `permissions-policy`. Recorded as an observation only: header-presence-only is a REJECTED class and no exploit chain was demonstrated (the magic-link payload travels in the URL fragment, which browsers never place in `Referer`, so no token-leak chain exists).
+NO_DELTA @ all other assets: no new CT-observable host, `/login` chunk set byte-identical, cto CNAME stable, GoTrue `/auth/v1/settings` body unchanged (`external.anonymous_users:false`, `disable_signup:true`, `mailer_autoconfirm:false`, `external.email` sole truthy), no storage bucket-name literal in `/login` HTML (grep `storage/v1` → 0 hits).
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/*,8.0,attack_surface=8,business_value=6,tech_exposure=8,gate_ease=10,cloud_surface=9,freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*,7.6,attack_surface=8,business_value=6,tech_exposure=8,gate_ease=10,cloud_surface=6,freshness=8
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,6.7,attack_surface=4,business_value=7,tech_exposure=9,gate_ease=10,cloud_surface=9,freshness=2
+[PRIO] kurs.onecode.de/login,6.8,attack_surface=6,business_value=8,tech_exposure=7,gate_ease=9,cloud_surface=5,freshness=4
+
+[HYP] Supabase Storage object surface is gated on exactly one unknown — the bucket name — with no name-independent read primitive on any of the 10 mounted GET route classes
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1
+confidence: 62
+reasoning: 10 mounted GET route classes bucket-resolve BEFORE any authz or signature decision and return a byte-identical 98-byte `400 {"code":"NoSuchBucket"}` — /object/public, /object/info, /object/list, /bucket, bare /object/{b}/{k}, /object/authenticated, /object/info/authenticated, /object/list/authenticated, /render/image/public, /render/image/authenticated, /object/upload/sign. The GET route table is closed by counter-example (/object/{b}, /render/image/{b}/{k}, /vector/* are all routing-404 `InvalidRequest`), so this enumeration is exhaustive, not sampled. Two routes fail CLOSED before bucket lookup instead: /object/sign/{b}/{k} → `400 {"code":"InvalidRequest","message":"querystring must have required property 'token'"}` and /storage/v1/s3/* → `403 AccessDenied "Missing signature"` (SigV4 checked first). The bucket name appears in zero of the 13 pre-auth chunks and zero bytes of /login HTML. Therefore every storage read/write primitive — including the presigned-upload issuer on /object/upload/sign — is name-gated, and the name is not recoverable pre-auth by any instrument available.
+evidence_needed: One request to any of the 10 mounted classes that returns something other than `NoSuchBucket` / `InvalidRequest` / a signature error for a NON-EXISTENT bucket — that would be a name-independent primitive. Secondarily: one real bucket name, which converts the oracle from a structural disclosure into an actual object-read test.
+verify_steps: 1) GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/upload/sign/zzz_ctrl_9x7/x.txt -H 'apikey: sb_publishable_…' -H 'Authorization: Bearer sb_publishable_…' (read-only) — expect 400 code:NoSuchBucket, proving the upload-sign route is mounted and bucket-resolving pre-auth. 2) GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/zzz_ctrl_9x7/x.txt with the same headers — expect the byte-identical NoSuchBucket control. 3) GET https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/zzz_ctrl_9x7 -H 'apikey: …' — expect 404 `Route GET:/object/zzz_ctrl_9x7 not found` (no bare-bucket LIST route exists, so no listing primitive is reachable by name either).
+impact: LOW standalone — a structural existence oracle, no object data path, no name-independent bypass demonstrated. Its real value is diagnostic: it proves the entire storage surface is a single-variable problem, so one disclosed bucket name collapses the whole hypothesis set. Severity LOW.
+testability: PASSIVE
+
+[HYP] GoTrue reflects arbitrary Origin with Access-Control-Allow-Credentials:true on apikey-bearing requests, discriminator is authentication state not route or plane
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*
+confidence: 55
+reasoning: Matched control on a single path this cycle. `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.example` → 200, `ACAO: https://evil.example`, `ACAC: true`, `vary: Origin, Accept-Encoding`, `cf-cache-status: DYNAMIC`. Identical request minus the key → 401 `{"message":"No API key found in request"}`, `ACAO: *`, no `ACAC`. `Origin: null` + apikey → `ACAO: null` + `ACAC: true`, so no attacker-controlled domain is required. The apikey is a public value shipped in all 13 pre-auth chunks (sha256 `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`), so gating the credentialed form on it is not a boundary. Ceiling is capped by two measured negatives: GoTrue is Bearer-only (`/auth/v1/user` with apikey + forged `sb-…-auth-token` cookie → 401 "This endpoint requires a valid Bearer token"), and the credentialed reflection does not extend to the storage host, which returns `404 Invalid Storage request` with zero `access-control-*` headers. `cf-cache-status: DYNAMIC` throughout, so there is no cache-amplification escalation.
+evidence_needed: A cross-origin response on this origin that returns identity state the attacker does not already possess — i.e. proof that some credential other than a bearer token is honoured here. Concretely: any 200 body from `/auth/v1/user` reached from a foreign origin with no attacker-supplied bearer.
+verify_steps: 1) curl -sS -D- -o/dev/null -H 'Origin: https://evil.example' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings?apikey=sb_publishable_…' — expect 200 with `ACAO: https://evil.example` and `ACAC: true`. 2) Same URL with the `?apikey=` removed — expect 401 with `ACAO: *` and no `ACAC` (the discriminator pair). 3) Same as 1 but `-H 'Origin: null'` — expect `ACAO: null` + `ACAC: true`.
+impact: LOW-MEDIUM. Defeats origin isolation on the project's identity service and is owner-fixable with a single allowed-origins config, but there is no auth cookie on this origin and the app session-cookie host emits no ACAO at all, so no credentialed cross-origin read of application data is demonstrated. Severity LOW-MEDIUM.
+testability: PASSIVE
+
+[HYP] Forced-login via unbound URL-fragment session ingestion mounted on /login
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: `18:I[34891,…,"HashSessionHandoff"]` is still mounted on the /login RSC flight payload, immediately followed by `19:I[28420,…]` (LoginForm), both with the identical 5-chunk dependency set ending in `1a4tqdnsy9k1l.js` (13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6c6dcedd0`). The component body parses `window.location.hash` for `access_token`+`refresh_token` and calls `setSession()` on hydration with no `state`, `nonce`, `PKCE` or `sub` binding — first-party code, not a library default. Post-setSession redirect is a fixed two-entry map `{invite:"/einladung", recovery:"/passwort-neu"}` defaulting to `/`, so this is forced-login (CWE-384), not an open redirect. Error paths are fixed to `/login?error=link-abgelaufen`, so it is not a phishing primitive. The sink's effective artifact is the `sb-aygnpacdkgtsfnhgcyjc-auth-token` cookie (base64url, @supabase/ssr 0.12.4). Reached only via a user click on an attacker URL; requires a valid attacker-controlled token pair, i.e. an invited account.
+evidence_needed: Two invited OneCode course accounts on distinct addresses. Then: serve `https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>&expires_in=3600&token_type=bearer&error_description=` to a victim browser and observe `Set-Cookie: sb-aygnpacdkgtsfnhgcyjc-auth-token` plus a 200 on `/dashboard` in that context. Without a token pair the finding is hash-presence only.
+verify_steps: Passive re-verification only, since the live path needs a real account: 1) GET https://kurs.onecode.de/login — expect 200, zero Set-Cookie, and `18:I[34891` immediately followed by `19:I[28420` in the body (both confirmed 09:00Z, page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`). 2) GET https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js — expect 13 880 B, sha256 `5a72d2cd…`, byte-identical to the 2026-09-19 11:33Z build; a change here is the deploy signal for a targeted fix to the fragment handler alone, independent of any main-chunk change.
+impact: MEDIUM. Forced login into an attacker-controlled session context (business-logic attribution failure); the victim's subsequent course work accrues to the attacker's account. Bounded by the fixed redirect map and by the fact that the victim's browser never sends the session cross-origin. Severity MEDIUM.
+testability: AUTH_HELPED
+
+[PARKED] S3-compatible storage plane SigV4 bypass (was [FINAL] conf 75 HIGH in the 2026-10-02 02:36Z cycle — explicitly downgraded): I have now measured every reachable shape and none is exploitable by me. `GET /storage/v1/s3` → `403 AccessDenied "Missing signature"`; `/storage/v1/s3/{b}/{k}` → same 403 with the key echoed into `<Resource>`, which positively proves the router parses bucket and key without consulting existence, so there is no S3-side oracle and no public read. The only differentiating response I have is `400 InvalidAccessKeyId` from a single bogus key ID; enumerating access-key IDs is the program's credential/rate-limit class and I will not run it. Confirming evidence for this hypothesis requires owner-supplied SigV4 keys, which I cannot obtain, so it is untestable in this environment rather than merely low-confidence. Also note the previous cycle recorded it as PASSIVE **and** HIGH **and** conf 75 with an empty `verify_steps` — that combination was internally inconsistent and should not have been marked FINAL.
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65): unchanged and still the highest-value lead, but every route to a second `authenticated` principal is now measured closed — `external.anonymous_users:false` in `/auth/v1/settings` AND `GET /auth/v1/anonymous` → 404 (not 405, so the provider is not mounted at all), `disable_signup:true`, `mailer_autoconfirm:false`, PostgREST schema blocked at `401 Secret API key required`, GoTrue admin plane 401 on both `/auth/v1/admin/users` and `/auth/v1/admin/generate_link`, and 4 candidate HS256 secrets × 2 endpoints → 403/401 with `alg:none` → 403 `bad_jwt`. Two invited accounts are the only non-intrusive path.
+[PARKED] cto.onecode.de subdomain takeover (conf 58): day-53 with a byte-identical result set. `dig` → CNAME `cname.perspective-dns.com.`, A 104.18.2.73/3.73, TXT = CNAME line only with zero verification records, `GET http://cto.onecode.de/` → `409 error code: 1001`. Passively converged; only an owner's claim attempt against the Perspective funnel SaaS can resolve it, which is HUMAN_ONLY and out of my reach.
+[PARKED] Missing response security headers on /login (observed this cycle: no CSP, no HSTS, no X-Frame-Options, no X-Content-Type-Options, no Referrer-Policy, no Permissions-Policy). Dropped at the schema gate, not the confidence gate: descriptive-header-only and clickjacking-without-demonstrated-exploit are both explicit REJECTED classes, and the one chain that would have made it real — Referer-based fragment-token leakage — is structurally impossible because browsers never transmit the fragment in `Referer`. Recorded as an observation so it is not re-derived from scratch next cycle.
+[FINAL] 1. Storage object surface is a single-variable problem: 10 mounted GET route classes bucket-resolve pre-auth and the GET route table is provably closed — conf 62, PASSIVE, LOW (structural disclosure, no object data path, no name-independent bypass).
+[FINAL] 2. GoTrue reflected-origin credentialed CORS, discriminator = authentication state (unauthenticated → `ACAO:*` no ACAC; apikey-bearing → reflected Origin + `ACAC:true`, including `Origin: null`) — conf 55, PASSIVE, LOW-MEDIUM (Bearer-only ceiling and CORS-clean session-cookie host both measured).
+[FINAL] 3. Forced-login via unbound URL-fragment session ingestion on /login, HashSessionHandoff module 34891 mounted at RSC row 18 — conf 55, AUTH_HELPED, MEDIUM (requires a valid attacker token pair; fixed redirect map rules out open-redirect chaining).
+
+[NEXT] HUMAN: Ask the program owner for **two invited OneCode course accounts on two distinct email addresses I control**, and state the conversion explicitly so the ask is actionable: account A supplies the second `authenticated` principal that resolves the RLS/BOLA hypothesis (conf 65, the single highest-value unresolved lead), account B supplies the attacker token pair that converts the fragment-injection hash-presence into an observed forced login (conf 55 → demonstrable PoC), and either account's session context reveals one real Supabase Storage bucket name, which converts the storage finding from a structural existence oracle into an actual object-read authorization test and retires the entire 10-route-class surface question in one step. If accounts cannot be issued, the cheapest alternative is a single object URL or bucket name pasted from any course-material link the owner already has.
+
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the pre-auth bucket-existence oracle is **route-table-complete rather than sampled** — 10 mounted GET route classes return a byte-identical 98-byte `400 {"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}` with apikey + Bearer, and the route table is closed by counter-example (`/object/{bucket}` → `404 Route GET:/object/… not found` `InvalidRequest`; `/render/image/{b}/{k}` → same; `/vector/{b}/query` → same). This is the correction pattern this KB has needed three times: a claim that says "N routes" built on sampling is unsound, and only a routing-404 for the missing shapes makes it sound. Two routes fail CLOSED before bucket lookup instead of bucket-resolving — `/object/sign/{b}/{k}` → `400 InvalidRequest "querystring must have required property 'token'"` and `/storage/v1/s3/*` → `403 AccessDenied "Missing signature"` — so the oracle set is exactly the bucket-resolving subset.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: `/storage/v1/object/upload/sign/{bucket}/{key}` is mounted and bucket-resolves pre-auth (400 NoSuchBucket with a control bucket). It is the only mounted route whose success path would mint a credential without an account, so it belongs in the enumeration even though its HTTP verb is POST and therefore outside my read-only bounds — this is a scope note for the report author, not a tested finding.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: the CORS discriminator is AUTHENTICATION STATE, re-proven this cycle with a matched control on a single path rather than by sampling routes — `?apikey=` present → 200 + `ACAO: <reflected>` + `ACAC: true` + `vary: Origin, Accept-Encoding` + `cf-cache-status: DYNAMIC`; key absent → 401 + `ACAO: *` + **no** `ACAC`. `Origin: null` + apikey → `ACAO: null` + `ACAC: true`, so the primitive needs no attacker-controlled domain. Both prior contradictory models were measuring different states; neither was wrong, and the KB's "no credentialed cross-origin read" framing was a mis-attribution of the unauthenticated form.
+[LEARN] REJECTED OTHER @ own hypothesis set (self-correction of the 2026-10-02 02:36Z cycle): the S3-plane lead was emitted as `[FINAL] conf 75, PASSIVE, HIGH` with an **empty** `verify_steps` field. PASSIVE + HIGH + no verify steps is a contradiction — a HIGH-impact PASSIVE claim must state the request that demonstrates it. Re-probing the plane this cycle showed every reachable shape returns `403 Missing signature`, the router parses bucket/key without existence lookup, and the only differential requires owner-supplied SigV4 keys. Downgraded to PARKED as untestable-in-environment, not as low-confidence.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de/_next/image: re-confirmed that absent Referrer-Policy cannot be chained into fragment-token leakage, because the magic-link payload is delivered in the URL **fragment** and browsers never place the fragment in the `Referer` header. This closes the only chain that would have promoted the missing-header observation out of the REJECTED class.
+
+[RISK] OneCode GmbH: 47 — unchanged. The cycle produced one real delta and it is a completeness correction, not new exposure: the storage oracle is now provably route-complete (10 classes) with the GET route table closed by routing-404 counter-examples, which raises confidence in an existing LOW finding without raising its impact. The primary accepted issue, GoTrue reflected-origin credentialed CORS, re-reproduced live with a matched control and its ceiling re-verified by two negatives (Bearer-only auth on that origin, no `access-control-*` on the session-cookie host, `cf-cache-status: DYNAMIC` ruling out cache amplification). The S3 plane is formally downgraded to untestable-in-environment, which is a small reduction in asserted risk. Nothing permissive was observed on any of the six Supabase planes; `/rest/v1/` is 401 secret-key-required, `/graphql/v1` is 503 PGRST002, `/functions/v1/*` 404, `/realtime/v1/` 401, `/analytics/v1/` 404. kurs.onecode.de is day-15 with zero deploys and 13 byte-identical chunks. The only material unblock in the whole program remains two invited accounts, which would convert the single highest-value lead (RLS/BOLA, conf 65) plus one conf-55 lead into demonstrable findings in one request.
+```

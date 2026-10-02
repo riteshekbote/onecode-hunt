@@ -1133,3 +1133,13 @@ www.onecode.de
 - CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` monitor formally closed 09-17 (26 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey AND Bearer present — on all four route classes (`/bucket`, `/object/public`, `/object/info`, `/object/sign
 - CHANGED GoTrue credentialed reflection discriminator confirmed: authentication STATE (unauthenticated → wildcard no ACAC; apikey-bearing → reflected Origin with `ACAC: true`) — live re-verified 2026-10-01 00:
+
+## 2026-10-02 09:03:04 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — the pre-auth `NoSuchBucket` oracle is ROUTE-TABLE-COMPLETE, not sampled. Live GETs (apikey + Bearer = publishable, Origin: https://evil.example) return by
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — the GET route table is now CLOSED by counter-example, which is what makes the 9-class oracle claim sound rather than sampled: `/object/{bucket}` → `404 {"
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 — `/storage/v1/object/upload/sign/{b}/{k}` (presigned-upload issuer) is MOUNTED and bucket-resolves pre-auth (400 NoSuchBucket with a control bucket). This 
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1 — CORS auth-state discriminator re-reproduced live 09:01Z with a matched control on ONE path. `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.exam
+- CHANGED kurs.onecode.de — NO deploy, day-15. `GET /login` → `200`, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical), zero `Set-Cookie`, `private, no-cache, 
+- CHANGED cto.onecode.de — day-53, unchanged. `dig @1.1.1.1` → CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only, zero verification records. `GET http://cto.onecode.de/` →
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /graphql/v1 — closed monitor sampled once for state only: `/rest/v1/` → `401 {"message":"Secret API key required","hint":"Only secret API keys can be used fo
+- CHANGED kurs.onecode.de response headers — `/login` emits NO `content-security-policy`, NO `strict-transport-security`, NO `x-frame-options`, NO `x-content-type-options`, NO `referrer-policy`, NO `permissions
