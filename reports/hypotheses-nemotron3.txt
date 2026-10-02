@@ -1,4 +1,4 @@
-## 2026-10-02 15:49:21 UTC [target] (model nemotron3)
+## 2026-10-02 20:34:08 UTC [target] (model nemotron3)
 [NEW] S3-compatible storage plane at `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Missing signature) — NEW host, separate credential store, bypasses RLS
 [NEW] GoTrue credentialed CORS reflection on `/auth/v1/*` re-verified live: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no `ACAC`
 [NEW] Signed URL route `/storage/v1/object/upload/sign/{bucket}/{key}` mounted and bucket-resolves pre-auth (400 NoSuchBucket) — 10th GET route class in complete route table

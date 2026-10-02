@@ -1152,3 +1152,18 @@ www.onecode.de
 - CHANGED `cto.onecode.de` CNAME→`cname.perspective-dns.com` day-53, HTTP 409, zero verification TXT — passive probing fully converged
 - CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes
+
+## 2026-10-02 20:35:20 UTC
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → **zero A records** (dig A, three legacy Supabase hostnames). Extends the 10-01 DNS-shape negative (`foo.`, `evil.<ref>`) to the stan
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/upload/sign/{b}/{k}` GET + `Origin: https://evil.example` + apikey/Bearer → `400 {"code":"NoSuchBucket"}` with `ACAO: *` and **no** `ACAC`. The pres
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/{bucket}?list-type=2` → `403 <Code>AccessDenied</Code><Message>Missing signature</Message>` with `<Resource>zzz_ctrl_9x7</Resource>` and **no** 
+- CHANGED `kurs.onecode.de` — day-16, **no deploy**. `GET /login` → 200, 18 702 B, page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical since the 2026-09-19 11:33Z buil
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1` — CORS auth-state discriminator re-proven with a matched control on one path, this cycle: `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.exampl
+- CHANGED `cto.onecode.de` — day-54, unchanged. CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only (zero verification records), `GET http://cto.onecode.de/` → `409`.
+- NEW S3-compatible storage plane at `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 Invali
+- NEW GoTrue credentialed CORS reflection on `/auth/v1/*` re-verified live: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no `
+- NEW Signed URL route `/storage/v1/object/upload/sign/{bucket}/{key}` mounted and bucket-resolves pre-auth (400 NoSuchBucket) — 10th GET route class in complete route table
+- CHANGED `kurs.onecode.de` no deploy day-15: main chunk `f916f314ea61a8c5...` (154581 B) and sink chunk `5a72d2cd...` (13880 B) byte-identical; pre-auth surface frozen at `{/login,/passwort-vergessen,/datensch
+- CHANGED `cto.onecode.de` CNAME→`cname.perspective-dns.com` day-53, HTTP 409, zero verification TXT — passive probing fully converged
+- CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes
