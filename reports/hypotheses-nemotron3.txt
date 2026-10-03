@@ -1,17 +1,16 @@
-## 2026-10-03 14:58:10 UTC [target] (model nemotron3)
-[NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` + `jwks.json` — pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 id_token signing but JWKS serves only ES256; `code_challenge_methods_supported: ["S256","plain"]`; entire `/auth/v1/oauth/*` namespace returns `feature_disabled`
-[NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` reflects arbitrary `Origin` with `ACAC: true` **without** apikey (unauthenticated) — falsifies "auth-state discriminator" model; CORS on well-known subtree is unconditional
-[NEW] JWT algorithm confusion comprehensively closed on both planes: 38 live probes (27 PostgREST + 11 GoTrue) across HS256/RS256/PS256/ES256/EdDSA × attacker keys — zero tokens authenticated; embedded JWK header injection rejected; ES256-only signing confirmed
-[NEW] `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (legacy Supabase hostnames not routed)
-[NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 MissingSignature)
-[CHANGED] `kurs.onecode.de` — day-17, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; all `/api/*`, `/v1`, `/dashboard` 307→/login
-[CHANGED] `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converged
-[CHANGED] Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
-[CHANGED] Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth
-[PRIO] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`,9.15,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9
-[PRIO] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink,.well-known}`,8.15,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
-[PRIO] `cto.onecode.de`,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
-[PRIO] `kurs.onecode.de`,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6
+## 2026-10-03 18:39:01 UTC [target] (model nemotron3)
+[NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+[NEW] `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+[NEW] `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+[CHANGED] CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with `ACAC: true` only when apikey present; (C) unregistered/fallthrough paths serve wildcard preflight
+[CHANGED] `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+[CHANGED] `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+[CHANGED] Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+[CHANGED] `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 MissingSignature)
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,9.15,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink,.well-known},8.15,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
+[PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
+[PRIO] kurs.onecode.de,6.80,attack_surface=7 business_value=9 tech_exposure=8 gate_ease=2 cloud_surface=7 freshness=6
 [HYP] S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
@@ -39,7 +38,7 @@ evidence_needed: Attacker creates Perspective account, adds custom domain cto.on
 verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
 impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
 testability: HUMAN_ONLY
-[PARKED] Post-auth cross-tenant BOLA via Supabase RLS gap: confidence 65, requires 2 invited accounts (AUTH_HELPED), pre-auth surface exhausted 17+ days; no new vectors
+[PARKED] Post-auth cross-tenant BOLA via Supabase RLS gap: confidence 65, requires 2 invited accounts (AUTH_HELPED), pre-auth surface exhausted 18+ days; no new vectors
 [PARKED] Forced-login session fixation via HashSessionHandoff: confidence 70, exploitability negligible — requires valid attacker token pair (invited account) + victim click; no open redirect; error paths fixed to /login?error=link-abgelaufen
 [PARKED] Supabase Storage bucket enumeration via publishable key: confidence 35 < 40; zero buckets for 20+ days, bucket names not recoverable from pre-auth chunks
 [PARKED] S3 access-key-ID enumeration: confidence 30 — only taxonomy oracle confirmed (InvalidSignature vs MissingSignature); actual ID enumeration is credential-class and rate-limited

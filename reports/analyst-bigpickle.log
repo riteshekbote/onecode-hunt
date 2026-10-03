@@ -32077,3 +32077,261 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: third traversal negative this cycle. `oauth-authorization-server/../../settings` normalises to `/auth/v1/settings` → `401` + `ACAO: *`. Prefix mounting does not create a normalisation escape, which is what keeps the gate-ordering model coherent — normalisation happens before both the gate and the Kong match.
 [LEARN] REJECTED MISCONFIG @ kurs.onecode.de / cto.onecode.de / storage/v1: no deploy (day-19), no DNS delta (day-57), no storage delta. `/login` 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, zero `Set-Cookie`; cto CNAME `cname.perspective-dns.com.` + HTTP 409; storage control `400 NoSuchBucket`. Build-diffing stays event-triggered, not time-triggered.
 [RISK] OneCode GmbH: 49 — unchanged. This cycle's value is not a new exposure but a **corrected one**: my previous cycle published an over-narrow scope claim ("exactly the 5 named routes, closed by counter-example") and the queued probe falsified it, replacing a closed 6-route list with an unbounded prefix-mounted path space and, more importantly, replacing a descriptive three-tier CORS model with the causal mechanism behind it — the apikey gate running before routing. That reframing is what makes the finding actionable, because it tells the owner the fix is one ordering change in the Kong CORS layer instead of a brittle path allowlist that prefix mounting would defeat anyway. Two prior record errors were also caught and fixed this cycle (`oauth/oidc` listed as pre-gate, and the `.well-known` tier-C body copied from the API root), which is the cost of trusting a standing catalogue without re-running its controls; the lesson is that control paths must be re-verified whenever a model is revised, not only when an asset changes. No exploitable path was demonstrated and none is claimed: no token issued or accepted, no session or data reached, no ATO path, no traversal, no new data plane. The unbounded reflecting space returns Kong-local 404s with no body data, so the growth is in policy surface, not exposure — which is why the score holds rather than rises. The two long-standing accepted findings are unchanged: storage remains a LOW single-variable existence oracle across a provably complete route table, and the fragment sink on `/login` remains a MEDIUM forced-login awaiting a real token pair. kurs.onecode.de is day-19 with a byte-identical build. The programme's only material unblock is still two invited accounts, which would resolve the RLS/BOLA hypothesis (conf 65, the highest-value unresolved lead) and convert hash-presence into an observed forced login.
+===== ANALYST bigpickle 2026-10-03 18:42:55 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u; echo "--- P1 queued NEXT: traversal from pre-gate prefix ---"; curl -sS -D- -o /tmp/o1.txt -m 20 -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server/../authorize" | sed -n '1,40p'; echo "BODY:"; head -c 300 /tmp/o1.txt; echo; sleep 1
+Sat Oct  3 18:36:44 UTC 2026
+--- P1 queued NEXT: traversal from pre-gate prefix ---
+HTTP/2 401 
+date: Sat, 03 Oct 2026 18:36:44 GMT
+content-type: application/json;charset=UTF-8
+content-length: 101
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+sb-error-code: UNAUTHORIZED_MISSING_API_KEY
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1030d-e3da-7ded-ac6e-888619780932
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=ZJInJOUA1pFE7GX0YiLqhf6_2HfZ3S8Yu4E.mqgSoIk-1791052604.3754535-1.0.1.1-0nDWWnAUQIrpDNkelhuilKYXcKiwcWT1NrIh1ZwoRxtCxSza8z24slcETc5emv9UxDfSJmmgNUPtwGOI9CoSqUymUylf6OjJSxf1yCvTRqvEhD83xE6EqoHwXboC9jdj; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 03 Oct 2026 19:06:44 GMT
+server: cloudflare
+cf-ray: a44e0dd9588ac98c-IAD
+alt-svc: h3=":443"; ma=86400
+
+BODY:
+{"message":"No API key found in request","hint":"No `apikey` request header or url param was found."}
+[0m
+[0m$ [0mecho "--- P2 realtime v2 channels endpoint (read-only GET) ---"; curl -sS -D- -m 20 -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/api/tenants/realtime/channels" -o /tmp/o2.txt | sed -n '1,40p'; echo "BODY:"; head -c 600 /tmp/o2.txt; echo; sleep 1
+--- P2 realtime v2 channels endpoint (read-only GET) ---
+HTTP/2 401 
+date: Sat, 03 Oct 2026 18:37:01 GMT
+content-type: application/json; charset=utf-8
+content-length: 30
+cf-ray: a44e0e399b0f32f0-IAD
+cf-cache-status: DYNAMIC
+cache-control: max-age=0, private, must-revalidate
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: accept-encoding
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1030e-2001-76c1-bd21-26efd4c80d25
+set-cookie: __cf_bm=wUjz.wkRmXxmpLwr1oJ.QHUG72Ldx5nFY8rfEeqlA74-1791052619.7711387-1.0.1.1-HiY1z__lUH3IeMc2l7fTqoSR4TJz21nUJxNlPBY75zS9pYq7mM.XoEFyfAFtaPBaTuqSdD5d4LUWOgPawIfticIY97pJ3uXSS10oN1p3hR.8.ldWwF5sFeTTxSO4yM53; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 03 Oct 2026 19:07:01 GMT
+alt-svc: h3=":443"; ma=86400
+
+BODY:
+{"error":"API key is missing"}
+[0m
+[0m$ [0mecho "--- P3a realtime channels, apikey as QUERY ---"; curl -sS -o /tmp/o3a.txt -D- -m 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/api/tenants/realtime/channels?apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" | sed -n '1,3p;9,20p'; echo "BODY:"; head -c 300 /tmp/o3a.txt; echo; sleep 1
+echo "--- P3b realtime channels, apikey query + Bearer publishable ---"; curl -sS -o /tmp/o3b.txt -D- -m 20 -H 'Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' "https://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/api/tenants/realtime/channels?apikey=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" | sed -n '1,3p;9,20p'; echo "BODY:"; head -c 300 /tmp/o3b.txt; echo; sleep 1
+--- P3a realtime channels, apikey as QUERY ---
+HTTP/2 401 
+date: Sat, 03 Oct 2026 18:37:16 GMT
+content-type: application/json; charset=utf-8
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: accept-encoding
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1030e-5a2a-7146-b04c-e469af15027f
+set-cookie: __cf_bm=sctgi6phgVdMwkwxcvyWHUSiyJaH9S4M491L2HoTIsY-1791052634.6617978-1.0.1.1-WajyEeMp8MAw5M5UeodCnhM5xbpqzIEbuF6fHezq0qBbPIXb0y2w4rtfE2wFjbgYPkVs8XsOycEsUYriRvnYM_Pyd_kA0m0NYecPirUoCEd4xMvwAma9uzuSDoOHt772; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 03 Oct 2026 19:07:16 GMT
+alt-svc: h3=":443"; ma=86400
+
+BODY:
+{"error":"The token provided is not a valid JWT"}
+--- P3b realtime channels, apikey query + Bearer publishable ---
+HTTP/2 401 
+date: Sat, 03 Oct 2026 18:37:19 GMT
+content-type: application/json; charset=utf-8
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: accept-encoding
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1030e-6637-7fa0-81d2-e5cbba3e45bd
+set-cookie: __cf_bm=TXepIU7Zf92jtqP5JExeYBup6NavvhKBuZ_2b0KaWiU-1791052637.744086-1.0.1.1-XSoKxFNzD.kTDvg6ZF0os65us6X51uDsuz76r82w7diimJhAAJDahwpsBR4U9WepqoRTa9CrN16XUcsSyWl9xUgWftf_rPqJui.9do7..pG7B7hwHV1Y.3FsN4p39vOS; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 03 Oct 2026 19:07:19 GMT
+alt-svc: h3=":443"; ma=86400
+
+BODY:
+{"error":"The token provided is not a valid JWT"}
+[0m
+[0m$ [0mecho "--- P4 cache-amplifier check on PRE-GATE paths (new path class, never cache-tested) ---"
+for p in "/auth/v1/oauth/token" "/auth/v1/.well-known/oauth-authorization-server/a/b/c/d/e"; do
+echo "### $p"
+curl -sS -o /dev/null -D- -m 20 -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co$p" | grep -iE '^(HTTP/|access-control|vary|cf-cache-status|cache-control|etag|age|expires|date|content-length)'
+sleep 1
+done
+--- P4 cache-amplifier check on PRE-GATE paths (new path class, never cache-tested) ---
+### /auth/v1/oauth/token
+HTTP/2 404 
+date: Sat, 03 Oct 2026 18:37:57 GMT
+content-length: 77
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://attacker.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+### /auth/v1/.well-known/oauth-authorization-server/a/b/c/d/e
+HTTP/2 404 
+date: Sat, 03 Oct 2026 18:37:59 GMT
+content-length: 19
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://attacker.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+[0m
+[0m$ [0mecho "--- P5 kurs /login ---"; curl -sS -o /tmp/k.html -m 25 -w 'code=%{http_code} size=%{size_download}\n' "https://kurs.onecode.de/login"; sha256sum /tmp/k.html; curl -sS -o /dev/null -D- -m 20 "https://kurs.onecode.de/login" | grep -iE '^(HTTP/|set-cookie|server|x-railway-edge|x-hikari-trace|cache-control)'; sleep 1
+echo "--- P6 storage control ---"; curl -sS -m 20 -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -H 'Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -w ' code=%{http_code}\n' "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/public/zzz_ctrl_9x7/x.txt"; sleep 1
+echo "--- P7 cto ---"; curl -sS -o /dev/null -m 20 -w 'http_code=%{http_code}\n' "http://cto.onecode.de/"; dig +short @1.1.1.1 cto.onecode.de CNAME; dig +short @1.1.1.1 cname.perspective-dns.com A
+--- P5 kurs /login ---
+code=200 size=18702
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/k.html
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+server: railway-hikari
+x-railway-edge: iad1
+x-hikari-trace: iad1.trg5
+--- P6 storage control ---
+{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"} code=400
+--- P7 cto ---
+http_code=409
+cname.perspective-dns.com.
+104.18.3.73
+104.18.2.73
+[0m
+## Objective
+- Continue the authorized OneCode GmbH bug-bounty POC (`bugs.olivermaicher.eu`) in `phase=POC`, `target=api`.
+- Produce the mandated evidence-only delta, prioritization, hypotheses, self-critique, one read-only next action, learning, and risk output.
+
+## Important Details
+- Scope is limited to `*.onecode.de`, `kurs.onecode.de`, and OneCode-owned infrastructure/cloud APIs, including `aygnpacdkgtsfnhgcyjc.supabase.co` and `aygnpacdkgtsfnhgcyjc.storage.supabase.co`.
+- Live verification must be passive-first, `<=1 rps`, and use only read-only `GET`/`HEAD`/`OPTIONS`; no mutation, auth bypass, customer-data access, DoS, lockout, scanner-only, or known-library findings.
+- Required output order: DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → exactly one NEXT action → LEARNING → RISK.
+- Current corrected CORS model supersedes stale entries: GoTrue’s global API-key gate runs before routing; six Kong OAuth/OpenID route names are matched pre-gate and prefix-mounted at arbitrary depth.
+- Pre-gate reflecting routes are `/auth/v1/.well-known/jwks.json`, `/auth/v1/.well-known/openid-configuration`, `/auth/v1/.well-known/oauth-authorization-server`, `/auth/v1/oauth/authorize`, `/auth/v1/oauth/token`, and `/auth/v1/oauth/userinfo`; arbitrary and `Origin: null` are reflected with `ACAC: true` without a key.
+- Prior “exact-route/closed list” and “CORS tiers” explanations are retracted; do not generalize the finding to storage, edge functions, realtime, or the app origin.
+- Use valid 64-hex SHA-256 values: main chunk `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`.
+- Publishable-key bytes hash to `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`; `870cf518...` is the trailing-newline artifact.
+
+## Work State
+### Completed
+- `kurs.onecode.de` has no deploy since `2026-09-19 11:33Z`; 13 chunk references remain stable. Pre-auth surface is `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` at 200; `/`, `/admin`, `/courses`, `/dashboard`, `/api/*`, and `/v1/*` redirect 307 to `/login`.
+- `HashSessionHandoff` module 34891 is mounted on `/login` RSC row 18, parses URL-fragment tokens, and calls `setSession()` without state/nonce/PKCE binding; exploitation still requires a valid attacker token pair. Redirects are fixed, so this is forced-login rather than open redirect.
+- Supabase project settings: email-only, `disable_signup:true`, `mailer_autoconfirm:false`, `external.anonymous_users:false`; no external OAuth providers are enabled.
+- `/auth/v1/.well-known/openid-configuration` advertises three OAuth endpoints, but all three return `404 feature_disabled`; it advertises RS256/HS256/ES256 while JWKS contains only ES256 key `4f59d46f-c3e6-47c7-a717-fabf016650c9`; it also advertises weak `plain` PKCE and inactive grant metadata.
+- JWT testing established ES256-only verification; 38 cross-plane algorithm/key-confusion probes and embedded-JWK tests produced zero authenticated tokens. Earlier HS256 premise is invalid.
+- REST monitor was formally closed on 2026-09-17 after 27 probes alternating `503 PGRST002`/`401`; no anonymous `200` table response was observed.
+- Storage route table is closed: 10 mounted GET classes return byte-identical `400 NoSuchBucket`; 81 candidate bucket names were excluded. `GET /storage/v1/bucket` returning `200 []` does not prove zero buckets.
+- Storage/S3 findings are bounded: storage responses use wildcard CORS without `ACAC`; S3 requires SigV4 and returns `403 Missing signature` before bucket lookup.
+- `cto.onecode.de` remains `CNAME cname.perspective-dns.com`, HTTP 409/TLS failure, no verification TXT; takeover is `HUMAN_ONLY`. CT/DNS inventory found no new subdomains.
+
+### Active
+- Highest current finding: combined unbounded pre-gate CORS reflection plus inaccurate OIDC discovery metadata, confidence `74`, `PASSIVE`, impact `LOW-MEDIUM`; no token, session, data, or ATO path demonstrated.
+- Remediation hypothesis confidence `61`: enforce origin policy after route resolution/Kong matching rather than relying on a brittle path-prefix allowlist.
+- Storage single-variable hypothesis confidence `62`: 10 route classes are fully characterized; one real bucket name would collapse the remaining hypothesis.
+- Current priorities: `auth/v1/oauth` `8.05`; `auth/v1/.well-known` `7.95`; `storage/v1` `7.60`.
+- Unresolved leads: post-auth BOLA/RLS gap confidence `65`; forced-login confidence `55`; S3 bypass previously ranked `75` but untestable without owner keys; `cto` takeover confidence `58`.
+- Program risk remains `49`; passive reconnaissance is largely converged and no material exploitable escalation has been shown.
+
+### Blocked
+- BOLA/RLS testing requires two invited authenticated accounts; anonymous signup/sign-in and GoTrue admin routes are closed.
+- Forced-login confirmation requires a valid attacker-issued token pair and victim interaction (`AUTH_HELPED`).
+- S3 authorization testing requires owner-supplied SigV4 credentials; no pre-auth bypass is observable.
+- `cto.onecode.de` takeover cannot progress without the owner/provider claim attempt (`HUMAN_ONLY`).
+
+## Next Move
+1. `curl -sS -D- -o/dev/null -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server/../authorize"`
+2. Expect `401 {"message":"No API key found in request"}` with `ACAO: *` and no `ACAC`; record any different result as a material reopening of the gate-ordering model.
+
+## Relevant Files
+- `scope.yml`: authoritative in-scope asset rules.
+- `inventory/onecode.md`: OneCode host inventory and passive reconnaissance.
+- `art/lead_nemotron3.txt`: S3/storage lead source.
+- `art/lead_bigpickle.txt`: OIDC/CORS lead source.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+## STEP 1 — DELTA
+
+[RESOLVED] Queued traversal probe closed negative (4th consecutive) — `GET /auth/v1/.well-known/oauth-authorization-server/../authorize` with `Origin: https://attacker.example` → `401 UNAUTHORIZED_MISSING_API_KEY`, body `{"message":"No API key found in request","hint":"No \`apikey\` request header or url param was found."}`, `ACAO: *`, **no** `ACAC`, `content-length: 101`. Path normalization therefore occurs *before* both the GoTrue gate and Kong route matching, not inside a pre-gate path segment. Gate-ordering causal model survives its strongest falsification attempt; the "escaping pre-gate via `..`" variant is now closed, not merely parked.
+
+[RESOLVED] Realtime pre-auth reachability closed **by measurement** rather than assumption (retires30-day-old parked conf 35) — `GET /realtime/v1/api/tenants/realtime/channels` is mounted and returns plane-specific structured errors: `apikey` header alone → `401 {"error":"API key is missing"}`; `apikey` as query param (with or without `Authorization: Bearer <publishable>`) → `401 {"error":"The token provided is not a valid JWT"}`. The realtime Phoenix v2 REST API is deployed, but it demands a genuinely signed JWT in the key position, and the only credential the app ever ships (`sb_publishable_…`, the post-key-rotation format) is not a JWT. There is therefore **no credential-free path to any realtime channel API**, and since anonymous sign-in is unmounted, signup is disabled, and autoconfirm is off, no anon JWT is obtainable pre-auth. All app broadcast/presence use is necessarily post-auth session-bound.
+
+[RESOLVED] Cache-amplifier ceiling now measured **on the path class that carries the flagship finding**, closing a real gap — previously cache behavior was only tested on `/auth/v1/settings` and proxy fallthrough 404s, never on the unbounded pre-gate reflecting space. Both `/auth/v1/oauth/token` and `/auth/v1/.well-known/oauth-authorization-server/a/b/c/d/e` (arbitrary-depth nested) return `cf-cache-status: DYNAMIC`, `vary: Origin`, and carry **no** `cache-control`, `etag`, `age`, or `expires` header, with 19–77 byte bodies. Origin-keyed variance plus dynamic status means no shared cache can serve one origin's reflected credentialed ACAO to another. The combined finding's ceiling is now measured where the reflection actually lives, not inferred by proxy.
+
+[NEW] Two distinct CORS middlewares confirmed at header level, not inferred from behavior — pre-gate Kong-local 404s emit `vary: Origin` **alone**, while GoTrue resource paths emit `vary: Origin, Accept-Encoding`. Pre-gate 404s additionally expose `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. This is positive evidence for the separate-middleware model and gives a precise discriminating header for any future plane triage.
+
+[NEW] Realtime plane emits **zero** `access-control-*` headers on a simple cross-origin GET with foreign `Origin` — not wildcard ACAO, nothing. The persisted claim that realtime grants `ACAO: *` was preflight-only and is now correctly scoped: realtime is not cross-origin readable on the request path at all.
+
+[NEW] `sb-gateway-mode: direct` header observed on realtime responses, absent on the auth/Kong plane (`sb-gateway-version: 1`). Gate/version heterogeneity across planes is real and worth carrying into remediation guidance.
+
+[FALSE POSITIVE] Realtime "wildcard ACAO pre-auth" — retracted as preflight-only artifact; see above.
+
+[UNCHANGED] `kurs.onecode.de/login` — `200`, 18702 bytes, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, byte-identical to prior cycle; `private, no-cache, no-store, max-age=0, must-revalidate`; `railway-hikari` / `x-railway-edge: iad1`; no `Set-Cookie`. No deploy, build diff remains event-triggered not time-triggered.
+
+[UNCHANGED] Storage control `GET /storage/v1/object/public/zzz_ctrl_9x7/x.txt` with both publishable-key credentials → `400` `{"statusCode":"404","error":"Bucket not found","message":"Bucket not found","code":"NoSuchBucket"}`.
+
+[UNCHANGED] `cto.onecode.de` → HTTP `409`; CNAME `cname.perspective-dns.com` → Cloudflare `104.18.3.73` / `104.18.2.73`. Provider-fronted, still unclaimable by me, `HUMAN_ONLY`.
+
+## STEP 2 — PRIORITIZE
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth, 8.05, attack_surface=7, business_value=6, tech_exposure=10, gate_ease=10, cloud_surface=6, freshness=10
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known, 7.95, attack_surface=7, business_value=6, tech_exposure=10, gate_ease=10, cloud_surface=6, freshness=10
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1, 7.60, attack_surface=8, business_value=6, tech_exposure=8, gate_ease=10, cloud_surface=9, freshness=5
+
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1, 6.55, attack_surface=5, business_value=6, tech_exposure=8, gate_ease=3, cloud_surface=8, freshness=8
+
+## STEP 3 — HYPOTHESES
+
+[FINAL] Combined credentialed arbitrary-origin reflection over an unbounded prefix-mounted Kong OAuth/OIDC surface, plus inaccurate discovery documents - aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1 (behavioral_differential/credentialed_cors_reflection) [scheme=https, path=/auth/v1/.well-known/oauth-authorization-server/* and /auth/v1/oauth/{authorize,token,userinfo}/*, class=missing_access_control, confidence=74, impact=LOW-MEDIUM, testability=verified_no_fix, verify_steps=arbitrary and null Origin reflected with ACAC true and no apikey at depth 5; traversal escape from pre-gate prefix returns gated 401 so normalization precedes both gate and Kong; cf-cache-status DYNAMIC with vary Origin on the carrying path class so no shared-cache amplifier; bodies are Kong-local feature_disabled 404s and public JWKS/discovery bytes only, no token session or data path]
+
+[FINAL] Gate ordering is the single root cause and a prefix allowlist at the GoTrue layer cannot durably fix a Kong-matched pre-gate surface - aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1 (architectural/root_cause) [scheme=https, path=/auth/v1, class=configuration, confidence=61, impact=LOW, testability=passive_only, verify_steps=six Kong route names match ahead of the global GoTrue apikey gate and are prefix-mounted to arbitrary depth; same path class returns gated 401 with ACAO wildcard and no ACAC once the route no longer matches, proving match-order dependence rather than per-route CORS policy]
+
+[FINAL] The storage route table is not yet complete and one unmounted read primitive or one real bucket name remains - aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1 (differential/route_table_completeness) [scheme=https, path=/storage/v1, class=authorization_bypass, confidence=62, impact=LOW, testability=passive_only, verify_steps=ten mounted GET classes return the identical 98-byte NoSuchBucket body across app and dedicated storage hosts; 81 candidate names excluded; authenticated bucket listing returns 200 empty list which is uninformative under anon RLS and does not prove zero buckets; S3 plane enforces SigV4 with 403 Missing signature before bucket lookup so it offers no oracle]
+
+[PARKED] Post-auth BOLA / RLS policy gap between object ownership and caller - aygnpacdkgtsfnhgcyjc.supabase.co (authenticated_multi_account/idor) [scheme=https, path=/rest/v1/*, class=broken_object_level_authorization, confidence=65, impact=HIGH, testability=blocked_requires_two_invited_accounts, verify_steps=anonymous sign-in unmounted, signup disabled, autoconfirm off, admin 401, schema 401, ES256-only verifier with no confusion path]
+
+[PARKED] Fragment session handoff enables attacker-token forced login - kurs.onecode.de/login (authenticated_token_replay/forced_login) [scheme=https, path=/login, class=authentication_bypass, confidence=55, impact=MEDIUM, testability=auth_helped_requires_token_pair, verify_steps=HashSessionHandoff module 34891 mounted on login RSC row 18 parses fragment access and refresh tokens and calls setSession with no state nonce or PKCE; redirects fixed so not an open redirect]
+
+[PARKED] S3 authorization bypass on dedicated storage host - aygnpacdkgtsfnhgcyjc.storage.supabase.co (differential/s3_authz) [scheme=https, path=/s3/*, class=authorization_bypass, confidence=75, impact=MEDIUM, testability=blocked_requires_owner_sigv4_keys, verify_steps=403 Missing signature returned before any bucket enumeration]
+
+[PARKED] cto.onecode.de subdomain takeover - cto.onecode.de (dns/subdomain_takeover) [scheme=http, path=/, class=subdomain_takeover, confidence=58, impact=HIGH, testability=human_only, verify_steps=CNAME to cname.perspective-dns.com behind Cloudflare 104.18.3.73 and 104.18.2.73, HTTP 409, no verification TXT]
+
+## STEP 4 — SELF-CRITIQUE
+
+**Hypothesis 1** is generic in shape — Supabase credentialed reflection is a well-documented class — but the instance is not: the surface is unbounded in depth, matched ahead of the apikey gate, and reachable with no credential whatsoever, which is a materially stronger statement than "CORS reflects on routes you can already call". Alternatives that crack it: a browser never issues credentialed requests to a reflected non-matching origin in a way that yields state-changing effect, which is why the ceiling is capped; and the `ACAO: *` preflight behavior means only simple requests can actually read responses cross-origin, which is the same limiter. Exploitability is therefore real but bounded: an attacker page can read the public JWKS and the discovery bytes it could fetch anyway, so the practical gain is enumeration and disclosure-surface confirmation rather than data theft. I explicitly reject inflating this into a session or data finding. Impact LOW-MEDIUM stands, and this cycle's cache measurement removes the one remaining amplifier I could still argue for.
+
+**Hypothesis 2** risks being unfalsifiable, since architecture claims are hard to test passively. I kept it only because the header-level `vary` divergence gives it independent physical support and because it makes a concrete remediation falsifiable: if a prefix allowlist genuinely closed the issue, the same deep nested probes should stop reflecting. Impact is LOW because it is a hardening argument, not an exploit, and it must not be reported as a second finding — it is the explanation for finding 1.
+
+**Hypothesis 3** is the weakest and I am treating it as adversarial rather than affirmative. It exists specifically because this session already made one "route table is complete" mistake in the other direction — the CORS exact-route claim was falsified by prefix mounting. Claiming completeness a second time on a different plane is exactly the failure mode to avoid. The honest position is that ten enumerated classes do not prove exhaustiveness, and the one untested candidate is Supabase's server-side image transformation path, which would be a read primitive on private buckets if mounted. I am not asserting it is mounted; I am asserting my closure claim is unproven and this is the cheapest test of it. If it returns the NoSuchBucket body, my route-table claim is falsified and the storage hypothesis needs rewriting, not patching.
+
+The two highest-confidence unresolved leads, BOLA at 65 and S3 at 75, both sit above my three finals and both are genuinely blocked on credentials I do not have and must not obtain. I am not parking them because they are weak; they are parked because no amount of further anonymous probing moves them, and pretending otherwise would be fabricating progress.
+
+## STEP 5 — NEXT
+
+[NEXT] PROBE — single-variable path change against the established storage control, identical headers and credentials to the passing NoSuchBucket baseline, testing whether the ten-class route-table closure is falsifiable:
+
+`curl -sS -D- -m 20 -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -H 'Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' 'https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/render/image/authenticated/zzz_ctrl_9x7/1x1.png'`
+
+If the response body is the 98-byte storage `NoSuchBucket` error, the route table is **not** complete as claimed and Hypothesis 3 is falsified in its current form — I must re-enumerate rather than patch. If it is a Kong route-not-found or an auth-layer 401/404, the closure claim gains real support. Either outcome is informative; no further probing is queued behind it.
+
+## STEP 6 — LEARNING
+
+Normalization happens before route matching, not inside it: a `..` segment that escapes a pre-gate prefix lands in the gated zone, which is why four traversal variants all collapsed to the same gated 401 wildcard-CORS response. Prefix-mounted pre-gate routing and traversal-based escape are mutually exclusive as attack paths here, and I should stop spending probes on that family.
+
+`vary` is a cheap, positive-evidence discriminator between CORS middlewares, and it is more reliable than inferring middleware identity from status codes. Two middlewares differing only in `vary` composition would have been indistinguishable by behavior alone.
+
+Deployment surface claims should be falsified once, cheaply, by choosing the single most damaging untested path class per plane. The realtime plane's channel API was the right candidate and it closed in three probes, retiring a 30-day-old parked hypothesis with a hard measurement instead of leaving it as a shrug. Applying the same standard to storage is the immediate analogue.
+
+An error-message taxonomy is a real map of internal architecture. The realtime plane's distinct `API key is missing` versus `The token provided is not a valid JWT` split revealed both that the service is deployed and exactly what credential class it demands, from401 bodies alone, with no exploitation attempted.
+
+Pre-auth reachability is not the same as pre-auth exposure, and the publishable-key format change is load-bearing here: because the app ships `sb_publishable_…` rather than a legacy anon JWT, every plane demanding a real JWT is structurally unreachable pre-auth. That is a mitigation I should not have to argue for, and it is the reason realtime demoted rather than promoted.
+
+## STEP 7 — RISK
+
+OneCode program risk: **49** — **LOW**, unchanged. No exploitable account takeover, no authorization bypass, no customer data exposure, and no cross-tenant read path is established anywhere in this cycle. The only pre-auth credentialed reflection is bounded by browser preflight semantics, confined to public discovery and JWKS bytes, non-cacheable, and returns no session material. The one substantive escalation candidate in the entire backlog is the post-auth BOLA/RLS gap, and it is unreachable without two invited accounts. Risk should not move on structural or hardening findings, and nothing in this cycle justifies moving it.

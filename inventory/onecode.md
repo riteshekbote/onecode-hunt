@@ -1256,3 +1256,16 @@ www.onecode.de
 - CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converg
 - CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth
+
+## 2026-10-03 18:42:55 UTC
+- NEW Two distinct CORS middlewares confirmed at header level, not inferred from behavior — pre-gate Kong-local 404s emit `vary: Origin` **alone**, while GoTrue resource paths emit `vary: Origin, Accept-Enc
+- NEW Realtime plane emits **zero** `access-control-*` headers on a simple cross-origin GET with foreign `Origin` — not wildcard ACAO, nothing. The persisted claim that realtime grants `ACAO: *` was preflig
+- NEW `sb-gateway-mode: direct` header observed on realtime responses, absent on the auth/Kong plane (`sb-gateway-version: 1`). Gate/version heterogeneity across planes is real and worth carrying into remed
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+- NEW `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+- CHANGED CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with 
+- CHANGED `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
