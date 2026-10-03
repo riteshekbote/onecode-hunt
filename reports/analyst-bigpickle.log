@@ -31479,3 +31479,32 @@ Dropped this cycle: my own "reflection is unconditional across `/auth/v1/.well-k
 [STEP 7 — RISK]
 
 [RISK] OneCode GmbH: 49 — unchanged. This cycle produced a **correction, not new exposure**. It added one third unconditional-reflection site (`oauth-authorization-server`, on a router whose only output is `feature_disabled`) and, more valuably, falsified an over-broad claim of my own by locating the fallthrough control that bounds it. Net characterisation improved; measured exposure did not move: all three reflecting routes serve static public documents or a disabled endpoint, GoTrue on this origin is Bearer-only so `ACAC: true` has no cookie to carry, and the OAuth router has no reachable auth flow. No token issued or accepted, no session or data reached, no path traversal, no new CORS escalation. The two long-standing accepted findings are unchanged — storage remains a LOW single-variable existence oracle, the fragment sink on `/login` remains a MEDIUM forced-login awaiting a real token pair. kurs.onecode.de is day-18 with a byte-identical build. The programme's only material unblock is still two invited accounts, which would resolve the RLS/BOLA hypothesis (conf 65, the highest-value unresolved lead) and convert the fragment hash-presence into an observed forced login.
+===== ANALYST bigpickle 2026-10-03 10:30:25 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll work through the 8 steps. Starting with the queued NEXT probe from the last cycle.
+[0m$ [0mcurl -sS --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration" 2>&1 | head -c 4000
+{"issuer":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1","authorization_endpoint":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/authorize","token_endpoint":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/token","jwks_uri":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json","userinfo_endpoint":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/userinfo","scopes_supported":["openid","profile","email","phone","offline_access"],"response_types_supported":["code"],"response_modes_supported":["query"],"grant_types_supported":["authorization_code","refresh_token"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256","HS256","ES256"],"token_endpoint_auth_methods_supported":["client_secret_basic","client_secret_post","none"],"claims_supported":["sub","aud","iss","exp","iat","auth_time","nonce","email","email_verified","phone_number","phone_number_verified","name","picture","preferred_username","updated_at"],"code_challenge_methods_supported":["S256","plain"]}
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/opencode/*, /tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp/opencode 2>/dev/null || cd /tmp; cat > probe1.sh <<'EOF'
+#!/bin/bash
+H="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+probe() {
+  local label="$1"; local path="$2"
+  out=$(curl -sS --max-time 20 -D /tmp/h.txt -o /tmp/b.txt "$H$path" 2>/dev/null)
+  code=$(head -1 /tmp/h.txt | awk '{print $2}')
+  body=$(head -c 200 /tmp/b.txt)
+  printf '%-46s %s\n    %s\n' "$label $path" "$code" "$body"
+  sleep 1.2
+}
+probe "ADVERT authorization_endpoint"  "/auth/v1/oauth/authorize"
+probe "ADVERT token_endpoint"           "/auth/v1/oauth/token"
+probe "ADVERT userinfo_endpoint"        "/auth/v1/oauth/userinfo"
+probe "ADVERT jwks_uri"                 "/auth/v1/.well-known/jwks.json"
+probe "CTRL oauth-unregistered-sibling"  "/auth/v1/oauth/zzz_ctrl_9x7"
+EOF
+bash probe1.sh failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+Now enumerating every advertised endpoint from the discovery document, each with a credential-free GET, plus the negative controls that the KB's own methodology requires.
