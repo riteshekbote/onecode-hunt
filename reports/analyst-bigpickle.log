@@ -32335,3 +32335,70 @@ Pre-auth reachability is not the same as pre-auth exposure, and the publishable-
 ## STEP 7 — RISK
 
 OneCode program risk: **49** — **LOW**, unchanged. No exploitable account takeover, no authorization bypass, no customer data exposure, and no cross-tenant read path is established anywhere in this cycle. The only pre-auth credentialed reflection is bounded by browser preflight semantics, confined to public discovery and JWKS bytes, non-cacheable, and returns no session material. The one substantive escalation candidate in the entire backlog is the post-auth BOLA/RLS gap, and it is unreachable without two invited accounts. Risk should not move on structural or hardening findings, and nothing in this cycle justifies moving it.
+===== ANALYST bigpickle 2026-10-03 21:46:49 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u +"%Y-%m-%dT%H:%M:%SZ"; H="https://aygnpacdkgtsfnhgcyjc.supabase.co"; K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== P1: traversal from INSIDE pre-gate prefix -> sibling Kong route (no apikey) ==="
+curl -sS -D- -o/tmp/p1.txt --path-as-is -H 'Origin: https://attacker.example' "$H/auth/v1/.well-known/oauth-authorization-server/../authorize" | sed -n '1,25p'
+echo "--- body ---"; head -c 300 /tmp/p1.txt; echo; sleep 1
+echo "=== P2: control - same target WITHOUT traversal, no apikey ==="
+curl -sS -D- -o/tmp/p2.txt -H 'Origin: https://attacker.example' "$H/auth/v1/oauth/authorize" | sed -n '1,25p'
+echo "--- body ---"; head -c 300 /tmp/p2.txt; echo
+2026-10-03T21:46:22Z
+=== P1: traversal from INSIDE pre-gate prefix -> sibling Kong route (no apikey) ===
+HTTP/2 401 
+date: Sat, 03 Oct 2026 21:46:22 GMT
+content-type: application/json;charset=UTF-8
+content-length: 101
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+sb-error-code: UNAUTHORIZED_MISSING_API_KEY
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a103bb-80dc-7db3-979d-0595b2fd01aa
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=A3EvKSEvVNXO5VFmg_danm5IL0Ih6.CVVvLoTeK0Pj8-1791063982.2952664-1.0.1.1-7ri72p6G37UHhiOUgstg9KAkpFNDfPA034pf9mjMVXYhmUVq4.tAkUpI1YcdGTW4_W6bVxEQGDxJ9NhiAak4mV1rYbn7RqT0UI8v3vNdfVF4P9w2GAlQRfKpGwvFfo7L; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 03 Oct 2026 22:16:22 GMT
+server: cloudflare
+cf-ray: a44f23a15d46cefe-SJC
+alt-svc: h3=":443"; ma=86400
+
+--- body ---
+{"message":"No API key found in request","hint":"No `apikey` request header or url param was found."}
+=== P2: control - same target WITHOUT traversal, no apikey ===
+HTTP/2 404 
+date: Sat, 03 Oct 2026 21:46:24 GMT
+content-type: application/json
+content-length: 77
+cf-ray: a44f23a8cb274705-SJC
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://attacker.example
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin
+x-content-type-options: nosniff
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a103bb-8584-71d0-b973-1e50815ae1fb
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 41
+x-sb-error-code: feature_disabled
+set-cookie: __cf_bm=YyOPJ_bhU16SGKw3TT5hhOFHj4F_V0alJf6lV7CMMcQ-1791063983.4868097-1.0.1.1-.6Z3g_sgOHm8obirXCJftSdHm7L3F393HyMRSbCe8dNUS3KCvyD30LUC6.rAUTyZWswxtT7mpiD6MIOOnk4fynaEiLu7CWQ5Vav2IkYyLEEsWT52XfpuBBM_9_Y7NPYF; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 03 Oct 2026 22:16:24 GMT
+alt-svc: h3=":443"; ma=86400
+
+--- body ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mH="https://aygnpacdkgtsfnhgcyjc.supabase.co"; K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== P3: storage /object/authenticated/<b>/<k>  (NOT in the catalogued 10-class oracle set) ==="
+curl -sS -D- -o/tmp/p3.txt -H "apikey: $K" -H "Authorization: Bearer $K" -H 'Origin: https://attacker.example' "$H/storage/v1/object/authenticated/zzz_ctrl_9x7/x.txt" | sed -n '1,14p'
+echo "--- body ---"; cat /tmp/p3.txt; echo; sleep 1
+echo "=== P4: storage /object/public/<b>/<k>  (established control, same headers) ==="
+curl -sS -D- -o/tmp/p4.txt -H "apikey: $K" -H "Authorization: Bearer $K" -H 'Origin: https://attacker.example' "$H/storage/v1/object/public/zzz_ctrl_9x7/x.txt" | sed -n '1,14p'
+echo "--- body ---"; cat /tmp/p4.txt; echo failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

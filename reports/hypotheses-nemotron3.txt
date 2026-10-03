@@ -1,4 +1,4 @@
-## 2026-10-03 18:39:01 UTC [target] (model nemotron3)
+## 2026-10-03 21:46:40 UTC [target] (model nemotron3)
 [NEW] `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
 [NEW] `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
 [NEW] `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect

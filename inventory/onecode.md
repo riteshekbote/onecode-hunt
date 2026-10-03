@@ -1269,3 +1269,13 @@ www.onecode.de
 - CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
 - CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+
+## 2026-10-03 21:46:49 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+- NEW `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+- CHANGED CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with 
+- CHANGED `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss

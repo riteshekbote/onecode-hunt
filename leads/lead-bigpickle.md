@@ -6762,3 +6762,4 @@ testability: PASSIVE
 [PARKED] S3 authorization bypass on dedicated storage host - aygnpacdkgtsfnhgcyjc.storage.supabase.co (differential/s3_authz) [scheme=https, path=/s3/*, class=authorization_bypass, confidence=75, impact=MEDIUM, testability=blocked_requires_owner_sigv4_keys, verify_steps=403 Missing signature returned before any bucket enumeration]
 [PARKED] cto.onecode.de subdomain takeover - cto.onecode.de (dns/subdomain_takeover) [scheme=http, path=/, class=subdomain_takeover, confidence=58, impact=HIGH, testability=human_only, verify_steps=CNAME to cname.perspective-dns.com behind Cloudflare 104.18.3.73 and 104.18.2.73, HTTP 409, no verification TXT]
 [NEXT] PROBE — single-variable path change against the established storage control, identical headers and credentials to the passing NoSuchBucket baseline, testing whether the ten-class route-table closure is falsifiable:
+## 2026-10-03 21:46:38 UTC [target] (model bigpickle)
