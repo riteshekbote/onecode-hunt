@@ -1200,3 +1200,21 @@ www.onecode.de
 - CHANGED `cto.onecode.de` — day-54, unchanged. CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only (zero verification records), `GET http://cto.onecode.de/` → `409`
 - CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes
+
+## 2026-10-03 05:11:23 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 {"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}` served by the **OAuth router, no
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, and the subtree root all return `401 No API key found in request` with `ACAO: *` + full 9-method list + `max-age 
+- NEW `OPTIONS` preflight on the well-known subtree → `200 ACAO: *` + 9-method list + `max-age 3600`, identical on both `openid-configuration` and `oauth-authorization-server`. Preflight uniform; only the *
+- CHANGED **My own conf-72 claim is narrowed and survives in corrected form.** "Reflection on this subtree is unconditional" is **retracted**. Correct three-tier model: (A) registered well-known docs + OAuth-ro
+- CHANGED `kurs.onecode.de` — day-18, **no deploy**. `/login` 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`; main chunk 154 581 B sha256 `f916f314ea61a8c58a055707fc63c
+- CHANGED `cto.onecode.de` — day-56, `cname.perspective-dns.com.` → 104.18.3.73/104.18.2.73, HTTP 409. Unchanged.
+- NEW Negative recorded: `GET /auth/v1/.well-known/../settings` → normalises to `/auth/v1/settings` and is gated at `401`. No path-traversal gate bypass.
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` + `jwks.json` — pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 id_token signing but JWKS serves o
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` reflects arbitrary `Origin` with `ACAC: true` **without** apikey (unauthenticated) — falsifies "auth-state discriminator" model; CORS o
+- NEW JWT algorithm confusion comprehensively closed on both planes: 38 live probes (27 PostgREST + 11 GoTrue) across HS256/RS256/PS256/ES256/EdDSA × attacker keys — zero tokens authenticated; embedded JWK 
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (legacy Supabase hostnames not routed)
+- CHANGED `kurs.onecode.de` — day-17, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; all `/
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converg
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+- CHANGED GoTrue credentialed CORS: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no ACAC — router-wide confirmed
