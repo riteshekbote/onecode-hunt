@@ -1229,3 +1229,30 @@ www.onecode.de
 - CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
 - CHANGED GoTrue credentialed CORS: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no ACAC — router-wide confirmed
+
+## 2026-10-03 15:00:44 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` — the NEXT directive is now **closed at endpoint level**. All three advertised OAuth endpoints are dead: `/auth/v1/oauth/aut
+- NEW **DELTA — the OAuth reflection is exact-route, not prefix-mounted.** `/auth/v1/oauth/zzz_ctrl_9x7`, `/auth/v1/oauth/` and `/auth/v1/oauth` all return `401 {"message":"No API key found in request"}` wi
+- NEW `/auth/v1/.well-known/oauth-authorization-server/aygnpacdkgtsfnhgcyjc.supabase.co` (RFC 8414 §3 path-insertion metadata form, never tested) → `404 page not found` with `ACAO` reflected + `ACAC: true` 
+- NEW `Origin: null` → `ACAO: null` + `ACAC: true` on all three advertised endpoints (`authorize`, `token`, `userinfo`). No attacker-controlled domain required anywhere on tier A.
+- NEW **Preflight is uniform wildcard and does NOT reflect**, on tier A and tier C alike: `OPTIONS` on `/auth/v1/oauth/authorize`, `/auth/v1/oauth/token`, `/auth/v1/.well-known/jwks.json`, `/auth/v1/oauth/z
+- NEW `token_endpoint_auth_methods_supported: ["client_secret_basic","client_secret_post","none"]` and `grant_types_supported: ["refresh_token"]` + `scopes_supported` incl. `offline_access` — a fourth overs
+- CHANGED `kurs.onecode.de` — day-19, **no deploy**. `/login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (64-hex asserted), **zero** `Set-Cookie`. Byte-identical 
+- CHANGED `cto.onecode.de` — day-57, CNAME `cname.perspective-dns.com.`, HTTP `409`. Unchanged.
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1` — `400 {"code":"NoSuchBucket"}` on the control bucket, unchanged.
+- NEW **The queued NEXT paid off — and it falsified my own previous-cycle claim.** `/auth/v1/oauth/token/extra` → `404 feature_disabled` with reflected `ACAO` + `ACAC: true`. `/auth/v1/oauth/authorize/extra
+- NEW **The entire pre-gate reflecting surface is unbounded in path space.** All 6 pre-gate route names are prefix-mounted at arbitrary depth: `.well-known/jwks.json/anything`, `.well-known/openid-configura
+- NEW **Corrected mechanism — it is not "CORS tiers", it is gate ordering.** `401 {"message":"No API key found in request"}` with `ACAO: *` and no `ACAC` is GoTrue's **global apikey gate, which runs before 
+- NEW Final pre-gate enumeration (8 names tested, credential-free, no apikey): **6 are pre-gate** — `.well-known/jwks.json` (200 ES256), `.well-known/openid-configuration` (200), `.well-known/oauth-authoriz
+- NEW Third traversal negative: `/auth/v1/.well-known/oauth-authorization-server/../../settings` normalises to `/auth/v1/settings` → `401 No API key found`, `ACAO: *`, no ACAC. Prefix mounting does not crea
+- CHANGED `kurs.onecode.de` — day-19, no deploy. `/login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, zero `Set-Cookie`. Byte-identical since 2026-09-19 11:33Z.
+- CHANGED `cto.onecode.de` — day-57, CNAME `cname.perspective-dns.com.`, HTTP `409`. Unchanged. `storage/v1` → `400 NoSuchBucket` on the control bucket, unchanged.
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` + `jwks.json` — pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 id_token signing but JWKS serves o
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` reflects arbitrary `Origin` with `ACAC: true` **without** apikey (unauthenticated) — falsifies "auth-state discriminator" model; CORS o
+- NEW JWT algorithm confusion comprehensively closed on both planes: 38 live probes (27 PostgREST + 11 GoTrue) across HS256/RS256/PS256/ES256/EdDSA × attacker keys — zero tokens authenticated; embedded JWK 
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (legacy Supabase hostnames not routed)
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSi
+- CHANGED `kurs.onecode.de` — day-17, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; all `/
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converg
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth

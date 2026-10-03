@@ -3457,3 +3457,30 @@
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
 - LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-17; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-55, HTTP 409, zero verification TXT — passive probing fully converged
+
+## RANKED HYPOTHESES 2026-10-03 15:00:44 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [74] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: The published OIDC discovery document advertises three OAuth endpoints of which zero are mounted, while the reflecting routes that do exist are exactly the five named ones — a closed, enumerable defect (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `curl -sS -D- -o/dev/null -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server/
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: the discovery document advertises `authorization_endpoint`, `token_endpoint` and `use
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth: the credentialed reflection is **exact-route, not prefix-mounted** — `/auth/v1/oauth/zzz_ct
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: the two OAuth-adjacent prefixes mount in **opposite** modes — `/auth/v1/oauth/*` is exact-route (unregist
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: **preflight does not reflect anywhere, on any tier.** `OPTIONS` on `/auth/v1/oauth/authorize`, `/
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration/..: path traversal from the well-known subtree normalises to `/au
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: RFC 8414 metadata is not exposed under any standard discovery location. `/.well-known/openid-configuratio
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de / cto.onecode.de: no deploy (day-19) and no DNS delta (day-57). `/login` 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b2
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth: my own previous-cycle claim that OAuth reflection is **exact-route, not prefix-mounted** is
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: the pre-gate reflecting surface is **unbounded and prefix-mounted**, verified to dept
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: **the mechanism is gate ordering, not CORS tiers** — my three-tier framing was descriptive, not c
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: my standing record listed `oauth/oidc` as a pre-gate `feature_disabled` route and `.w
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: third traversal negative this cycle. `oauth-authorization-server/../../settings` norm
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de / cto.onecode.de / storage/v1: no deploy (day-19), no DNS delta (day-57), no storage delta. `/login` 200, 18 702 B, sha256 
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: CORS unconditional reflection on well-known subtree falsifies "auth-state discriminat
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: ES256→HS256 key confusion closed by live test — 8 public-key derivations × kid present/absent all 403 bad_jwt;
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /auth/v1: JWT algorithm confusion comprehensively closed — 38 probes across all algs × attacker keys,
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishab
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-17; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-55, HTTP 409, zero verification TXT — passive probing fully converged
