@@ -3393,3 +3393,36 @@
 - LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-15. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-53, u
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces
+
+## RANKED HYPOTHESES 2026-10-03 00:08:37 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [58] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration: The pre-auth OIDC discovery document advertises HS256/RS256 id_token signing while the JWKS serves only ES256, and `plain` PKCE is offered — a spec-conformance and downgrade surface on the project's identity service (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Ask the program owner for **two invited OneCode course accounts on two distinct email addresses I control**, stating the conversion explicitly — account 
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration: two pre-auth, credential-free security documents were published 
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: ES256→HS256 key confusion via the now-public JWKS is closed by live test — 8 public-key derivations (raw `x||y
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: `alg` case-variant confusion is closed. `none`/`None`/`NONE` × kid present/absent all return `401 PGRS
+- LEARN: REJECTED OTHER @ own KB (self-correction of a 53-day-old premise): every JWT entry in this KB assumed **HS256** shared-secret verification. This cycle proves th
+- LEARN: REJECTED MISCONFIG @ own KB (second self-correction, same cycle): the "CORS discriminator is AUTHENTICATION STATE — unauthenticated ⇒ wildcard no ACAC" model ha
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the API-plane breadth sweep completed for the first time — `/pg/`, `/pg-meta/`, `/admin`, `/da
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-17. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
+- LEARN: NOTE @ own KB: several prior entries cite the sink-chunk hash as `5a72d2cd…c3c6c6dcedd0`, which is 66 hex characters and cannot be a SHA-256 digest. The correct
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /auth/v1: JWT algorithm confusion is now comprehensively closed on both planes — 27 PostgREST + 11 Go
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: embedded JWK header injection is closed. Tokens carrying `{"alg":"RS256","jwk":<attacker RSA JWK>}`, `{"alg":"
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: the `PS256`/`PS384`/`PS512` anomaly is **not** a key-type allowlist gap. PostgREST returns `"JWT 
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: **the KB's "CORS discriminator is authentication state" model is falsified outright, 
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration: the published discovery document is provably inaccurate, now wit
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: the credentialed-reflection finding is **bounded to public documents** — no data plane inherit
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-17. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
+- LEARN: NOTE @ own methodology (self-correction, both from this cycle): (1) I over-claimed a "documented exception" last turn when the correct reading is a falsified ge
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: pre-auth bucket-existence oracle is ROUTE-TABLE-COMPLETE (10 mounted GET routes return byte-id
+- LEARN: REJECTED OTHER @ own hypothesis set (self-correction of the 2026-10-02 02:36Z cycle): the S3-plane lead was emitted as `[FINAL] conf 75, PASSIVE, HIGH` with an 
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de/_next/image: re-confirmed that absent Referrer-Policy cannot be chained into fragment-token leakage, because the magic-link
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: pre-auth bucket-existence oracle is ROUTE-TABLE-COMPLETE (10 mounted GET routes return byte-id
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-16. Main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd75
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME `cname.perspective-dns.com.` → A 104.18.2.73/104.18.3.73, TXT = CNAME line only, zero verification records. Day-54, u
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces

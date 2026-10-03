@@ -1167,3 +1167,36 @@ www.onecode.de
 - CHANGED `cto.onecode.de` CNAME→`cname.perspective-dns.com` day-53, HTTP 409, zero verification TXT — passive probing fully converged
 - CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes
+
+## 2026-10-03 00:08:37 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` → **200**, 240 B, serving a **JWKS never probed in 53 days**. One key: `kid 4f59d46f-c3e6-47c7-a717-fabf016650c9`, **`alg: ES256`, `kty
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` → **200**, 1045 B, also never probed. `issuer=https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1`, `jwks_uri` as above, and cr
+- CHANGED **The project's JWT signing algorithm class was wrong in the KB for 53 days.** Every prior JWT entry (09-25 `alg:none`→403, 09-28 "4 candidate HS256 secrets → 403/401", 09-30 "Bearer-only negative") a
+- NEW `/auth/v1/oauth/{authorize,token,userinfo,register,oidc}` — entire namespace mapped for the first time. All five → `404 {"error_code":"feature_disabled","msg":"OAuth server is disabled"}`. So the OIDC
+- NEW Storage/API breadth sweep (never run): `/pg/`, `/pg-meta/`, `/admin`, `/dashboard`, `/api/`, `/v1/`, `/.well-known/jwks.json` all → `404 {"error":"requested path is invalid"}`. The `jwks` document liv
+- CHANGED ES256→HS256 key confusion tested and **falsified** with 16 live requests: 8 public-key derivations (`raw_x||y`, DER SPKI, PEM SPKI, PEM-no-LF, minified JWK JSON, spaced JWK JSON, decoded `x` alone, de
+- CHANGED `alg` case-variant confusion (`none`/`None`/`NONE`, × kid present/absent) on PostgREST → 401. `alg=none` returns the distinct `PGRST301 "JWT is unsecured but expected 'alg' was not 'none'"`; `None`/`N
+- CHANGED PostgREST shares the ES256 verifier: an ES256 `kid`-bearing token yields `PGRST301 "None of the keys was able to decode the JWT" / "No suitable key or wrong key type"` — the resolver finds the JWK and
+- CHANGED **The KB's GoTrue CORS "auth-state discriminator" model has a documented exception.** The `jwks.json` endpoint reflects Origin **with `ACAC: true` even with no apikey and no `Authorization`** — 200 + 
+- CHANGED `kurs.onecode.de` — day-17, **no deploy**. `GET /login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical since 2026-09-19 11:33Z). Main chunk 
+- CHANGED `cto.onecode.de` — day-55, unchanged. CNAME `cname.perspective-dns.com.`, zero verification TXT.
+- NEW **JWT algorithm accept-list is ES256-only — confirmed on both planes by live test, contradicting the project's own published OIDC document.** PostgREST `PGRST301` and GoTrue `bad_jwt` distinguish two 
+- NEW **RS256-family key confusion is closed with valid attacker signatures** — a materially stronger negative than last cycle's 16 probes. Previously all confusion attempts failed at *signature* verificati
+- NEW **Embedded attacker JWK in the JWT header is ignored.** `{"alg":"RS256","jwk":<attacker RSA JWK>}` → `401 "No suitable key or found"`; `{"alg":"ES256","jwk":<attacker EC JWK>}` → `401`; `{"alg":"RS256
+- NEW **`PS256`/`PS384`/`PS512` take a distinct code path on PostgREST** — reproducibly (8/8, plus 3 repeats) `"JWT cryptographic operation failed"` with `details: null`, whereas all other algs return `"No 
+- NEW **CORS on the two new well-known paths: credentialed arbitrary-Origin reflection confirmed, and it does NOT depend on apikey.** Both `/auth/v1/.well-known/openid-configuration` and `/auth/v1/.well-kno
+- CHANGED **The KB's "auth-state discriminator" model is now falsified with a clean counter-example and must be retired as a general rule.** Last cycle I recorded it as having "an exception"; the correct statem
+- CHANGED Storage/API breadth: unchanged and now closed by counter-example — `/pg/`, `/pg-meta/`, `/admin`, `/dashboard`, `/api/`, `/v1/`, root `/.well-known/jwks.json` all `404 {"error":"requested path is inva
+- CHANGED `kurs.onecode.de` — day-17, no deploy. `/login` 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc21fc581a09d37acd21d9450`… corrected: `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc5
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, zero TXT. Unchanged.
+- NEW S3-compatible storage plane at `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 Invali
+- NEW GoTrue credentialed CORS reflection on `/auth/v1/*` re-verified live: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no `
+- NEW Signed URL route `/storage/v1/object/upload/sign/{bucket}/{key}` mounted and bucket-resolves pre-auth (400 NoSuchBucket) — 10th GET route class in complete route table
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (dig A, three legacy Supabase hostnames)
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/upload/sign/{b}/{k}` GET + `Origin: https://evil.example` + apikey/Bearer → `400 {"code":"NoSuchBucket"}` with `ACAO: *` and **no** `ACAC`
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/{bucket}?list-type=2` → `403 <Code>AccessDenied</Code><Message>Missing signature</Message>` with `<Resource>zzz_ctrl_9x7</Resource>` and **no** 
+- CHANGED `kurs.onecode.de` — day-16, **no deploy**. `GET /login` → 200, 18 702 B, page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical since the 2026-09-19 11:33Z buil
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1` — CORS auth-state discriminator re-proven with a matched control on one path, this cycle: `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.exampl
+- CHANGED `cto.onecode.de` — day-54, unchanged. CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only (zero verification records), `GET http://cto.onecode.de/` → `409`
+- CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes
