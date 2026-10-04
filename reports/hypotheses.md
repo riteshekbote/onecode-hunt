@@ -3534,3 +3534,23 @@
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
 - LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-17; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-55, HTTP 409, zero verification TXT — passive probing fully converged
+
+## RANKED HYPOTHESES 2026-10-04 06:29:19 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [71] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: Pre-auth token-state oracle on GoTrue verify endpoint (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: enumerate type surface on /auth/v1/verify to test parameter validation separation. Execute read-only GETs with token=x and types {signup,invite,magiclink
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by mea
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior diff
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ forma
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z (main/sink chunks byte-identical day-20+), pre-auth surface frozen at {/login,/passwort-
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: CORS unconditional reflection on well-known subtree falsifies "auth-state discriminat
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: ES256→HS256 key confusion closed by live test — 8 public-key derivations × kid present/absent all 403 bad_jwt;
+- LEARN: REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 + /auth/v1: JWT algorithm confusion comprehensively closed — 38 probes across all algs × attacker keys,
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishab
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-18; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-56, HTTP 409, zero verification TXT — passive probing fully converged

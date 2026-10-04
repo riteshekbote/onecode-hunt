@@ -1024,3 +1024,12 @@
 - 2026-10-04 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-03
 - 2026-10-04 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-17; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - 2026-10-04 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-55, HTTP 409, zero verification TXT — passive probing fully converged
+- 2026-10-04 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true.
+- 2026-10-04 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects.
+- 2026-10-04 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth.
+- 2026-10-04 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only.
+- 2026-10-04 REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z (main/sink chunks byte-identical day-20+), pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff event-triggered.
+- 2026-10-04 REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path.
+- 2026-10-04 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-04
+- 2026-10-04 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-18; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- 2026-10-04 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-56, HTTP 409, zero verification TXT — passive probing fully converged

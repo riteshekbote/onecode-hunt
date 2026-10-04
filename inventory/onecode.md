@@ -1304,3 +1304,5 @@ www.onecode.de
 - CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
 - CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+
+## 2026-10-04 06:29:19 UTC
