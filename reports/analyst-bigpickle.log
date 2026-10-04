@@ -33876,3 +33876,25 @@ I'm stopping here — the queue has no unauthenticated step left. Two things hap
 Two corrections to my earlier summary, which I should flag since they'd mislead a fresh agent: `art/lead_nemotron3.txt`, `hypotheses-bigpickle.txt`, and `inventory/onecode.md` were wrong paths — the real files are `leads/lead-bigpickle.md` and `reports/hypotheses-bigpickle.txt`. My hypothesis file was also an **empty stub**; all prior state existed only in context. Both findings are now persisted there, so this work survives context loss.
 
 Worth your decision: the CORS mechanism is now well-characterized but unproven impactfully. If you can supply one session cookie, that's the single highest-value unblock — it converts a theoretical misconfig into a demonstrated cross-origin identity read.
+===== ANALYST bigpickle 2026-10-04 23:18:43 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll execute the queued probe against the `/auth/v1/verify` type surface — read-only GETs, no credentials, at low rate.
+[93m[1m! [0mpermission requested: external_directory (/tmp/opencode/*, /tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp/opencode 2>/dev/null || cd /tmp
+PUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+B="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+for t in signup invite magiclink recovery email_change email sms phone_change double_factor reauthenticate; do
+  out=$(curl -sS -D- -o- -m 20 -H "Origin: https://attacker.example" \
+    "$B/auth/v1/verify?token=x&type=$t" 2>&1)
+  code=$(printf '%s' "$out" | head -1)
+  loc=$(printf '%s' "$out" | grep -i '^location:' | tr -d '\r')
+  acao=$(printf '%s' "$out" | grep -i '^access-control-allow-origin:' | tr -d '\r')
+  acac=$(printf '%s' "$out" | grep -i '^access-control-allow-credentials:' | tr -d '\r')
+  vary=$(printf '%s' "$out" | grep -i '^vary:' | tr -d '\r')
+  body=$(printf '%s' "$out" | sed -n '/^\r*$/,$p' | tail -n +2 | tr -d '\n\r')
+  printf '%-16s | %s | %s | %s | %s | %s\n    BODY: %s\n' "$t" "$code" "$loc" "$acao" "$acac" "$vary" "$body"
+  sleep 1
+done failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
