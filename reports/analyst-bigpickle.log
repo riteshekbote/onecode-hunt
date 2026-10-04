@@ -33158,3 +33158,48 @@ double_factor:303 loc:https://kurs.onecode.de/#error=invalid_request&error_code=
 [93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
 [0m✗ [0mcat /tmp/v_*.txt | sort failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST bigpickle 2026-10-04 12:40:26 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u +%Y-%m-%dT%H:%M:%SZ; K=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30; B=https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify; for t in signup invite magiclink recovery email_change email sms phone_change double_factor reauthenticate zzz_ctrl_9x7; do printf '%s => ' "$t"; curl -sS -o /tmp/o.$t -D /tmp/h.$t -w '%{http_code} ' -H "Origin: https://attacker.example" "$B?token=x&type=$t"; grep -i -m1 '^location:' /tmp/h.$t | tr -d '\r' | cut -c1-160; sleep 1; done
+2026-10-04T12:38:36Z
+signup => 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+invite => 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+magiclink => 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+recovery => 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+email_change => 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+email => 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+sms => 303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+phone_change => 303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+double_factor => 303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+reauthenticate => 303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+zzz_ctrl_9x7 => 303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+[0m
+The queued NEXT returned the **second** predicted branch, not the first. Let me bound it precisely.
+[0m$ [0mK=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30; B=https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+p(){ printf '%-46s ' "$1"; curl -sS -o /tmp/b -D /tmp/h -w '%{http_code} ' -H "Origin: https://attacker.example" "$2"; 
+  loc=$(grep -i -m1 '^location:' /tmp/h | tr -d '\r' | sed 's/.*error_description=//;s/&sb=.*//');
+  acac=$(grep -i -c '^access-control-allow-credentials: true' /tmp/h);
+  vary=$(grep -i -m1 '^vary:' /tmp/h | tr -d '\r' | cut -c7-);
+  echo "desc=[${loc:-none}] ACAC=$acac vary=[$vary]"; sleep 1; }
+p "no token, valid type"    "$B?type=recovery"
+p "no token, invalid type"  "$B?type=sms"
+p "no token_hash, valid t"  "$B?token_hash=$(printf '0%.0s' $(seq 64))&type=recovery"
+p "token_hash, invalid t"   "$B?token_hash=$(printf '0%.0s' $(seq 64))&type=sms"
+p "token present, no type"  "$B?token=x"
+p "type UPPERCASE valid"    "$B?token=x&type=RECOVERY"
+no token, valid type                           400 desc=[none] ACAC=1 vary=[Origin]
+no token, invalid type                         400 desc=[none] ACAC=1 vary=[Origin]
+no token_hash, valid t                         400 desc=[none] ACAC=1 vary=[Origin]
+token_hash, invalid t                          400 desc=[none] ACAC=1 vary=[Origin]
+token present, no type                         400 desc=[none] ACAC=1 vary=[Origin]
+type UPPERCASE valid                           303 desc=[Invalid+email+verification+type] ACAC=1 vary=[Origin, Accept-Encoding]
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcurl -sS -o /tmp/l -w 'login %{http_code} %{size_download}B\n' https://kurs.onecode.de/login; sha256sum /tmp/l | cut -c1-64; curl -sS https://kurs.onecode.de/login | grep -o '0-mbmp1iqb6hj\.js' | head -1
+curl -sS -o /tmp/c -w 'chunk %{http_code} %{size_download}B\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js; sha256sum /tmp/c | cut -c1-64
+dig +short @1.1.1.1 cto.onecode.de CNAME; curl -sS -o /dev/null -w 'cto http %{http_code}\n' http://cto.onecode.de/
+curl -sS -o /tmp/s -w 'storage %{http_code} ' -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket; cat /tmp/s failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+Clean3-level ladder. Now the standing-surface delta check.

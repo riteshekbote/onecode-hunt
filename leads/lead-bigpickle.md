@@ -6915,3 +6915,4 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z (main/sink chunks byte-identical day-20+), pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff event-triggered.
 [LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path.
 [RISK] OneCode GmbH: 49 — unchanged. Structural findings on identity/data planes remain bounded by measurement: verify oracle residual (LOW), CORS policy surface (LOW-MEDIUM), storage oracle bounded (LOW). Critical unblocked paths remain AUTH_HELPED (post-auth BOLA conf 65) and HUMAN_ONLY (cto conf 58). No demonstrated exploit path to customer data without credentials or owner action.
+## 2026-10-04 12:39:33 UTC [target] (model bigpickle)
