@@ -33357,3 +33357,522 @@ Continue if you have next steps, or stop and ask for clarification if you are un
 - **CORS/auth model**: Route-registration-ordered — well-known + 7 pre-gate routes (including `/auth/v1/verify`) reflect `Origin`+`ACAC:true` keyless; resource paths reflect only with `apikey`; `OPTIONS` never reflect.
 - **JWT/storage**: ES256-only JWKS (HS256 key confusion rejected); comprehensive alg confusion + embedded JWK rejected (38 probes). Storage: 10 GET route classes return identical `NoSuchBucket` pre-auth (oracle bounded); `/storage/v1/s3` is SigV4-enforced (no oracle).
 - **Findings**: OIDC discovery overstates endpoints; `/auth/v1/verify` open-redirect closed; SSO present with `saml_private_key_next_configured=true` while `saml_enabled=false`.
+===== ANALYST bigpickle 2026-10-04 20:19:01 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll execute the queued NEXT probe: enumerate the `type` surface on the seventh pre-gate route.
+[0m$ [0mcd /tmp/opencode 2>/dev/null || mkdir -p /tmp/opencode && cd /tmp/opencode; date -u '+%Y-%m-%dT%H:%M:%SZ'; echo "---"; for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do printf '%-16s ' "$t"; curl -sS -o /tmp/opencode/v_$t.body -D /tmp/opencode/v_$t.hdr -w '%{http_code} ' -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t" 2>&1; grep -i '^location:' /tmp/opencode/v_$t.hdr | tr -d '\r' | head -1; sleep 1; done
+2026-10-04T20:14:57Z
+---
+signup           303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+invite           303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+magiclink        303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+recovery         303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+email_change     303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+email            303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+sms              303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+phone_change     303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+double_factor    303 location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+[0m
+Delta. Let me examine the CORS headers on these and probe the boundary.
+[0m$ [0mcd /tmp/opencode; echo "=== headers for magiclink (otp_expired group) ==="; grep -iE '^(HTTP|location|access-control|vary|set-cookie|x-sb|server|cf-cache)' v_magiclink.hdr | tr -d '\r'; echo; echo "=== headers for sms (validation_failed group) ==="; grep -iE '^(HTTP|location|access-control|vary|set-cookie|x-sb|server|cf-cache)' v_sms.hdr | tr -d '\r'; echo; echo "=== body sizes / uniqueness ==="; for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do printf '%-16s %s\n' "$t" "$(wc -c < v_$t.body)"; done
+=== headers for magiclink (otp_expired group) ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://attacker.example
+set-cookie: __cf_bm=DML45Vn7JT_UhgbjOO1WA2A4RIbxFdEux7mxA0Q8th0-1791144900.4475574-1.0.1.1-OpTOqnO8DdhMm5wBQZHefkgLlQU8KeHX3LOn_3IVzqzqSfDsAJ6AFMtYh.1QxGq31iOMMsyRfo9ac2LDbWHkTso6l4u5qe7VAffIyYHmQENmhCu975UzvzNc0fD5GwZR; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sun, 04 Oct 2026 20:45:00 GMT
+server: cloudflare
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== headers for sms (validation_failed group) ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://attacker.example
+set-cookie: __cf_bm=n15sskobf12wa2VWDP6ZfQ.byiuNkYKlJNo103Iyezk-1791144906.1545968-1.0.1.1-VKEB2hZwuL3eSYxVmn4GfGGWdiZG7JLBnYx1VLfjMPFddbR_6UWc_uvTAqlW0xcB1cQhZVm6rH5x6hxCCIRRkgsIOG9zE7dnsm84USZiu9cAWQpkdsXu8NubT98I9OQv; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sun, 04 Oct 2026 20:45:06 GMT
+server: cloudflare
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+
+=== body sizes / uniqueness ===
+signup           164
+invite           164
+magiclink        164
+recovery         164
+email_change     164
+email            164
+sms              167
+phone_change     167
+double_factor    167
+[0m
+Two deterministic classes keyed on `type` alone. Now let me establish the exact validation order and bound it.
+[0m$ [0mcd /tmp/opencode; echo "=== A) ordering probes ==="; probe(){ printf '%-34s ' "$1"; curl -sS -o /dev/null -D- -w '' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify$2" 2>/dev/null | grep -iE '^(HTTP|location)' | tr -d '\r' | tr '\n' ' '; echo; sleep 1; }; probe "no type, no token" ""; probe "type=signup no token" "?type=signup"; probe "type=sms no token" "?type=sms"; probe "token only no type" "?token=x"; probe "type=zzz_bogus token=x" "?token=x&type=zzz_bogus"; probe "type=zzz_bogus no token" "?type=zzz_bogus"; echo; echo "=== B) token_hash encoding (order vs type) ==="; probe "token_hash=64zeros type=signup" "?token_hash=0000000000000000000000000000000000000000000000000000000000000000&type=signup"; probe "token_hash=64zeros type=sms" "?token_hash=0000000000000000000000000000000000000000000000000000000000000000&type=sms"; echo; echo "=== C) token-value variance within group A (is otp_expired generic?) ==="; for t in x aaaaaaaaaa 00000000-0000-0000-0000-000000000000; do printf '%-38s ' "token=$t"; curl -sS -o /dev/null -D- -w '' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=$t&type=recovery" 2>/dev/null | grep -i '^location' | tr -d '\r' | cut -c1-120; sleep 1; done
+=== A) ordering probes ===
+no type, no token                  HTTP/2 400  
+type=signup no token               HTTP/2 400  
+type=sms no token                  HTTP/2 400  
+token only no type                 HTTP/2 400  
+type=zzz_bogus token=x             HTTP/2 303  location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb= 
+type=zzz_bogus no token            HTTP/2 400  
+
+=== B) token_hash encoding (order vs type) ===
+token_hash=64zeros type=signup     HTTP/2 400  
+token_hash=64zeros type=sms        HTTP/2 400  
+
+=== C) token-value variance within group A (is otp_expired generic?) ===
+token=x                                location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+
+token=aaaaaaaaaa                       location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+
+token=00000000-0000-0000-0000-000000000000 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+
+[0m
+[0m$ [0mcd /tmp/opencode; echo "=== 400 body shape (no token) ==="; curl -sS "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup" | head -c 300; echo; echo; echo "=== determinism re-run: one member per group ==="; for t in email sms; do printf '%-8s ' "$t"; curl -sS -o /dev/null -D- -w '' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t" 2>/dev/null | grep -i '^location' | tr -d '\r' | sed 's/.*error_code=\([a-z_]*\).*/\1/'; sleep 1; done; echo; echo "=== extra group-A candidate types never in my sweep ==="; for t in idv_ enrollment email_otp phone signup_otp; do printf '%-14s ' "$t"; curl -sS -o /dev/null -D- -w '' "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t" 2>/dev/null | grep -i '^location' | tr -d '\r' | sed 's/.*error_code=\([a-z_]*\).*/\1/'; sleep 1; done
+=== 400 body shape (no token) ===
+{"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+
+=== determinism re-run: one member per group ===
+email    otp_expired
+sms      validation_failed
+
+=== extra group-A candidate types never in my sweep ===
+idv_           validation_failed
+enrollment     validation_failed
+email_otp      validation_failed
+phone          validation_failed
+signup_otp     validation_failed
+[0m
+## Objective
+- Continue the OneCode GmbH bug-bounty POC on `aygnpacdkgtsfnhgcyjc.supabase.co`, prioritizing evidence-backed logic flaws and outputting only the required structured analysis blocks.
+- Test whether `/auth/v1/verify` exposes a pre-auth token-state/type-validation oracle.
+
+## Important Details
+- State: `phase=POC`, `target=api`; report channel `bugs.olivermaicher.eu`.
+- Live testing must remain passive-first, `GET`/`HEAD` only, `≤1 rps`, with no customer-data access, auth bypass, or mutation.
+- `/auth/v1/verify` is the seventh keyless/pre-gate route, exactly matched and handler-reachable. Off-origin `redirect_to` falls back to `https://kurs.onecode.de`; open redirect is closed.
+- OpenID discovery advertises disabled/incorrect capabilities, but only the bounded `/verify` differential is the immediate target.
+- Supabase uses ES256 asymmetric JWTs; JWT algorithm confusion and embedded-JWK injection were comprehensively negative.
+- Correct publishable-key byte digest: `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`; `870cf518…` includes a trailing newline.
+- `GET /storage/v1/bucket → []` is uninformative. The real storage finding is a low-severity `NoSuchBucket` oracle spanning 10 route classes; 81 names were excluded.
+- Supabase REST monitor is closed after 27 probes: only `401`/`503`, never `200` or rows.
+- `cto.onecode.de` remains `HUMAN_ONLY`: `CNAME cname.perspective-dns.com`, HTTP `409`, no verification TXT.
+- Post-auth BOLA remains the highest-value unresolved flaw but requires two invited accounts (`AUTH_HELPED`).
+
+## Work State
+### Completed
+- Confirmed `/auth/v1/verify` is keyless and credential-reflecting; `/verify/extra` is not mounted.
+- Confirmed off-origin `redirect_to` is discarded while on-origin redirects are honored.
+- Enumerated `/verify` token parameter forms and several verify types; still need the bounded final type matrix.
+- Bounded CORS behavior by route registration: seven pre-gate routes; resource-path reflection occurs only with the public apikey; preflight remains wildcard without `ACAC`.
+- Closed JWT confusion, OAuth redirect, SSRF, XSS, forged-cookie, Next.js middleware-bypass, REST exposure, storage public-download, and S3 pre-auth object-access hypotheses.
+- Characterized `kurs.onecode.de`: pre-auth `200` set is `{/login,/passwort-vergessen,/datenschutz,/rechtliches}`; protected routes redirect `307→/login`.
+
+### Active
+- Highest active lead: `/auth/v1/verify` type-validation separation, confidence `71`, impact `LOW`.
+- Secondary finals: route-registration-ordered GoTrue CORS, confidence `69`; bounded storage bucket oracle, confidence `62`.
+- Parked: post-auth BOLA `65` (`AUTH_HELPED`), `cto.onecode.de` takeover `58` (`HUMAN_ONLY`), forced-login fragment sink `55` (`AUTH_HELPED`).
+
+### Blocked
+- No cheap second authenticated principal: anonymous sign-in and signup are disabled; two invited accounts are required for the BOLA test.
+- `cto.onecode.de` cannot progress passively beyond the owner’s claim attempt.
+- S3 object authorization requires owner-supplied SigV4 credentials; pre-auth probes only return `403 Missing signature`.
+
+## Next Move
+1. Run at `≤1 rps`: `for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do curl -sS -o/dev/null -w "$t %{http_code} " -H "Origin: https://attacker.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t"; done`
+2. Compare status, `Location`, `error_code`, and `error_description`; if all invalid-token cases are identical, reduce the oracle to one bit and confidence toward `55`; if type validation precedes token verification, retain/elevate a bounded oracle hypothesis.
+
+## Relevant Files
+- `scope.yml`: authoritative eligible assets.
+- `inventory/onecode.md`: OneCode host inventory.
+- `hypotheses-bigpickle.txt`: prior hypotheses and queued `/verify` probe.
+- `hypotheses-nemotron3.txt`: competing lead set and CORS probe.
+- `art/lead_nemotron3.txt`: S3 lead source; previously over-ranked and not currently reportable without SigV4 credentials.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; ls -la; echo "=== hypotheses files ==="; ls -la hypotheses-*.txt 2>/dev/null; echo "=== tail of bigpickle ==="; tail -25 hypotheses-bigpickle.txt 2>/dev/null || echo "(missing)"
+total 956
+drwxr-xr-x 12 runner runner   4096 Oct  4 20:14 .
+drwxr-xr-x  3 runner runner   4096 Oct  4 20:14 ..
+drwxr-xr-x  7 runner runner   4096 Oct  4 20:14 .git
+drwxr-xr-x  3 runner runner   4096 Oct  4 20:14 .github
+-rw-r--r--  1 runner runner   1692 Oct  4 20:14 README.md
+-rw-r--r--  1 runner runner  12468 Oct  4 20:17 analyst-out.txt
+-rw-r--r--  1 runner runner 431248 Oct  4 20:14 analyst-prompt.txt
+-rw-r--r--  1 runner runner 427399 Oct  4 20:14 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 leads
+-rw-r--r--  1 runner runner   5684 Oct  4 20:14 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 reports
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Oct  4 20:14 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 scripts
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  4 20:14 triage
+=== hypotheses files ===
+=== tail of bigpickle ===
+(missing)
+[0m
+The probe is complete and the result is decisive. Let me persist it and close the hypothesis out properly.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "=== state_bigpickle.json ==="; cat state_bigpickle.json; echo; echo "=== analyst-out.txt (tail 60) ==="; tail -60 analyst-out.txt; echo; echo "=== probe-results.md (tail 30) ==="; tail -30 probe-results.md
+=== state_bigpickle.json ===
+{"phase": "POC", "target": "api"}
+=== analyst-out.txt (tail 60) ===
+### Completed
+- Confirmed `/auth/v1/verify` is keyless and credential-reflecting; `/verify/extra` is not mounted.
+- Confirmed off-origin `redirect_to` is discarded while on-origin redirects are honored.
+- Enumerated `/verify` token parameter forms and several verify types; still need the bounded final type matrix.
+- Bounded CORS behavior by route registration: seven pre-gate routes; resource-path reflection occurs only with the public apikey; preflight remains wildcard without `ACAC`.
+- Closed JWT confusion, OAuth redirect, SSRF, XSS, forged-cookie, Next.js middleware-bypass, REST exposure, storage public-download, and S3 pre-auth object-access hypotheses.
+- Characterized `kurs.onecode.de`: pre-auth `200` set is `{/login,/passwort-vergessen,/datenschutz,/rechtliches}`; protected routes redirect `307→/login`.
+
+### Active
+- Highest active lead: `/auth/v1/verify` type-validation separation, confidence `71`, impact `LOW`.
+- Secondary finals: route-registration-ordered GoTrue CORS, confidence `69`; bounded storage bucket oracle, confidence `62`.
+- Parked: post-auth BOLA `65` (`AUTH_HELPED`), `cto.onecode.de` takeover `58` (`HUMAN_ONLY`), forced-login fragment sink `55` (`AUTH_HELPED`).
+
+### Blocked
+- No cheap second authenticated principal: anonymous sign-in and signup are disabled; two invited accounts are required for the BOLA test.
+- `cto.onecode.de` cannot progress passively beyond the owner’s claim attempt.
+- S3 object authorization requires owner-supplied SigV4 credentials; pre-auth probes only return `403 Missing signature`.
+
+## Next Move
+1. Run at `≤1 rps`: `for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do curl -sS -o/dev/null -w "$t %{http_code} " -H "Origin: https://attacker.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t"; done`
+2. Compare status, `Location`, `error_code`, and `error_description`; if all invalid-token cases are identical, reduce the oracle to one bit and confidence toward `55`; if type validation precedes token verification, retain/elevate a bounded oracle hypothesis.
+
+## Relevant Files
+- `scope.yml`: authoritative eligible assets.
+- `inventory/onecode.md`: OneCode host inventory.
+- `hypotheses-bigpickle.txt`: prior hypotheses and queued `/verify` probe.
+- `hypotheses-nemotron3.txt`: competing lead set and CORS probe.
+- `art/lead_nemotron3.txt`: S3 lead source; previously over-ranked and not currently reportable without SigV4 credentials.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; ls -la; echo "=== hypotheses files ==="; ls -la hypotheses-*.txt 2>/dev/null; echo "=== tail of bigpickle ==="; tail -25 hypotheses-bigpickle.txt 2>/dev/null || echo "(missing)"
+total 956
+drwxr-xr-x 12 runner runner   4096 Oct  4 20:14 .
+drwxr-xr-x  3 runner runner   4096 Oct  4 20:14 ..
+drwxr-xr-x  7 runner runner   4096 Oct  4 20:14 .git
+drwxr-xr-x  3 runner runner   4096 Oct  4 20:14 .github
+-rw-r--r--  1 runner runner   1692 Oct  4 20:14 README.md
+-rw-r--r--  1 runner runner  12468 Oct  4 20:17 analyst-out.txt
+-rw-r--r--  1 runner runner 431248 Oct  4 20:14 analyst-prompt.txt
+-rw-r--r--  1 runner runner 427399 Oct  4 20:14 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 leads
+-rw-r--r--  1 runner runner   5684 Oct  4 20:14 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 reports
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Oct  4 20:14 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  4 20:14 scripts
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  4 20:14 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  4 20:14 triage
+=== hypotheses files ===
+=== tail of bigpickle ===
+(missing)
+[0m
+The probe is complete and the result is decisive. Let me persist it and close the hypothesis out properly.
+
+=== probe-results.md (tail 30) ===
+
+## 2026-10-03 00:08:37 UTC
+
+
+## 2026-10-03 05:11:23 UTC
+
+
+## 2026-10-03 10:30:25 UTC
+
+
+## 2026-10-03 15:00:44 UTC
+
+
+## 2026-10-03 18:42:55 UTC
+
+
+## 2026-10-03 21:46:49 UTC
+
+
+## 2026-10-04 00:32:23 UTC
+
+
+## 2026-10-04 06:29:19 UTC
+
+
+## 2026-10-04 12:40:26 UTC
+
+
+## 2026-10-04 17:08:54 UTC
+[0m
+My prior summary referenced filenames that don't exist. Let me check the real artifacts.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "=== README ==="; cat README.md; echo; echo "=== scripts/ ==="; ls -la scripts/; echo; echo "=== leads/ ==="; ls -la leads/ | head -30; echo; echo "=== reports/ ==="; ls -la reports/
+=== README ===
+# onecode-hunt
+
+24/7 deep multi-model bug-hunting automation for **OneCode GmbH** (Oliver Maicher bug-bounty hub).
+
+Scope: *.onecode.de, kurs.onecode.de; All company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH
+(full exclusion + rules list in `scope.yml`)
+
+Pipeline (all workflows run every 20 minutes):
+
+- **Deep Hunt** (`hunt.yml`): analyst hunts the discovered inventory + hypotheses, emits structured
+  leads, chains primitives, self-critiques. Models: mimo.
+- **Triager** (`triage.yml`): second-model 7-Question Gate validation + live passive probe; keeps
+  running count in `reports/valid-bugs.md`.
+- **Reposcan** (`reposcan.yml`): deep source scan of any public GitHub org (if configured).
+- **Sync Issues** (`sync-issues.yml`): mirrors leads to GitHub issues.
+
+Testing discipline: rate-limited (1 rps), no DoS/account-lockout, writes only on non-prod/test
+assets, no exposure of customer/employee/financial/auth data, secrets committed only as hashes.
+
+> IMPORTANT: the pipeline produces CANDIDATE leads. A reportable, validated finding requires
+> human triage + proof against the program's gate. No finding is fabricated; scanner output alone
+> is never accepted.
+
+Artifacts:
+
+| Artifact | Purpose |
+|---|---|
+| `leads/` | Candidate findings (UNVALIDATED) |
+| `triage/` | Validation verdicts |
+| `reports/valid-bugs.md` | Validated findings + running count |
+| `scope.yml` | Program scope and exclusions (edit to adjust) |
+
+Program description: German software development company providing mobile app development, backend engineering, DevOps, and custom software solutions
+
+=== scripts/ ===
+total 28
+drwxr-xr-x  2 runner runner  4096 Oct  4 20:14 .
+drwxr-xr-x 12 runner runner  4096 Oct  4 20:14 ..
+-rw-r--r--  1 runner runner 16987 Oct  4 20:14 sync-issues.py
+
+=== leads/ ===
+total 2664
+drwxr-xr-x  2 runner runner    4096 Oct  4 20:14 .
+drwxr-xr-x 12 runner runner    4096 Oct  4 20:14 ..
+-rw-r--r--  1 runner runner 1152043 Oct  4 20:14 lead-bigpickle.md
+-rw-r--r--  1 runner runner    9741 Oct  4 20:14 lead-laguna.md
+-rw-r--r--  1 runner runner    9550 Oct  4 20:14 lead-ling3.md
+-rw-r--r--  1 runner runner    9932 Oct  4 20:14 lead-longcat.md
+-rw-r--r--  1 runner runner      18 Oct  4 20:14 lead-mimo.md
+-rw-r--r--  1 runner runner 1485612 Oct  4 20:14 lead-nemotron3.md
+-rw-r--r--  1 runner runner   34119 Oct  4 20:14 reposcan-onecode.md
+
+=== reports/ ===
+total 5504
+drwxr-xr-x  2 runner runner    4096 Oct  4 20:14 .
+drwxr-xr-x 12 runner runner    4096 Oct  4 20:14 ..
+-rw-r--r--  1 runner runner 2804504 Oct  4 20:14 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   41447 Oct  4 20:14 analyst-laguna.log
+-rw-r--r--  1 runner runner   41256 Oct  4 20:14 analyst-ling3.log
+-rw-r--r--  1 runner runner   41638 Oct  4 20:14 analyst-longcat.log
+-rw-r--r--  1 runner runner 2146878 Oct  4 20:14 analyst-nemotron3.log
+-rw-r--r--  1 runner runner      54 Oct  4 20:14 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Oct  4 20:14 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Oct  4 20:14 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Oct  4 20:14 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner    9191 Oct  4 20:14 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  502096 Oct  4 20:14 hypotheses.md
+-rw-r--r--  1 runner runner     782 Oct  4 20:14 valid-bugs.md
+[0m
+`analyst-out.txt` is a harness capture and `art/` never existed. Let me find the real output convention before writing anything.
+Found the real artifacts. Let me read my hypothesis state file.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "=== reports/hypotheses-bigpickle.txt ==="; cat reports/hypotheses-bigpickle.txt; echo; echo "=== reports/valid-bugs.md ==="; cat reports/valid-bugs.md; echo; echo "=== other analysts' hypothesis files ==="; for f in reports/hypotheses-{laguna,ling3,longcat}.txt; do echo "--- $f"; cat "$f"; echo; done
+=== reports/hypotheses-bigpickle.txt ===
+## 2026-10-04 17:08:44 UTC [target] (model bigpickle)
+
+=== reports/valid-bugs.md ===
+# Validated findings (running count 0)
+
+- 3 lead(s) marked VALID at 2026-09-05 07:54:04 UTC
+  - | Q7 Reasonable triager | Yes | Concrete asset, clear verify path, high impact — classic valid bug-bounty finding |
+  - **Verdict: VALID (AUTH_HELPED)**
+  - | 1 | Post-auth BOLA via Supabase RLS gap | **VALID** (AUTH_HELPED) | 7.7 | Needs 2 test accounts |
+
+- 2 lead(s) marked VALID at 2026-09-06 21:28:59 UTC
+  - **Verdict: VALID**
+  - **Verdict: VALID**
+
+- 4 lead(s) marked VALID at 2026-09-09 15:18:55 UTC
+  - **Verdict: VALID**
+  - **Verdict: HOLD** (needs HUMAN claim-attempt to convert to VALID)
+  - **Verdict: HOLD** (monitoring-only; escalates to VALID if cache recovers)
+  - | 1. Post-auth BOLA via RLS Gap | **VALID** | CRITICAL — report when two test accounts obtained |
+
+=== other analysts' hypothesis files ===
+--- reports/hypotheses-laguna.txt
+## 2026-10-04 17:02:44 UTC [target] (model laguna)
+
+--- reports/hypotheses-ling3.txt
+## 2026-10-04 17:02:42 UTC [target] (model ling3)
+
+--- reports/hypotheses-longcat.txt
+## 2026-10-04 17:02:42 UTC [target] (model longcat)
+[0m
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+My hypothesis file is an empty stub — the state was only ever in-context. Let me write the closure record.
+[0m
+[0m← [0mEdit reports/hypotheses-bigpickle.txt
+Index: /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
+===================================================================
+--- /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
++++ /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
+@@ -1,1 +1,48 @@
+ ## 2026-10-04 17:08:44 UTC [target] (model bigpickle)
++
++## 2026-10-04 20:15 UTC [target] (model bigpickle)
++
++### CLOSED (NEGATIVE) — /auth/v1/verify token-state oracle — conf 71 -> 20
++
++Ran the queued bounded type matrix (GET only, 1 rps, no tokens supplied, all values synthetic).
++
++**Established validation order: token-presence -> type-validity -> token-lookup.**
++
++1. Token presence is checked first. No token and no token_hash => `400`
++   `{"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}`,
++   independent of `type` (confirmed for both `type=signup` and `type=sms`).
++2. `type` is validated next. With any non-empty token, two deterministic response classes:
++   - accepted email-verification types -> `303`, `error_code=otp_expired`,
++     "Email link is invalid or has expired" (164-byte body)
++   - rejected / non-email types -> `303`, `error_code=validation_failed`,
++     "Invalid email verification type" (167-byte body)
++3. Token lookup happens last.
++
++**Type surface (deterministic, stable on re-run, both `Origin: https://attacker.example`
++with `ACAO` reflected + `ACAC: true`):**
++- class A / otp_expired: `signup`, `invite`, `magiclink`, `recovery`, `email_change`, `email`
++- class B / validation_failed: `sms`, `phone_change`, `double_factor`,
++  and also `zzz_bogus`, `idv_`, `enrollment`, `email_otp`, `phone`, `signup_otp`
++
++**Why this does not support the hypothesis.** The original claim was a token-state oracle.
++Tested three structurally different token values (`x`, `aaaaaaaaaa`,
++`00000000-0000-0000-0000-000000000000`) against `type=recovery`: all three return
++byte-identical `otp_expired`. There is therefore **no observable token-state differential**;
++the generic invalid-token response is constant and non-oracular. `token_hash` (64 zeros)
++with a valid type also returns only the `400` presence error, never reaching lookup.
++
++The residual signal is a **single bit on the `type` parameter** — "is this a recognized
++email-verification type" — and that value set is GoTrue's own static, publicly documented
++list, not a secret. It is additionally gated behind token *presence* (any junk string
++satisfies it), so it yields no state about any token, user, or account.
++
++**Verdict: refuted as an attack primitive.** Informational only, not reportable: no verify
++steps beyond "observe two error strings", no secret disclosed, no auth boundary weakened.
++Confidence 71 -> 20. Do not re-queue.
++
++### Remaining finals
++- route-registration-ordered GoTrue CORS — conf 69 (next)
++- bounded storage bucket `NoSuchBucket` oracle — conf 62 (parked; informational grade)
++- post-auth BOLA via RLS gap — conf 65, AUTH_HELPED (blocked: 2 invited accounts)
++- cto.onecode.de takeover — conf 58, HUMAN_ONLY (owner claim attempt required)
++- forced-login fragment sink — conf 55, AUTH_HELPED
+
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; echo "=== CORS mentions in nemotron3 hypotheses ==="; grep -niE 'cors|route.registration|registration.order' reports/hypotheses-nemotron3.txt | head -40
+=== CORS mentions in nemotron3 hypotheses ===
+15:[HYP] Reflected-origin credentialed CORS on GoTrue gateway enables cross-origin authenticated identity reads
+22:impact: Cross-origin read of authenticated identity data (user profile, session, factors) by any origin — MEDIUM (requires valid apikey/JWT; session cookie host kurs.onecode.de is CORS-clean so no direct app session theft); owner-fixable via allowed_origins config
+37:[FINAL] 1. Reflected-origin credentialed CORS on GoTrue gateway (confidence 85, MISCONFIG, PASSIVE) — cross-origin authenticated identity reads, includes unconditional well-known reflection
+40:[NEXT] PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v (validates reflected-origin+ACAC on authenticated user endpoint; CORS headers present on 401 too)
+41:[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known: CORS unconditional reflection on well-known subtree falsifies "auth-state discriminator" model — reflection without apikey, with ACAC:true, vary: Origin
+46:[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-04
+49:[RISK] onecode: 70 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. CRITICAL NEW: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads), plus unconditional reflection on well-known endpoints. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth.
+[0m
+Now let me pin down the next lead (CORS, conf 69) before spending probes on it.
+The CORS model in my notes claims reflection is apikey-gated — but my `/verify` probe just showed reflection **with no apikey**. Let me test that across the full pre-gate surface.
+[0m$ [0mcd /tmp/opencode; echo "=== /auth/v1 pre-gate surface: reflection WITHOUT apikey ==="; for p in "/auth/v1/health" "/auth/v1/settings" "/auth/v1/.well-known/openid-configuration" "/auth/v1/.well-known/jwks.json" "/auth/v1/verify?token=x&type=recovery" "/auth/v1/logout" "/auth/v1/token?grant_type=password"; do printf '%-46s ' "$p"; H=$(curl -sS -o /dev/null -D- -H 'Origin: https://attacker.example' "https://aygnpacdkgtsfnhgcyjc.supabase.co$p" 2>/dev/null | tr -d '\r'); A=$(printf '%s' "$H" | grep -i '^access-control-allow-origin' | cut -d' ' -f2-); C=$(printf '%s' "$H" | grep -i '^access-control-allow-credentials' | cut -d' ' -f2-); printf 'acao=%-28s acac=%s\n' "${A:-<none>}" "${C:-<none>}"; sleep 1; done
+=== /auth/v1 pre-gate surface: reflection WITHOUT apikey ===
+/auth/v1/health                                acao=*                            acac=<none>
+/auth/v1/settings                              acao=*                            acac=<none>
+/auth/v1/.well-known/openid-configuration      acao=https://attacker.example     acac=true
+/auth/v1/.well-known/jwks.json                 acao=https://attacker.example     acac=true
+/auth/v1/verify?token=x&type=recovery          acao=https://attacker.example     acac=true
+/auth/v1/logout                                acao=*                            acac=<none>
+/auth/v1/token?grant_type=password             acao=*                            acac=<none>
+[0m
+[0m← [0mEdit reports/hypotheses-bigpickle.txt
+Index: /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
+===================================================================
+--- /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
++++ /home/runner/work/onecode-hunt/onecode-hunt/reports/hypotheses-bigpickle.txt
+@@ -39,10 +39,41 @@
+ **Verdict: refuted as an attack primitive.** Informational only, not reportable: no verify
+ steps beyond "observe two error strings", no secret disclosed, no auth boundary weakened.
+ Confidence 71 -> 20. Do not re-queue.
+ 
++### Two-handler CORS model (CONFIRMED, refutes recorded apikey-gating)
++
++Bounded GET sweep, no apikey, `Origin: https://attacker.example`, 1 rps. Exactly two
++distinct behaviors in the GoTrue gateway, selected by **route registration**, not by auth:
++
++- wildcard, no ACAC: `/auth/v1/health`, `/auth/v1/settings`, `/auth/v1/logout`,
++  `/auth/v1/token?grant_type=password`
++- reflected + `access-control-allow-credentials: true`:
++  `/auth/v1/.well-known/openid-configuration`, `/auth/v1/.well-known/jwks.json`,
++  `/auth/v1/verify`
++
++This **refutes** the earlier recorded model ("unauthenticated -> wildcard; apikey-bearing ->
++reflected + ACAC"). That was an artifact of which routes happened to be sampled with and
++without the key. Reflection + ACAC occurs on a pre-gate route with no apikey at all.
++Recorded finding was the right phenomenon with the wrong mechanism; correcting the
++mechanism matters because it means the credentialed reflector is registered gateway-wide
++rather than gated behind key presence.
++
++Exploitability still unresolved and still blocked: the reflected+ACAC routes that are
++pre-gate return only public/error data (`/verify` = error strings; the two `/.well-known`
++paths are public documents by design). The deciding test is whether an authenticated
++route (/user, /admin/*) also reflects+ACACs **and** whether a session cookie exists that
++a cross-origin `credentials: include` fetch would attach. Both need a live session.
++Reclassified **AUTH_HELPED**. conf 69 (mechanism better understood, decisive step blocked).
++
+ ### Remaining finals
+-- route-registration-ordered GoTrue CORS — conf 69 (next)
++- route-registration-ordered GoTrue CORS — conf 69, AUTH_HELPED (see above; needs session)
+ - bounded storage bucket `NoSuchBucket` oracle — conf 62 (parked; informational grade)
+ - post-auth BOLA via RLS gap — conf 65, AUTH_HELPED (blocked: 2 invited accounts)
+ - cto.onecode.de takeover — conf 58, HUMAN_ONLY (owner claim attempt required)
+ - forced-login fragment sink — conf 55, AUTH_HELPED
++
++### No unauthenticated step remains in the queue
++Every open lead now terminates in a human-supplied prerequisite: 2 invited accounts
++(BOLA), a live session (CORS), an owner claim attempt (cto), or owner SigV4 keys (S3).
++Passive unauthenticated probing is exhausted for this phase; further progress requires
++the human triage/account-provisioning action, not more requests.
+
+[0m
+Clean delta — this refutes my recorded model. Let me record it.
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt; wc -l reports/hypotheses-bigpickle.txt; echo "=== verify structure ==="; grep -n '^#' reports/hypotheses-bigpickle.txt
+79 reports/hypotheses-bigpickle.txt
+=== verify structure ===
+1:## 2026-10-04 17:08:44 UTC [target] (model bigpickle)
+3:## 2026-10-04 20:15 UTC [target] (model bigpickle)
+5:### CLOSED (NEGATIVE) — /auth/v1/verify token-state oracle — conf 71 -> 20
+43:### Two-handler CORS model (CONFIRMED, refutes recorded apikey-gating)
+68:### Remaining finals
+75:### No unauthenticated step remains in the queue
+[0m
+I'm stopping here — the queue has no unauthenticated step left. Two things happened since the summary:
+
+**1. The queued `/verify` probe closed negatively.** I established the real validation order is `token-presence → type-validity → token-lookup`, and it produced exactly the two classes I predicted. But it does **not** support the hypothesis it was testing for: three structurally different tokens (`x`, `aaaaaaaaaa`, a well-formed UUID) all return byte-identical `otp_expired`, so there's **no token-state differential**. The residual is one bit about the `type` parameter — and that value set is GoTrue's own static, publicly documented list, gated behind token *presence*, which any junk string satisfies. Conf 71 → 20, closed as informational, not reportable.
+
+**2. The CORS model in my notes was wrong about mechanism.** I'd recorded "unauthenticated → wildcard, apikey-bearing → reflected + ACAC." That was an artifact of which routes I'd sampled with and without the key. A clean sweep shows exactly two handlers selected by **route registration**: wildcard/no-ACAC on `/health`, `/settings`, `/logout`, `/token`; reflected + `ACAC: true` on `/.well-known/*` and `/verify` — the latter with **no apikey at all**. The phenomenon was right, the mechanism wrong, and the correction matters: the credentialed reflector is registered gateway-wide rather than gated behind key presence.
+
+**Why I'm stopping rather than continuing:** every remaining lead now terminates in a human-supplied prerequisite — 2 invited accounts (BOLA), a live session (CORS), an owner claim attempt (`cto`), or owner SigV4 keys (S3). The CORS finding is the closest to actionable, but its decisive step needs a session cookie a cross-origin `credentials: include` fetch would attach, which I can't produce: signup and anonymous sign-in are disabled.
+
+Two corrections to my earlier summary, which I should flag since they'd mislead a fresh agent: `art/lead_nemotron3.txt`, `hypotheses-bigpickle.txt`, and `inventory/onecode.md` were wrong paths — the real files are `leads/lead-bigpickle.md` and `reports/hypotheses-bigpickle.txt`. My hypothesis file was also an **empty stub**; all prior state existed only in context. Both findings are now persisted there, so this work survives context loss.
+
+Worth your decision: the CORS mechanism is now well-characterized but unproven impactfully. If you can supply one session cookie, that's the single highest-value unblock — it converts a theoretical misconfig into a demonstrated cross-origin identity read.
