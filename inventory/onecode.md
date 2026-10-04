@@ -1279,3 +1279,28 @@ www.onecode.de
 - CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
 - CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
 - CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+
+## 2026-10-04 00:32:23 UTC
+- CHANGED Queued NEXT probe **executed**: `GET /auth/v1/.well-known/oauth-authorization-server/../authorize` → `401` `x-sb-error-code: UNAUTHORIZED_MISSING_API_KEY`, `ACAO: *`, 9-method list, **no `ACAC`**, no 
+- NEW `/auth/v1/sso`, `/auth/v1/sso/oidc`, `/auth/v1/sso/saml/metadata` — a **GoTrue SSO namespace never probed in 53 days**. All three return `404 {"error_code":"saml_provider_disabled","msg":"SAML 2.0 is 
+- NEW `/auth/v1/mfa` and `/auth/v1/identities` — never probed. Both return Kong-local `404 page not found` with reflected `ACAO` + `ACAC: true` when the apikey is present.
+- CHANGED **Falsified my own expansion hypothesis.** Matched no-apikey control across 5 paths: `/auth/v1/sso`, `/auth/v1/sso/oidc`, `/auth/v1/mfa`, `/auth/v1/identities`, `/auth/v1/user` all → `401` + `ACAO: *`
+- NEW **No redirect primitive on the SSO surface, measured not inferred.** `/auth/v1/sso?apikey=…&redirect_to=https://evil.example/steal&RelayState=abc` and the `/sso/oidc` equivalent return `saml_provider_
+- NEW Scope correction that *simplifies* the model: the credentialed reflection is **universal on the apikey-bearing branch**, now measured on 4 additional resource-path classes beyond the previously catalo
+- CHANGED **Queued NEXT executed — the ACS probe found nothing, and the namespace is now fully bounded.** `GET /auth/v1/sso/saml/acs?RelayState=abc&SAMLResponse=<dummy>` → `404 saml_provider_disabled`, no `Loca
+- NEW **SSO subtree structurally closed on both sides, with a counterexample.** `/sso/a`, `/sso/a/b/c/d/e`, `/sso/oidc/x/y` → all `saml_provider_disabled` (unbounded depth); `/sso-abc` → Kong-local `404 pag
+- NEW No domain-specific SSO-OIDC provider exists. `/sso/oidc?domain=onecode.de|kurs.onecode.de|auth.onecode.de` → all `404 saml_provider_disabled`, **no `Location`** on any, even with off-origin `redirect_
+- NEW **`/auth/v1/settings` full scalar surface enumerated (8 keys).** `disable_signup=true`, `mailer_autoconfirm=false`, `phone_autoconfirm=false`, `saml_enabled=false`, `sms_provider=twilio`, and two I ha
+- CHANGED **`/auth/v1/verify` is a SEVENTH pre-gate route — this falsifies last cycle's causal claim.** Keyless `GET /auth/v1/verify` → `400 {"error_code":"validation_failed","msg":"Verify requires a verificati
+- NEW `/verify` is **exactly matched, not prefix-mounted** — `/auth/v1/verify/a` → Kong-local `404 page not found`. Structurally distinct from the 6 Kong routes, each of which reflects to depth 5.
+- NEW **Open redirect on `/verify` is CLOSED by measurement, not assumption.** Off-origin `redirect_to=https://evil.example/steal` → `Location: https://kurs.onecode.de#…`, off-origin target **discarded**, S
+- NEW **The `.well-known/` namespace has no wildcard route.** Five standards-motivated siblings — RFC 9728 `oauth-protected-resource`, the `/` directory index itself, `webfinger`, `assetlinks.json`, `change
+- NEW Pre-gate set closed at exactly 7 by bounded sweep, not sampling. Keyless `401` + `ACAO:*` + no `ACAC` on all 23 further candidates: `health`, `health/live`, `health/ready`, `logout`, `recover`, `signu
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+- NEW `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+- CHANGED CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with 
+- CHANGED `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
