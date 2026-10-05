@@ -34155,3 +34155,230 @@ I re-ran only the axis my own NEXT queued, plus its required counter-example and
 ## STEP 7 — Next action
 
 Re-open the BOLA blocker by requesting two invited test accounts (`huntedfox@…` plus one second address) through the `bugs.olivermaicher.eu` channel — it is the only surviving item with a MEDIUM-HIGH ceiling, it is the sole blocker on the program's highest-impact class, and nothing else on the identity or data plane can be advanced further with anonymous read-only access.
+===== ANALYST bigpickle 2026-10-05 09:20:54 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll start by executing the queued NEXT probe from my previous cycle — the `/verify` type surface enumeration — plus baseline state checks.
+[0m$ [0mcd /tmp/opencode 2>/dev/null || mkdir -p /tmp/opencode && cd /tmp/opencode; date -u '+%Y-%m-%dT%H:%M:%SZ'; echo "--- queued NEXT: /verify type surface enumeration ---"; for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do code=$(curl -sS -o /tmp/opencode/v_$t.txt -w '%{http_code}' -H "Origin: https://attacker.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t"); sleep 1; echo "$t $code"; done
+2026-10-05T09:14:25Z
+--- queued NEXT: /verify type surface enumeration ---
+signup 303
+invite 303
+magiclink 303
+recovery 303
+email_change 303
+email 303
+sms 303
+phone_change 303
+double_factor 303
+[0m
+[0m$ [0mcd /tmp/opencode; for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do echo "=== $t ==="; cat v_$t.txt; echo; done
+=== signup ===
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== invite ===
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== magiclink ===
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== recovery ===
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== email_change ===
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== email ===
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== sms ===
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+=== phone_change ===
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+=== double_factor ===
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+[0m
+Genuine differential found. Now the critical soundness test — is this a *static enum* check or a *state* check?
+[0m$ [0mcd /tmp/opencode; echo "--- COUNTER-EXAMPLE: is type-validation a static enum or state-dependent? ---"; for t in zzz_ctrl_9x7 SMS Recovery RECOVERY "recovery%20" "reco" ""; do echo "--- type=[$t] ---"; curl -sS -D h.txt -o b.txt -w 'code=%{http_code}\n' -H "Origin: https://attacker.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t"; sleep 1; grep -i '^location:' h.txt; cat b.txt; echo; done
+--- COUNTER-EXAMPLE: is type-validation a static enum or state-dependent? ---
+--- type=[zzz_ctrl_9x7] ---
+code=303
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+--- type=[SMS] ---
+code=303
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+--- type=[Recovery] ---
+code=303
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+--- type=[RECOVERY] ---
+code=303
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+--- type=[recovery%20] ---
+code=303
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+--- type=[reco] ---
+code=303
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+--- type=[] ---
+code=400
+{"code":400,"error_code":"validation_failed","msg":"Verify requires a verification type"}
+[0m
+Decisive: static case-sensitive allowlist of exactly 6 types. Now testing the *token* axis independently to see if any state signal survives at all.
+[0m$ [0mcd /tmp/opencode; echo "--- TOKEN-FORMAT AXIS: is token validation static (format) or dynamic (state)? ---"; probe(){ curl -sS -D h.txt -o b.txt -w "%{http_code}" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=$1"; sleep 1; printf "%-28s %s | %s\n" "$2" "$(cat h.txt|head -1|tr -d '\r')" "$(grep -o 'error_code=[a-z_]*' b.txt || cat b.txt)"; };
+probe "" "empty"
+probe "a" "1char"
+probe "aaaaaaaa" "8char"
+probe "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" "32char-garbage"
+probe "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhIn0.sig" "jwt-shaped"
+probe "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" "96char"
+--- TOKEN-FORMAT AXIS: is token validation static (format) or dynamic (state)? ---
+400empty                        HTTP/2 400  | {"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+3031char                        HTTP/2 303  | error_code=otp_expired
+3038char                        HTTP/2 303  | error_code=otp_expired
+30332char-garbage               HTTP/2 303  | error_code=otp_expired
+303jwt-shaped                   HTTP/2 303  | error_code=otp_expired
+30396char                       HTTP/2 303  | error_code=otp_expired
+[0m
+## Objective
+- Continue the OneCode GmbH bug-bounty POC/triage for the in-scope Supabase/API surface and produce evidence-backed STEP 1–7 output. Current state: `phase=POC`, `target=api`; no repository changes are involved.
+
+## Important Details
+- Scope is limited to `*.onecode.de`, `kurs.onecode.de`, and OneCode-owned infrastructure. Live work is read-only (`GET`/`HEAD`/`OPTIONS`, ≤1 rps), with no mutation, auth bypass, customer-data access, DoS, username enumeration, scanner-only claims, or invented findings; hash secrets.
+- Canonical project: `aygnpacdkgtsfnhgcyjc.supabase.co`; `SITE_URL=https://kurs.onecode.de`; only `sb_publishable_…` format is accepted. Correct key-byte SHA-256: `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`; `870cf518…` was a trailing-newline artifact, not key rotation.
+- Latest GoTrue model supersedes the old blanket auth-state wording: reflection is route-registration ordered. The pre-gate set is exactly 7 (6 prefix-mounted Kong routes plus exact `/auth/v1/verify`); pre-gate routes reflect arbitrary or `Origin: null` with `ACAC:true`, ordinary resource routes reflect only with `apikey`, keyless/fallthrough paths use `ACAO:*`, and `OPTIONS` never reflects.
+- `kurs.onecode.de` pre-auth surface is exactly `{ /login, /passwort-vergessen, /datenschutz, /rechtliches }` at `200`; `/api/*`, `/v1`, `/admin`, `/courses`, and `/dashboard` return `307` to `/login`. No deploy since `2026-09-19 11:33Z`.
+- Baseline hashes: main chunk `0-mbmp1iqb6hj.js` = `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page = `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`.
+- Storage `GET /storage/v1/bucket` → `200 []` is only an anon-visibility result, not proof of zero buckets. The bounded `NoSuchBucket` oracle spans 10 mounted GET classes, with 81 candidate names excluded; `/storage/v1/s3` is SigV4-enforced and not demonstrably exploitable without owner credentials.
+- Latest priority snapshot: Supabase API `9.0` (`attack_surface=9,business_value=9,tech_exposure=10,gate_ease=10,cloud_surface=8,freshness=8`); `kurs.onecode.de` `7.8` (`7,9,8,8,5,9`); `cto.onecode.de` `5.5` (`4,6,4,7,3,10`). Risk remains `OneCode GmbH: 49` unchanged.
+
+## Work State
+### Completed
+- `[FINAL]` Pre-auth token-state oracle on `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify`: confidence `71`, `PASSIVE`, impact `LOW`; `/verify` is exact/keyless, open redirect is closed, and only type-dependent invalid-token behavior remains unresolved.
+- `[FINAL]` Route-registration-ordered GoTrue CORS/auth gate: confidence `69`, `PASSIVE`, impact `LOW-MEDIUM`; a 23-route keyless sweep and counterexamples bound the pre-gate set. Supabase is Bearer-only/no auth-cookie; the app origin is CORS-clean.
+- `[FINAL]` Bounded pre-auth storage bucket-existence oracle: confidence `62`, `PASSIVE`, impact `LOW`; route table and CORS characterization are complete, with no object-data path demonstrated.
+- XSS, `_next/image` SSRF, `x-middleware-subrequest`, path/header normalization, RSC, forged/null cookies, PKCE injection, and privileged-key checks are negative.
+- JWT verification is ES256-only; algorithm/key-confusion and embedded-JWK tests rejected all attempts. OAuth providers are disabled, redirect allowlists are closed, SAML/passkeys are disabled, and no Edge Functions are deployed.
+- `cto.onecode.de` remains `cname.perspective-dns.com` → HTTP `409/1001`, TLS handshake failure, zero verification TXT; `hostmaster.onecode.de` is NXDOMAIN. CT inventory found exactly five names; `www`/`mail` remain static/non-web.
+- REST monitoring is formally closed after 27 probes (`503↔401`), never returning `200` rows; no further cadence probes have value.
+- `HashSessionHandoff` is mounted on `/login` RSC row 18 and uses `sb-aygnpacdkgtsfnhgcyjc-auth-token`, but requires a valid attacker token pair plus victim interaction and has fixed redirects; parked, not a demonstrated pre-auth ATO.
+- No repository or code changes were made.
+
+### Active
+- Last recorded cycle: `2026-10-05 02:11:15 UTC`. The queued `/auth/v1/verify` `type`-surface enumeration has not yet been executed.
+- Remaining evidence gaps: verify needs distinct pre-token errors across types; CORS needs an eighth pre-gate route or a tier-boundary counterexample; storage needs a real bucket name or a differential non-`NoSuchBucket` response.
+- Keep `kurs.onecode.de` build diffing and `cto.onecode.de` DNS checks event-triggered rather than time-triggered.
+
+### Blocked
+- Post-auth BOLA/RLS hypothesis (`conf 65`) requires two invited test accounts (`AUTH_HELPED`); anonymous sign-in and signup are disabled.
+- `cto.onecode.de` takeover (`conf 58`) requires an owner/consented claim attempt (`HUMAN_ONLY`).
+- Any S3 RLS-bypass claim requires owner-supplied SigV4 credentials; do not report the structural plane as exploitable without them.
+- The forced-login path requires a valid attacker token pair and victim interaction; no credential-free authentication bypass has been demonstrated.
+
+## Next Move
+1. Run the queued read-only probe at ≤1 rps: `for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do curl -sS -o/dev/null -w "$t %{http_code} " -H "Origin: https://attacker.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t"; done`
+2. Compare status, `Location`, and error data: uniform results should reduce the verify confidence toward ~`55`; a distinct pre-token error would justify retaining or increasing the oracle hypothesis. Do not run other time-cadence probes or elevate `OPTIONS`-only behavior.
+
+## Relevant Files
+- `scope.yml`: eligible asset scope.
+- `inventory/onecode.md`: discovered OneCode host inventory.
+- `art/lead_nemotron3.txt`: ranked lead source.
+- `hypotheses-nemotron3.txt`: ranked hypotheses and queued probe details.
+- No code/repository files were modified.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Both soundness checks are in. One last bounded check closes the verify hypothesis definitively — the `token_hash` parameter the error message just revealed.
+[0m$ [0mcd /tmp/opencode; B="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify"; p(){ curl -sS -D h.txt -o b.txt -w "%{http_code}" "$1"; sleep 1; printf "%-24s %s | %s\n" "$2" "$(grep -io '^HTTP/2 [0-9]*' h.txt|tr -d '\r')" "$(grep -o 'error_code=[a-z_]*' b.txt || cat b.txt)"; };
+p "$B?type=recovery&token_hash=$(printf 'a%.0s' {1..64})" "token_hash-64hex"
+p "$B?type=recovery&token_hash=aaaa" "token_hash-short"
+p "$B?type=recovery&token_hash=" "token_hash-empty"
+p "$B?type=recovery&token=x&token_hash=$(printf 'a%.0s' {1..64})" "both-present"
+p "$B?token_hash=$(printf 'a%.0s' {1..64})" "hash-no-type"
+400token_hash-64hex         HTTP/2 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+400token_hash-short         HTTP/2 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+400token_hash-empty         HTTP/2 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+303both-present             HTTP/2 303 | error_code=otp_expired
+400hash-no-type             HTTP/2 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a verification type"}
+[0m
+One result looks anomalous (`token_hash=64hex` rejected as absent). Before drawing any conclusion I must rule out a shell-expansion artifact in my own probe.
+[0m$ [0mcd /tmp/opencode; V=$(printf 'a%.0s' {1..64}); echo "generated_len=${#V}"; echo "sample=$V"; echo "--- base64url-shaped hash (what a real Supabase token_hash looks like) ---"; H=$(head -c 32 /dev/urandom | base64 | tr '+/' '-_' | tr -d '=\n'); echo "b64_len=${#H}"; curl -sS -o b.txt -w "code=%{http_code}\n" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token_hash=$H"; sleep 1; cat b.txt
+generated_len=64
+sample=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+--- base64url-shaped hash (what a real Supabase token_hash looks like) ---
+b64_len=43
+code=400
+{"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+[0m
+Shell artifact ruled out (len=64 confirmed; a real 43-char base64url hash is also rejected). The verify surface is now fully characterized — and every separable axis is static.
+
+---
+
+**[FINAL]**
+
+**STEP 1 — WHAT I DID**
+Executed the queued NEXT probe, then applied three required soundness checks before accepting the result:
+1. Type-surface enumeration, 9 values, invalid token, off-origin `Origin`.
+2. Counter-example construction — nonsense, case variants, prefix, whitespace-encoded — to test whether the validation axis is state-dependent or a constant allowlist.
+3. Token-format axis — empty / 1 / 8 / 32-char / JWT-shaped / 96-char.
+4. `token_hash` axis revealed by the error string, including a format-correct base64url hash.
+
+**STEP 2 — WHAT I FOUND**
+- **6 types** (`signup`, `invite`, `magiclink`, `recovery`, `email_change`, `email`) → `303 otp_expired`.
+- **3 types** (`sms`, `phone_change`, `double_factor`) → `303 validation_failed` / "Invalid email verification type".
+- I initially had a genuine differential. **The counter-example killed it:** `zzz_ctrl_9x7`, `SMS`, `Recovery`, `RECOVERY`, `reco`, `recovery%20` all return the identical `validation_failed`. The axis is a **static, case-sensitive 6-word allowlist** — a constant, publicly knowable set. It encodes no information about any user, token, or session.
+- Token axis: empty → `400` "Verify requires a token or a token hash"; **every** non-empty token (1 char → 96 char, JWT-shaped) → uniform `otp_expired`. No format check, no state signal.
+- `token_hash` is advertised in the error string but not accepted by this handler/config; a format-correct 43-char base64url hash is also rejected as absent.
+- **Conclusion: no axis is state-dependent. There is no pre-auth token-state oracle.** Parameter validation is separable from the secret, but the separated axis is a hardcoded enum — inert.
+
+**STEP 3 — HYPOTHESES UPDATED**
+| # | Hypothesis | Conf | Verdict | Impact |
+|---|---|---|---|---|
+| 1 | Pre-auth token-state oracle on `/auth/v1/verify` | 71 → **40** | **DROP** — all separable axes static; reaching state requires a valid token, and token forging is closed (ES256-only, no alg-confusion) | LOW |
+| 2 | Route-registration-ordered GoTrue CORS gate | 69 → **58** | **HOLD as hardening** — mechanism verified (pre-gate set bounded at 7, reflects arbitrary/`null` Origin + `ACAC:true`) | LOW — no ambient credential to abuse |
+| 3 | Pre-auth storage bucket-existence oracle | **62** | **HOLD** — mechanism confirmed/bounded (10 GET classes, `NoSuchBucket` differential, 81 names excluded) | LOW — name space unrecoverable |
+| 4 | Post-auth BOLA/RLS | 65 | PARKED — `AUTH_HELPED`, 2 invited accounts | MEDIUM if proven |
+| 5 | `cto` takeover | 58 | PARKED — `HUMAN_ONLY` | MEDIUM if proven |
+| 6 | S3 RLS bypass | 55 | PARKED — needs owner SigV4 keys | MEDIUM if proven |
+
+Hypothesis 2 downgraded on impact, not mechanism: reflecting a credentialed Origin is only exploitable with an ambient credential, and the Supabase auth origin is Bearer-only with no auth cookie. Real misconfiguration, no demonstrated data path — hardening note, not a reportable vulnerability.
+
+**STEP 4 — VERDICT**
+**CONVERGED.** Every live-testable branch is now exhausted. The remaining items are all gated on human action or external credentials (`AUTH_HELPED`, `HUMAN_ONLY`, owner-supplied SigV4). No further passive probing can raise confidence on any live hypothesis.
+
+**STEP 5 — RISK**
+`OneCode GmbH: 49 — unchanged.` No customer-data exposure, no ATO, no XSS, no SSRF, no open redirect. This cycle produced a net **negative** result plus one inert characterization.
+
+**STEP 6 — NEXT**
+Converged — no next probe emitted. `kurs` build-diff and `cto` DNS monitoring remain **event-triggered only** (deploy / NS change). Next movement requires human input: two invited test accounts for BOLA, or an owner claim attempt for `cto`.
+
+**STEP 7 — SKILL MEMORY**
+- **Pre-secret parameter validation is only evidence if the parameter's value space is secret-derived.** If the accepted set is a hardcoded constant — an enum, a regex, a length class — the differential is public knowledge and carries **zero** information about the protected resource. Before escalating any "valid vs invalid" split, construct a counter-example from outside the plausible set (case variants, prefixes, whitespace encoding, nonsense). Matching errors across the whole out-of-set population proves allowlist, not state.
+- **When a result looks anomalous, attribute it to yourself first.** `token_hash` rejected as "absent" invited the conclusion that it was format-validated. Printing `len=64` and re-testing with a format-correct hash showed the server simply never accepts that parameter. A shell-expansion bug would have become a fabricated finding. Always print the generated value's shape before blaming the target.
+- **Uniform results are a legitimate, valuable output.** Confirming that 1→96-char tokens collapse to one error is a real negative that closes a hypothesis permanently. Do not manufacture activity to fill a cycle; the correct output for exhausted branches is *drop and stop*.
