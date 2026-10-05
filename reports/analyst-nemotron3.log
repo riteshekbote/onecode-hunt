@@ -19690,3 +19690,8 @@ testability: HUMAN_ONLY
 ## STEP 7 — RISK
 
 [RISK] onecode: 70 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. CRITICAL NEW: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads), plus unconditional reflection on well-known endpoints. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth.
+===== ANALYST nemotron3 2026-10-05 18:40:58 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[91m[1mError: [0m{"message":"Streaming response failed: [503] Upstream error from Nvidia: Service temporarily overloaded","type":"server_error"}

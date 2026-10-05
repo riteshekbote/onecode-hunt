@@ -6921,3 +6921,9 @@ testability: PASSIVE
 ## 2026-10-04 23:18:07 UTC [target] (model bigpickle)
 ## 2026-10-05 02:11:05 UTC [target] (model bigpickle)
 ## 2026-10-05 09:20:43 UTC [target] (model bigpickle)
+## 2026-10-05 18:40:46 UTC [target] (model bigpickle)
+[HYP] GoTrue credentialed CORS reflection is unconditional on `/verify` and survives both response branches, making it post-routing rather than state-dependent.
+[HYP] Pre-auth verification-type enumeration on `/verify` discloses which OTP channels the project has configured, with the parameter validated before the secret.
+[HYP] Storage bucket-existence oracle via `NoSuchBucket` differential.
+[HYP] Post-auth BOLA/RLS gap on Supabase REST remains the only high-value path.
+[HYP] `cto.onecode.de` subdomain takeover.

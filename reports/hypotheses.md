@@ -3632,3 +3632,6 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ forma
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+
+## RANKED HYPOTHESES 2026-10-05 18:40:58 UTC
+- [0] ?: GoTrue credentialed CORS reflection is unconditional on `/verify` and survives both response branches, making it post-routing rather than state-dependent. (from art/lead_bigpickle.txt)
