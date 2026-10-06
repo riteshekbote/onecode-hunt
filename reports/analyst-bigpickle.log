@@ -34686,3 +34686,155 @@ tok=a.b.c      -> 303 location: https://kurs.onecode.de#error=access_denied&erro
 [93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
 [0m✗ [0mcd /tmp && curl -sS -o l.html -w 'login %{http_code} %{size_download}\n' https://kurs.onecode.de/login && sha256sum l.html | cut -c1-64 && curl -sS -o m.js -w 'chunk %{http_code} %{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js && sha256sum m.js | cut -c1-64; curl -sS -o s.js -w 'sink %{http_code} %{size_download}\n' https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js && sha256sum s.js | cut -c1-64 failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST bigpickle 2026-10-06 06:40:53 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-10-06 06:37:27 UTC
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "%{http_code} %{size_download} %{redirect_url}\n" --max-time 15 https://kurs.onecode.de/login
+200 18702
+[0m
+## Objective
+- Act as a senior bug bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu), running a fixed 7-step cycle (DELTA→PRIORITIZE→HYPOTHESES→SELF-CRITIQUE→NEXT→LEARN→RISK) to find real, in-scope, verifiable vulnerabilities.
+- Scope is limited to `*.onecode.de`, `kurs.onecode.de`, and OneCode-operated infrastructure; current phase = POC, target = `api`.
+
+## Important Details
+- Live probes must be read-only, ≤1 rps, GET/HEAD/OPTIONS only; no mutating/auth-bypass tests; no DoS/lockout/TLS/mail/CSRF-on-logout/reject-list classes (long REJECTED list in prompt).
+- Only PASSIVE, AUTH_HELPED, or HUMAN_ONLY testability; every HYP needs concrete `verify_steps`; confidence <40 or REJECTED-class must be [PARKED].
+- All claims must trace to KB entries or own read-only probes; sha256 secrets; hashes must be re-derived live with 64-hex length asserted (two malformed digests occurred previously).
+- Key facts:
+  - Supabase project ref `aygnpacdkgtsfnhgcyjc`; publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, correct sha256 = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (old `870cf518…` was a line-ending artifact; PoCs must cite `43ccb834…`).
+  - JWT signing is ES256 asymmetric (JWKS `kid 4f59d46f-c3e6-47c7-a717-fabf016650c9`); all prior HS256/alg:none assumptions were wrong-algorithm; algorithm confusion comprehensively closed (38 probes).
+  - GoTrue CORS model = three tiers keyed on route registration: (A) 7 pre-gate names (jwks.json, openid-configuration, oauth-authorization-server, oauth/authorize, oauth/token, oauth/userinfo — all prefix-mounted unbounded depth — plus exactly-matched `/auth/v1/verify`) reflect Origin + ACAC:true keyless; (B) `/auth/v1/*` resource paths reflect only with apikey (header or `?apikey=` query), else `ACAO:*` no ACAC; (C) fallthrough = `ACAO:*` + 9-method list + max-age 3600. Preflight never reflects anywhere. Gate is route-registration-ordered, not blanket.
+  - `redirect_to` allowlist enforced exact-origin across 15+ shapes, 4 host headers, 4 verify types, 2 token encodings; off-origin always falls back to `https://kurs.onecode.de`.
+  - kurs.onecode.de pre-auth surface = {/login, /passwort-vergessen, /datenschutz, /rechtliches} 200; everything else 307→/login; no deploy since 2026-09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`, sink chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; build-diffing is event-triggered only.
+  - HashSessionHandoff (module 34891) mounted on /login RSC row 18; fragment→setSession with no state/nonce/PKCE; next-map `{invite:/einladung,recovery:/passwort-neu}` default `/`; requires valid token pair → AUTH_HELPED.
+  - Storage oracle: 10 route-table-complete GET classes → `400 {"code":"NoSuchBucket"}`; 81 names excluded; bucket name unrecoverable pre-auth; S3 plane (`aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`) enforces SigV4, no oracle, PARKED (conf 75, untestable without owner keys).
+  - cto.onecode.de: CNAME→`cname.perspective-dns.com`, HTTP 409/1001, zero verification TXT, day-58+; conf 58, HUMAN_ONLY.
+  - Post-auth BOLA via RLS gap conf 65 — needs 2 invited test accounts (AUTH_HELPED); anonymous sign-in disabled (`external.anonymous_users:false`), `/auth/v1/anonymous` 404.
+  - SAML keys provisioned (`saml_private_key_next_configured=true`) while `saml_enabled=false`; `/auth/v1/sso*` behind `saml_provider_disabled`.
+  - REST monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows).
+- Program risk score held at 49; deliberately not raised.
+- Queued NEXT (from last cycle, unexecuted): enumerate verification-type surface on `/auth/v1/verify`.
+
+## Work State
+### Completed
+- Full pre-auth characterization of kurs.onecode.de (including CVE-2025-29927, `_next/image` SSRF, path-normalization, header desync, forged cookies, reflected-XSS — all REJECTED).
+- GoTrue/PostgREST/storage/edge/realtime/S3 CORS matrix complete across 6 planes + 2 hosts; storage host proven single-plane.
+- JWT confusion closed (ES256-only, embedded JWK rejected); `redirect_to` allowlist closed (15 shapes); OIDC discovery documents found and proven inaccurate (advertises RS256/HS256, dead endpoints).
+- Pre-gate set bounded at exactly 7 via 23-path keyless sweep with counter-examples; traversal negatives ×4.
+- 10-04 cycle completed: SSO subtree bounded (no ACS/redirect primitive), `/auth/v1/settings` scalar surface enumerated (8 keys), storage/kurs/cto deltas re-checked.
+
+### Active
+- Latest aggregated hypotheses (2026-10-05/06): (1) `/verify` credentialed CORS reflection unconditional/survives both response branches; (2) pre-auth verification-type enumeration on `/verify` disclosing configured OTP channels (parameter validated before secret); (3) storage NoSuchBucket oracle; (4) post-auth BOLA/RLS; (5) cto takeover.
+- Ranked conf-75 lead still present but PARKED: S3 plane (untestable without owner SigV4 keys).
+
+### Blocked
+- Post-auth BOLA (conf 65): blocked on two invited test accounts → AUTH_HELPED.
+- cto.onecode.de takeover (conf 58): blocked on owner claim attempt → HUMAN_ONLY.
+- HashSessionHandoff forced-login: needs valid token pair → AUTH_HELPED.
+- S3 plane: needs owner-supplied SigV4 keys → PARKED.
+
+## Next Move
+1. Execute queued [NEXT] PROBE: read-only GETs (≤1 rps) against `https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=<T>` for T ∈ {signup, invite, magiclink, recovery, email_change, email, sms, phone_change, double_factor}, with `Origin: https://evil.example`, expecting 303 to Site URL with `error_code`; check whether distinct error codes for the same invalid token across types prove parameter validation precedes token lookup (token-state/OTP-channel oracle).
+2. If delta-free, re-check event triggers only: kurs chunk hash (deploy detection), cto CNAME/TXT, and consider whether the three surviving [FINAL] findings (verify conf 71, gate-ordering CORS conf 69, storage oracle conf 62) are ready for report drafting at bugs.olivermaicher.eu.
+
+## Relevant Files
+- (none — no local files; all work is against live endpoints `kurs.onecode.de`, `aygnpacdkgtsfnhgcyjc.supabase.co`, `aygnpacdkgtsfnhgcyjc.storage.supabase.co`, `cto.onecode.de`, plus the KB/inventory in context)
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcurl -sS -o /dev/null -w "login:%{http_code} " --max-time 15 https://kurs.onecode.de/login; curl -sS -o /dev/null -w "root:%{http_code} " --max-time 15 -L https://kurs.onecode.de/ ; curl -sS -o /dev/null -w "jwks:%{http_code} " --max-time 15 -H "Origin: https://evil.example" https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json; echo
+login:200 root:200 jwks:200
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "%{http_code}\n" --max-time 15 https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/object/nonexistent-oracle-test-xyz/x 2>&1
+400
+[0m
+[0m$ [0mfor T in signup invite magiclink recovery email_change email sms phone_change double_factor; do
+  out=$(curl -sS -D- -o /dev/null --max-time 15 -H "Origin: https://evil.example" \
+    "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$T")
+  code=$(printf '%s' "$out" | awk 'NR==1{print $2}')
+  loc=$(printf '%s' "$out" | awk 'tolower($1)=="location:"{print $2}' | tr -d '\r')
+  acac=$(printf '%s' "$out" | awk 'tolower($1)=="access-control-allow-credentials:"{print $2}' | tr -d '\r')
+  acao=$(printf '%s' "$out" | awk 'tolower($1)=="access-control-allow-origin:"{print $2}' | tr -d '\r')
+  echo "$T http=$code acao=$acao acac=$acac loc=$loc"
+  sleep 1.1
+done
+signup http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+invite http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+magiclink http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+recovery http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+email_change http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+email http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+sms http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+phone_change http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+double_factor http=303 acao=https://evil.example acac=true loc=https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "cto_http:%{http_code} cname:" --max-time 15 https://cto.onecode.de/ 2>&1; dig +short CNAME cto.onecode.de | tr '\n' ' '; echo; dig +short TXT _acme-challenge.cto.onecode.de | tr '\n' ' '; echo; dig +short TXT onecode._domainkey.cto.onecode.de | tr '\n' ' '; echo
+curl: (35) OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+cto_http:000 cname:cname.perspective-dns.com.
+[0m
+[0m$ [0mfor T in phone "sms" "" "recovery&redirect_to=https://evil.example"; do
+  out=$(curl -sS -D- -o /dev/null --max-time 15 -H "Origin: https://evil.example" \
+    "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$T")
+  code=$(printf '%s' "$out" | awk 'NR==1{print $2}')
+  loc=$(printf '%s' "$out" | awk 'tolower($1)=="location:"{print $2}' | tr -d '\r')
+  echo "type='$T' http=$code loc=$loc"
+  sleep 1.1
+done
+type='phone' http=303 loc=https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+type='sms' http=303 loc=https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+type='' http=400 loc=
+type='recovery&redirect_to=https://evil.example' http=303 loc=https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+[0m
+[0m$ [0mcurl -sS --max-time 15 https://kurs.onecode.de/login | grep -oE '/_next/static/chunks/[a-z0-9-]+\.js' | sort -u | head -8
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "s3plane:%{http_code}\n" --max-time 15 "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/sign/anything" ; curl -sS -D- -o /dev/null --max-time 15 -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/auth/v1/.well-known/openid-configuration" | grep -icE 'access-control-allow-origin'
+s3plane:403
+0
+[0m
+[0m$ [0mcurl -sS --max-time 20 https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js | sha256sum; curl -sS --max-time 20 https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js | sha256sum
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  -
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  -
+[0m
+[0m$ [0mcurl -sS -D- --max-time 15 "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/sign/anything" | head -30
+HTTP/2 403 
+date: Tue, 06 Oct 2026 06:39:59 GMT
+content-type: text/plain
+content-length: 213
+cf-ray: a462ac0d5ae729b2-IAD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+content-security-policy: default-src 'none'; sandbox
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a10ff0-c464-7e7b-abfb-0bd262c9f21d
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=rtMZAW7j3AOJ46gPe_NhMs.Q3nVQrpKkt.PxFxS.lpY-1791268799.5746408-1.0.1.1-Hba8v8a9RDbYLyr0lKOQFTja_wtVp4fuXsHaaWCRu0BJVtqNt0UtWnofelu1obqNDsd6Ufe5A8_ay7gejbAhzYAXRCrDTHUuLhFflyrGNW3KHM4.YB_3TlsW1Vx16mDK; HttpOnly; SameSite=None; Secure; Path=/; Domain=storage.supabase.co; Expires=Tue, 06 Oct 2026 07:09:59 GMT
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource>sign/anything</Resource><Code>AccessDenied</Code><Message>Missing signature</Message></Error>
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mmkdir -p /tmp/oc && for c in 0-mbmp1iqb6hj 1a4tqdnsy9k1l 1ymt1shyhmu-4 2i51e627rllld; do curl -sS --max-time 25 -o /tmp/oc/$c.js "https://kurs.onecode.de/_next/static/chunks/$c.js"; done; ls -la /tmp/oc failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+[0m$ [0mout=$(curl -sS -D- --max-time 15 -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&sb=evilpayload123"); printf '%s' "$out" | head -5; echo "---BODY---"; printf '%s' "$out" | sed -n '/^\r*$/,$p' | tail -n +2 | head -5
+HTTP/2 400 
+date: Tue, 06 Oct 2026 06:40:42 GMT
+content-type: application/json
+content-length: 89
+cf-ray: a462ad1acdb83210-IAD
+---BODY---
+{"code":400,"error_code":"validation_failed","msg":"Verify requires a verification type"}
+[0m

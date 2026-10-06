@@ -1358,3 +1358,5 @@ www.onecode.de
 - CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
 - CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
 - CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-06 06:40:53 UTC
