@@ -36622,3 +36622,406 @@ Ran the two queued probes plus a bounded follow-up sweep. Results:
 **[LEARN]** Absence of a second `authenticated` principal is now structural, not incidental: auth is Bearer-only (no cookie session anywhere in the stack), so no browser-attached credential exists for a reflected-`ACAC` origin to steal. CORS reflection on this project cannot escalate to session exfil regardless of route count.
 
 **[RISK]** No new high-confidence finding. Conf-69 CORS lead downgrades to informational (misconfiguration with no victim data path); residual actionable lead remains the cto.onecode.de takeover (HUMAN_ONLY) and the parked post-auth BOLA (AUTH_HELPED). Knowledge base updated with 4 entries in `knowledge/index.md`.
+===== ANALYST bigpickle 2026-10-06 23:13:00 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor t in signup invite magiclink recovery email_change email sms phone_change double_factor; do echo "=== type=$t ==="; curl -sS -D- -o- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=$t&token=x&redirect_to=https://evil.example/steal" 2>&1 | head -30; sleep 1; done
+=== type=signup ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:25 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a46853ef187c8189-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=cC9YR87ftQppC_Agh3Yb5MSTyoV68WEFtv2Kcx7cvqs-1791328104.815201-1.0.1.1-4paS02P.yePzSXULr8o01pARporni0UTpong8RFut7_9ljp0j.cRpyV1AUsZ4JdTCBvLgF8fZl4Oxfz63C8_HSF4ga2ZNchoep97lZPudJiytUH2Eol.EuTJdIi_6Dnf; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:25 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-b236-79ab-8882-106d2544a996
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 148
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== type=invite ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:26 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a46853f9c82abf9e-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=dTMk_8.BHm1LOS15NunbLziKt_OrBFtLgQC.5bEFp2k-1791328106.5263267-1.0.1.1-mec_Qf.FXKykjus7fn28YALDR0wyuh0zmvwLRgQobS0iu382HnxPxXTM39QynmZX5WaXt9QDdij0brqSkJpdX6B_nycTMqb7Tn8hnGiALhO00Nsg.8aTrJmxpRYQtLga; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:26 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-b83b-7802-ae09-3a3baea33803
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 4
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== type=magiclink ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:28 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a4685401f83b2ad8-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=bEe6B40cNmPncaaUNYGRG4T39lWrohQIgqnNCm_hcBs-1791328107.8323786-1.0.1.1-nCzACF4Vdd7fWIlMp8eY4C.SlOTvqqEToS1jddJyiCAIdjwPSp.ufJ0OGtfCK66kwBjqPLzqEDC.WN_rr_NRayWZEeeyR_3ZquiDvTbiaJ3X2IqO7Oz5ylpQSG6z4aVR; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:28 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-bd5b-7c91-91dc-5f502e5bbd95
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 2
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== type=recovery ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:29 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a4685409f98c2198-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=eSF23zC4dBv2kuqpwoEF59OOhWa5FgwX9sB3_8Knodo-1791328109.1143665-1.0.1.1-MxvOGfDzkWlFlnjtf.kOPCsYo9F.aKDGiXD6ro3GEHqLKTZMHDfnoHX9qluYCTjRhgeycSIw54MdvNWE5o5FN9Z8yfwUWzbaJytwZCLBR2k1F1M.YhWRi_q9Xk8DbvNa; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:29 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-c266-7cbd-834f-17ebdea71e87
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 4
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== type=email_change ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:30 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a4685412481ac4e6-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=P5.f7JZhSe_v1BApBhOTM0yjH0fN2FeYZW20sZgdD48-1791328110.4483416-1.0.1.1-uRS.W6UpyPKBGJ8oS6ev7rx7sgHsLqVJu3Czm_HqsXxe0WxrVldnq100s_D2DkC3_tiUaIwe6ALPy3YqK4KoYuCN63z5opOTdot.cD.dLQaLGv7hRfmEiaPJhAgXYjZ3; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:30 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-c78f-7eb1-86b5-4a8d5dbf1752
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 2
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== type=email ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:31 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a468541a1d6c7a17-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=EUhGvUBBH9no.0x0BzyfnQsFo6S1FreIunz_ikJX0ts-1791328111.7006824-1.0.1.1-_PvppAByBlRIZsVTrei9GffeY7i2tNbN0hQf4ZsatlmuD765vMWHV06wvQjMwMLN8ji7PWAZiztel.TLRGmaWjFxy37CwUvbKJthwkYPK5Z9u6VlN93IFgKfY9cT564H; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:31 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-cc7b-7066-a29a-bf7f947a74a5
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 1
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== type=sms ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:33 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+cf-ray: a4685422184ebf9e-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=rpRBiqhaS8IuF0e8z0bq9o0lK0bYybTobjkURjDxOz4-1791328112.9736698-1.0.1.1-TwdIHgPZ9IFN_xWYDOos2sBW4QYBcrxKWO_.D73.a20RQzGmOL09tTn2Gi89tVLgtUwf63fMPABRo7s5yopuGHZ2VH3XVQVN8Y_u79A.tLJVfO90oaMosWS6_GIJk7L9; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:33 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-d179-7ce4-92b5-279e36c2ebb1
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 4
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+=== type=phone_change ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:34 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+cf-ray: a468542a1d7e8189-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=65nlonzYYR1LudJWzGnd96fzh89sHQcqF6Hies.q0_o-1791328114.2582936-1.0.1.1-KB_IWIfUL0gf2dKfjDfihX36HJN7zH8a9EQybYjufDaEX47SCI4hs3upWV.Y.LHp8ntKXV3eZte9e1DM2zpG1l0p5Gg2U5Iu_z9bDSozZMjPYz5DQ3DSMVdm5L2tSxhL; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:34 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-d667-72cf-9b7b-5574a21ff50c
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 1
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+=== type=double_factor ===
+HTTP/2 303 
+date: Tue, 06 Oct 2026 23:08:35 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+cf-ray: a46854320c00f71c-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=LbRAHrEDpOTwSI1NFQMHKS1Zzr7b_5jOsir9XkTJ2JI-1791328115.526268-1.0.1.1-izJ6fPElD4tS2P0_VFbzHjeAUoPp9r30WFEGLhRYYYF1QwWYZsIA2htHjLtfbFHus3wUTqKosXVUenKcHVdItxNLI1iSVyOci04jy6oIYGH4mJTv520kHytrAqODVeAh; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:38:35 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11379-db6b-787c-bcc4-4713a3e9d224
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 1
+alt-svc: h3=":443"; ma=86400
+
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+[0m
+## Objective
+- Act as senior bug bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu), running a 7-step hypothesis-driven analysis cycle on in-scope assets (`*.onecode.de`, `kurs.onecode.de`) to produce structured [HYP]/[FINAL]/[NEXT]/[LEARN]/[RISK] blocks without inventing vulnerabilities.
+
+## Important Details
+- Scope: ONLY `*.onecode.de`, `kurs.oneode.de` (as listed), plus company infra per scope.yml; report channel bugs.olivermaicher.eu.
+- Testability tiers: PASSIVE (GET/HEAD/OPTIONS, ≤1 rps), AUTH_HELPED (needs invited accounts), HUMAN_ONLY (owner action).
+- Rejected classes list is extensive (DoS, username enumeration, rate-limit, TLS best practice, OPTIONS/TRACE, robots.txt, mail config, etc.) — must not emit these.
+- Key facts:
+  - Supabase project `aygnpacdkgtsfnhgcyjc`; publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the catalogued `870cf518…` was a newline-artifact; PoCs must cite `43ccb834…`).
+  - Project signs with **ES256 asymmetric** (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); all HS256/alg-none/algorithm-confusion/JWK-injection attempts rejected (38 live probes, zero authenticated).
+  - GoTrue CORS model = three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect Origin + `ACAC: true` unconditionally; (B) `/auth/v1/*` resource paths reflect + ACAC only with apikey present, else `ACAO: *` no ACAC; (C) fallthrough → `ACAO: *` + 9-method list, no ACAC. Preflight NEVER reflects. Pre-gate set = exactly 7 (6 prefix-mounted Kong routes + exactly-matched `/verify`).
+  - Storage: 10 route classes return byte-identical `400 {"code":"NoSuchBucket"}` (route-table-complete); 81 candidate names excluded; bucket name unrecoverable from 13 pre-auth chunks. S3 plane (`aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`) enforces SigV4 → 403 Missing signature, no oracle.
+  - `kurs.onecode.de`: no deploy since 2026-09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (64-hex only — a 66-char variant exists in older entries, do not use); `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`.
+  - Pre-auth surface frozen: `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` at 200; everything else 307→/login. `HashSessionHandoff` (module 34891) mounted on `/login` RSC row 18.
+  - `cto.onecode.de`: CNAME → `cname.perspective-dns.com` day-58+, HTTP 409/1001, zero TXT; conf 58, HUMAN_ONLY.
+  - PostgREST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows).
+  - `/auth/v1/settings`: `saml_private_key_next_configured=true` while `saml_enabled=false`; `disable_signup=true`; `external.anonymous_users:false`; email-only.
+  - `/auth/v1/verify` = 7th pre-gate route (keyless); open-redirect closed across 15 off-origin shapes; residual = token-state oracle.
+  - Methodology discipline: always include a counter-example/control path when making scope claims; re-derive hashes live with 64-hex assertion; state whether a model survives or dies when contradicted.
+- Report risk: program risk ~49-70 (recent entries: 49 unchanged, one line says 70).
+
+## Work State
+### Completed
+- Pre-auth surface of `kurs.onecode.de` exhaustively characterized (4 pages, 13 chunks, gate bypass classes all negative: CVE-2025-29927, path-normalization, header desync, forged cookies, RSC negotiation, XSS reflection).
+- GoTrue CORS finding bounded and mechanism identified (gate ordering: apikey gate before routing; Kong OAuth/OpenID routes matched pre-gate).
+- JWT algorithm confusion closed comprehensively (38 probes).
+- Storage oracle route-table-complete (10 GET classes); S3 plane characterized (SigV4, no oracle).
+- `/auth/v1/verify` open-redirect closed; pre-gate enumeration closed at 7 names.
+- Ranked finals: [75] S3 plane (PARKED/AUTH_HELPED), [71] verify token-state oracle, [69] CORS gate-ordering, [62] storage bucket oracle; PARKED: BOLA conf 65 (AUTH_HELPED, needs 2 invited accounts), cto takeover conf 58 (HUMAN_ONLY), HashSessionHandoff forced-login (AUTH_HELPED).
+
+### Active
+- Cycle phase `POC`, target `api`; last ranked-hypotheses run 2026-10-06 19:12:08 UTC (model bigpickle).
+- Queued next probe from last cycle: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user"` (validates reflected-origin+ACAC on authenticated endpoint).
+- Another queued NEXT: enumerate `type` surface on `/auth/v1/verify` (types: signup, invite, magiclink, recovery, email_change, email, sms, phone_change, double_factor) with `token=x` + Origin header, ≤1 rps.
+
+### Blocked
+- Post-auth BOLA/RLS (highest value, conf 65) blocked: requires 2 invited test accounts — AUTH_HELPED.
+- `cto.onecode.de` takeover blocked: HUMAN_ONLY (owner claim attempt).
+- S3 plane differential untestable without owner-supplied SigV4 keys.
+
+## Next Move
+1. Execute the queued read-only PROBE: `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user` with `Origin: https://evil.example` + `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, capture `ACAO`/`ACAC`/`vary` on the 401.
+2. Then run the `/auth/v1/verify` type-surface enumeration probe (read-only GETs, ≤1 rps) and emit the 7-step structured output ([DELTA]→[RISK]).
+
+## Relevant Files
+- (none) — all work is live read-only HTTP/DNS probing plus emitted structured blocks; no local files referenced.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mecho "=== /auth/v1/user with apikey + evil Origin (no JWT) ==="; curl -sS -D- -o- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" 2>&1 | head -40; echo; echo "=== same but no Origin (control) ==="; curl -sS -D- -o- -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" 2>&1 | head -40
+=== /auth/v1/user with apikey + evil Origin (no JWT) ===
+HTTP/2 401 
+date: Tue, 06 Oct 2026 23:10:51 GMT
+content-type: application/json
+content-length: 96
+cf-ray: a468578299032198-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1137b-ee50-72ed-b928-60fa3494e5d4
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 105
+x-sb-error-code: no_authorization
+set-cookie: __cf_bm=NtItk5l9V9GITZ6w0o7MbXNkScZzcj4jV7gd35UO5Ic-1791328251.2952971-1.0.1.1-9M2thIQJbceXXdEsFqwpASqan9Fm30E.taoc6MXXfDQnZ5HzDaGYeADyUE7Jnh..aaoIZmDVWBJMEhnK3aHr_flURXB3Rx5D4lOveqHClokvfcvCk0Nn01mFqmRvQIga; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:40:51 GMT
+alt-svc: h3=":443"; ma=86400
+
+{"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+=== same but no Origin (control) ===
+HTTP/2 401 
+date: Tue, 06 Oct 2026 23:10:52 GMT
+content-type: application/json
+content-length: 96
+cf-ray: a46857866d127a17-LAX
+cf-cache-status: DYNAMIC
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1137b-f018-70a3-9e2d-ee857575c093
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 1
+x-sb-error-code: no_authorization
+set-cookie: __cf_bm=5TsrpcqCo.mxkXP8Rw4Rb0CeOivrt7P92zuqQIiFPA8-1791328251.9013314-1.0.1.1-Y6eVSZaKfdixeYgYama2b.fEE9VG24ZAHFMbNIIy4lf492jbssURZh3bJ0M9RsyNfCay.EF_lFblzlowNKPdx7R0jFtieLevSI8sTU57bzmcJPRmmWO7wQYECEtcP1uC; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:40:52 GMT
+alt-svc: h3=":443"; ma=86400
+
+{"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+[0m
+[0m$ [0mecho "=== preflight OPTIONS /auth/v1/user (control for preflight non-reflection) ==="; curl -sS -D- -o- -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: authorization,apikey" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" 2>&1 | head -40
+=== preflight OPTIONS /auth/v1/user (control for preflight non-reflection) ===
+HTTP/2 200 
+date: Tue, 06 Oct 2026 23:10:52 GMT
+content-length: 0
+cf-ray: a468578aff2ff71c-LAX
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+access-control-allow-headers: authorization,apikey
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a1137b-f2fc-71c9-96ac-746b1e27ba45
+x-content-type-options: nosniff
+set-cookie: __cf_bm=76COJqRcuGTOztBRf85nmAExF2mxLIdM5bFbQ2aKAEs-1791328252.6362798-1.0.1.1-x2b2YJXeYcaK4XhlCE2zszgl6tZ4Cjt1jt6kXEihgh3zSifuOz1wK4REKMknPKSDhY6HB1r6TLzTHd5Rx481kpfV.c2gvVInyXhCho.Wu1oDuE38i8orBqt2CrVa5047; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 23:40:52 GMT
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mecho "=== A: no token param ==="; curl -sS -D- -o- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&redirect_to=https://evil.example/steal" 2>&1 | grep -Ei "^(HTTP|location|access-control-allow-origin|access-control-allow-credentials)"; sleep 1; echo; echo "=== B: empty token ==="; curl -sS -D- -o- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=" 2>&1 | grep -Ei "^(HTTP|location|access-control-allow-origin|access-control-allow-credentials)"; sleep 1; echo; echo "=== C: 64-hex garbage token ==="; curl -sS -D- -o- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=0000000000000000000000000000000000000000000000000000000000000000" 2>&1 | grep -Ei "^(HTTP|location|access-control-allow-origin|access-control-allow-credentials)"; sleep 1; echo; echo "=== D: well-formed JWT garbage ==="; curl -sS -D- -o- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjRmNTlkNDZmLWMzZTYtNDdjNy1hNzE3LWZhYmYwMTY2NTBjOSJ9.eyJzdWIiOiJmYWtlLXVzZXIiLCJleHAiOjk5OTk5OTk5OTl9.ZmFrZQ" 2>&1 | grep -Ei "^(HTTP|location|access-control-allow-origin|access-control-allow-credentials)"
+=== A: no token param ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+
+=== B: empty token ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+
+=== C: 64-hex garbage token ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+
+=== D: well-formed JWT garbage ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+[0m
+[0m$ [0mecho "=== 400 body: missing token ==="; curl -sS -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup" 2>&1; echo; sleep 1; echo "=== 400 body: empty token ==="; curl -sS -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=" 2>&1; echo; sleep 1; echo "=== control: garbage token body ==="; curl -sS -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=0000000000000000000000000000000000000000000000000000000000000000" -o /dev/null -w "%{http_code}\n" 2>&1
+=== 400 body: missing token ===
+{"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+=== 400 body: empty token ===
+{"code":400,"error_code":"validation_failed","msg":"Verify requires a token or a token hash"}
+=== control: garbage token body ===
+303
+[0m
+**[DELTA #1 — queued probe executed] `GET /auth/v1/user`, apikey + evil Origin**
+- With `apikey` present: `401 no_authorization`, `ACAO: https://evil.example` + `ACAC: true`, `vary: Origin` → **Tier B confirmed unchanged** on authenticated resource paths (Origin reflected + credentials allowed once apikey gate passes).
+- Control without Origin → no ACAO header at all.
+- Preflight `OPTIONS` (authorization,apikey requested): `ACAO: *` + 9-method list, **no ACAC, never reflects** → preflight ceiling confirmed.
+- **Bounding consequence:** any *credentialed* cross-origin read is browser-blocked (preflight `ACAO: *` w/o ACAC is invalid for `credentials:include`). Only `credentials:omit` reads succeed, and those carry no cookies (GoTrue auth = Bearer header, no session cookie; the only `supabase.co` cookie is `__cf_bm` bot-mgmt). Exploit payload = evil-JS reading data it already holds the JWT to call directly. **Impact drops; [69] CORS finding recount to conf ~55, LOW.**
+
+**[DELTA #2 — queued probe executed] `/auth/v1/verify` type-surface enumeration (9 types, ≤1 rps)**
+- `signup|invite|magiclink|recovery|email_change|email` → all **identical** `303 otp_expired`; no per-type differential.
+- `sms|phone_change|double_factor` → `303 validation_failed "Invalid email verification type"` (clean separation: email-verify typed vs not).
+- `redirect_to=https://evil.example/steal` **ignored in all shapes** → Location always `kurs.onecode.de` → open-redirect re-closed (15+ shapes now).
+- Token-state oracle: missing/empty token → `400 "Verify requires a token or a token hash"`; any present invalid token (64-hex garbage *or* well-formed but forged ES256 JWT) → `303 otp_expired`. **No valid-token differential observable pre-auth, no identity/state leakage in any branch.**
+- All 303/400s reflect Origin + ACAC (harmless — no sensitive data in fragments/bodies).
+
+**[FINAL]**
+- **[71] verify token-state oracle: DEAD.** Residual signal = token present/absent (title-case parameter validation, rejected class).
+- **[69] CORS gate-ordering: SURVIVED but downgraded** → reflect+ACAC confirmed on authenticated paths; browser exploitability bounded by preflight `ACAO:*`/no-ACAC ceiling → conf ~55, LOW.
+- Ranking now: [75] S3 plane (PARKED/AUTH_HELPED), PARKED BOLA conf 65 (AUTH_HELPED, 2 accounts), cto conf 58 (HUMAN_ONLY), CORS ~55. **Pre-auth surface of kurs.onecode.de/Supabase is now exhaustively closed** — every remaining positive hypothesis is AUTH_HELPED or HUMAN_ONLY.
+
+**[NEXT]**
+1. `curl …GET /auth/v1/verify?type=signup` with a **real** signup link (from an invited-profile email) to test valid-token behaviour — AUTH_HELPED.
+2. BOLA/RLS differential on `/auth/v1/users` (and PostgREST) with two invited accounts — AUTH_HELPED.
+3. `cto.onecode.de` owner-claim — HUMAN_ONLY.
+
+**[LEARN]** The preflight `ACAO:*`/no-ACAC invariant is what actually neutralizes nearly all reflected-origin+ACAC findings on GoTrue; the 6-vs-3 type split shows GoTrue validates against an email-Verify-only type set server-side, and `redirect_to` is only consulted for a *successful* token (not probeable pre-auth).
+
+**[RISK]** Program risk ~49–70 (unchanged; no new findings emitted this cycle).
+
+**[STOP → REQUEST]** All further progress requires the two invited test accounts (BOLA/RLS, S3, valid-token verify). No additional pre-auth probes are queued — further cycling on this surface has ~zero marginal value. Confirm accounts or redirect to a different scope item.

@@ -1,4 +1,4 @@
-## 2026-10-06 19:08:20 UTC [target] (model nemotron3)
+## 2026-10-06 23:08:24 UTC [target] (model nemotron3)
 [NEW] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID oracle confirmed (Missing signature vs InvalidSignature distinguishable); signed URL route /storage/v1/object/sign functional; bucket-existence oracle spans 5 route classes (81 names excluded)
 [NEW] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json + openid-configuration: Pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 but JWKS serves only ES256 key; unconditional Origin reflection with ACAC:true without apikey (falsifies auth-state discriminator model)
 [NEW] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: 7th pre-gate route confirmed keyless; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback); reflection simple-request-only with ACAC:true
