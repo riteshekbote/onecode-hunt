@@ -1,4 +1,4 @@
-## 2026-10-06 06:39:16 UTC [target] (model nemotron3)
+## 2026-10-06 13:41:07 UTC [target] (model nemotron3)
 [PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,9.15,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink,.well-known},8.15,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
 [PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
@@ -25,7 +25,7 @@ testability: PASSIVE
 class: MISCONFIG
 asset: cto.onecode.de
 confidence: 58
-reasoning: CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure (re-confirmed 2026-10-04); hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 55+ days, zero verification TXT records.
+reasoning: CNAME → cname.perspective-dns.com (documented Perspective funnel SaaS custom-domain target); returns HTTP 409 "error code:1001" + TLS handshake failure (re-confirmed 2026-10-04); hostname currently unbound on Perspective platform and plausibly reclaimable by attacker with Perspective account; CNAME stable 58+ days, zero verification TXT records.
 evidence_needed: Attacker creates Perspective account, adds custom domain cto.onecode.de, verifies ownership via CNAME, serves content on cto.onecode.de
 verify_steps: HUMAN: Create Perspective trial account; attempt to bind custom subdomain cto.onecode.de (CNAME already resolves to cname.perspective-dns.com); if successful, attacker controls subdomain
 impact: Subdomain takeover → phishing, brand abuse, session hijacking via shared cookie domain — HIGH
