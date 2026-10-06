@@ -34650,3 +34650,39 @@ Conclusion: the original hypothesis sought a distinct `error_code` across `type`
 ## [RISK] OneCode GmbH: 49/100 — unchanged
 
 Rationale: the only new pre-auth finding is a LOW-severity verification-type configuration disclosure that is already implied by two public documents on the same origin. The BOLA path remains the sole high-value hypothesis and is `AUTH_HELPED`. The takeover path remains `HUMAN_ONLY`. No session issuance, data access, privilege escalation, or ATO chain exists. Risk intentionally not raised: disclosed surface is structural, attacker-inaccessible in effect, and points to a widely adopted Supabase stack rather than a OneCode-specific defect.
+===== ANALYST bigpickle 2026-10-06 00:21:25 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u; K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; B="https://aygnpacdkgtsfnhgcyjc.supabase.co"; for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do printf "== %s\n" "$t"; curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' -H "apikey: $K" "$B/auth/v1/verify?type=$t&token=zz" ; sleep 1; done
+Tue Oct  6 00:19:42 UTC 2026
+== signup
+303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+== invite
+303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+== magiclink
+303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+== recovery
+303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+== email_change
+303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+== email
+303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+== sms
+303 https://kurs.onecode.de/#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+== phone_change
+303 https://kurs.onecode.de/#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+== double_factor
+303 https://kurs.onecode.de/#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+[0m
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; B="https://aygnpacdkgtsfnhgcyjc.supabase.co"; echo "--- token shape variants (type=recovery, GET, redirect stripped)"; for tok in "" "zz" "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" "a.b.c"; do printf "tok=%-10.10s -> " "$tok"; curl -sS -o /dev/null -w '%{http_code} ' -H "apikey: $K" "$B/auth/v1/verify?type=recovery&token=$tok"; curl -sS -D- -o /dev/null -H "apikey: $K" "$B/auth/v1/verify?type=recovery&token=$tok" | grep -i '^location:' | head -1; sleep 1; done; echo "--- token_hash variant"; curl -sS -o /dev/null -w '%{http_code}\n' -D /tmp/h1 -H "apikey: $K" "$B/auth/v1/verify?type=recovery&token_hash=0000000000000000000000000000000000000000000000000000000000000000"; grep -i '^location:' /tmp/h1 | head -1
+--- token shape variants (type=recovery, GET, redirect stripped)
+tok=           -> 400 tok=zz         -> 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+tok=AAAAAAAAAA -> 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+tok=a.b.c      -> 303 location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+--- token_hash variant
+400
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp && curl -sS -o l.html -w 'login %{http_code} %{size_download}\n' https://kurs.onecode.de/login && sha256sum l.html | cut -c1-64 && curl -sS -o m.js -w 'chunk %{http_code} %{size_download}\n' https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js && sha256sum m.js | cut -c1-64; curl -sS -o s.js -w 'sink %{http_code} %{size_download}\n' https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js && sha256sum s.js | cut -c1-64 failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

@@ -1347,3 +1347,14 @@ www.onecode.de
 - CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
 
 ## 2026-10-05 18:40:58 UTC
+
+## 2026-10-06 00:21:25 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID orac
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known` — namespace has no wildcard route; 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return key
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso` — namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) w
+- CHANGED `kurs.onecode.de` — no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED `cto.onecode.de` — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
