@@ -1384,3 +1384,5 @@ www.onecode.de
 - CHANGED kurs.onecode.de: no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
 - CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
 - CHANGED Supabase REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+
+## 2026-10-07 02:31:10 UTC

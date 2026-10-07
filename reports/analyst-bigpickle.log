@@ -37025,3 +37025,195 @@ access-control-allow-credentials: true
 **[RISK]** Program risk ~49–70 (unchanged; no new findings emitted this cycle).
 
 **[STOP → REQUEST]** All further progress requires the two invited test accounts (BOLA/RLS, S3, valid-token verify). No additional pre-auth probes are queued — further cycling on this surface has ~zero marginal value. Confirm accounts or redirect to a different scope item.
+===== ANALYST bigpickle 2026-10-07 02:31:10 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll run the last queued [NEXT] probe plus a fresh state check on the key surfaces.
+[0m$ [0mecho "=== kurs login ===" ; curl -s -D- -o /dev/null --max-time 15 "https://kurs.onecode.de/login" | head -20 ; echo "=== cto ===" ; curl -s -o /dev/null -w "%{http_code}" --max-time 15 "http://cto.onecode.de/" ; echo
+=== kurs login ===
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Wed, 07 Oct 2026 02:28:43 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: k5UsbCyUSVuaHS2rs_GTAg
+x-railway-edge: iad1
+x-hikari-trace: iad1.dh1s
+
+=== cto ===
+409
+[0m
+[0m$ [0mecho "=== verify type sweep ===" ; for t in signup invite magiclink recovery email_change email sms phone_change double_factor; do code=$(curl -s -o /dev/null -w "%{http_code} %{redirect_url}" --max-time 15 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?token=x&type=$t&redirect_to=https://evil.example/steal" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30") ; echo "type=$t -> $code" ; sleep 1 ; done
+=== verify type sweep ===
+type=signup -> 303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+type=invite -> 303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+type=magiclink -> 303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+type=recovery -> 303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+type=email_change -> 303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+type=email -> 303 https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+type=sms -> 303 https://kurs.onecode.de/#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+type=phone_change -> 303 https://kurs.onecode.de/#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+type=double_factor -> 303 https://kurs.onecode.de/#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+[0m
+## Objective
+- Continue structured bug-bounty recon/hunting on OneCode GmbH (scope: `*.onecode.de`, `kurs.onecode.de`), producing analysis via the 8-step pipeline (DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT → LEARN → RISK).
+- Prioritize HIGH-VALUE classes (auth/session, IDOR/BOLA, SSRF→metadata, mass assignment, JWT confusion, OAuth flaws, buslogic, file upload, GraphQL, subdomain takeover); chain where possible.
+
+## Important Details
+- Report channel: `bugs.olivermaicher.eu`. Current state: `{"phase": "POC", "target": "api"}`.
+- Constraints: passive-first, ≤1 rps, GET/HEAD/OPTIONS only for live probes; no auth-bypass or mutating tests on live customer data; sha256 any secret; scanner output requires manual validation.
+- Out-of-scope/REJECTED classes: DoS, descriptive errors/headers only, robots.txt/public files, outdated libraries, OPTIONS/TRACE, CSRF on logout/anon forms, cookie flags on non-sensitive data, self-XSS, rate-limit/bruteforce policy, SSL/TLS best practice, clickjacking w/o exploit, mail config, username/account enumeration, public login panels, etc.
+- Known assets: `kurs.onecode.de` (Railway Next.js/Turbopack, CNAME `ki8dqcf6.up.railway.app`, `railway-hikari`, 307 gate); `cto.onecode.de` (CNAME→`cname.perspective-dns.com`, HTTP 409/1001, TLS handshake-fail); `aygnpacdkgtsfnhgcyjc.supabase.co`; `aygnpacdkgtsfnhgcyjc.storage.supabase.co`; `www`/`mta-sts` (Webflow, static); `mail` (non-web).
+- Supabase project `aygnpacdkgtsfnhgcyjc`; publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the catalogued `870cf518…` was a trailing-newline artifact — cite `43ccb834…`).
+- Auth config: email-only, `disable_signup:true`, `mailer_autoconfirm:false`, `external.anonymous_users:false`, all OAuth false, `passkeys_enabled=false`, `saml_enabled=false` but `saml_private_key_next_configured=true`, `sms_provider=twilio`; SITE_URL = `https://kurs.onecode.de`.
+- Verified hashes (64-hex asserted): main chunk `0-mbmp1iqb6hj.js` 154 581 B = `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` 13 880 B = `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page = `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`.
+- Pre-auth surface on kurs = exactly `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` (200); all `/api/*`, `/v1`, `/admin`, `/dashboard` → 307→`/login`.
+
+## Work State
+### Completed
+- Exhaustive pre-auth characterization of `kurs.onecode.de`; no deploy since 2026-09-19 11:33Z build (chunks byte-identical day-20+); gates re-validated (CVE-2025-29927 x-middleware-subrequest negative, path-norm/header-desync negatives, `_next/image` SSRF negative).
+- Supabase planes mapped: REST monitor formally CLOSED 09-17 (27 probes 503↔401, never 200+rows; `sb_publishable_` format enforced platform-wide, legacy `eyJhbGci…` rejected).
+- JWT algorithm confusion comprehensively closed (38 probes across HS/RS/PS/ES/EdDSA × attacker keys, zero authenticated; embedded JWK header rejected; resolver never trusts attacker key).
+- GoTrue CORS characterized as three tiers keyed on route registration; preflight never reflects; simple-request reflection via apikey header/query; 7 pre-gate routes (6 Kong prefix-mounted + exact-matched `/verify`).
+- `auth/v1/verify` open-redirect closed by measurement (off-origin `redirect_to` discarded, Site URL fallback); per-type allowlist holds (15+ shapes).
+- Storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature, independent SigV4); access-key-ID oracle (400 InvalidSignature vs 403 Missing signature); 10 mounted GET route classes return byte-identical `NoSuchBucket`; 81 candidate bucket names excluded.
+- `cto.onecode.de` takeover assessed: provider confirmed Perspective, CNAME stable day-58+, zero verification TXT — passive probing fully converged.
+- S3-plane HIGH lead self-corrected: downgraded to PARKED (untestable-in-environment without owner SigV4 keys).
+
+### Active
+- [FINAL] Reflected-origin credentialed CORS on GoTrue gateway — conf ~85 (MISCONFIG, PASSIVE); Cookie-less origin caps ceiling LOW-MEDIUM.
+- [FINAL] S3-compatible storage plane with independent SigV4 authz (bypasses RLS) — conf 75 (MISCONFIG, PASSIVE→AUTH_HELPED); ranked #1 in latest RANKED HYPOTHESES.
+- [FINAL] Pre-auth token-state oracle on GoTrue `/auth/v1/verify` — conf 71 (PASSIVE, LOW).
+- [FINAL] Route-registration-ordered CORS/auth gate on GoTrue — conf 69 (PASSIVE, LOW-MEDIUM).
+- [FINAL] Storage pre-auth bucket-existence oracle (bounded) — conf 62 (PASSIVE, LOW).
+- [PARKED] Post-auth BOLA via Supabase RLS gap — conf 65 (AUTH_HELPED, highest-value; needs 2 invited test accounts).
+- [PARKED] `cto.onecode.de` takeover — conf 58 (HUMAN_ONLY).
+- [PARKED] Forced-login via `HashSessionHandoff` (module 34891) fragment sink on `/login` — AUTH_HELPED (requires valid attacker token pair + victim click).
+
+### Blocked
+- Post-auth BOLA (conf 65): requires two invited accounts.
+- `cto.onecode.de` takeover (conf 58): requires owner/HUMAN claim attempt; no passive proof path.
+- Forced-login sink: requires valid attacker token pair (invited) + victim interaction; not passive.
+- S3 plane risk (conf 75): no observable differential without owner-supplied SigV4 keys.
+
+## Next Move
+1. [NEXT] PROBE: enumerate `type` surface on GoTrue verify — read-only GETs with `token=x` and types `{signup,invite,magiclink,recovery,email_change,email,sms,phone_change,double_factor}` incl. `Origin` header to confirm reflection; expect 303 to Site URL with error_code, no off-origin `Location`; ≤1 rps.
+2. [NEXT] PROBE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v` — validate reflected-origin + ACAC on authenticated user endpoint.
+
+## Relevant Files
+- `inventory/onecode.md`: 10-host inventory + passive recon + timeline of probes (only source of discovered assets).
+- `scope.yml`: in-scope assets (`*.onecode.de`, `kurs.onecode.de`).
+- `art/lead_nemotron3.txt`: source of the #1 ranked S3-plane lead (conf 75).
+- `hypotheses-nemotron3.txt`: carries the queued NEXT probe (`/auth/v1/user` CORS validation).
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Verify type surface now fully enumerated (email-only backend confirmed: 6 valid email types, 3 phone types rejected; off-origin `redirect_to` discarded). Now the queued CORS probe.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== storage s3 no-sig ===" ; curl -s -D- -o /dev/null --max-time 15 "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" | grep -iE "^(HTTP|x-amz)"
+echo "=== rest monitor root ===" ; curl -s -o /dev/null -w "%{http_code}" --max-time 15 -H "apikey: $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/" ; echo
+=== storage s3 no-sig ===
+HTTP/2 403 
+=== rest monitor root ===
+401
+[0m
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+echo "=== /auth/v1/user simple GET w/ Origin ===" ; curl -s -D- -o /dev/null --max-time 15 -H "Origin: https://evil.example" -H "apikey: $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" | grep -iE "^(HTTP|access-control|vary)"
+echo "=== /auth/v1/user OPTIONS preflight ===" ; curl -s -D- -o /dev/null --max-time 15 -X OPTIONS -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" -H "Access-Control-Request-Headers: apikey" -H "apikey: $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" | grep -iE "^(HTTP|access-control|vary)"
+sleep 1
+echo "=== /auth/v1/token simple GET w/ Origin (pre-gate?) ===" ; curl -s -D- -o /dev/null --max-time 15 -H "Origin: https://evil.example" -H "apikey: $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token" | grep -iE "^(HTTP|access-control|vary)"
+=== /auth/v1/user simple GET w/ Origin ===
+HTTP/2 401 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+=== /auth/v1/user OPTIONS preflight ===
+HTTP/2 200 
+access-control-allow-origin: *
+access-control-allow-headers: apikey
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+=== /auth/v1/token simple GET w/ Origin (pre-gate?) ===
+HTTP/2 405 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+[0m
+New delta: reflected-origin + `ACAC:true` confirmed on pre-gate `/auth/v1/user` and `/auth/v1/token` (401/405), but preflight returns `ACAO:*` without credentials — consistent with prior characterization and still capped LOW (bearer-token auth, no ambient cookies). Let me spend this cycle on net-new surface discovery rather than re-measuring.
+[0m$ [0mfor h in api app admin staging dev test portal dashboard backend auth sso grafana jenkins gitlab vpn status; do ip=$(getent hosts "$h.onecode.de" 2>/dev/null | awk '{print $1}' | head -1); [ -n "$ip" ] && echo "$h.onecode.de -> $ip" ; done ; echo "done"
+done
+[0m
+[0m$ [0mecho "=== crt.sh onecode.de ===" ; curl -s --max-time 40 "https://crt.sh/?q=%25.onecode.de&output=json" 2>/dev/null | tr ',' '\n' | grep -iE 'name_value|common_name' | sed 's/.*"//; s/".*//' | tr 'A-Z' 'a-z' | sort -u | head -100 ; echo "---exit $?---"
+=== crt.sh onecode.de ===
+
+---exit 0---
+[0m
+[0m$ [0mecho "=== known hosts ===" ; for h in onecode.de kurs.onecode.de cto.onecode.de www.onecode.de mail.onecode.de mta-sts.onecode.de; do echo -n "$h -> "; getent hosts "$h" | awk '{print $1}' | tr '\n' ' '; echo; done
+echo "=== crt.sh reach ===" ; curl -s -o /dev/null -w "crt.sh http=%{http_code} time=%{time_total}\n" --max-time 20 "https://crt.sh/?q=onecode.de"
+echo "=== hackertarget ===" ; curl -s --max-time 25 "https://api.hackertarget.com/hostsearch/?q=onecode.de" 2>/dev/null | head -40 ; echo "exit=$?"
+=== known hosts ===
+onecode.de -> 198.202.211.1 
+kurs.onecode.de -> 69.46.46.42 
+cto.onecode.de -> 2606:4700::6812:249 2606:4700::6812:349 
+www.onecode.de -> 2620:cb:2000::1 
+mail.onecode.de -> 95.130.17.37 
+mta-sts.onecode.de -> 2620:cb:2000::1 
+=== crt.sh reach ===
+crt.sh http=502 time=0.490569
+=== hackertarget ===
+cto.onecode.de,104.18.3.73
+kurs.onecode.de,69.46.46.98
+mail.onecode.de,95.130.17.37
+mta-sts.onecode.de,198.202.211.1
+www.onecode.de,198.202.211.1
+exit=0
+[0m
+## DELTA
+- **Verify type surface CLOSED**: `/auth/v1/verify` accepts email types `{signup, invite, magiclink, recovery, email_change, email}` (303→Site URL, `otp_expired`); rejects phone types `{sms, phone_change, double_factor}` (303, `validation_failed` "Invalid email verification type"). Off-origin `redirect_to=https://evil.example/steal` discarded → Site URL fallback. Confirms email-only backend + per-type allowlist; no cross-type confusion, no open redirect.
+- **CORS reflection re-confirmed on pre-gate routes**: simple GET with `Origin: https://evil.example` on `/auth/v1/user` (401) and `/auth/v1/token` (405) returns `access-control-allow-origin: https://evil.example` + `access-control-allow-credentials: true` + `vary: Origin`. Preflight OPTIONS returns `ACAO: *` with no `ACAC`. Impact stays **LOW** (bearer-token auth; no ambient cookies on `supabase.co`).
+- **No net-new surface**: crt.sh down (502); hackertarget returns only the 5 known hosts; DNS brute of 15 candidate labels = all NXDOMAIN. Host set unchanged (`onecode.de`, `kurs`, `cto`, `www`, `mail`, `mta-sts`).
+- **Storage/REST unchanged**: S3 no-sig 403; REST monitor root 401. No state change vs. prior cycle.
+
+## PRIORITIZE
+1. `[PARKED]` Post-auth BOLA via Supabase RLS gap (conf 65, AUTH_HELPED) — only HIGH-value path; blocked on lab accounts.
+2. `[FINAL]` Reflected-origin credentialed CORS on GoTrue (conf 85) — real but bounded LOW; reportable as INFO/LOW hardening.
+3. `[FINAL]` S3-plane independent SigV4 authz (conf 75) — HIGH ceiling but untestable without owner keys.
+4. `[PARKED]` cto.onecode.de takeover (conf 58, HUMAN_ONLY) — claim attempt only.
+5. `[FINAL]` Token-state oracle / CORS route-gate / storage bucket oracle (conf 62–71) — LOW informational.
+
+## HYPOTHESES
+- `[FINAL]` GoTrue gate reflects arbitrary Origin with credentials on pre-gate routes; no cookie-auth path → LOW.
+- `[FINAL]` S3 storage plane enforces independent SigV4 that bypasses PostgREST RLS → HIGH ceiling, unverified.
+- `[PARKED]` RLS gap enables cross-tenant BOLA once any two authenticated sessions exist.
+- `[PARKED]` Perspective dangling CNAME on `cto.onecode.de` is claimable.
+- `[REFUTED]` `verify` open-redirect / type-confusion.
+- `[REFUTED]` JWT alg-confusion, `/auth/v1/verify` redirect, x-middleware-subrequest, path-norm/header desync.
+
+## SELF-CRITIQUE
+- This cycle was pure re-measurement + failed OSINT (crt.sh 502); zero new attack surface. Continuing passive probes has severely diminishing returns.
+- CORS: tempting to inflate, but without a cookie-based session the reflected-ACAO+ACAC is not exploitable — must not misreport as token theft.
+- S3-plane #3 cannot be validated from environment; asserting exploitability would be speculation, not measurement.
+- Every remaining HIGH path requires an authorization artifact (invited account) or owner action — this is a coverage gap, not a vuln.
+
+## NEXT
+1. **STOP passive probing** on converged surfaces; no further value from re-measuring CORS/verify/storage.
+2. `[ASK]` Request 2 invited test accounts (AUTH_HELPED) to execute the RLS/BOLA hypothesis — the single highest-value unblock. Without it, no new coverage is achievable.
+3. `[HUMAN_ONLY]` Submit Perspective CNAME claim attempt for `cto.onecode.de` (owner action).
+4. `[REPORT]` File the reflected-origin credentialed-CORS as LOW/INFO hardening finding (allowlist origins) if reporting a clean positive is desired.
+5. If accounts denied: declare passive recon **exhausted/converged** and park the engagement.
+
+## LEARNING
+- `kurs`/Supabase stack is hardened: enum, alg-confusion, redirect, desync, middleware-bypass all negative; verify type surface now fully bounded.
+- Platform limit: `supabase.co` gateway reflects Origin + `ACAC:true` on pre-gate routes but token model is bearer-only → CORS is informational, not exploitable. Don't re-open.
+- Net-new host discovery is the only passive lever left and it returned nothing; stop spending cycles there unless a new cert/CT source appears.
+
+## RISK
+- Constraints honored: ≤1 rps, GET/HEAD/OPTIONS only, read-only, no auth-bypass/mutation of live data. No customer data touched.
+- Blast radius: none. All requests were unauthenticated reads against public endpoints.
+- Residual: engagement is converged; highest-value work is blocked on AUTH_HELPED (2 accounts) and HUMAN_ONLY (DNS claim). State remains `{phase: POC, target: api}`; no phase advancement possible without those artifacts.
+
+**Blocked** — I can't advance coverage without either (a) two invited test accounts for the BOLA/RLS test, or (b) authorization to attempt the `cto` claim. Want me to draft the LOW-severity CORS report, or hold?
