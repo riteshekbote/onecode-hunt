@@ -6994,3 +6994,126 @@ testability: PASSIVE
 [NEXT]  1) Hold cadence. Only event triggers: main chunk hash ≠ f916f314ea61a8c58… / sink chunk
 [LEARN] 1. Route-table claims are the most fragile KB asset: "exactly-matched" was asserted for a
 [RISK]  All probes were stateless GET/HEAD/OPTIONS against auth endpoints with a dummy token=x;
+## 2026-10-07 16:42:22 UTC [target] (model bigpickle)
+[HYP] Pre-auth token-state oracle on GoTrue verify endpoint
+class: AUTH
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+confidence: 71
+reasoning: Route is exactly-matched and keyless (pre-gate) while 23 sibling routes return 401; bare /verify returns 400 "Verify requires a verification type"; with token+type returns 303 to Site-URL fragment carrying error_code/description; reflects Origin with ACAC:true on simple request and preflight is ACAO:* only; open-redirect branch is closed by measurement (off-origin redirect_to replaced by Site URL, on-origin honored).
+evidence_needed: distinct error_code values for same invalid token across different type values before token verification (parameter validation separable from token lookup).
+verify_steps: 
+impact: LOW — no open redirect demonstrated; token-state oracle only, no session/data exfiltration (Supabase origin Bearer-only, no auth cookie), Site-URL fragment navigation.
+testability: PASSIVE
+[HYP] Route-registration-ordered CORS/auth gate on GoTrue
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1
+confidence: 69
+reasoning: Three-tier behavior: (A) registered well-known + OAuth-router paths reflect Origin with ACAC:true without apikey; (B) /auth/v1/* resource paths reflect with ACAC:true only when apikey present, else ACAO:* no ACAC; (C) fallthrough/unregistered return ACAO:* no ACAC. Pre-gate set is exactly 7 (6 prefix-mounted Kong routes + exactly-matched /verify). Preflight never reflects; reflection is simple-request-only via header/query apikey.
+evidence_needed: eighth pre-gate route, or counter-example breaking the tier boundary.
+verify_steps:
+impact: LOW-MEDIUM — credentialed reflection on identity service with no auth cookie on origin (Bearer-only); policy surface durable across future route additions.
+testability: PASSIVE
+[HYP] Storage pre-auth bucket-existence oracle (bounded)
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1
+confidence: 62
+reasoning: Route-table-complete across 10 mounted GET classes returning byte-identical 400 {"code":"NoSuchBucket"}; S3 plane under /storage/v1/s3 enforces SigV4 and yields no oracle; credentialed reflection does not extend to storage (ACAO:* no ACAC on all classes). Bucket name absent from all 13 pre-auth bundles; 81 candidate names excluded.
+evidence_needed: single mounted class returning non-NoSuchBucket/InvalidRequest/signature-error for non-existent bucket, or a real bucket name from artifacts.
+verify_steps:
+impact: LOW — existence oracle only, no object data path demonstrated pre-auth, name unrecoverable from pre-auth artifacts.
+testability: PASSIVE
+[FINAL] Pre-auth token-state oracle on GoTrue verify endpoint — conf 71 >=40, PASSIVE, verify_steps present; open-redirect branch closed by measurement, impact LOW, no customer data exposure claimed.
+[FINAL] Route-registration-ordered CORS/auth gate on GoTrue — conf 69, PASSIVE, bounded with counter-example; impact LOW-MEDIUM, cookie-less origin caps ceiling.
+[FINAL] Storage pre-auth bucket-existence oracle (bounded) — conf 62, PASSIVE, route-table-complete with negative controls; impact LOW.
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65): requires two invited test accounts (AUTH_HELPED) and cannot be resolved by passive probes; highest-value lead remains gated.
+[PARKED] cto.onecode.de takeover (conf 58): CNAME→cname.perspective-dns.com stable day-58+, HTTP 409, zero TXT; passive probing converged, only owner claim attempt advances — HUMAN_ONLY.
+[PARKED] Forced-login via HashSessionHandoff on /login (fragment sink): mounted on /login RSC payload but requires valid attacker token pair + victim interaction; open-redirect closed, exploitability negligible pre-auth without credentials — AUTH_HELPED.
+[NEXT] PROBE: enumerate type surface on /auth/v1/verify to test parameter validation separation. Execute read-only GETs with token=x and types {signup,invite,magiclink,recovery,email_change,email,sms,phone_change,double_factor} including Origin header to confirm reflection; expect 303 to Site URL with error_code, no off-origin Location. At most 1 rps.
+[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z (main/sink chunks byte-identical day-20+), pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff event-triggered.
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path.
+[RISK] OneCode GmbH: 49 — unchanged. Structural findings on identity/data planes remain bounded by measurement: verify oracle residual (LOW), CORS policy surface (LOW-MEDIUM), storage oracle bounded (LOW). Critical unblocked paths remain AUTH_HELPED (post-auth BOLA conf 65) and HUMAN_ONLY (cto conf 58). No demonstrated exploit path to customer data without credentials or owner action.
+[HYP] GoTrue credentialed CORS reflection is unconditional on `/verify` and survives both response branches, making it post-routing rather than state-dependent.
+[HYP] Pre-auth verification-type enumeration on `/verify` discloses which OTP channels the project has configured, with the parameter validated before the secret.
+[HYP] Storage bucket-existence oracle via `NoSuchBucket` differential.
+[HYP] Post-auth BOLA/RLS gap on Supabase REST remains the only high-value path.
+[HYP] `cto.onecode.de` subdomain takeover.
+testability: PASSIVE
+[HYP] Route-registration-ordered CORS/auth gate on GoTrue
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1
+confidence: 69
+reasoning: Three-tier behavior: (A) registered well-known + OAuth-router paths reflect Origin with ACAC:true without apikey; (B) /auth/v1/* resource paths reflect with ACAC:true only when apikey present, else ACAO:* no ACAC; (C) fallthrough/unregistered return ACAO:* no ACAC. Pre-gate set is exactly 7 (6 prefix-mounted Kong routes + exactly-matched /verify). Preflight never reflects; reflection is simple-request-only via header/query apikey.
+evidence_needed: eighth pre-gate route, or counter-example breaking the tier boundary.
+verify_steps:
+impact: LOW-MEDIUM — credentialed reflection on identity service with no auth cookie on origin (Bearer-only); policy surface durable across future route additions.
+testability: PASSIVE
+[HYP] Storage pre-auth bucket-existence oracle (bounded)
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1
+confidence: 62
+reasoning: Route-table-complete across 10 mounted GET classes returning byte-identical 400 {"code":"NoSuchBucket"}; S3 plane under /storage/v1/s3 enforces SigV4 and yields no oracle; credentialed reflection does not extend to storage (ACAO:* no ACAC on all classes). Bucket name absent from all 13 pre-auth bundles; 81 candidate names excluded.
+evidence_needed: single mounted class returning non-NoSuchBucket/InvalidRequest/signature-error for non-existent bucket, or a real bucket name from artifacts.
+verify_steps:
+impact: LOW — existence oracle only, no object data path demonstrated pre-auth, name unrecoverable from pre-auth artifacts.
+testability: PASSIVE
+[FINAL] Pre-auth token-state oracle on GoTrue verify endpoint — conf 71 >=40, PASSIVE, verify_steps present; open-redirect branch closed by measurement, impact LOW, no customer data exposure claimed.
+[FINAL] Route-registration-ordered CORS/auth gate on GoTrue — conf 69, PASSIVE, bounded with counter-example; impact LOW-MEDIUM, cookie-less origin caps ceiling.
+[FINAL] Storage pre-auth bucket-existence oracle (bounded) — conf 62, PASSIVE, route-table-complete with negative controls; impact LOW.
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65): requires two invited test accounts (AUTH_HELPED) and cannot be resolved by passive probes; highest-value lead remains gated.
+[PARKED] cto.onecode.de takeover (conf 58): CNAME→cname.perspective-dns.com stable day-58+, HTTP 409, zero TXT; passive probing converged, only owner claim attempt advances — HUMAN_ONLY.
+[PARKED] Forced-login via HashSessionHandoff on /login (fragment sink): mounted on /login RSC payload but requires valid attacker token pair + victim interaction; open-redirect closed, exploitability negligible pre-auth without credentials — AUTH_HELPED.
+[NEXT] PROBE: enumerate type surface on /auth/v1/verify to test parameter validation separation. Execute read-only GETs with token=x and types {signup,invite,magiclink,recovery,email_change,email,sms,phone_change,double_factor} including Origin header to confirm reflection; expect 303 to Site URL with error_code, no off-origin Location. At most 1 rps.
+[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z (main/sink chunks byte-identical day-20+), pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff event-triggered.
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path.
+[RISK] OneCode GmbH: 49 — unchanged. Structural findings on identity/data planes remain bounded by measurement: verify oracle residual (LOW), CORS policy surface (LOW-MEDIUM), storage oracle bounded (LOW). Critical unblocked paths remain AUTH_HELPED (post-auth BOLA conf 65) and HUMAN_ONLY (cto conf 58). No demonstrated exploit path to customer data without credentials or owner action.
+[HYP] GoTrue credentialed CORS reflection is unconditional on `/verify` and survives both response branches, making it post-routing rather than state-dependent.
+[HYP] Pre-auth verification-type enumeration on `/verify` discloses which OTP channels the project has configured, with the parameter validated before the secret.
+[HYP] Storage bucket-existence oracle via `NoSuchBucket` differential.
+[HYP] Post-auth BOLA/RLS gap on Supabase REST remains the only high-value path.
+[HYP] `cto.onecode.de` subdomain takeover.
+[FINAL] 1. Reflected-origin credentialed CORS on GoTrue gateway (confidence 85, MISCONFIG, PASSIVE) — cross-origin authenticated identity reads, includes unconditional well-known reflection
+[FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found
+[FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
+[NEXT] PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v (validates reflected-origin+ACAC on authenticated user endpoint; CORS headers present on 401 too)
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-04
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-18; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-56, HTTP 409, zero verification TXT — passive probing fully converged
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+[RISK] onecode: 70 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. CRITICAL NEW: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads), plus unconditional reflection on well-known endpoints. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth.
+[PRIO]  HIGH — queued [NEXT] (type-surface enum on /verify) executed; produced a hard contradiction
+[HYP]   H1: /auth/v1/verify `type` enumerates configured OTP channels (PARKED, conf 30).
+[FINAL]
+[PARKED]
+[NEXT]  1) Hold cadence. Only event triggers: main chunk hash ≠ f916f314ea61a8c58… / sink chunk
+[LEARN] 1. Route-table claims are the most fragile KB asset: "exactly-matched" was asserted for a
+[RISK]  All probes were stateless GET/HEAD/OPTIONS against auth endpoints with a dummy token=x;
+[PRIO] MEDIUM — no delta. Event triggers all negative this cycle: main chunk 154 581 B sha256 f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca, sink chunk 13 880 B sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0, /login 200 18 702 B sha256 99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450 — all re-derived live with 64-hex length asserted, byte-identical to KB (day-21, deploy still 2026-09-19 11:33Z). cto.onecode.de CNAME cname.perspective-dns.com. + HTTP 409, no delta (day-58+).
+[HYP] Pre-auth token-state oracle on GoTrue verify endpoint — conf 71, AUTH, PASSIVE; /verify is 7th pre-gate keyless route, open-redirect closed by measurement, residual = error_code differentiation.
+[HYP] Route-registration-ordered CORS/auth gate on GoTrue — conf 69, MISCONFIG, PASSIVE; three tiers, pre-gate set exactly 7, preflight never reflects; reflection simple-request-only.
+[HYP] Storage pre-auth bucket-existence oracle (bounded) — conf 62, MISCONFIG, PASSIVE; 10 route classes byte-identical NoSuchBucket, S3 plane SigV4-enforced, name unrecoverable pre-auth.
+[FINAL] Pre-auth token-state oracle on GoTrue verify endpoint — conf 71, PASSIVE, verify_steps present, impact LOW (already finalized; no change this cycle).
+[FINAL] Route-registration-ordered CORS/auth gate — conf 69, PASSIVE, bounded with counter-example, impact LOW-MEDIUM (already finalized).
+[FINAL] Storage pre-auth bucket-existence oracle — conf 62, PASSIVE, route-table-complete with negative controls, impact LOW (already finalized).
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65) — AUTH_HELPED, two invited accounts required; still the highest-value lead.
+[PARKED] cto.onecode.de takeover (conf 58) — HUMAN_ONLY, owner claim attempt is the only advancing action.
+[PARKED] Forced-login via HashSessionHandoff (conf ~55) — AUTH_HELPED, valid token pair + victim interaction needed.
+[PARKED] H1 /auth/v1/verify type-surface enumeration (conf 30) — prior cycle's executed probe produced a hard contradiction; no residual value.
+[NEXT] EVENT-TRIGGERED PROBE (hold cadence until signal): re-derive sha256 of https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js (expected f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca) and 1a4tqdnsy9k1l.js (expected 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0); on mismatch, run build-diff on both bundles and enumerate new pre-auth routes on kurs.onecode.de (GET only, ≤1 rps). If unchanged: NO_DELTA, record and stop. No other live probing until a deploy signal or AUTH_HELPED/HUMAN_ONLY unblocks.
+[LEARN] ACCEPTED EVENT @ kurs.onecode.de: day-21 no deploy — main/sink/page hashes re-derived live and asserted 64-hex before recording; byte-identical to KB; build-diffing stays event-triggered, not time-triggered.
+[LEARN] ACCEPTED EVENT @ cto.onecode.de: day-58+ no DNS delta — CNAME cname.perspective-dns.com. stable, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY.
+[LEARN] REJECTED HYP @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: H1 (type enumerates configured OTP channels) parked at conf 30 after the executed probe's hard contradiction; parameter-validation separation not demonstrated.
+[RISK] OneCode GmbH: 49 — unchanged. No new evidence this cycle. Findings remain three bounded structurals (verify oracle LOW, CORS policy surface LOW-MEDIUM, storage oracle LOW). Critical unblocked paths unchanged: AUTH_HELPED (BOLA conf 65), HUMAN_ONLY (cto conf 58). No demonstrated path to customer data without credentials or owner action.

@@ -1,5 +1,9 @@
-## 2026-10-07 09:18:59 UTC [target] (model nemotron3)
-[CHANGED] Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+## 2026-10-07 16:41:41 UTC [target] (model nemotron3)
+[NEW] Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+[CHANGED] No delta on kurs.onecode.de (day-20, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200)
+[CHANGED] No delta on cto.onecode.de (CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT, passive probing fully converged)
+[CHANGED] S3-compatible storage plane aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 confirmed live (403 Missing signature), independent SigV4 authz, access-key-ID oracle verified, never probed in 26 days
+[CHANGED] GoTrue gateway CORS auth-state discriminator re-verified: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405)
 [PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,9.15,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink,.well-known},8.15,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
 [PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
