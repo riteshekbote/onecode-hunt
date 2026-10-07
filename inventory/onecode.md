@@ -1386,3 +1386,6 @@ www.onecode.de
 - CHANGED Supabase REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
 
 ## 2026-10-07 02:31:10 UTC
+
+## 2026-10-07 09:31:59 UTC
+- CHANGED Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)

@@ -6986,3 +6986,11 @@ testability: PASSIVE
 ## 2026-10-06 19:11:59 UTC [target] (model bigpickle)
 ## 2026-10-06 23:12:47 UTC [target] (model bigpickle)
 ## 2026-10-07 02:31:01 UTC [target] (model bigpickle)
+## 2026-10-07 09:31:47 UTC [target] (model bigpickle)
+[PRIO]  HIGH — queued [NEXT] (type-surface enum on /verify) executed; produced a hard contradiction
+[HYP]   H1: /auth/v1/verify `type` enumerates configured OTP channels (PARKED, conf 30).
+[FINAL]
+[PARKED]
+[NEXT]  1) Hold cadence. Only event triggers: main chunk hash ≠ f916f314ea61a8c58… / sink chunk
+[LEARN] 1. Route-table claims are the most fragile KB asset: "exactly-matched" was asserted for a
+[RISK]  All probes were stateless GET/HEAD/OPTIONS against auth endpoints with a dummy token=x;
