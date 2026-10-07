@@ -7117,3 +7117,62 @@ testability: PASSIVE
 [LEARN] ACCEPTED EVENT @ cto.onecode.de: day-58+ no DNS delta — CNAME cname.perspective-dns.com. stable, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY.
 [LEARN] REJECTED HYP @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: H1 (type enumerates configured OTP channels) parked at conf 30 after the executed probe's hard contradiction; parameter-validation separation not demonstrated.
 [RISK] OneCode GmbH: 49 — unchanged. No new evidence this cycle. Findings remain three bounded structurals (verify oracle LOW, CORS policy surface LOW-MEDIUM, storage oracle LOW). Critical unblocked paths unchanged: AUTH_HELPED (BOLA conf 65), HUMAN_ONLY (cto conf 58). No demonstrated path to customer data without credentials or owner action.
+## 2026-10-07 21:43:00 UTC [target] (model bigpickle)
+[NEW] None
+[CHANGED] None
+[PRIO] kurs.onecode.de, 9.2, axis=a:8 b:9 t:10 g:10 c:9 f:8
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co, 8.8, axis=a:7 b:9 t:10 g:9 c:10 f:8
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co, 7.5, axis=a:4 b:8 t:9 g:7 c:10 f:8
+[PRIO] cto.onecode.de, 4.2, axis=a:1 b:2 t:3 g:2 c:9 f:9
+[HYP] Forced-login via URL-fragment session sink (HashSessionHandoff)
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 70
+reasoning: The app mounts HashSessionHandoff on /login RSC payload (row 18) which parses window.location.hash for access_token+refresh_token and calls supabase.auth.setSession() with no state/nonce/PKCE binding; post-setSession redirects are fixed map {invite:/einladung,recovery:/passwort-neu} defaulting to /.
+evidence_needed: Confirmation that the fragment is processed without CSRF/state and that a crafted token pair forces session establishment on victim browser; sink chunk present and mounted.
+verify_steps: 
+impact: LOW-MEDIUM severity; attacker who controls valid Supabase session tokens can force a logged-in session on victim browser via crafted fragment URL (forced-login/CWE-384). Exploitability negligible pre-auth without credentials.
+testability: PASSIVE
+[HYP] Pre-auth token-state oracle on GoTrue verify
+class: AUTH
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+confidence: 71
+reasoning: verify is a 7th pre-gate keyless route (exactly matched) that returns structured error codes depending on token/state; open-redirect branch is closed by measurement (off-origin redirect_to discarded, Site URL fallback). Reflection is simple-request-only with ACAC:true.
+evidence_needed: Consistent, distinguishable response bodies/status across token states (valid/invalid/expired/type variations) without credentials.
+verify_steps:
+impact: LOW; information disclosure via token-state oracle only; no account/data exposure demonstrated.
+testability: PASSIVE
+[HYP] Post-auth BOLA via Supabase RLS gap
+class: IDOR
+asset: kurs.onecode.de (Supabase REST /rest/v1)
+confidence: 65
+reasoning: Post-auth surface exists (registered routers + course semantics) but anon REST blocked and schema-cache unstable; UUID PKs reduce guessability. Missing RLS filter enabling cross-tenant SELECT is the only plausible BOLA vector.
+evidence_needed: Cross-tenant data read between two distinct invited accounts via authenticated REST/GraphQL calls to tables with insufficient row-level security.
+verify_steps: (requires credentials) Not executable as passive probe — two invited test accounts needed.
+impact: HIGH severity; potential cross-tenant data access if RLS misconfigured.
+testability: AUTH_HELPED
+[FINAL] Forced-login via URL-fragment session sink (HashSessionHandoff)
+[FINAL] Pre-auth token-state oracle on GoTrue verify
+[PARKED] Post-auth BOLA via Supabase RLS gap (conf 65): requires two invited test accounts (AUTH_HELPED); cannot be resolved by passive probes alone
+[PARKED] cto.onecode.de takeover (conf 58): CNAME→cname.perspective-dns.com stable day-58+, HTTP 409, zero TXT; passive probing converged, only owner claim attempt advances — HUMAN_ONLY
+[PARKED] S3-compatible storage plane aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 (conf 75 in prior): independent SigV4 authz bypasses RLS; oracle-free pre-auth, requires owner-supplied SigV4 keys to demonstrate data access — testability AUTH_HELPED/HUMAN_ONLY, no path to TRUE/FALSE without keys
+[NEXT] PROBE: 
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de/login: HashSessionHandoff mounted on /login parses URL fragment with no state/nonce/PKCE binding; sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0 present and mounted (PASSIVE validation)
+[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: 7th pre-gate keyless route with token-state oracle (conf 71); open-redirect closed, reflection simple-request-only with ACAC:true
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z; main/sink/page hashes byte-identical day-21; pre-auth surface frozen {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff stays event-triggered
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero TXT; passive probing fully converged, HUMAN_ONLY
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
+[RISK] OneCode GmbH: 49 — structural findings bounded: verify oracle LOW, storage oracle bounded LOW, sink present but requires AUTH_HELPED exploit path. Critical unblocked: post-auth BOLA (conf 65, AUTH_HELPED), cto takeover (conf 58, HUMAN_ONLY). No demonstrated customer data access without credentials or owner action.
+[NEW] None
+[CHANGED] None
+[PRIO] kurs.onecode.de/login (HashSessionHandoff) 9.2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify 8.0
+[PRIO] BOLA (AUTH_HELPED) 7.5
+[PRIO] cto.onecode.de (HUMAN_ONLY) 4.2
+[PARKED] BOLA via Supabase RLS (conf 65, AUTH_HELPED) — needs two invited test accounts.
+[PARKED] cto.onecode.de (conf 58, HUMAN_ONLY) — Perspective CNAME, 409/1001, zero TXT; passive exhausted.
+[PARKED] S3 plane (SigV4) — requires owner-supplied credentials.
+[LEARN] Chunks byte-identical; deploy signal absent since 2026-09-19T11:33Z. Build-diff remains event-triggered only.
+[LEARN] verify route confirms allowlist + token-state oracle (low severity). No change.
+[LEARN] /login HTML fetched; sink mount evidence consistent with prior RSC inspection.
+[RISK] 49 (stable). No customer data exposure demonstrated without credentials or owner action. Sink requires valid tokens + victim interaction (exploitability negligible pre-auth). verify oracle information-only.

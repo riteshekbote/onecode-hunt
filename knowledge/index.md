@@ -1090,3 +1090,13 @@
 - 2026-10-07 ACCEPTED EVENT @ kurs.onecode.de: day-21 no deploy — main/sink/page hashes re-derived live and asserted 64-hex before recording; byte-identical to KB; build-diffing stays event-triggered, not time-triggered.
 - 2026-10-07 ACCEPTED EVENT @ cto.onecode.de: day-58+ no DNS delta — CNAME cname.perspective-dns.com. stable, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY.
 - 2026-10-07 REJECTED HYP @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: H1 (type enumerates configured OTP channels) parked at conf 30 after the executed probe's hard contradiction; parameter-validation separation not demonstrated.
+- 2026-10-07 ACCEPTED AUTH @ kurs.onecode.de/login: HashSessionHandoff mounted on /login parses URL fragment with no state/nonce/PKCE binding; sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0 present and mounted (PASSIVE validation)
+- 2026-10-07 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: 7th pre-gate keyless route with token-state oracle (conf 71); open-redirect closed, reflection simple-request-only with ACAC:true
+- 2026-10-07 REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z; main/sink/page hashes byte-identical day-21; pre-auth surface frozen {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff stays event-triggered
+- 2026-10-07 REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero TXT; passive probing fully converged, HUMAN_ONLY
+- 2026-10-07 Chunks byte-identical; deploy signal absent since 2026-09-19T11:33Z. Build-diff remains event-triggered only.
+- 2026-10-07 verify route confirms allowlist + token-state oracle (low severity). No change.
+- 2026-10-07 /login HTML fetched; sink mount evidence consistent with prior RSC inspection.
+- 2026-10-07 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- 2026-10-07 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
+- 2026-10-07 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-07
