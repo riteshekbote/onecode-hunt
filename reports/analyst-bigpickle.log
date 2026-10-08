@@ -38497,3 +38497,174 @@ Probes run this cycle (all read-only, ≤1 rps):
 - **S3 plane (conf 75)** — needs owner-supplied SigV4 keys
 
 **[NEXT] HUMAN:** provision two invited kurs.onecode.de test accounts (unblocks BOLA — the only remaining path to a CRITICAL-class finding), and attempt the Perspective account claim for cto. No productive automated probe remains; I'll continue ≤1/day monitoring of REST and cto.
+===== ANALYST bigpickle 2026-10-08 07:41:27 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/login.html -D- -w "\nSIZE:%{size_download}\n" --max-time 15 https://kurs.onecode.de/login | head -30; echo "---"; sha256sum /tmp/opencode/login.html; echo "---IMPRESSUM---"; curl -sS -o /dev/null -w "%{http_code}" --max-time 10 https://kurs.onecode.de/impressum; echo; curl -sS -o /dev/null -w "%{http_code}" --max-time 10 https://kurs.onecode.de/agb; echo; curl -sS -o /dev/null -w "%{http_code}" --max-time 10 https://kurs.onecode.de/verseidung
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Thu, 08 Oct 2026 07:38:21 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: 1Uv6MiQERIyA-30M7fhULg
+x-railway-edge: lax1
+x-hikari-trace: lax1.z1hw
+
+
+SIZE:18702
+---
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/opencode/login.html
+---IMPRESSUM---
+307
+307
+307
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME @1.1.1.1; dig +short cto.onecode.de TXT @1.1.1.1; curl -sS -o /dev/null -w "%{http_code}" --max-time 10 http://cto.onecode.de/ --resolve cto.onecode.de:80:104.18.2.73; echo
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+409
+[0m
+## Objective
+- Act as senior bug bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu), running the mandated 8-step analysis loop over a passive-recon knowledge base on scoped assets (`*.onecode.de`, `kurs.onecode.de` + company infra) to surface, prioritize, and validate high-value findings.
+
+## Important Details
+- Scope: ONLY `*.onecode.de`, `kurs.onecode.de`, and OneCode GmbH-owned infrastructure/web/apps/APIs/cloud/domains. Report channel: bugs.olivermaicher.eu.
+- Phases: `phase=POC`, `target=api`.
+- Probing rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only for live probes; no mutating/auth-bypass tests against live customer data; sha256 any secret; facts vs hypotheses strictly separated; any scanner output needs manual validation.
+- Output format: exact 8 steps — [NEW]/[CHANGED]/NO_DELTA → [PRIO] → 3× [HYP] (strict one-field-per-line schema) → [PARKED]/[FINAL] → exactly one [NEXT] → [LEARN] → [RISK].
+- REJECTED classes (exhaustive list in prompt): DoS, lockout, descriptive errors/headers only, robots.txt, outdated libs, OPTIONS/TRACE, logout CSRF, cookie flags, self-XSS, scanner-no-POC, physical, social engineering, username enumeration, brute-force/rate-limit, SSL/TLS best practice, clickjacking w/o exploit, mail config, known-vuln libs w/o program exploit, password/recovery policy, autocomplete, public login panels, lack of email verification, session control during credential change, exposure of customer/employee/financial/auth data during testing.
+- Key assets/state:
+  - `kurs.onecode.de` — Next.js/Turbopack App Router on Railway (CNAME `ki8dqcf6.up.railway.app`); pre-auth surface frozen at `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` 200, all else 307→/login; no deploy since 2026-09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` = 154581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18702 B); build-diffing is event-triggered only.
+  - Supabase project `aygnpacdkgtsfnhgcyjc` (publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, sha256 of key bytes `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` — the catalogued `870cf518…` digest is a trailing-newline artifact; PoCs must cite `43ccb834…`). JWT alg = ES256 only (JWKS `kid 4f59d46f-c3e6-47c7-a717-fabf016650c9`); platform enforces `sb_publishable_` key format; REST monitor CLOSED 09-17 (27 probes, 503↔401, never 200+rows).
+  - `cto.onecode.de` — CNAME→`cname.perspective-dns.com` stable day-59+, HTTP 409/1001, zero verification TXT; conf 58, HUMAN_ONLY.
+  - `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — SigV4 plane, 403 Missing signature, oracle-free pre-auth; requires owner keys (AUTH_HELPED/HUMAN_ONLY).
+- Corrected findings (post retractions): GoTrue CORS three-tier model keyed on route registration/gate ordering — (A) 7 pre-gate routes (`.well-known/jwks.json`, `.well-known/openid-configuration`, `.well-known/oauth-authorization-server`, `oauth/authorize`, `oauth/token`, `oauth/userinfo`, `/auth/v1/verify`) reflect Origin with `ACAC:true` keyless, prefix-mounted unbounded-depth except `/verify` (exact-match); (B) `/auth/v1/*` resource paths reflect+ACAC only with apikey (header or `?apikey=` query), else wildcard no ACAC; (C) fallthrough → `401 No API key found` + `ACAO:*` 9-method list. Preflight NEVER reflects (uniform `ACAO:*`). Cache amplifier falsified (`vary: Origin` present where relevant, `cf-cache-status: DYNAMIC`).
+- PARKED leads: post-auth BOLA via RLS gap (conf 65, AUTH_HELPED — needs 2 invited accounts); cto takeover (conf 58, HUMAN_ONLY); S3 plane (conf 75 prior, HUMAN/AUTH_HELPED — no keys).
+- Rejected exhaustively: JWT alg/key confusion (38 probes + embedded JWK), open redirect (15 shapes, 5 verify types, 2 encodings, host headers), XSS on pre-auth pages, CVE-2025-29927, `_next/image` SSRF, forged cookies, PKCE injection, storage bucket enumeration (81 names), edge functions (404), middleware path/header desync, subdomain brute-force (26 hosts, zero records).
+- Self-correction standing rule: any claim about a subtree/plane/route set must carry its own negative control (counter-example path); re-derive all hashes live and assert 64-hex length before recording.
+- Risk score: 49 (stable). No customer data exposure demonstrated without credentials or owner action.
+
+## Work State
+### Completed
+- 8-step loop run through 2026-10-08 01:22Z; latest cycle executed nemotron3's queued probe: `GET /auth/v1/user`, `Origin: https://evil.example`, header apikey=publishable → 401 + `ACAO: <reflected>` + `ACAC: true` + `Vary: Origin` (tier-B confirmed, NO_DELTA); also closed `/auth/v1/admin/users` (401), `/rest/v1/` (401 Secret API key required), `/auth/v1/verify` keyless (400 unchanged).
+- All pre-auth surfaces characterized and exhaustive negatives recorded; CORS matrix complete across 6 planes/4 hosts; JWT confusion class closed; storage oracle route-table-complete (10 GET classes, 81 names).
+- Two [FINAL] findings held: forced-login via HashSessionHandoff fragment sink (requires valid token pair + victim interaction); pre-auth token-state oracle on GoTrue `/auth/v1/verify` (low severity).
+
+### Active
+- Ranking/priorities: [PRIO] kurs.onecode.de/login (HashSessionHandoff) 9.2; `/auth/v1/verify` 8.0; BOLA (AUTH_HELPED) 7.5; cto (HUMAN_ONLY) 4.2.
+- Ranked hypothesis list top entry: S3 plane conf 75 (from `art/lead_nemotron3.txt`), but already downgraded to PARKED (untestable without owner SigV4 keys).
+
+### Blocked
+- Post-auth BOLA (conf 65): needs two invited test accounts (AUTH_HELPED).
+- cto.onecode.de takeover (conf 58): needs owner/consented claim attempt (HUMAN_ONLY).
+- S3 SigV4 data-access proof: needs owner-supplied keys (HUMAN_ONLY).
+
+## Next Move
+1. Emit `[NEXT] HUMAN:` — BOLA escalation path (two invited kurs test accounts → password grant → cross-query `/rest/v1/{profiles,enrollments,courses}`) as the sole path to a CRITICAL-class finding; plus cto Perspective claim attempt.
+2. If a passive probe is required instead: probe an untested route under a pre-gate prefix or another `/auth/v1/*` resource class with matched apikey/no-apikey controls to further bound the CORS tier-B claim (re-probes bounded ≤1/day; kurs build-diff only on deploy signal).
+
+## Relevant Files
+- `inventory/onecode.md`: scoped host inventory (10 hosts) + passive recon log.
+- `scope.yml`: scope definition (referenced, not shown).
+- `art/lead_nemotron3.txt`: source of ranked S3-plane hypothesis.
+- `hypotheses-bigpickle.txt`, `hypotheses-nemotron3.txt`: queued [NEXT] PROBE entries (nemotron3's queued CORS probe already executed 2026-10-08).
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mKEY=sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30
+BASE=https://aygnpacdkgtsfnhgcyjc.supabase.co
+echo "== /auth/v1/token GET +apikey =="
+curl -sS -o /dev/null -D- --max-time 10 -H "Origin: https://evil.example" -H "apikey: $KEY" "$BASE/auth/v1/token" | grep -iE "^HTTP|access-control|vary"
+echo "== control: no apikey =="
+curl -sS -o /dev/null -D- --max-time 10 -H "Origin: https://evil.example" "$BASE/auth/v1/token" | grep -iE "^HTTP|access-control|vary"
+sleep 1
+echo "== /auth/v1/recover GET +apikey =="
+curl -sS -o /dev/null -D- --max-time 10 -H "Origin: https://evil.example" -H "apikey: $KEY" "$BASE/auth/v1/recover" | grep -iE "^HTTP|access-control|vary"
+echo "== control: no apikey =="
+curl -sS -o /dev/null -D- --max-time 10 -H "Origin: https://evil.example" "$BASE/auth/v1/recover" | grep -iE "^HTTP|access-control|vary"
+== /auth/v1/token GET +apikey ==
+HTTP/2 405 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+== control: no apikey ==
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+== /auth/v1/recover GET +apikey ==
+HTTP/2 405 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+== control: no apikey ==
+HTTP/2 401 
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+[0m
+**Step 1 — [NEW]/[CHANGED]/NO_DELTA**
+- NO_DELTA: `kurs.onecode.de/login` — 200, 18702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical to KB; no deploy since 2026-09-19). New route probes `/impressum`, `/agb`, `/verseidung` → all 307→/login (consistent with frozen pre-auth set; no NEW 200s).
+- NO_DELTA: `cto.onecode.de` — CNAME `cname.perspective-dns.com`, zero verification TXT, HTTP 409. Stable day-59+.
+- [NEW] (tier-bound): `/auth/v1/token` and `/auth/v1/recover` GET, **405** with apikey → `ACAO: https://evil.example` (reflected) + `ACAC: true` + `Vary: Origin` + `access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version`. Matched no-apikey control → 401 `ACAO: *` 9-method list. Same pair on `/auth/v1/user` (401+key) earlier.
+
+**Step 2 — [PRIO]**
+1. kurs.onecode.de/login (HashSessionHandoff) — 9.2 [FINAL]
+2. GoTrue `/auth/v1/verify` token-state oracle — 8.0 [FINAL]
+3. BOLA via RLS gap — 7.5 (AUTH_HELPED, parked)
+4. cto takeover — 4.2 (HUMAN_ONLY, parked)
+
+**Step 3 — [HYP]**
+```
+HYP: GoTrue tier-B reflection is gated on apikey presence at the auth
+     layer, independent of HTTP method outcome — 405 method-rejected
+     responses still reflect Origin with ACAC (register/authorize gate
+     runs before the method router).
+target: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{token,recover}
+class: cors
+evidence: 405+apikey → ACAO:https://evil.example, ACAC:true,
+  vary:Origin; 401 no-key control → ACAO:*; observed 2026-10-08
+  on /auth/v1/token, /auth/v1/recover, /auth/v1/user
+falsifier: any 405/4xx resource path under /auth/v1/ with apikey
+  returning ACAO:* or preflight-style header set
+conf: 80
+status: PROBE
+```
+```
+HYP: Tier-A (keyless, ACAC, unbounded-depth prefix) extends beyond the
+     7 catalogued routes to other unregistered .well-known/oauth paths
+     only if mounted at the same pre-gate prefix — depth is bounded,
+     count is unbounded.
+target: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/*
+class: cors
+evidence: 7 pre-gate routes reflect keyless; /verify exact-match only;
+  prefix-mount depth unbounded for matching first-segment
+falsifier: any additional pre-gate-registered path that does NOT
+  reflect keyless (e.g. /auth/v1/.well-known/openid-configuration/x)
+conf: 60
+status: PROBE
+```
+```
+HYP: Cross-profile read (BOLA) persists post-auth because RLS on
+     profiles/enrollments/courses lacks a per-uid predicate.
+target: kurs.onecode.de → /rest/v1/{profiles,enrollments,courses}
+class: broken-access-control
+evidence: pre-auth REST monitor CLOSED (no rows without creds);
+  client bundle references these tables; authz untested at data layer
+falsifier: a second invited account receives 0 rows / 401 when
+  querying another profile id
+conf: 65
+status: AUTH_HELPED
+```
+
+**Step 4 — [PARKED]** BOLA (AUTH_HELPED — needs 2 invited accounts) · cto takeover (HUMAN_ONLY) · S3 SigV4 plane (HUMAN_ONLY — no owner keys). **[FINAL]** HashSessionHandoff forced-login · `/auth/v1/verify` oracle — both held, no scope class violated, no POC retraction needed.
+
+**Step 5 — [NEXT]** `PROBE:` Extend the tier-B method-gate claim with a matched control on an unregistered-method + registered-path combination: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -X HEAD "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/token"` vs the same URL with no apikey — assert per-response both the ACAO value and whether `access-control-expose-headers` appears (tier-B marker), ≤1 rps, GET/HEAD only; then probe tier-A depth: `curl -sS -D- -H "Origin: https://evil.example" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration/deep"` to test prefix-mount depth bound on a novel segment.
+
+**Step 6 — [LEARN]** The auth gate (apikey check) runs *before* method routing on `/auth/v1/*`: 405 responses inherit tier-B reflection exactly like 401/200. This collapses "method outcome" as a tier discriminator — the three-tier model keys solely on (1) prefix mount, (2) apikey presence, (3) fallthrough, with method never reaching the CORS layer. Correction applied: catalogue now cites `43ccb834…` for the publishable key (newline-artifact digest `870cf518…` retired).
+
+**Step 7 — [RISK]** 49 (stable) — no customer data exposure demonstrated without credentials or owner action; the 405-tier finding is a scope-narrowing fact, not a new exploitable condition (browser still needs a same-origin user session, and no POC exists beyond forced-login with an already-valid token pair).

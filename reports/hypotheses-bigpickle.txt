@@ -1,28 +1,4 @@
-## 2026-10-08 01:22:24 UTC [target] (model bigpickle)
-[PARKED] cto.onecode.de takeover (conf 58): CNAME→cname.perspective-dns.com stable day-58+, HTTP 409, zero TXT; passive probing converged, only owner claim attempt advances — HUMAN_ONLY
-[PARKED] S3-compatible storage plane aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 (conf 75 in prior): independent SigV4 authz bypasses RLS; oracle-free pre-auth, requires owner-supplied SigV4 keys to demonstrate data access — testability AUTH_HELPED/HUMAN_ONLY, no path to TRUE/FALSE without keys
-[NEXT] PROBE: 
-[LEARN] ACCEPTED AUTH @ kurs.onecode.de/login: HashSessionHandoff mounted on /login parses URL fragment with no state/nonce/PKCE binding; sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0 present and mounted (PASSIVE validation)
-[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: 7th pre-gate keyless route with token-state oracle (conf 71); open-redirect closed, reflection simple-request-only with ACAC:true
-[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z; main/sink/page hashes byte-identical day-21; pre-auth surface frozen {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff stays event-triggered
-[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero TXT; passive probing fully converged, HUMAN_ONLY
-[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
-[RISK] OneCode GmbH: 49 — structural findings bounded: verify oracle LOW, storage oracle bounded LOW, sink present but requires AUTH_HELPED exploit path. Critical unblocked: post-auth BOLA (conf 65, AUTH_HELPED), cto takeover (conf 58, HUMAN_ONLY). No demonstrated customer data access without credentials or owner action.
-[NEW] None
-[CHANGED] None
-[PRIO] kurs.onecode.de/login (HashSessionHandoff) 9.2
-[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify 8.0
-[PRIO] BOLA (AUTH_HELPED) 7.5
-[PRIO] cto.onecode.de (HUMAN_ONLY) 4.2
-[PARKED] BOLA via Supabase RLS (conf 65, AUTH_HELPED) — needs two invited test accounts.
-[PARKED] cto.onecode.de (conf 58, HUMAN_ONLY) — Perspective CNAME, 409/1001, zero TXT; passive exhausted.
-[PARKED] S3 plane (SigV4) — requires owner-supplied credentials.
-[LEARN] Chunks byte-identical; deploy signal absent since 2026-09-19T11:33Z. Build-diff remains event-triggered only.
-[LEARN] verify route confirms allowlist + token-state oracle (low severity). No change.
-[LEARN] /login HTML fetched; sink mount evidence consistent with prior RSC inspection.
-[RISK] 49 (stable). No customer data exposure demonstrated without credentials or owner action. Sink requires valid tokens + victim interaction (exploitability negligible pre-auth). verify oracle information-only.
-[NEW] nemotron3 queued probe executed: GET /auth/v1/user, Origin: https://evil.example, header apikey=publishable → HTTP 401 no_authorization with `ACAO: https://evil.example` + `ACAC: true` + `Vary: Origin`. Confirms tier-B model exactly: resource-path reflection with credentials on 401, non-preflight only. Expected/predicted — NO_DELTA, no impact (Bearer-only origin, kurs emits no CORS headers for foreign origins). Also closed this cycle: GET /auth/v1/admin/users (401 no_authorization), GET /rest/v1/ (401 Secret API key required), GET /auth/v1/verify keyless (400, unchanged).
-[NEXT] HUMAN: BOLA escalation (two invited kurs test accounts → password grant → cross-query /rest/v1/{profiles,enrollments,courses}) — sole path to CRITICAL-class finding. HUMAN: cto Perspective claim attempt. PROBE: none productive; passive recon fully converged, re-probes bounded ≤1/day (REST) / ≤1/day (cto).
-[LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: tier-B CORS model (reflect+ACAC on apikey-present resource paths, incl. 401 responses) re-confirmed on /auth/v1/user — mechanism is gateway-level, stable across 6 probed resource paths.
-[LEARN] REJECTED SSRF/IDOR @ kurs.onecode.de + supabase: admin routes and REST root key-gated 401; no pre-auth escalation.
-[RISK] 49 (stable). No customer data exposure demonstrated without credentials or owner action.
+## 2026-10-08 07:41:16 UTC [target] (model bigpickle)
+class: cors
+class: cors
+class: broken-access-control

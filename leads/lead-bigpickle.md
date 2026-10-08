@@ -7204,3 +7204,7 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: tier-B CORS model (reflect+ACAC on apikey-present resource paths, incl. 401 responses) re-confirmed on /auth/v1/user — mechanism is gateway-level, stable across 6 probed resource paths.
 [LEARN] REJECTED SSRF/IDOR @ kurs.onecode.de + supabase: admin routes and REST root key-gated 401; no pre-auth escalation.
 [RISK] 49 (stable). No customer data exposure demonstrated without credentials or owner action.
+## 2026-10-08 07:41:16 UTC [target] (model bigpickle)
+class: cors
+class: cors
+class: broken-access-control
