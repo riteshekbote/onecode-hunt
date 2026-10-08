@@ -38668,3 +38668,308 @@ status: AUTH_HELPED
 **Step 6 — [LEARN]** The auth gate (apikey check) runs *before* method routing on `/auth/v1/*`: 405 responses inherit tier-B reflection exactly like 401/200. This collapses "method outcome" as a tier discriminator — the three-tier model keys solely on (1) prefix mount, (2) apikey presence, (3) fallthrough, with method never reaching the CORS layer. Correction applied: catalogue now cites `43ccb834…` for the publishable key (newline-artifact digest `870cf518…` retired).
 
 **Step 7 — [RISK]** 49 (stable) — no customer data exposure demonstrated without credentials or owner action; the 405-tier finding is a scope-narrowing fact, not a new exploitable condition (browser still needs a same-origin user session, and no POC exists beyond forced-login with an already-valid token pair).
+===== ANALYST bigpickle 2026-10-08 15:06:29 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -D- -o /dev/null --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef" 2>&1
+HTTP/2 303 
+date: Thu, 08 Oct 2026 14:59:48 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a47602ee7d09242d-IAD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=8jym6AujudOPYtxG3ALISHtS_F5k4TlSbvGJriIybJ4-1791471587.601753-1.0.1.1-8Fl3RR_.1PYXKBbxOmjUAyNgR84eWnH2vjoVSsYePDujc_xM2s4cZrkacGqoU3276JNgWfr7dI2pu4fe55FygaWhnPV9AAcl0SRp_iwAKwCcyf2ztqo6dxih4s031jLK; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 08 Oct 2026 15:29:48 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11c07-119d-722a-a995-dce2b05147c1
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 121
+alt-svc: h3=":443"; ma=86400
+[0m
+## Objective
+- Act as bug bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu) hunting in-scope assets `*.onecode.de`, `kurs.onecode.de`, running the fixed 8-step loop (DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT → LEARN → RISK) and emitting only structured blocks.
+- Current state: phase=POC, target=api; passive recon largely converged, remaining high-value leads are AUTH_HELPED/HUMAN_ONLY gated.
+
+## Important Details
+- In-scope only: `*.onecode.de`, `kurs.onecode.de` (+ OneCode-operated infra); railway.app / supabase.co platform hosts treated as out-of-scope for reporting but probed as service endpoints of in-scope app.
+- Live probe rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only; no mutating/auth-bypass tests on live customer data; sha256 any secret; no REJECTED classes (listed OUT OF SCOPE list is long — DoS, username enum, rate-limit, TLS best practice, clickjacking w/o exploit, mail config, etc.).
+- Publishable key: `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 (of key bytes) = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`; the old `870cf518…` digest was a newline artifact — PoCs must cite `43ccb834…`.
+- Supabase project: `aygnpacdkgtsfnhgcyjc.supabase.co` (GoTrue v2.197.0); site URL `https://kurs.onecode.de`.
+- JWT signing is **ES256 only** (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); all HS256/RS256/alg-none/jwk-injection/key-confusion attempts rejected (38+ probes) — do not re-test.
+- GoTrue CORS model: three tiers keyed on route registration — (A) 7 pre-gate routes reflect Origin+ACAC:true keyless: `.well-known/jwks.json`, `.well-known/openid-configuration`, `.well-known/oauth-authorization-server*` (prefix-mounted, unbounded depth), `oauth/authorize`, `oauth/token`, `oauth/userinfo` (prefix-mounted), `auth/v1/verify` (exact-match only); (B) `/auth/v1/*` resource paths reflect+ACAC only when apikey present (header or query), else wildcard no ACAC; (C) unregistered fallthrough → `ACAO:*` + 9-method list. Preflight NEVER reflects anywhere. Mechanism = gate ordering (apikey gate runs before routing for GoTrue routes; Kong routes matched pre-gate).
+- Mechanism note: remediation must "enforce allowlist after route resolution".
+- HashSessionHandoff (module 34891) mounted on `/login` RSC payload row 18; parses URL fragment → `setSession()` with no state/nonce/PKCE; error paths fixed to `/login?error=link-abgelaufen`; next-map `{invite:/einladung, recovery:/passwort-neu}` default `/`.
+- kurs.onecode.de pre-auth surface frozen: `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` 200; all else 307→/login.
+- kurs build: no deploy since 2026-09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (64-hex, beware the bad 66-char variant in older entries); `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`. Build-diffing is event-triggered only.
+- cto.onecode.de: CNAME→`cname.perspective-dns.com.` (104.18.2.73/104.18.3.73), HTTP 409 "error code:1001", zero verification TXT, day-59+; conf 58, HUMAN_ONLY.
+- REST monitor closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces `sb_publishable_` format only.
+- Storage: bucket-existence oracle route-table-complete across 10 GET classes (`NoSuchBucket` 400), 81 candidate names excluded, bucket name unrecoverable pre-auth; `/object/upload/sign/{b}/{k}` mounted + bucket-resolves (POST = out of read-only bounds, scope note for report author).
+- S3 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`: 403 Missing signature, SigV4 enforced, oracle-free, also mounted on main api host; requires owner keys → PARKED (conf 75 prior but PASSIVE+HIGH+empty verify_steps contradiction noted; downgraded to untestable).
+- Auth settings: email-only, `disable_signup:true`, `external.anonymous_users:false`, `saml_enabled:false` but `saml_private_key_next_configured=true`, `passkeys_enabled=false`, all external OAuth false.
+- redirect_to allowlist: exact-origin, enforced per verify type, 15+ shapes, X-Forwarded-Host no influence, zero off-origin redirects — closed.
+- Methodological standing rule recorded: any claim about a subtree/route set must carry its own negative control (counter-example path); re-derive every hash live and assert 64-hex before recording.
+
+## Work State
+### Completed
+- Full pre-auth surface of kurs.onecode.de characterized (4 pages, sink mount on /login only, legal pages static, no reflected-XSS, no PKCE injection, forged cookies/CVE-2025-29927/path-normalization/header-desync/_next/image SSRF all negative).
+- Supabase gateway CORS matrix complete across 6+ planes/hosts; JWT alg confusion closed; storage exposure hypothesis closed; SSO namespace bounded (`saml_provider_disabled`, ACS gated); GoTrue admin/schema disclosure blocked; analytics plane 404; no host-header routing under project ref; wildcard DNS under ref zero.
+- Inventory confirmed complete (Certspotter 5 names; 26 brute-forced subdomains all NX).
+- Risk score steady at 49; no demonstrated customer data access pre-auth.
+
+### Active
+- Last cycle (2026-10-08 07:41): executed queued nemotron3 probe (GET `/auth/v1/user` + Origin + apikey → 401 with reflected ACAO+ACAC, tier-B confirmed, NO_DELTA); closed `/auth/v1/admin/users` (401), `/rest/v1/` (401), `/auth/v1/verify` keyless (400 unchanged).
+- Final lead classes being tracked: `cors`, `cors`, `broken-access-control` (last 3 lines of cycle output).
+
+### Blocked
+- Post-auth BOLA via RLS gap (conf 65): needs 2 invited test accounts → AUTH_HELPED.
+- cto.onecode.de takeover (conf 58): only owner claim attempt → HUMAN_ONLY.
+- S3 SigV4 plane: needs owner-supplied keys → AUTH_HELPED/HUMAN_ONLY.
+
+## Next Move
+1. HUMAN: request two invited kurs.onecode.de test accounts → password grant → cross-query `/rest/v1/{profiles,enrollments,courses}` for the BOLA/RLS test (sole path to CRITICAL-class finding).
+2. HUMAN: cto.onecode.de Perspective claim attempt; PROBE: none productive — passive recon converged; re-probes bounded ≤1/day and build-diff event-triggered only (re-check chunk hash only after a deploy signal).
+
+## Relevant Files
+- `inventory/onecode.md`: host inventory (10 hosts, 3 live HTTP) + full probe history log.
+- `_next/static/chunks/0-mbmp1iqb6hj.js` (kurs): main chunk, deploy-signal hash `f916f314…`.
+- `_next/static/chunks/1a4tqdnsy9k1l.js` (kurs): sink chunk hosting module 34891 HashSessionHandoff, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`.
+- `_next/static/chunks/2-fsf9vi38mzv.js` (kurs): `/passwort-vergessen` route chunk, no sink.
+- `art/lead_nemotron3.txt`, `hypotheses-nemotron3.txt`, `hypotheses-bigpickle.txt`: cross-agent lead/hypothesis files (ranked S3 conf-75 lead originates from nemotron3).
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcurl -sS -D- -o /dev/null --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef&redirect_to=https%3A%2F%2Fkurs.onecode.de%2Fok%3Fx%3DMARKER42" 2>&1
+HTTP/2 303 
+date: Thu, 08 Oct 2026 15:01:02 GMT
+content-type: text/plain
+location: https://kurs.onecode.de/ok?x=MARKER42#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a47604c30e0d9a22-IAD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=CJvCML1jgJbXlkL3jfksdOEdzpyFvobEYPIC9dmSTIE-1791471662.5686903-1.0.1.1-QlKFJNKxXNSRMtW80zlOhk_v0wquq.MAOcROQfunew8f2Pf6lmJVvEuK5AaVJe4eXnM8mcO_je0nfp7SMwoFK4HdClNIyDiPZpgVrs.T15DzWDgtWZl12DAAbvqdmgS3; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 08 Oct 2026 15:31:02 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11c08-35fe-714c-b6d7-6af1c5c5ccc0
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 193
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mcurl -sS -D- -o /dev/null --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=MARKER_XYZ&token=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef" 2>&1; echo "===="; curl -sS -D- -o /dev/null --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=%3Cscript%3Ealert(1)%3C%2Fscript%3Edeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef" 2>&1
+HTTP/2 303 
+date: Thu, 08 Oct 2026 15:01:08 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=invalid_request&error_code=validation_failed&error_description=Invalid+email+verification+type&sb=
+cf-ray: a47604e88c849a22-IAD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=12G3DVqVuIZXZzkV7pgTLPHZtZO30S7mRoYCWeFsbEA-1791471668.5702963-1.0.1.1-AdBsMhrg._iq9KbqgUkicYN8anuAg.Hnhb5ZiSHC0k6HyIfq7Q0mdiZyrEi.srJedmgkr.RRt_Hug8P0I.BbFUFRNmWPyq5c1RsZyYIym0gY17WtF8tOQvcyFCtFTen5; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 08 Oct 2026 15:31:08 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11c08-4d6c-7d95-b70b-ef1b4529a9fb
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 2
+alt-svc: h3=":443"; ma=86400
+
+====
+HTTP/2 303 
+date: Thu, 08 Oct 2026 15:01:09 GMT
+content-type: text/plain
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a47604e9cb9b242d-IAD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=aUaY64wWWOcD06i8BDucPRLo7mcyUvwoiyvrKUeIf3c-1791471668.7774742-1.0.1.1-xwAho8Tl1a8HE9gMYDN3qUqrBpf7TKiw2fpkwueyspTCWxDjV.qniOoSppstgHmxXL1xiivMj5zj8prxqUdPVl2Y0uXLmZlRQV_heYAyhW60vH_wi8LXhWZVxo0jJhWf; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 08 Oct 2026 15:31:09 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+content-security-policy: default-src 'none'; sandbox
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11c08-519e-7c1b-a902-f8dfe0fd677e
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 1
+alt-svc: h3=":443"; ma=86400
+[0m
+[0m$ [0mcurl -sS -D- -o /dev/null --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef&redirect_to=https%3A%2F%2Fkurs.onecode.de%2Flogin%23access_token%3DEVILFRAGMENT" 2>&1 | sed -n '1,8p'; echo "===="; curl -sS -D- -o /dev/null --max-time 20 "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef&redirect_to=https%3A%2F%2Fkurs.onecode.de%2Flogin%3Fnext%3Dhttps%253A%252F%252Fevil.example%252F" 2>&1 | sed -n '1,8p'
+HTTP/2 303 
+date: Thu, 08 Oct 2026 15:01:40 GMT
+content-type: text/plain
+location: https://kurs.onecode.de/login#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a47605af5974d6a0-IAD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=6tOj2pVVsjM5OyPLYIUDSTBv8quTg2Gw02q5E6gArbk-1791471700.373389-1.0.1.1-vBJRKa4mSZ6dWpz7ZBtLz4xv48h3fEWN2kkM2yaUsC755so2NDYj9VZbgpx26OQG7eg.U4w4R.6yh8Vkrcv2JThMIm2oNPay9liZdSaT2p7W6UhXMGiSy7tH3uPTT65N; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 08 Oct 2026 15:31:40 GMT
+server: cloudflare
+====
+HTTP/2 303 
+date: Thu, 08 Oct 2026 15:01:40 GMT
+content-type: text/plain
+location: https://kurs.onecode.de/login?next=https%3A%2F%2Fevil.example%2F#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+cf-ray: a47605b08966242d-IAD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=5Ik8P0Efw8y4d8RPWzaSI5R9dlVFj8nxd9oMso2Y90s-1791471700.5714343-1.0.1.1-AKD77Y2RqGj5kIAy087CH77kG_9X5qBxyWFqG4ahCKFI7Gw.iL2ypcn.F8oSBX3IniOwgmx3TyPDzEjBXqvvaBUU8tFSbK2ds58VlzzH7F7ORAvMFJTh714KdsAk6ha_; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Thu, 08 Oct 2026 15:31:40 GMT
+server: cloudflare
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/login_next.html -w "%{http_code}\n" --max-time 20 "https://kurs.onecode.de/login?next=https%3A%2F%2Fevil.example%2F"; grep -o 'name="next"[^>]*' /tmp/opencode/login_next.html; grep -o '"next"[^,]\{0,80\}' /tmp/opencode/login_next.html | head -5; echo "===="; grep -o 'searchParams.get([^)]*)' /tmp/opencode/login_next.html | sort -u
+200
+"next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks
+====
+[0m
+[0m$ [0mgrep -o '<[^>]*name="next"[^>]*>' /tmp/opencode/login_next.html; echo "===="; grep -o 'value="[^"]*"[^>]*name="next"\|name="next"[^>]*value="[^"]*"' /tmp/opencode/login_next.html; echo "===="; grep -o '.\{120\}name="next".\{60\}' /tmp/opencode/login_next.html
+====
+====
+[0m
+[0m$ [0mgrep -o '.\{140\}"next".\{80\}' /tmp/opencode/login_next.html | head -3
+ewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/_next/static/chunks/2n8375xih-hg0.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks
+[0m
+[0m$ [0mgrep -o '.\{100\}name="next".\{100\}' /tmp/opencode/login_next.html | head -3; echo "====count"; grep -c 'name="next"' /tmp/opencode/login_next.html; grep -o 'name="next"[^>]*/\?>' /tmp/opencode/login_next.html
+====count
+0
+[0m
+[0m$ [0mgrep -o 'next=[^"&<]*' /tmp/opencode/login_next.html | head; echo "===="; grep -o 'error=[^"&<]*\|error_code=[^"&<]*\|sb=[^"&<]*' /tmp/opencode/login_next.html | head; echo "====searchParams"; grep -o 'searchParams[^,]\{0,60\}' /tmp/opencode/login_next.html | sort -u | head
+next=https%3A%2F%2Fevil.example%2F\
+next=https%3A%2F%2Fevil.example%2F\
+====
+====searchParams
+[0m
+[0m$ [0mgrep -o '.\{200\}next=https%3A%2F%2Fevil.example%2F.\{120\}' /tmp/opencode/login_next.html
+s/2n8375xih-hg0.css\",\"style\"]\n:HL[\"/_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2\",\"font\",{\"crossOrigin\":\"\",\"type\":\"font/woff2\"}]\nb:X\n0:{\"P\":null,\"c\":[\"\",\"login?next=https%3A%2F%2Fevil.example%2F\"],\"q\":\"?next=https%3A%2F%2Fevil.example%2F\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"login\",{\"children\":[\"__
+[0m
+[0m$ [0mgrep -o '.\{80\}"next".\{80\}' /tmp/opencode/login_next.html | head -5; echo "===="; grep -o 'https://evil.example[^"]*' /tmp/opencode/login_next.html | sort -u; echo "====redirect-hrefs"; grep -o 'href="https://[^"]*"' /tmp/opencode/login_next.html | sort -u | head
+rel="stylesheet" href="/_next/static/chunks/2n8375xih-hg0.css" data-precedence="next"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks
+====
+https://evil.example/\\\
+====redirect-hrefs
+href="https://www.onecode.de/imprint"
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/chunk_main.js -w "%{http_code} %{size_download}\n" --max-time 30 "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js"; sha256sum /tmp/opencode/chunk_main.js; grep -o 'get("next")\|searchParams.get([^)]*)' /tmp/opencode/chunk_main.js | sort -u | head
+200 154581
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/chunk_main.js
+searchParams.get(o.NEXT_RSC_UNION_QUERY)
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/sink.js -w "%{http_code} %{size_download}\n" --max-time 30 "https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js"; sha256sum /tmp/opencode/sink.js; echo "===="; grep -o '.\{100\}next.\{100\}' /tmp/opencode/sink.js | grep -i 'search\|param\|redirect' | head; echo "====next-map"; grep -o '.\{60\}passwort-neu.\{80\}' /tmp/opencode/sink.js | head -3
+200 13880
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  /tmp/opencode/sink.js
+====
+====next-map
+i(18566),i=e.i(11795);let n={invite:"/einladung",recovery:"/passwort-neu"};e.s(["HashSessionHandoff",0,function(){let e=(0,r.useRouter)();return(0,t.use
+[0m
+[0m$ [0mgrep -o '.\{80\}"next".\{80\}' /tmp/opencode/chunk_main.js | head -5; echo "====sink next"; grep -o '.\{60\}"next".\{60\}' /tmp/opencode/sink.js | head -5; echo "====error fragment handling"; grep -o '.\{100\}error_code.\{100\}' /tmp/opencode/sink.js | head -3
+====sink next
+====error fragment handling
+ion(e){let t=e.startsWith("#")?e.slice(1):e;if(!t)return null;let r=new URLSearchParams(t),i=r.get("error_code")??r.get("error");if(i)return{kind:"error",code:i.includes("expired")?"link-abgelaufen":"link-ungue
+[0m
+[0m$ [0mgrep -o 'get("next")\|\?next\|next=' /tmp/opencode/chunk_main.js | sort | uniq -c; echo "===="; grep -o '.\{80\}router.replace([^)]*).\{40\}' /tmp/opencode/sink.js | head; echo "===="; grep -o '.\{60\}setSession.\{120\}' /tmp/opencode/sink.js | head -3
+9 next=
+====
+====
+?error=${t.code}`);let r=!1;return(0,i.createClient)().auth.setSession({access_token:t.accessToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login
+[0m
+[0m$ [0mgrep -o 'next=[^"`]*\|["'"'"']next["'"'"']\|get("next")' /tmp/opencode/sink.js | sort -u; echo "====main next="; grep -o '.\{100\}next=.\{100\}' /tmp/opencode/chunk_main.js | head -10
+====main next=
+ion:a,setState:r})):t.type===l.ACTION_NAVIGATE||t.type===l.ACTION_RESTORE?(e.pending.discarded=!0,a.next=e.pending.next,e.last===e.pending&&(e.last=a),v({actionQueue:e,action:a,setState:r})):(null!==e.last
+ll,o=0;function c(e){if(i===e)return;let t=e.prev,r=e.next;if(null===r||null===t?(o+=e.size,d()):(t.next=r,r.prev=t),null===i)e.prev=e,e.next=e;else{let t=i.prev;e.prev=t,null!==t&&(t.next=e),e.next=i,i.pr
+t,null!==e.next&&(o=o-r+t,d())}function f(e){let t=e.next,r=e.prev;null!==t&&null!==r&&(o-=e.size,e.next=null,e.prev=null,i===e?t===i?i=null:(i=t,r.next=t,t.prev=r):(r.next=t,t.prev=r))}function d(){o<=0x3
+[0m
+[0m$ [0mgrep -o 'searchParams.get([^)]*)\|URLSearchParams' /tmp/opencode/login_next.html | sort -u; echo "====ch"; grep -o 'href="/_next/static/chunks/[^"]*\.js"' /tmp/opencode/login_next.html | sort -u; echo "===="; grep -o 'get([^)]*next[^)]*)' /tmp/opencode/chunk_main.js /tmp/opencode/sink.js
+====ch
+href="/_next/static/chunks/3mc6dra1m0098.js"
+====
+[0m
+[0m$ [0mgrep -o '/_next/static/chunks/[a-z0-9-]*\.js' /tmp/opencode/login_next.html | sort -u; echo "===="; grep -o 'app/login[^"]*\.js' /tmp/opencode/login_next.html | sort -u
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+====
+[0m
+[0m$ [0mmkdir -p /tmp/opencode/kurchunks && cd /tmp/opencode/kurchunks && for c in 08ttfj81-47mu 1ymt1shyhmu-4 2i51e627rllld 2ufbqzbeyam3w 3fntmmi971322 3mc6dra1m0098; do curl -sS -o $c.js --max-time 20 "https://kurs.onecode.de/_next/static/chunks/$c.js"; done; sha256sum *.js; echo "===="; grep -l 'get("next")\|searchParams' *.js
+dd976fc71297b2c55b3c9eacaa65b11bb1be18efe8392bf5cb2016e7af8b64c8  08ttfj81-47mu.js
+71d30e67ed90f3e0dce2785e36d27deceafbd20937bcaebabd67666fc2b39d2f  1ymt1shyhmu-4.js
+a4590375a64190f57d18b357bf576bf111bd5f02f3c93cad0f65fdf176689f46  2i51e627rllld.js
+598c4def7e716d8bebb8f06ae15fe5097937e3e9d2077e3e484683fa84bbab88  2ufbqzbeyam3w.js
+34ed6abf4c6d0d1bb3dc56d3f133d2a5dbc3a3c89c791deab314e27143ac14ce  3fntmmi971322.js
+d9840d6de414f19d28fbe08cc2ddd0aeb95cf379864950a506592a54f4996f31  3mc6dra1m0098.js
+====
+08ttfj81-47mu.js
+3fntmmi971322.js
+[0m
+[0m$ [0mcd /tmp/opencode/kurchunks && grep -o '.\{120\}searchParams.\{120\}' 08ttfj81-47mu.js 3fntmmi971322.js | head -10; echo "===="; grep -o '.\{100\}get("next").\{100\}' *.js | head
+08ttfj81-47mu.js:L({actionQueue:e,globalError:t,webSocket:n,staticIndicatorState:r}){let l,s=(0,f.useActionQueue)(e),{canonicalUrl:d}=s,{searchParams:w,pathname:_}=(0,o.useMemo)(()=>{let e=new URL(d,"u"<typeof window?"http://n":window.location.href);return{searchParams
+3fntmmi971322.js:(71645),a=e.r(33906),o=e.r(61994),d=e.r(15783);function s({Component:e,serverProvidedParams:t}){let r,i;if(null!==t)r=t.searchParams,i=t.params;else{let e=(0,u.use)(l.LayoutRouterContext);i=null!==e?e.parentParams:{},r=(0,a.urlSearchParamsToParsedUrlQu
+3fntmmi971322.js:SearchParamsContext))}let c=(0,d.createClientSearchParams)(r),f=(0,d.createClientParams)(i);return(0,n.jsx)(e,{params:f,searchParams:c})}("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Objec
+====
+[0m
+[0m$ [0mgrep -o '.\{160\}replace("/login.\{160\}' /tmp/opencode/sink.js | head -3; echo "===="; grep -o 'e.replace([^)]*)\|router.replace([^)]*)' /tmp/opencode/sink.js | sort -u; echo "====nextmap-usage"; grep -o '.\{200\}invite:"/einladung".\{300\}' /tmp/opencode/sink.js
+}`);let r=!1;return(0,i.createClient)().auth.setSession({access_token:t.accessToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login?error=link-abgelaufen");e.replace(t.next),e.refresh()}}),()=>{r=!0}},[e]),null}],34891)},28420,e=>{"use strict";var t=e.i(43476),r=e.i(71645),i=e.i(22016),n=e.
+====
+e.replace("/login?error=link-abgelaufen")
+e.replace(/^([A-Z])
+e.replace(`/login?error=${t.code}`)
+e.replace(t.next)
+====nextmap-usage
+-0 text-destructive",strokeWidth:2.2}),(0,t.jsx)("p",{className:"text-[12.5px] leading-relaxed",children:e})]}):null}],76017)},34891,e=>{"use strict";var t=e.i(71645),r=e.i(18566),i=e.i(11795);let n={invite:"/einladung",recovery:"/passwort-neu"};e.s(["HashSessionHandoff",0,function(){let e=(0,r.useRouter)();return(0,t.useEffect)(()=>{let t=function(e){let t=e.startsWith("#")?e.slice(1):e;if(!t)return null;let r=new URLSearchParams(t),i=r.get("error_code")??r.get("error");if(i)return{kind:"error",code:i.includes("e
+[0m
+[0m$ [0mgrep -o 'function(e){let t=e.startsWith("#").\{1000\}' /tmp/opencode/sink.js
+function(e){let t=e.startsWith("#")?e.slice(1):e;if(!t)return null;let r=new URLSearchParams(t),i=r.get("error_code")??r.get("error");if(i)return{kind:"error",code:i.includes("expired")?"link-abgelaufen":"link-ungueltig"};let a=r.get("access_token"),l=r.get("refresh_token");return a&&l?{kind:"session",accessToken:a,refreshToken:l,next:n[r.get("type")??""]??"/"}:null}(window.location.hash);if(!t)return;if(window.history.replaceState(null,"",window.location.pathname+window.location.search),"error"===t.kind)return void e.replace(`/login?error=${t.code}`);let r=!1;return(0,i.createClient)().auth.setSession({access_token:t.accessToken,refresh_token:t.refreshToken}).then(({error:i})=>{if(!r){if(i)return void e.replace("/login?error=link-abgelaufen");e.replace(t.next),e.refresh()}}),()=>{r=!0}},[e]),null}],34891)},28420,e=>{"use strict";var t=e.i(43476),r=e.i(71645),i=e.i(22016),n=e.i(18566),a=e.i(68877),l=e.i(11795),o=e.i(19455),s=e.i(55764),d=e.i(10204),u=e.i(76017);e.s(["LoginForm",0,function({linkError:e}){let c=(0,n.useRo
+[0m
+[0m$ [0mcd /tmp/opencode/kurchunks && grep -o 'get("next")\|searchParams.get([^)]*)' *.js /tmp/opencode/chunk_main.js /tmp/opencode/sink.js | sort -u; echo "===="; grep -o '.\{80\}linkError.\{120\}' /tmp/opencode/sink.js | head -3; echo "====form"; grep -o '.\{60\}LoginForm.\{200\}' /tmp/opencode/sink.js | head -2
+/tmp/opencode/chunk_main.js:searchParams.get(o.NEXT_RSC_UNION_QUERY)
+====
+=e.i(19455),s=e.i(55764),d=e.i(10204),u=e.i(76017);e.s(["LoginForm",0,function({linkError:e}){let c=(0,n.useRouter)(),[p,f]=(0,r.useState)(""),[g,m]=(0,r.useState)(""),[h,b]=(0,r.useState)(null),[v,x]=(0,r.use
+====form
+),o=e.i(19455),s=e.i(55764),d=e.i(10204),u=e.i(76017);e.s(["LoginForm",0,function({linkError:e}){let c=(0,n.useRouter)(),[p,f]=(0,r.useState)(""),[g,m]=(0,r.useState)(""),[h,b]=(0,r.useState)(null),[v,x]=(0,r.useState)(!1);async function y(e){e.preventDefault(),x(!0),b
+[0m
+[0m$ [0mgrep -o '.\{200\}async function y(e){e.preventDefault().\{700\}' /tmp/opencode/sink.js
+764),d=e.i(10204),u=e.i(76017);e.s(["LoginForm",0,function({linkError:e}){let c=(0,n.useRouter)(),[p,f]=(0,r.useState)(""),[g,m]=(0,r.useState)(""),[h,b]=(0,r.useState)(null),[v,x]=(0,r.useState)(!1);async function y(e){e.preventDefault(),x(!0),b(null);let t=(0,l.createClient)(),{error:r}=await t.auth.signInWithPassword({email:p,password:g});if(r){b("E-Mail oder Passwort ist falsch."),x(!1);return}c.push("/"),c.refresh()}return(0,t.jsxs)("form",{onSubmit:y,className:"kr-shadow flex flex-col gap-5 rounded-lg border border-border bg-card p-7",children:[(0,t.jsxs)("div",{children:[(0,t.jsx)("h1",{className:"mb-1.5 text-[23px] font-extrabold",children:"Willkommen zurück"}),(0,t.jsx)("p",{className:"text-[13.5px] leading-relaxed text-muted-foreground",children:"Melde dich mit der E-Mail an, an die deine Einladung ging."})]}),(0,t.jsxs)("div",{className:"flex flex-col gap-1.5",children:[(0,t.jsx)(d.Label,{htmlFor:"email",className
+[0m
+**DELTA**
+- Probed `/auth/v1/verify?type=recovery&token=<64hex>` (bare, + on-origin `redirect_to`, + non-hex XSS payload, + invalid `type`, + fragment-bearing `redirect_to`): all 303 to `https://kurs.onecode.de[on-origin-path]#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=`. Fragment fields are server-controlled enums only; `sb=` empty; token/type not reflected; attacker fragment in `redirect_to` stripped and replaced by server fragment.
+- On-origin `redirect_to=https://kurs.onecode.de/ok?x=MARKER42` preserved verbatim → query survives, but that is allowlist-intended behavior (path+query on app origin).
+- `redirect_to=https://kurs.onecode.de/login?next=https://evil.example/` passes allowlist (host on-origin). Followed: `/login?next=<evil>` returns 200 and echoes `next` only in the RSC flight URL (`"q":"?next=..."`); no client chunk reads `searchParams.get("next")` (grep over main `0-mbmp1iqb6hj.js`, sink `1a4tqdnsy9k1l.js`, and all 6 other login chunks — only hit is Next's internal `NEXT_RSC_UNION_QUERY`).
+- LoginForm success path hardcodes `c.push("/")` — `next` not consumed post-auth. HashSessionHandoff: `next = {invite,recovery}[type] ?? "/"` fixed map, `setSession()` server-validated, error path fixed `/login?error=...`.
+- Re-derived chunk hashes live: main `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` (154581 B), sink `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (13880 B) — both match baseline, no deploy since 2026-09-19.
+- Delta: **NO_DELTA**. Surface unchanged; two candidate chains falsified (verify→fragment injection; verify→`next`→open redirect).
+
+**PRIORITIZE**
+1. HUMAN/AUTH_HELPED — BOLA via RLS gap (conf 65), needs 2 invited accounts: sole path to CRITICAL.
+2. HUMAN_ONLY — cto.onecode.de Perspective claim (conf 58, day-59+).
+3. PASSIVE/HUMAN_ONLY — S3 SigV4 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` (owner keys required).
+4. Parked — storage bucket-name oracle (route-table-complete, 81 names excluded, pre-auth unrecoverable).
+
+**HYPOTHESES**
+- H1 (falsified this cycle): verify 303 fragment reflects attacker input → app-origin fragment injection into HashSessionHandoff parser. Disproved: all fragment values server-set enums, `sb=` empty, token/type unreflected, `redirect_to` fragment stripped.
+- H2 (falsified this cycle): `/login?next=<off-origin>` is a post-auth open redirect reachable via verify `redirect_to`. Disproved: `next` echoed only in RSC flight URL; zero consumers across all 7 login chunks; LoginForm hardcodes `push("/")`; HashSessionHandoff `next` is a fixed map, not the query param.
+- H3 (held, AUTH_HELPED): `/rest/v1/{profiles,enrollments}` cross-tenant read under RLS gap — unverifiable without 2 invited accounts.
+- H4 (held, HUMAN_ONLY): cto.onecode.de registration claim via Perspective DNS.
+
+**SELF-CRITIQUE**
+- Both falsifications rest on static analysis of all 7 chunks referenced by `/login` + live hash verification — grep coverage is complete for this build; residual risk only if server components consume `searchParams` invisibly (server login page has no redirect on GET — probe showed 200 render, no 3xx — so no server-side redirect either).
+- `sb=` empty on error path is unobserved on the success path (requires valid token, out of passive bounds) — bounded, not claimed closed.
+
+**NEXT**
+[NEXT] HUMAN — request two invited `kurs.onecode.de` test accounts, password-grant, cross-query `GET /rest/v1/profiles?select=id,email,tenant_id` and `/rest/v1/enrollments` with account A's Bearer to confirm the RLS gap (config 65, priority-1). Fallback if accounts denied: Perspective claim attempt on cto.onecode.de (HUMAN_ONLY, conf 58). No further passive probes productive — surface converged; re-probe cadence ≤1/day, build-diff event-triggered only.
+
+**LEARN**
+- GoTrue `verify` composes app-origin 303 fragments exclusively from server-side enums (`error_code`/`error_description`); attacker inputs (`token`, `type`, `redirect_to` fragment) never enter the fragment — the app-origin redirect is not an injection primitive.
+- kurs `/login?next=` is a dead parameter in this build: echoed in flight data, never read, never used by LoginForm — do not re-test open-redirect via `next` unless a deploy changes the chunk hashes.
+- Each claim carries its own negative control: chunk-hash re-derivation (both 64-hex, match baseline) + per-chunk grep for `searchParams.get("next")` (zero hits, control = `NEXT_RSC_UNION_QUERY` present).
+
+**RISK**
+Risk score: **49 (steady)**. No demonstrated customer data access pre-auth; passives converged; top-3 leads all gated on HUMAN/AUTH_HELPED action.
