@@ -1100,3 +1100,25 @@
 - 2026-10-07 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - 2026-10-07 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
 - 2026-10-07 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-07
+- 2026-10-08 ACCEPTED AUTH @ kurs.onecode.de/login: HashSessionHandoff mounted on /login parses URL fragment with no state/nonce/PKCE binding; sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0 present and mounted (PASSIVE validation)
+- 2026-10-08 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: 7th pre-gate keyless route with token-state oracle (conf 71); open-redirect closed, reflection simple-request-only with ACAC:true
+- 2026-10-08 REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z; main/sink/page hashes byte-identical day-21; pre-auth surface frozen {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200; build-diff stays event-triggered
+- 2026-10-08 REJECTED MISCONFIG @ cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero TXT; passive probing fully converged, HUMAN_ONLY
+- 2026-10-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
+- 2026-10-08 Chunks byte-identical; deploy signal absent since 2026-09-19T11:33Z. Build-diff remains event-triggered only.
+- 2026-10-08 verify route confirms allowlist + token-state oracle (low severity). No change.
+- 2026-10-08 /login HTML fetched; sink mount evidence consistent with prior RSC inspection.
+- 2026-10-08 ACCEPTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co: tier-B CORS model (reflect+ACAC on apikey-present resource paths, incl. 401 responses) re-confirmed on /auth/v1/user — mechanism is gateway-level, stable across 6 probed resource paths.
+- 2026-10-08 REJECTED SSRF/IDOR @ kurs.onecode.de + supabase: admin routes and REST root key-gated 401; no pre-auth escalation.
+- 2026-10-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+- 2026-10-08 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- 2026-10-08 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-07
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed by measurement (off-origin redirect_to discarded, Site URL fallback), residual is token-state oracle; reflection is simple-request-only with ACAC:true
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior differs by well-known vs resource paths and by presence of apikey; preflight never reflects
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane SigV4-enforced (no oracle); route-table-complete, bucket name unrecoverable pre-auth
+- 2026-10-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
+- 2026-10-08 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+- 2026-10-08 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle

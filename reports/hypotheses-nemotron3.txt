@@ -1,4 +1,4 @@
-## 2026-10-07 21:38:12 UTC [target] (model nemotron3)
+## 2026-10-08 01:20:32 UTC [target] (model nemotron3)
 [NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verified, never probed in 26 days
 [NEW] GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
 [NEW] Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
@@ -43,6 +43,8 @@ testability: HUMAN_ONLY
 [FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found
 [FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [NEXT] PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v (validates reflected-origin+ACAC on authenticated user endpoint; CORS headers present on 401 too)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
 [LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 [LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days
