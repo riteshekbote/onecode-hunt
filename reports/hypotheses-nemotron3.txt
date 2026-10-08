@@ -1,4 +1,4 @@
-## 2026-10-08 14:59:10 UTC [target] (model nemotron3)
+## 2026-10-08 20:41:27 UTC [target] (model nemotron3)
 [NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verified, never probed in 26 days
 [NEW] GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
 [NEW] Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
