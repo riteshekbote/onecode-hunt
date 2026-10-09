@@ -40850,3 +40850,691 @@ STEP 4 — SELF-CRITIQUE
 STEP 5 — NEXT ACTION
 [NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B). If granted, immediately run H1 read-only cross-tenant REST probe with A's Bearer; if not granted within the cycle, pivot to [NEXT] PROBE H3 differential /auth/v1/verify (read-only) as the only account-free signal.
 ```
+===== ANALYST bigpickle 2026-10-09 14:46:24 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mmkdir -p /tmp/opencode/onecode && for u in \
+"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=email&redirect_to=https://evil.example/steal" \
+"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=email" \
+"https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=email&redirect_to=https://kurs.onecode.de/ok" \
+; do echo "=== $u"; curl -sS -o /tmp/opencode/onecode/body.txt -w "HTTP %{http_code}\n" --max-time 15 -D /tmp/opencode/onecode/hdr.txt "$u"; grep -iE "^(HTTP/|location:|access-control-allow-origin:|access-control-allow-credentials:|x-sb-error-code:)" /tmp/opencode/onecode/hdr.txt; echo "--body--"; head -c 300 /tmp/opencode/onecode/body.txt; echo; sleep 1; done
+=== https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=email&redirect_to=https://evil.example/steal
+HTTP 400
+HTTP/2 400 
+x-sb-error-code: validation_failed
+--body--
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider email could not be found"}
+=== https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=email
+HTTP 400
+HTTP/2 400 
+x-sb-error-code: validation_failed
+--body--
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider email could not be found"}
+=== https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=email&redirect_to=https://kurs.onecode.de/ok
+HTTP 400
+HTTP/2 400 
+x-sb-error-code: validation_failed
+--body--
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: Provider email could not be found"}
+[0m
+## Objective
+- Run a passive-first bug bounty analysis loop against OneCode GmbH (report channel: bugs.olivermaicher.eu) on scoped assets `*.onecode.de` / `kurs.onecode.de` plus associated Supabase project `aygnpacdkgtsfnhgcyjc`, emitting structured DELTA/PRIO/HYP/PARKED/FINAL/NEXT/LEARN/RISK blocks each cycle.
+
+## Important Details
+- In-scope only: `*.onecode.de`, `kurs.onecode.de`, and company-owned infra reachable from those (Supabase project + storage host are in-scope as app backend).
+- Passive-first rules: GET/HEAD/OPTIONS only, ≤1 rps; no mutating tests, no auth-bypass attempts against live customer data; no credentialed attacks; no username enumeration / brute-force / rate-limit classes (out of scope).
+- Phase: `POC`, target: `api`.
+- Publishable key: `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`; the older `870cf518…` digest was a trailing-newline artifact — all PoCs must cite `43ccb834…`).
+- Hash discipline: re-derive hashes live, assert 64-hex length before recording. Known-good values: main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18 702 B).
+- Build-diffing on `kurs.onecode.de` is EVENT-triggered (last deploy 2026-09-19 11:33Z; day-21 with no deploy) — time-cadence probing returns identical hashes, pure request cost.
+- CORS model (three tiers keyed on route registration / gate ordering): (A) pre-gate Kong routes (`jwks.json`, `openid-configuration`, `oauth-authorization-server`, `oauth/authorize`, `oauth/token`, `oauth/userinfo`, plus `verify` keyless) reflect Origin with `ACAC: true` regardless of auth state; (B) `/auth/v1/*` resource paths reflect + `ACAC: true` only when apikey present (header or query), else `ACAO: *` no ACAC; (C) unregistered fallthrough → `401 No API key found` + `ACAO: *` no ACAC, full 9-method preflight `max-age 3600`. Preflight NEVER reflects anywhere. GoTrue is Bearer-only (no auth cookie on supabase origin; only `__cf_bm`), so CORS impact is capped MEDIUM. `kurs.onecode.de` emits no cross-origin headers (CORS-clean).
+- JWT signing is ES256-only (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); all alg-confusion (38 probes), embedded-JWK, HS256-secret, `alg:none` attempts closed. Prior KB HS256 assumptions were wrong-algorithm tests.
+- `redirect_to` allowlist is exact-origin, enforced per-verify-type, 15+ off-origin shapes tested, zero bypass; `SITE_URL = https://kurs.onecode.de`.
+- Pre-auth surface on `kurs.onecode.de` = exactly `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` at 200; all `/api/*`, `/v1`, `/admin`, `/dashboard` 307→/login.
+- Two invited accounts (A, B) are the sole non-intrusive path for the HIGH/CRITICAL BOLA test; anonymous sign-in, signup, PKCE, admin plane all closed.
+- cto.onecode.de: dangling CNAME → `cname.perspective-dns.com.` (day-59+, HTTP 409/1001, zero verification TXT); conf 58, HUMAN_ONLY claim path.
+- S3 plane access-key-ID oracle is credentials-class enumeration → out of passive bounds, NOT reportable, no candidate IDs to be tested.
+- Out-of-scope hazard flagged in KB: `POST /storage/v1/object/upload/sign/{bucket}/{key}` mints credentials without an account but is POST — scope note only, do not test.
+
+## Work State
+### Completed
+- Subdomain inventory complete: 5 CT names (onecode.de, www, kurs, cto, mta-sts), confirmed by Certspotter + crt.sh + 26 DNS brute-forced names (all zero).
+- GitHub org scan done: `OneCodeDevs/compass` (Kotlin OSS nav lib) + `OneCode/hello-guide`; zero secrets/internal endpoints/CI leaks.
+- kurs.onecode.de pre-auth surface exhaustively characterized: HashSessionHandoff (module 34891) mounted on `/login` RSC row 18, fragment→setSession with no state/nonce/PKCE binding; requires valid invited token pair (AUTH_HELPED). All bypass classes negative (forged cookies ×5, CVE-2025-29927, path normalization ×10, header desync ×4, RSC negotiation, PKCE injection, `_next/image` SSRF, reflected XSS on `?error=`).
+- Supabase gateway fully mapped: 7 pre-gate routes, GoTrue CORS three-tier model, storage bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded, bucket name unrecoverable pre-auth), S3 SigV4 plane (403 Missing signature, no oracle), edge functions 404, realtime 401, REST monitor closed 09-17 (27 probes, 503↔401, never 200+rows).
+- OIDC discovery documents mapped: advertise RS256/HS256/ES256 but verifier is ES256-only; all `/auth/v1/oauth/*` returns `feature_disabled`; document inaccurate in 4 ways (informational finding).
+
+### Active
+- Passive convergence confirmed across all surfaces (risk score static at 49). Three FINAL leads: (1) Post-auth BOLA via RLS gap, conf 65, AUTH_HELPED, HIGH/CRITICAL; (2) Forced-login fragment sink, conf 55, AUTH_HELPED, MEDIUM; (3) `/auth/v1/verify` token-state oracle, conf 60, PASSIVE, LOW.
+
+### Blocked
+- HIGH/CRITICAL BOLA test blocked on obtaining two invited `kurs.onecode.de` accounts (HUMAN request outstanding).
+- cto.onecode.de takeover blocked on owner claim attempt (HUMAN_ONLY).
+- S3-plane lead parked as untestable-in-environment (needs owner-supplied SigV4 keys).
+- Passive probing fully converged; no new surface without a deploy event, an invited-account grant, or a claim attempt.
+
+## Next Move
+1. HUMAN: request two invited `kurs.onecode.de` accounts (A, B); if granted, immediately run read-only `GET /rest/v1/enrollments?select=*` and `GET /rest/v1/profiles?select=id,email` with A's Bearer (obtained via password-grant) to test cross-tenant row visibility — sole remaining path to the HIGH/CRITICAL BOLA finding.
+2. If accounts not granted this cycle: pivot to passive differential probe of `GET /auth/v1/verify?type=recovery&token=<garbage32>` (record status/Location/#error for well-formed-but-unknown vs malformed tokens) — the only account-free signal left.
+
+## Relevant Files
+- `inventory/onecode.md`: authoritative asset inventory + per-cycle probe log (last entry 2026-10-09 07:17:26 UTC).
+- `art/lead_nemotron3.txt`: source of the ranked conf-75 S3-plane lead.
+- `art/hypotheses-bigpickle.txt`: source of the HUMAN invited-accounts NEXT directive.
+- `art/hypotheses-nemotron3.txt`: source of the queued CORS probe NEXT directive (already executed and confirmed).
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mfind /home/runner/work/onecode-hunt/onecode-hunt -name "*.md" -not -path "*/node_modules/*" | sort | head -10
+/home/runner/work/onecode-hunt/onecode-hunt/README.md
+/home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md
+/home/runner/work/onecode-hunt/onecode-hunt/knowledge/index.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/lead-bigpickle.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/lead-laguna.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/lead-ling3.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/lead-longcat.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/lead-mimo.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/lead-nemotron3.md
+/home/runner/work/onecode-hunt/onecode-hunt/leads/reposcan-onecode.md
+[0m
+[0m$ [0mgrep -n "redirect_to" /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md | head -15
+767:- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `redirect_to` allowlist tested LIVE on the pre-auth, unauthenticated `GET /auth/v1/verify?type=recovery` path for the first time — 8 off-origin variants (`http
+782:- NEW Supabase GoTrue redirect_to allowlist tested LIVE on pre-auth unauthenticated verify path: 8 off-origin variants all 303 to https://kurs.onecode.de#error=... — no open redirect, no token leak to attac
+803:- CHANGED GoTrue `redirect_to` allowlist tested LIVE on pre-auth unauthenticated verify path: 8 off-origin variants all 303 to `https://kurs.onecode.de#error=...` — no open redirect, no token leak
+835:- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `redirect_to` allowlist tested LIVE on pre-auth unauthenticated `GET /auth/v1/verify?type=recovery` — 8 off-origin variants all 303 to `https://kurs.onecode.de
+849:- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `GET /auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → `400 {"error_code":"validation_failed","msg":"Unsupported provider: provider is no
+968:- CHANGED `/auth/v1/authorize?provider=github&redirect_to=https://evil.example/` re-confirmed inert:
+1048:- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — `redirect_to` allowlist now proven per-TYPE, not just on `type=recovery`. Live 16:52Z: type=recovery|email_change|signup + 32-byte garbage token + off
+1067:- NEW REJECTED OATH @ /auth/v1/*: the `redirect_to` allowlist is NOT influenceable by a client-supplied host header — an axis untested in 50 days. `X-Forwarded-Host: evil.example` alone (303 → https://kurs.
+1092:- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — redirect_to allowlist proven per-TYPE (recovery, email_change, signup), 13 off-origin shapes tested, zero bypass; 400 path emits vary: Origin only, 30
+1288:- NEW **No redirect primitive on the SSO surface, measured not inferred.** `/auth/v1/sso?apikey=…&redirect_to=https://evil.example/steal&RelayState=abc` and the `/sso/oidc` equivalent return `saml_provider_
+1296:- NEW **Open redirect on `/verify` is CLOSED by measurement, not assumption.** Off-origin `redirect_to=https://evil.example/steal` → `Location: https://kurs.onecode.de#…`, off-origin target **discarded**, S
+1317:- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discarded,
+1329:- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discarde
+1340:- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+1353:- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+[0m
+[0m$ [0mgrep -rn "authorize.*redirect_to" /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md | head -3
+849:- NEW aygnpacdkgtsfnhgcyjc.supabase.co: GoTrue `GET /auth/v1/authorize?provider=github&redirect_to=https://evil.example/` → `400 {"error_code":"validation_failed","msg":"Unsupported provider: provider is no
+968:- CHANGED `/auth/v1/authorize?provider=github&redirect_to=https://evil.example/` re-confirmed inert:
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/body.txt -w "HTTP %{http_code}\n" --max-time 15 -D /tmp/opencode/onecode/hdr2.txt \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/authorize?provider=github&redirect_to=https://evil.example/" 2>&1 | tail -5; echo "---"; grep -iE "^(HTTP/|location:|x-sb-error)" /tmp/opencode/onecode/hdr2.txt; echo "---"; head -c 80 /tmp/opencode/onecode/body.txt; echo
+HTTP 400
+---
+HTTP/2 400 
+x-sb-error-code: validation_failed
+---
+{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: provid
+[0m
+I'll continue based on what's documented. The inventory already says what's next; let me pull the lead files for the exact directives.
+[0m$ [0mcat /home/runner/work/onecode-hunt/onecode-hunt/leads/lead-bigpickle.md | head -120
+## 2026-09-03 16:10:54 UTC [target] (model bigpickle)
+[HYP] Railway app API discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/, GET https://kurs.onecode.de/v1/, GET https://kurs.onecode.de/graphql, GET https://kurs.onecode.de/swagger
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+[NEXT] PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+## 2026-09-03 19:20:17 UTC [target] (model bigpickle)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+## 2026-09-03 21:49:10 UTC [target] (model bigpickle)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+[HYP] Railway app API discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/, GET https://kurs.onecode.de/v1/, GET https://kurs.onecode.de/graphql, GET https://kurs.onecode.de/swagger
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+[NEXT] PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+[0m
+[0m$ [0mgrep -n "NEXT\|accounts\|BOLA" /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md | head -15
+76:- NEW Next.js/Turbopack App Router confirmed with registered `/api` + `/v1` routers (auth-gated) — post-auth BOLA surface concretely exists.
+95:- CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).
+102:- CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED).
+110:- CHANGED Post-auth BOLA via Supabase RLS gap confidence stable at 65 (nemotron3) / 62 (bigpickle) — highest overall value but requires two invited test accounts (AUTH_HELPED)
+130:- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED)
+141:- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED)
+151:- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED).
+160:- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED)
+174:- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value hypothesis (conf 65); requires two invited test accounts (AUTH_HELPED)
+202:- CHANGED Post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); requires two invited test accounts (AUTH_HELPED) — no delta
+552:- CHANGED Triage 7Q gate (mimo) invoked 01:06Z + 06:01Z 09-18 with EMPTY LEADS — zero new findings in flight; only the two escalation-gated leads (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY) remain unresolved.
+558:- CHANGED Triage 7Q gate invoked 01:06Z/06:01Z 09-18 with EMPTY LEADS — zero new findings; only two escalation-gated leads remain (BOLA AUTH_HELPED, cto CNAME HUMAN_ONLY)
+882:- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — two invited accounts required for BOLA test
+893:- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled (`external.anonymous_users:false`), email-only, signup disabled — two invited accounts required for BOLA test
+1234:- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` — the NEXT directive is now **closed at endpoint level**. All three advertised OAuth endpoints are dead: `/auth/v1/oauth/aut
+[0m
+[0m$ [0msed -n '1170,1220p' /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md
+## 2026-10-03 00:08:37 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` → **200**, 240 B, serving a **JWKS never probed in 53 days**. One key: `kid 4f59d46f-c3e6-47c7-a717-fabf016650c9`, **`alg: ES256`, `kty
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` → **200**, 1045 B, also never probed. `issuer=https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1`, `jwks_uri` as above, and cr
+- CHANGED **The project's JWT signing algorithm class was wrong in the KB for 53 days.** Every prior JWT entry (09-25 `alg:none`→403, 09-28 "4 candidate HS256 secrets → 403/401", 09-30 "Bearer-only negative") a
+- NEW `/auth/v1/oauth/{authorize,token,userinfo,register,oidc}` — entire namespace mapped for the first time. All five → `404 {"error_code":"feature_disabled","msg":"OAuth server is disabled"}`. So the OIDC
+- NEW Storage/API breadth sweep (never run): `/pg/`, `/pg-meta/`, `/admin`, `/dashboard`, `/api/`, `/v1/`, `/.well-known/jwks.json` all → `404 {"error":"requested path is invalid"}`. The `jwks` document liv
+- CHANGED ES256→HS256 key confusion tested and **falsified** with 16 live requests: 8 public-key derivations (`raw_x||y`, DER SPKI, PEM SPKI, PEM-no-LF, minified JWK JSON, spaced JWK JSON, decoded `x` alone, de
+- CHANGED `alg` case-variant confusion (`none`/`None`/`NONE`, × kid present/absent) on PostgREST → 401. `alg=none` returns the distinct `PGRST301 "JWT is unsecured but expected 'alg' was not 'none'"`; `None`/`N
+- CHANGED PostgREST shares the ES256 verifier: an ES256 `kid`-bearing token yields `PGRST301 "None of the keys was able to decode the JWT" / "No suitable key or wrong key type"` — the resolver finds the JWK and
+- CHANGED **The KB's GoTrue CORS "auth-state discriminator" model has a documented exception.** The `jwks.json` endpoint reflects Origin **with `ACAC: true` even with no apikey and no `Authorization`** — 200 + 
+- CHANGED `kurs.onecode.de` — day-17, **no deploy**. `GET /login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical since 2026-09-19 11:33Z). Main chunk 
+- CHANGED `cto.onecode.de` — day-55, unchanged. CNAME `cname.perspective-dns.com.`, zero verification TXT.
+- NEW **JWT algorithm accept-list is ES256-only — confirmed on both planes by live test, contradicting the project's own published OIDC document.** PostgREST `PGRST301` and GoTrue `bad_jwt` distinguish two 
+- NEW **RS256-family key confusion is closed with valid attacker signatures** — a materially stronger negative than last cycle's 16 probes. Previously all confusion attempts failed at *signature* verificati
+- NEW **Embedded attacker JWK in the JWT header is ignored.** `{"alg":"RS256","jwk":<attacker RSA JWK>}` → `401 "No suitable key or found"`; `{"alg":"ES256","jwk":<attacker EC JWK>}` → `401`; `{"alg":"RS256
+- NEW **`PS256`/`PS384`/`PS512` take a distinct code path on PostgREST** — reproducibly (8/8, plus 3 repeats) `"JWT cryptographic operation failed"` with `details: null`, whereas all other algs return `"No 
+- NEW **CORS on the two new well-known paths: credentialed arbitrary-Origin reflection confirmed, and it does NOT depend on apikey.** Both `/auth/v1/.well-known/openid-configuration` and `/auth/v1/.well-kno
+- CHANGED **The KB's "auth-state discriminator" model is now falsified with a clean counter-example and must be retired as a general rule.** Last cycle I recorded it as having "an exception"; the correct statem
+- CHANGED Storage/API breadth: unchanged and now closed by counter-example — `/pg/`, `/pg-meta/`, `/admin`, `/dashboard`, `/api/`, `/v1/`, root `/.well-known/jwks.json` all `404 {"error":"requested path is inva
+- CHANGED `kurs.onecode.de` — day-17, no deploy. `/login` 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc21fc581a09d37acd21d9450`… corrected: `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc5
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, zero TXT. Unchanged.
+- NEW S3-compatible storage plane at `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 Invali
+- NEW GoTrue credentialed CORS reflection on `/auth/v1/*` re-verified live: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no `
+- NEW Signed URL route `/storage/v1/object/upload/sign/{bucket}/{key}` mounted and bucket-resolves pre-auth (400 NoSuchBucket) — 10th GET route class in complete route table
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (dig A, three legacy Supabase hostnames)
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/upload/sign/{b}/{k}` GET + `Origin: https://evil.example` + apikey/Bearer → `400 {"code":"NoSuchBucket"}` with `ACAO: *` and **no** `ACAC`
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/{bucket}?list-type=2` → `403 <Code>AccessDenied</Code><Message>Missing signature</Message>` with `<Resource>zzz_ctrl_9x7</Resource>` and **no** 
+- CHANGED `kurs.onecode.de` — day-16, **no deploy**. `GET /login` → 200, 18 702 B, page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical since the 2026-09-19 11:33Z buil
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1` — CORS auth-state discriminator re-proven with a matched control on one path, this cycle: `GET /auth/v1/settings?apikey=<pub>` + `Origin: https://evil.exampl
+- CHANGED `cto.onecode.de` — day-54, unchanged. CNAME `cname.perspective-dns.com.`, A `104.18.2.73`/`104.18.3.73`, TXT = CNAME line only (zero verification records), `GET http://cto.onecode.de/` → `409`
+- CHANGED Supabase REST `/rest/v1/` monitor formally closed 09-17 (27 probes, 503↔401 oscillation, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Storage plane CORS characterization closed: `ACAO: *`, no `ACAC`, no reflection — with apikey+Bearer on all 10 mounted GET routes
+
+## 2026-10-03 05:11:23 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 {"code":404,"error_code":"feature_disabled","msg":"OAuth server is disabled"}` served by the **OAuth router, no
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, and the subtree root all return `401 No API key found in request` with `ACAO: *` + full 9-method list + `max-age 
+- NEW `OPTIONS` preflight on the well-known subtree → `200 ACAO: *` + 9-method list + `max-age 3600`, identical on both `openid-configuration` and `oauth-authorization-server`. Preflight uniform; only the *
+- CHANGED **My own conf-72 claim is narrowed and survives in corrected form.** "Reflection on this subtree is unconditional" is **retracted**. Correct three-tier model: (A) registered well-known docs + OAuth-ro
+- CHANGED `kurs.onecode.de` — day-18, **no deploy**. `/login` 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`; main chunk 154 581 B sha256 `f916f314ea61a8c58a055707fc63c
+- CHANGED `cto.onecode.de` — day-56, `cname.perspective-dns.com.` → 104.18.3.73/104.18.2.73, HTTP 409. Unchanged.
+- NEW Negative recorded: `GET /auth/v1/.well-known/../settings` → normalises to `/auth/v1/settings` and is gated at `401`. No path-traversal gate bypass.
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` + `jwks.json` — pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 id_token signing but JWKS serves o
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` reflects arbitrary `Origin` with `ACAC: true` **without** apikey (unauthenticated) — falsifies "auth-state discriminator" model; CORS o
+- NEW JWT algorithm confusion comprehensively closed on both planes: 38 live probes (27 PostgREST + 11 GoTrue) across HS256/RS256/PS256/ES256/EdDSA × attacker keys — zero tokens authenticated; embedded JWK 
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (legacy Supabase hostnames not routed)
+- CHANGED `kurs.onecode.de` — day-17, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; all `/
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converg
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+- CHANGED GoTrue credentialed CORS: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no ACAC — router-wide confirmed
+[0m
+[0m$ [0msed -n '1220,1360p' /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md | tail -140
+## 2026-10-03 10:30:25 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` + `jwks.json` — pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 id_token signing but JWKS serves o
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` reflects arbitrary `Origin` with `ACAC: true` **without** apikey (unauthenticated) — falsifies "auth-state discriminator" model; CORS o
+- NEW JWT algorithm confusion comprehensively closed on both planes: 38 live probes (27 PostgREST + 11 GoTrue) across HS256/RS256/PS256/ES256/EdDSA × attacker keys — zero tokens authenticated; embedded JWK 
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (legacy Supabase hostnames not routed)
+- CHANGED `kurs.onecode.de` — day-17, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; all `/
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converg
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+- CHANGED GoTrue credentialed CORS: `apikey` query param → reflects arbitrary `Origin` with `ACAC: true` on 200/401/404/405; unauthenticated → wildcard `ACAO: *` no ACAC — router-wide confirmed
+
+## 2026-10-03 15:00:44 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` — the NEXT directive is now **closed at endpoint level**. All three advertised OAuth endpoints are dead: `/auth/v1/oauth/aut
+- NEW **DELTA — the OAuth reflection is exact-route, not prefix-mounted.** `/auth/v1/oauth/zzz_ctrl_9x7`, `/auth/v1/oauth/` and `/auth/v1/oauth` all return `401 {"message":"No API key found in request"}` wi
+- NEW `/auth/v1/.well-known/oauth-authorization-server/aygnpacdkgtsfnhgcyjc.supabase.co` (RFC 8414 §3 path-insertion metadata form, never tested) → `404 page not found` with `ACAO` reflected + `ACAC: true` 
+- NEW `Origin: null` → `ACAO: null` + `ACAC: true` on all three advertised endpoints (`authorize`, `token`, `userinfo`). No attacker-controlled domain required anywhere on tier A.
+- NEW **Preflight is uniform wildcard and does NOT reflect**, on tier A and tier C alike: `OPTIONS` on `/auth/v1/oauth/authorize`, `/auth/v1/oauth/token`, `/auth/v1/.well-known/jwks.json`, `/auth/v1/oauth/z
+- NEW `token_endpoint_auth_methods_supported: ["client_secret_basic","client_secret_post","none"]` and `grant_types_supported: ["refresh_token"]` + `scopes_supported` incl. `offline_access` — a fourth overs
+- CHANGED `kurs.onecode.de` — day-19, **no deploy**. `/login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (64-hex asserted), **zero** `Set-Cookie`. Byte-identical 
+- CHANGED `cto.onecode.de` — day-57, CNAME `cname.perspective-dns.com.`, HTTP `409`. Unchanged.
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1` — `400 {"code":"NoSuchBucket"}` on the control bucket, unchanged.
+- NEW **The queued NEXT paid off — and it falsified my own previous-cycle claim.** `/auth/v1/oauth/token/extra` → `404 feature_disabled` with reflected `ACAO` + `ACAC: true`. `/auth/v1/oauth/authorize/extra
+- NEW **The entire pre-gate reflecting surface is unbounded in path space.** All 6 pre-gate route names are prefix-mounted at arbitrary depth: `.well-known/jwks.json/anything`, `.well-known/openid-configura
+- NEW **Corrected mechanism — it is not "CORS tiers", it is gate ordering.** `401 {"message":"No API key found in request"}` with `ACAO: *` and no `ACAC` is GoTrue's **global apikey gate, which runs before 
+- NEW Final pre-gate enumeration (8 names tested, credential-free, no apikey): **6 are pre-gate** — `.well-known/jwks.json` (200 ES256), `.well-known/openid-configuration` (200), `.well-known/oauth-authoriz
+- NEW Third traversal negative: `/auth/v1/.well-known/oauth-authorization-server/../../settings` normalises to `/auth/v1/settings` → `401 No API key found`, `ACAO: *`, no ACAC. Prefix mounting does not crea
+- CHANGED `kurs.onecode.de` — day-19, no deploy. `/login` → 200, 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`, zero `Set-Cookie`. Byte-identical since 2026-09-19 11:33Z.
+- CHANGED `cto.onecode.de` — day-57, CNAME `cname.perspective-dns.com.`, HTTP `409`. Unchanged. `storage/v1` → `400 NoSuchBucket` on the control bucket, unchanged.
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/openid-configuration` + `jwks.json` — pre-auth OIDC discovery documents live (200), advertise RS256/HS256/ES256 id_token signing but JWKS serves o
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json` reflects arbitrary `Origin` with `ACAC: true` **without** apikey (unauthenticated) — falsifies "auth-state discriminator" model; CORS o
+- NEW JWT algorithm confusion comprehensively closed on both planes: 38 live probes (27 PostgREST + 11 GoTrue) across HS256/RS256/PS256/ES256/EdDSA × attacker keys — zero tokens authenticated; embedded JWK 
+- NEW `api.`, `functions.`, `realtime.aygnpacdkgtsfnhgcyjc.supabase.co` → zero A records (legacy Supabase hostnames not routed)
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSi
+- CHANGED `kurs.onecode.de` — day-17, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200; all `/
+- CHANGED `cto.onecode.de` — day-55, CNAME `cname.perspective-dns.com.`, A `104.18.2.73/3.73`, TXT = CNAME line only (zero verification), HTTP 409 "error code:1001", TLS handshake-fail — passive probing converg
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002 (schema-cache-down); monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth
+
+## 2026-10-03 18:42:55 UTC
+- NEW Two distinct CORS middlewares confirmed at header level, not inferred from behavior — pre-gate Kong-local 404s emit `vary: Origin` **alone**, while GoTrue resource paths emit `vary: Origin, Accept-Enc
+- NEW Realtime plane emits **zero** `access-control-*` headers on a simple cross-origin GET with foreign `Origin` — not wildcard ACAO, nothing. The persisted claim that realtime grants `ACAO: *` was preflig
+- NEW `sb-gateway-mode: direct` header observed on realtime responses, absent on the auth/Kong plane (`sb-gateway-version: 1`). Gate/version heterogeneity across planes is real and worth carrying into remed
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+- NEW `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+- CHANGED CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with 
+- CHANGED `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+
+## 2026-10-03 21:46:49 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+- NEW `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+- CHANGED CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with 
+- CHANGED `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+
+## 2026-10-04 00:32:23 UTC
+- CHANGED Queued NEXT probe **executed**: `GET /auth/v1/.well-known/oauth-authorization-server/../authorize` → `401` `x-sb-error-code: UNAUTHORIZED_MISSING_API_KEY`, `ACAO: *`, 9-method list, **no `ACAC`**, no 
+- NEW `/auth/v1/sso`, `/auth/v1/sso/oidc`, `/auth/v1/sso/saml/metadata` — a **GoTrue SSO namespace never probed in 53 days**. All three return `404 {"error_code":"saml_provider_disabled","msg":"SAML 2.0 is 
+- NEW `/auth/v1/mfa` and `/auth/v1/identities` — never probed. Both return Kong-local `404 page not found` with reflected `ACAO` + `ACAC: true` when the apikey is present.
+- CHANGED **Falsified my own expansion hypothesis.** Matched no-apikey control across 5 paths: `/auth/v1/sso`, `/auth/v1/sso/oidc`, `/auth/v1/mfa`, `/auth/v1/identities`, `/auth/v1/user` all → `401` + `ACAO: *`
+- NEW **No redirect primitive on the SSO surface, measured not inferred.** `/auth/v1/sso?apikey=…&redirect_to=https://evil.example/steal&RelayState=abc` and the `/sso/oidc` equivalent return `saml_provider_
+- NEW Scope correction that *simplifies* the model: the credentialed reflection is **universal on the apikey-bearing branch**, now measured on 4 additional resource-path classes beyond the previously catalo
+- CHANGED **Queued NEXT executed — the ACS probe found nothing, and the namespace is now fully bounded.** `GET /auth/v1/sso/saml/acs?RelayState=abc&SAMLResponse=<dummy>` → `404 saml_provider_disabled`, no `Loca
+- NEW **SSO subtree structurally closed on both sides, with a counterexample.** `/sso/a`, `/sso/a/b/c/d/e`, `/sso/oidc/x/y` → all `saml_provider_disabled` (unbounded depth); `/sso-abc` → Kong-local `404 pag
+- NEW No domain-specific SSO-OIDC provider exists. `/sso/oidc?domain=onecode.de|kurs.onecode.de|auth.onecode.de` → all `404 saml_provider_disabled`, **no `Location`** on any, even with off-origin `redirect_
+- NEW **`/auth/v1/settings` full scalar surface enumerated (8 keys).** `disable_signup=true`, `mailer_autoconfirm=false`, `phone_autoconfirm=false`, `saml_enabled=false`, `sms_provider=twilio`, and two I ha
+- CHANGED **`/auth/v1/verify` is a SEVENTH pre-gate route — this falsifies last cycle's causal claim.** Keyless `GET /auth/v1/verify` → `400 {"error_code":"validation_failed","msg":"Verify requires a verificati
+- NEW `/verify` is **exactly matched, not prefix-mounted** — `/auth/v1/verify/a` → Kong-local `404 page not found`. Structurally distinct from the 6 Kong routes, each of which reflects to depth 5.
+- NEW **Open redirect on `/verify` is CLOSED by measurement, not assumption.** Off-origin `redirect_to=https://evil.example/steal` → `Location: https://kurs.onecode.de#…`, off-origin target **discarded**, S
+- NEW **The `.well-known/` namespace has no wildcard route.** Five standards-motivated siblings — RFC 9728 `oauth-protected-resource`, the `/` directory index itself, `webfinger`, `assetlinks.json`, `change
+- NEW Pre-gate set closed at exactly 7 by bounded sweep, not sampling. Keyless `401` + `ACAO:*` + no `ACAC` on all 23 further candidates: `health`, `health/live`, `health/ready`, `logout`, `recover`, `signu
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/oauth-authorization-server` → `404 feature_disabled` served by OAuth router, reflects `Origin` with `ACAC: true` without apikey (pre-gate)
+- NEW `.well-known` fallthrough closed by counter-example: `zzz_ctrl_9x7`, `acme-challenge`, subtree root all return `401 No API key found` with `ACAO: *` + 9-method list + `max-age 3600` (tier C)
+- NEW `OPTIONS` preflight on well-known subtree → uniform `ACAO: *` + 9-method list + `max-age 3600` on both `openid-configuration` and `oauth-authorization-server`; only simple requests reflect
+- CHANGED CORS model corrected to three tiers keyed on route registration: (A) registered well-known + OAuth-router paths reflect unconditionally with `ACAC: true`; (B) `/auth/v1/*` resource paths reflect with 
+- CHANGED `kurs.onecode.de` — day-18, no deploy; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` — day-56, CNAME `cname.perspective-dns.com.`, HTTP 409, zero verification TXT; passive probing converged
+- CHANGED Supabase REST `/rest/v1/` — 503 PGRST002; monitor formally closed 09-17 (27 probes, 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — 403 S3 XML "Missing signature" confirmed live; independent SigV4 authz plane, access-key-ID oracle verified (400 InvalidSignature vs 403 Miss
+
+## 2026-10-04 06:29:19 UTC
+
+## 2026-10-04 12:40:26 UTC
+
+## 2026-10-04 17:08:54 UTC
+
+## 2026-10-04 20:19:01 UTC
+
+## 2026-10-04 23:18:43 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discarded,
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known namespace has no wildcard route — 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return keyles
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) while
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 S3-compatible plane confirmed live (403 Missing signature), independent SigV4 authz, access-key-ID oracle verified, never probed in 26 days
+- CHANGED kurs.onecode.de: no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-05 02:11:15 UTC
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID oracle
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discarde
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known — namespace has no wildcard route; 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return keyle
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso — namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) whi
+- CHANGED kurs.onecode.de — no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED cto.onecode.de — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1 — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-05 09:20:54 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID orac
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known` — namespace has no wildcard route; 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return key
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso` — namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) w
+- CHANGED `kurs.onecode.de` — no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED `cto.onecode.de` — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+
+## 2026-10-05 18:40:58 UTC
+
+## 2026-10-06 00:21:25 UTC
+- NEW `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` — S3-compatible storage plane confirmed live (403 Missing signature), independent SigV4 authz plane never probed in 26 days; access-key-ID orac
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify` — confirmed as 7th pre-gate route (keyless, reflects Origin with ACAC:true); open-redirect branch closed by measurement (off-origin redirect_to discar
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known` — namespace has no wildcard route; 5 standards siblings (oauth-protected-resource, /, webfinger, assetlinks.json, change-password) all return key
+- NEW `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso` — namespace blocked by saml_provider_disabled (not feature_disabled); SAML signing material already provisioned (saml_private_key_next_configured=true) w
+- CHANGED `kurs.onecode.de` — no deploy day-20; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED `cto.onecode.de` — CNAME→cname.perspective-dns.com day-58+, HTTP 409, zero verification TXT; passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` — monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED GoTrue CORS model corrected to three tiers keyed on route registration: (A) well-known + OAuth-router paths reflect unconditionally with ACAC:true; (B) /auth/v1/* resource paths reflect with ACAC:true
+- CHANGED Preflight uniformly ACAO:* with full destructive method list on all planes — does NOT reflect Origin anywhere
+[0m
+[0m$ [0mtail -80 /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md | grep -B5 -A40 "2026-10-09" | head -50
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+
+## 2026-10-09 00:48:16 UTC
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+- NEW GitHub org scan complete (reposcan avenue previously unstaged by config): orgs `OneCodeDevs` (1 public repo `compass`, Kotlin Jetpack-Compose nav lib, updated Jul 2024) + `OneCode` (test repo `hello-g
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — matches prior Certspotter; subdomain inventory confirmed complete, zero new surface
+- CHANGED kurs.onecode.de still no deploy (day-20): /login 200 (18 702 B), main chunk 0-mbmp1iqb6hj.js sha256 f916f314ea61a8c5... byte-identical, sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738... byte-identica
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+
+## 2026-10-09 07:17:26 UTC
+- CHANGED S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it i
+- CHANGED Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-on
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+- NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names — subdomain inventory confirmed complete
+[0m
+[0m$ [0mgrep -B2 -A30 "2026-10-09 07:17:26 UTC" /home/runner/work/onecode-hunt/onecode-hunt/inventory/onecode.md | head -35
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+
+## 2026-10-09 07:17:26 UTC
+- CHANGED S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it i
+- CHANGED Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-on
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+- NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names — subdomain inventory confirmed complete
+[0m
+[0m$ [0mcat /home/runner/work/onecode-hunt/onecode-hunt/leads/lead-bigpickle.md | grep -B5 -A25 "2026-10-09" | head -30
+class: cors
+class: broken-access-control
+## 2026-10-08 15:06:18 UTC [target] (model bigpickle)
+[NEXT] HUMAN — request two invited `kurs.onecode.de` test accounts, password-grant, cross-query `GET /rest/v1/profiles?select=id,email,tenant_id` and `/rest/v1/enrollments` with account A's Bearer to confirm the RLS gap (config 65, priority-1). Fallback if accounts denied: Perspective claim attempt on cto.onecode.de (HUMAN_ONLY, conf 58). No further passive probes productive — surface converged; re-probe cadence ≤1/day, build-diff event-triggered only.
+## 2026-10-08 20:44:11 UTC [target] (model bigpickle)
+## 2026-10-09 00:48:03 UTC [target] (model bigpickle)
+[PRIO] kurs.onecode.de/login,6.4,attack_surface=5,business_value=7,tech_exposure=7,gate_ease=10,cloud=5,freshness=3
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify,6.0,attack_surface=4,business_value=6,tech_exposure=8,gate_ease=9,cloud=6,freshness=3
+[PRIO] kurs.onecode.de post-auth (/rest BOLA),6.5,attack_surface=8,business_value=9,tech_exposure=6,gate_ease=2,cloud=7,freshness=3
+[HYP] Forced-login via URL-fragment session sink mounted on public /login
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: HashSessionHandoff (module 34891, chunk `1a4tqdnsy9k1l.js`) is mounted on the /login RSC payload (row `18:I[34891,…]`), runs `useEffect` on hydration with no user interaction, reads `window.location.hash` for `access_token`+`refresh_token` and calls `setSession()` with no `state`/`nonce`/PKCE binding; /login is a 200 pre-auth page. Exploit needs an attacker-supplied valid token pair; signup+anonymous are disabled so an attacker token pair requires an invited account.
+evidence_needed: A crafted `GET https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>` from account A sets the victim browser's `sb-aygnpacdkgtsfnhgcyjc-auth-token` cookie to A's session and then serves A's authenticated views.
+verify_steps: PASSIVE-only: `GET https://kurs.onecode.de/login` and confirm `18:I[34891` mount unchanged; read chunk `/_next/static/chunks/1a4tqdnsy9k1l.js` and confirm hash-literal `access_token`/`refresh_token` + `setSession`. AUTH_HELPED confirmation: with account A's token pair, load the crafted fragment URL in a second browser profile and observe session adoption.
+impact: Victim operates inside attacker-controlled session (session fixation/CWE-384); data victim enters post-hijack is readable by attacker. Severity MEDIUM; capped because redirect map is fixed `{invite:/einladung,recovery:/passwort-neu}` (no off-origin redirect) and attacker needs an invitation.
+testability: AUTH_HELPED
+[HYP] Pre-auth token-state oracle on GoTrue verify
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+confidence: 60
+reasoning: Keyless `GET /auth/v1/verify` (7th pre-gate route, exactly-matched) is handler-reachable; off-origin `redirect_to` is discarded and Location falls back to `https://kurs.onecode.de#error=…`; response varies with token validity/state, producing an information-only oracle. Reflection is simple-request-only with below. No data read.
+evidence_needed: Distinguishable status/body for a well-formed-but-unknown token vs a malformed token on `type=recovery`.
+verify_steps: `GET /auth/v1/verify?type=recovery&token=<garbage32>&redirect_to=https://evil.example/steal` (read-only) — record status, `Location`, `#error` code. No credential, no mutation.
+impact: Token-state enumeration only; no session/data access. LOW.
+testability: PASSIVE
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS gap
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+[0m
+[0m$ [0msed -n '30,80p' /home/runner/work/onecode-hunt/onecode-hunt/leads/lead-bigpickle.md | head -55
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+[LEARN] REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+## 2026-09-03 21:49:10 UTC [target] (model bigpickle)
+[HYP] Session fixation on Railway-hosted kurs.onecode.de
+class: AUTH
+asset: kurs.onecode.de
+confidence: 65
+reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+evidence_needed: Set-Cookie headers on /login, session token format, cookie flags
+verify_steps: GET https://kurs.onecode.de/login — capture Set-Cookie, response body (CSRF token, form structure), security headers
+impact: Session fixation -> account takeover (High)
+testability: AUTH_HELPED
+[HYP] IDOR on course enrollment/resources
+class: IDOR
+asset: kurs.onecode.de
+confidence: 60
+reasoning: Course platform semantics (enrollments, resources) predict IDOR; auth required but test account feasible
+evidence_needed: Enrollment IDs, resource paths with numeric/string IDs, response differences
+verify_steps: After login, enumerate /enrollments/{id}, /courses/{id}, /resources/{id} patterns
+impact: Cross-tenant PII/resource access (High)
+testability: AUTH_HELPED
+[HYP] Railway API endpoint discovery
+class: MISCONFIG
+asset: kurs.onecode.de
+confidence: 40
+reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+evidence_needed: 200/401/403 responses on common API paths
+verify_steps: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+impact: API endpoint discovery, potential auth bypass (Medium-High)
+testability: PASSIVE
+[NEXT] PROBE: GET https://kurs.onecode.de/login — capture Set-Cookie headers, response body (CSRF token, form structure), security headers (CSP, HSTS, X-Frame-Options)
+[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[0m
+[0m$ [0mtail -60 /home/runner/work/onecode-hunt/onecode-hunt/leads/lead-bigpickle.md
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+[RISK] onecode: 70 — Primary asset `kurs.onecode.de`: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all `/api/*` auth-gated. CRITICAL NEW: S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co` deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads), plus unconditional reflection on well-known endpoints. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. `cto.onecode.de` dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth.
+[NEW] GitHub org scan complete (reposcan avenue previously unstaged by config): orgs `OneCodeDevs` (1 public repo `compass`, Kotlin Jetpack-Compose nav lib, updated Jul 2024) + `OneCode` (test repo `hello-guide`); full clone scan found zero secrets, zero internal/infra endpoints, zero CI-secret leaks, Maven publish targets Sonatype only — OSS-only, no source-leak finding
+[NEW] crt.sh re-query 2026-10-09 00:43Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — matches prior Certspotter; subdomain inventory confirmed complete, zero new surface
+[CHANGED] kurs.onecode.de still no deploy (day-20): /login 200 (18 702 B), main chunk 0-mbmp1iqb6hj.js sha256 f916f314ea61a8c5... byte-identical, sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738... byte-identical — build-diff remains event-triggered only
+[PRIO] kurs.onecode.de/login,6.4,attack_surface=5 business_value=7 tech_exposure=7 gate_ease=10 cloud_surface=5 freshness=3
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify,6.0,attack_surface=4 business_value=6 tech_exposure=8 gate_ease=9 cloud_surface=6 freshness=3
+[PRIO] kurs.onecode.de post-auth /rest BOLA (RLS gap),6.5,attack_surface=8 business_value=9 tech_exposure=6 gate_ease=2 cloud_surface=7 freshness=3
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS gap
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses}
+confidence: 65
+reasoning: Single Supabase project aygnpacdkgtsfnhgcyjc; UUID PKs weaken enumeration so the realistic gap is a missing RLS filter letting an authenticated user SELECT rows they do not own; PostgREST anon is key-gated 401/503 but Bearer reads are not app-origin-gated.
+evidence_needed: Account A's Bearer returning rows belonging to account B on unfiltered select=*
+verify_steps: AUTH_HELPED: with invited accounts A+B, read-only `GET /rest/v1/enrollments?select=*` and `GET /rest/v1/profiles?select=id,email` with A's Bearer
+impact: Cross-tenant PII/enrollment dump if RLS filter absent — HIGH/CRITICAL
+testability: AUTH_HELPED
+[HYP] Forced-login via URL-fragment session sink mounted on public /login
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 55
+reasoning: HashSessionHandoff (module 34891, chunk 1a4tqdnsy9k1l.js) mounted on /login RSC row `18:I[34891,...]`, runs on hydration, parses window.location.hash access_token+refresh_token into setSession() with no state/nonce/PKCE; exploit needs attacker-valid token pair, signup+anonymous disabled, redirect map fixed {invite:/einladung,recovery:/passwort-neu}
+evidence_needed: Crafted `GET https://kurs.onecode.de/login#access_token=<A>&refresh_token=<A>` adopting A's session in victim browser
+verify_steps: PASSIVE: fetch /login, confirm `18:I[34891` mount + hash literals in sink chunk; AUTH_HELPED second-browser session-adoption check
+impact: Session fixation (CWE-384) post-hijack data readable by attacker — MEDIUM
+testability: AUTH_HELPED
+[HYP] Pre-auth token-state oracle on GoTrue verify
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+confidence: 60
+reasoning: Keyless 7th pre-gate route exactly-matched; off-origin redirect_to discarded, Location falls back to https://kurs.onecode.de#error=...; response varies with token validity/state — information-only oracle
+evidence_needed: Distinguishable status/body for well-formed-but-unknown vs malformed token on type=recovery
+verify_steps: `GET /auth/v1/verify?type=recovery&token=<garbage32>&redirect_to=https://evil.example/steal` — record status/Location/#error code
+impact: Token-state enumeration only — LOW
+testability: PASSIVE
+[PARKED] Forced-login sink: MEDIUM, requires invited attacker token pair (no free principal; JWT forgery closed ES256/alg-confusion) — gated
+[PARKED] cto.onecode.de takeover (conf 58, HUMAN_ONLY): CNAME cname.perspective-dns.com day-59+, 409/1001, zero TXT — only owner claim advances
+[PARKED] GoTrue credentialed CORS + verify oracle + S3 SigV4 plane: all PASSIVE-confirmed and impact-capped; no new chain without creds
+[FINAL] 1. Post-auth BOLA via RLS gap (conf 65, AUTH_HELPED, HIGH/CRITICAL)
+[FINAL] 2. Forced-login fragment sink on /login (conf 55, AUTH_HELPED, MEDIUM)
+[FINAL] 3. GoTrue verify token-state oracle (conf 60, PASSIVE, LOW)
+[NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B); obtain A's Bearer via password-grant, then read-only `GET /rest/v1/enrollments?select=*` and `GET /rest/v1/profiles?select=id,email` with A's Bearer to test cross-tenant row visibility (sole remaining path to the HIGH/CRITICAL-class BOLA finding)
+[LEARN] REJECTED MISCONFIG @ github/OneCodeDevs+OneCode: public repos compass (Kotlin OSS nav lib, de.onecode groupId) + hello-guide (test); clone scan zero secrets/internal endpoints/CI leaks; repo-scan avenue closed
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-20; /login 200 (18 702 B), main+sink chunk sha256 byte-identical — build-diff must stay event-triggered
+[LEARN] ACCEPTED MISCONFIG @ onecode.de zone: crt.sh re-query 00:43Z exactly 5 names; three independent CT sources agree — subdomain inventory complete
+[RISK] onecode: 49 — all passive surface converged (20 days no deploy; REST/storage/S3/cto/GitHub all non-permissive or impact-capped). No customer-data access without credentials; two FINAL AUTH_HELPED leads (BOLA conf 65, sink conf 55) + one PASSIVE LOW oracle. Score static until invited-account BOLA test, cto claim attempt, or a deploy.
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-20; /login 200 (18 702 B), main+sink chunk sha256 byte-identical — build-diff must stay event-triggered
+[LEARN] ACCEPTED MISCONFIG @ onecode.de zone: crt.sh re-query 00:43Z exactly 5 names; three independent CT sources agree — subdomain inventory complete
+[RISK] onecode: 49 — all passive surface converged (20 days no deploy; REST/storage/S3/cto/GitHub all non-permissive or impact-capped). No customer-data access without credentials; two FINAL AUTH_HELPED leads (BOLA conf 65, sink conf 55) + one PASSIVE LOW oracle. Score static until invited-account BOLA test, cto claim attempt, or a deploy.
+## 2026-10-09 07:17:14 UTC [target] (model bigpickle)
+[CHANGED] S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it is credentials-class enumeration -> out of passive bounds, NOT reportable, no candidate IDs.
+[CHANGED] Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-only, no auth cookie on supabase.co; only __cf_bm SameSite=None). No new impact.
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1
+class: IDOR/BOLA (RLS gap on tenant-scoped tables)
+asset: kurs.onecode.de/login
+class: session adoption / fixation via URL-fragment sink
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+class: account/token-state oracle
+[NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B). If granted, immediately run H1 read-only cross-tenant REST probe with A's Bearer; if not granted within the cycle, pivot to [NEXT] PROBE H3 differential /auth/v1/verify (read-only) as the only account-free signal.
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "HTTP:%{http_code} CT:%{content_type} LOC:%{redirect_url}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=12345678901234567890123456789012&redirect_to=https://evil.example/steal" \
+  --max-time 15 -L 2>&1 | tail -2
+HTTP:200 CT:text/html; charset=utf-8 LOC:
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/v1.html -w "HTTP:%{http_code}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=12345678901234567890123456789012&redirect_to=https://evil.example/steal" \
+  --max-time 15 2>&1 | tail -1; echo "---"; head -c 150 /tmp/opencode/onecode/v1.html; echo
+HTTP:303
+---
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_description=Email+link+is+invalid+or+has+expired&amp;sb=">Se
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/v2.html -w "HTTP:%{http_code} LOC:%{redirect_url}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&redirect_to=https://evil.example/steal" \
+  --max-time 15 -L 2>&1 | tail -1; echo "---"; curl -sS -o /tmp/opencode/onecode/v2p.html -w "HTTP:%{http_code}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&redirect_to=https://evil.example/steal" \
+  --max-time 15 2>&1 | tail -1; head -c 100 /tmp/opencode/onecode/v2p.html; echo
+HTTP:200 LOC:
+---
+HTTP:303
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&amp;error_descriptio
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/v3p.html -w "HTTP:%{http_code}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&redirect_to=https://evil.example/steal" \
+  --max-time 15 2>&1 | tail -1; head -c 60 /tmp/opencode/onecode/v3p.html; echo
+HTTP:303
+<a href="https://kurs.onecode.de#error=access_denied&amp;err
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/vmal.html -w "HTTP:%{http_code}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=short&redirect_to=https://evil.example/steal" \
+  --max-time 15 2>&1 | tail -1; head -c 80 /tmp/opencode/onecode/vmal.html; echo
+HTTP:303
+<a href="https://kurs.onecode.de#error=access_denied&amp;error_code=otp_expired&
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/vinv.html -w "HTTP:%{http_code}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=recovery&token=nothex!!!&redirect_to=https://evil.example/steal" \
+  --max-time 15 2>&1 | tail -1; head -c 60 /tmp/opencode/onecode/vinv.html; echo
+HTTP:303
+<a href="https://kurs.onecode.de#error=access_denied&amp;err
+[0m
+[0m$ [0mcurl -sS -o /tmp/opencode/onecode/v4.html -w "HTTP:%{http_code}\n" \
+  "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?type=signup&token=12345678901234567890123456789012&redirect_to=https://evil.example/steal" \
+  --max-time 15 2>&1 | tail -1; head -c 40 /tmp/opencode/onecode/v4.html; echo
+HTTP:303
+<a href="https://kurs.onecode.de#error=a
+[0m

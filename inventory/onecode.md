@@ -1464,3 +1464,17 @@ www.onecode.de
 - CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
 - NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
 - NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names — subdomain inventory confirmed complete
+
+## 2026-10-09 14:46:24 UTC
+- NEW GitHub org scan complete (reposcan avenue previously unstaged by config): orgs `OneCodeDevs` (1 public repo `compass`, Kotlin Jetpack-Compose nav lib, updated Jul 2024) + `OneCode` (test repo `hello-g
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — matches prior Certspotter; subdomain inventory confirmed complete, zero new surface
+- CHANGED kurs.onecode.de still no deploy (day-20): /login 200 (18 702 B), main chunk 0-mbmp1iqb6hj.js sha256 f916f314ea61a8c5... byte-identical, sink chunk 1a4tqdnsy9k1l.js sha256 5a72d2cd8738... byte-identica
+- CHANGED S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it is
+- CHANGED Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-on
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+- NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names — subdomain inventory confirmed complete
