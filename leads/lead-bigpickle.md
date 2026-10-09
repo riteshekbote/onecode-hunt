@@ -7623,3 +7623,4 @@ class: session adoption / fixation via URL-fragment sink
 asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
 class: account/token-state oracle
 [NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B). If granted, immediately run H1 read-only cross-tenant REST probe with A's Bearer; if not granted within the cycle, pivot to [NEXT] PROBE H3 differential /auth/v1/verify (read-only) as the only account-free signal.
+## 2026-10-09 19:46:30 UTC [target] (model bigpickle)
