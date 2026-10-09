@@ -41728,3 +41728,88 @@ I am stopping here because the engagement has converged and I am **unsure how to
 3. If neither is available, the program has no further in-bounds findings; should I emit a final `NO_FINDINGS`/`CLOSED` report rather than continue cycling?
 
 Confirm which, and I'll proceed.
+===== ANALYST bigpickle 2026-10-09 23:56:01 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -o /tmp/login_1010.html -D /tmp/login_1010.hdr "https://kurs.onecode.de/login" && sha256sum /tmp/login_1010.html && grep -iE "^(content-type|set-cookie|cache-control|server|x-railway-edge|x-hikari-trace):" /tmp/login_1010.hdr
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/login_1010.html
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+server: railway-hikari
+x-railway-edge: iad1
+x-hikari-trace: iad1.dh1s
+[0m
+[0m$ [0mcurl -sS -o /tmp/chunk_1010.js "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" && sha256sum /tmp/chunk_1010.js && wc -c /tmp/chunk_1010.js
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/chunk_1010.js
+154581 /tmp/chunk_1010.js
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; dig +short cto.onecode.de A; echo "---"; dig +short kurs.onecode.de CNAME
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+---
+ki8dqcf6.up.railway.app.
+[0m
+## Objective
+- Continue passive-first bug-bounty analysis of OneCode GmbH program assets (`*.onecode.de`, `kurs.onecode.de`, company infra incl. Supabase project `aygnpacdkgtsfnhgcyjc.supabase.co`), running the 8-step structured cycle (DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT → LEARNING → RISK), phase=POC, target=api.
+- Drive the two highest-value gated leads to resolution: post-auth cross-tenant BOLA via Supabase RLS gap (conf 65, AUTH_HELPED) and forced-login via URL-fragment session sink on `/login` (conf 55, AUTH_HELPED), plus the one account-free signal (GoTrue `/auth/v1/verify` token-state oracle, conf 60, PASSIVE).
+
+## Important Details
+- Credentials/material: Supabase publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 (key bytes) = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`; old digest `870cf518…` was a trailing-newline artifact — cite `43ccb834…` in any PoC. Sink chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (64 hex; the 66-char `…c3c6c6dcedd0` variant is invalid). Main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`.
+- Hard probe limits: read-only (GET/HEAD/OPTIONS), ≤1 rps, no auth-bypass/mutating tests on live customer data, no credentials-enumeration/rate-limit classes. Out-of-scope classes explicitly listed (CSRF on logout/anonymous forms, brute-force/ratelimit, username enumeration, SSL/TLS practice, clickjacking w/o exploit, etc.).
+- Supabase gateway model: CORS = three tiers keyed on route registration — (A) registered well-known/OAuth-router paths + `/auth/v1/verify` reflect Origin with `ACAC:true` keyless; (B) `/auth/v1/*` resource paths reflect with `ACAC:true` only when apikey present (header or `?apikey=` query string); (C) fallthrough = `ACAO:*`, no ACAC. Preflight never reflects. App origin `kurs.onecode.de` is CORS-clean (no `access-control-*` on foreign Origin) → impact capped at MEDIUM. GoTrue is Bearer-only; no auth cookie on supabase origin.
+- JWT surface: verifier is **ES256-only** (JWKS `kid 4f59d46f-c3e6-47c7-a717-fabf016650c9`); alg confusion closed (38 probes + embedded-JWK injection + ES256→HS256, all rejected); `service_role` forgery closed; `alg:none` → 403. OIDC discovery doc overstates surface (advertises RS256/HS256, `plain` PKCE, dead OAuth endpoints) — informational.
+- Auth posture: email-only, `disable_signup:true`, `mailer_autoconfirm:false`, all external providers false, anonymous sign-in disabled (`/auth/v1/anonymous` → 404 router-level), SAML disabled but `saml_private_key_next_configured=true` (provisioned, single toggle away). No free second `authenticated` principal.
+- Storage: pre-auth bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded via `400 NoSuchBucket`); bucket name unrecoverable from 13 pre-auth chunks. S3 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` = 403 SigV4, no oracle, PARKED (needs owner S3 keys). REST monitor closed (27 probes, 503↔401, never 200+rows).
+- `cto.onecode.de`: CNAME → `cname.perspective-dns.com` stable day-59+, HTTP 409/1001, zero verification TXT, conf 58, **HUMAN_ONLY** (owner claim attempt = only proof path).
+- `kurs.onecode.de`: no deploy since 2026-09-19 11:33Z (day-21); pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200, all `/api/*,/v1,/admin,/dashboard` 307→/login; build-diffing must stay event-triggered, not time-triggered.
+- Risk score latest: 49 (onecode) — static until invited-account BOLA test, cto claim attempt, or a deploy.
+
+## Work State
+### Completed
+- Subdomain inventory proven complete via 3 independent CT/DNS sources: exactly `onecode.de, www, kurs, cto, mta-sts`; GitHub orgs `OneCodeDevs` + `OneCode` scanned — zero secrets/leaks (repo-scan avenue closed).
+- All passive monitors closed/converged: REST (`/rest/v1/`), storage listing (inference retracted — `[]` is anon-SELECT artifact), functions (404), realtime (401→500 WS-tunnel, pre-key 401), GraphQL (503 PGRST002), `cto` passive probing, `kurs` build-diff.
+- GoTrue pre-gate route set bounded to 7 (10-04/10-05 sweeps): `jwks.json`, `openid-configuration`, `oauth-authorization-server`, `oauth/authorize`, `oauth/token`, `oauth/userinfo`, `verify` (exactly-matched, keyless; open-redirect branch closed — off-origin `redirect_to` discarded, SITE_URL `https://kurs.onecode.de` fallback); `oauth/register` pre-gate exact-match only; `oauth/oidc`, `/sso/*` (SAML gate), `/mfa`, `/identities` NOT pre-gate.
+- Redirect allowlist survives 15+ off-origin shapes, 4 host-header variants, per-verify-type testing; no open redirect on GoTrue or `HashSessionHandoff` (fixed `{invite:/einladung,recovery:/passwort-neu}` map, default `/`).
+- Three FINAL hypotheses ranked: (1) Post-auth BOLA via RLS gap conf 65 AUTH_HELPED HIGH/CRITICAL; (2) Forced-login fragment sink `/login` conf 55 AUTH_HELPED MEDIUM; (3) GoTrue `/auth/v1/verify` token-state oracle conf 60 PASSIVE LOW.
+
+### Active
+- Phase=POC, target=api. Awaiting HUMAN decision on two invited test accounts (A,B) for the BOLA test; fallback = H3 differential `/auth/v1/verify` probe (only account-free signal remaining).
+- Event-triggered build-diff monitoring on `kurs.onecode.de` (re-diff chunks + route-literal scan only on deploy signal); `cto` CNAME day-count tracking pending claim attempt.
+
+### Blocked
+- BOLA test (sole path to HIGH/CRITICAL finding) blocked on two invited accounts — program-required HUMAN escalation, not testable passively.
+- `cto.onecode.de` takeover proof blocked on owner claim attempt (HUMAN_ONLY).
+- S3 plane RLS-bypass thesis untestable in-environment (requires owner-supplied SigV4 keys; downgraded to PARKED, not low-confidence).
+- No second authenticated principal obtainable pre-auth (anonymous+signup disabled, admin plane 401, JWT forgery closed) → all AUTH_HELPED leads gated on invited accounts.
+
+## Next Move
+1. [NEXT] HUMAN: request two invited `kurs.onecode.de` accounts (A, B) for the sole remaining HIGH-value path — then run read-only cross-tenant BOLA probe with A's Bearer: `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` and `GET /rest/v1/profiles?select=id,email` (look for rows owned by B returned to A).
+2. If accounts are not granted this cycle: [NEXT] PROBE H3 differential — `GET /auth/v1/verify?type=recovery&token=<garbage32>&redirect_to=https://evil.example/steal` vs well-formed/malformed token variants; record status/`Location`/`#error=` to characterize the token-state oracle (read-only, keyless).
+3. Keep deploy-gated diff on `kurs.onecode.de` (chunk sha256 re-derive, assert 64-hex) and day-count on `cto` CNAME; do not time-cadence-probe — all passive monitors are converged/closed.
+
+## Relevant Files
+- `scope.yml` + `inventory/onecode.md`: authoritative in-scope asset list and host inventory (10 hosts, 3 live HTTP) — cto/mail/www classes settled.
+- `art/lead_nemotron3.txt` / `hypotheses-nemotron3.txt`: source of the ranked S3-plane hypothesis ([75]) and queued PROBE shapes — S3 lead since downgraded to PARKED (SigV4-gated).
+- KB/leads tail: canonical hash values, CORS 3-tier model, 7-route pre-gate set, verify-oracle evidence — all current surface claims must trace to these or to fresh read-only probes.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mcurl -sS -o /tmp/bucket_1010.json -w "%{http_code}\n" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket"; cat /tmp/bucket_1010.json failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+[0m
+[0m$ [0mfor t in "type=recovery&token=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789&redirect_to=https://evil.example/steal" "type=recovery&token=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789" "type=email_change&token=0000000000000000000000000000000000000000000000000000000000000000&redirect_to=https://evil.example/steal"; do echo "=== $t"; curl -sS -o /dev/null -w "%{http_code} loc=%{redirect_url} ct=%{content_type}\n" -D - -o /dev/null "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify?$t" 2>&1 | grep -iE "^location:|^HTTP/|loc="; sleep 1; done
+=== type=recovery&token=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789&redirect_to=https://evil.example/steal
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+303 loc=https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb= ct=text/plain
+=== type=recovery&token=abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+303 loc=https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb= ct=text/plain
+=== type=email_change&token=0000000000000000000000000000000000000000000000000000000000000000&redirect_to=https://evil.example/steal
+HTTP/2 303 
+location: https://kurs.onecode.de#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb=
+303 loc=https://kurs.onecode.de/#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired&sb= ct=text/plain
+[0m
