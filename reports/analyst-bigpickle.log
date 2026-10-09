@@ -40673,3 +40673,180 @@ STEP 7 — RISK
 - [RISK] onecode: 49 — fully converged; score static until the invited-account BOLA test, a `cto.onecode.de` claim attempt, or a new deploy.
 
 I'm stopping here — every passive avenue is exhausted and the three remaining leads require human action (two invited accounts for the BOLA test) or program-owner authorization (Perspective claim on `cto.onecode.de`). If you want, I can draft the permission/request message to the program owner, or keep a low-frequency (≤1/day) watch for a deploy.
+===== ANALYST bigpickle 2026-10-09 07:17:26 UTC =====
+[0m
+> build · big-pickle
+[0m
+I'll attempt a small set of read-only probes to validate current state before writing the delta.
+[0m$ [0mcurl -sSI -m 10 https://kurs.onecode.de/login 2>&1 | head -20; echo "---DIG---"; dig +short cto.onecode.de CNAME 2>&1; echo "---CTO---"; curl -sS -m 10 -o /dev/null -w '%{http_code}\n' https://cto.onecode.de/ 2>&1
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Fri, 09 Oct 2026 07:15:47 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: coe1Mst8R8yMCH2cvEOTxA
+x-hikari-trace: lax1.ez9k
+x-railway-edge: lax1
+
+---DIG---
+cname.perspective-dns.com.
+---CTO---
+curl: (35) OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+000
+[0m
+[0m$ [0mcurl -sS -m 10 -D - -o /dev/null -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" 2>&1 | head -25
+HTTP/2 200 
+date: Fri, 09 Oct 2026 07:15:48 GMT
+content-type: application/json
+cf-ray: a47b989eedeb1950-LAX
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=UE43NRS1.uQJFRqaNbQBrb4h5RR98Lrdx63MrapDLmQ-1791530147.6612391-1.0.1.1-tw7p3RFdpCpFe7goLjBrP_..ZKBhWMygxFQcU0JlUUEeXRMLzhJso5kr1Pu70ZUU6ZOtTWRpVzAzJpNRp53er_eYJLUk2h60nBplzZmhmLd_gOn0FwP9M6tbGtXgD6._; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Fri, 09 Oct 2026 07:45:48 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a11f84-a047-742d-a727-e4ef7977eafe
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 37
+alt-svc: h3=":443"; ma=86400
+[0m
+## Objective
+- Advance the OneCode GmbH bug-bounty engagement (report channel: bugs.olivermaicher.eu) from recon into a demonstrable finding; current phase=POC, target=`api`.
+- In scope: `*.onecode.de`, `kurs.onecode.de`, and all OneCode GmbH-operated infrastructure/webapps/APIs/cloud.
+
+## Important Details
+- **Scope/rules:** passive-first, ≤1 rps, GET/HEAD/OPTIONS only for live probes; no auth-bypass or mutating tests on live customer data; sha256 any secret; no REJECTED-class findings (DoS, descriptive errors, OPTIONS/TRACE, TLS best practice, mail config, username enumeration, rate-limit policy, public login panels, etc.).
+- **Inventory complete:** exactly 5 CT names — `onecode.de`, `www`, `kurs`, `cto`, `mta-sts` (crt.sh + Certspotter + direct-DNS brute of 26 names agree). `hostmaster.*` NXDOMAIN.
+- **kurs.onecode.de:** Railway-hosted Next.js/Turbopack App Router; CNAME `ki8dqcf6.up.railway.app` (migrated from `tgk4io5m` 2026-09-10); server `railway-hikari`. Pre-auth surface = `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` all 200; all `/api/*`, `/v1`, `/admin`, `/dashboard` 307→/login. No deploy since 2026-09-19 11:33Z (day-20+).
+  - main chunk `0-mbmp1iqb6hj.js` = 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`
+  - sink chunk `1a4tqdnsy9k1l.js` = 13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`
+- **Supabase project:** `aygnpacdkgtsfnhgcyjc.supabase.co`; publishable key plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` — sha256 of **key bytes** = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the catalogued `870cf518...` was a trailing-newline artifact — PoCs must cite `43ccb834...`).
+- **Auth config:** email-only, `disable_signup=true`, `mailer_autoconfirm=false`, `external.anonymous_users=false`, all external OAuth false, `passkeys_enabled=false`, `saml_enabled=false` but `saml_private_key_next_configured=true`. JWT verifier is **ES256-only** (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`).
+- **S3 storage plane:** `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` live (403 Missing signature), independent SigV4 authz; access-key-ID oracle verified; no bucket oracle (SigV4 checked first).
+- **Bucket-existence oracle:** `/storage/v1` route-table-complete (10 mounted GET classes → byte-identical `400 {"code":"NoSuchBucket"}`), 81 candidate names excluded; bucket name unrecoverable pre-auth (no app storage literals in 13 pre-auth chunks).
+- **GoTrue CORS model:** three tiers keyed on route registration — (A) well-known/OAuth-router paths reflect Origin+`ACAC:true` unconditionally; (B) `/auth/v1/*` resource paths reflect+`ACAC:true` only with apikey present, else `ACAO:*` no ACAC; (C) fallthrough = `ACAO:*` + 9-method list + max-age 3600 no ACAC. Preflight never reflects. Impact capped at MEDIUM: GoTrue is Bearer-only (no auth cookie) and app session-cookie origin is CORS-clean.
+- **JWT confusion closed:** 38 probes (HS/RS/PS/ES/EdDSA × attacker keys), zero authenticated; embedded JWK header ignored; alg case-variants rejected; `PS256/384/512` distinct code path (benign).
+- **cto.onecode.de:** dangling CNAME → `cname.perspective-dns.com` (day-59+), HTTP 409/1001 + TLS handshake-fail, authoritative TXT zero → unbound/reclaimable, conf 58, HUMAN_ONLY.
+- **REST monitor formally closed 09-17** (27 probes, 503↔401 oscillation, never 200+rows).
+- **Risk score:** onecode 49 — all passive surface converged; no customer-data access without credentials.
+
+## Work State
+### Completed
+- Pre-auth surface on kurs.onecode.de exhaustively validated: forged/null cookies (5 variants), CVE-2025-29927 `x-middleware-subrequest`, PKCE `?code=` injection, path-normalization (10 variants), header-desync (`X-Original-URL`/`X-Rewrite-URL`/`X-Forwarded-Prefix`), `_next/image` SSRF, `?error=<script>` reflection — all negative; middleware gate intact.
+- `HashSessionHandoff` (module 34891) confirmed mounted on `/login` RSC payload row `18:I[34891,...]`, hydrates, parses `window.location.hash` access_token+refresh_token into `setSession()` with no state/nonce/PKCE; redirect map fixed `{invite:/einladung, recovery:/passwort-neu}` default `/`; error paths fixed to `/login?error=link-abgelaufen`.
+- `LoginForm` (module 28420): `linkError` only prop; post-password hardcodes `push("/")` + `refresh()`.
+- GoTrue `redirect_to` allowlist: 15 off-origin shapes across 5 verify types + `token_hash` encoding, X-Forwarded-Host — zero bypass; `/auth/v1/authorize` inert (`Unsupported provider`); `/auth/v1/callback` registered but 303 to SITE_URL (`bad_oauth_callback`).
+- 7 pre-gate keyless routes bounded: `jwks.json`, `openid-configuration`, `oauth-authorization-server`, `oauth/authorize`, `oauth/token`, `oauth/userinfo`, `verify`. `SITE_URL`=`https://kurs.onecode.de`.
+- GitHub orgs `OneCodeDevs` (repo `compass`, Kotlin OSS) + `OneCode` (`hello-guide`): zero secrets/internal endpoints/CI leaks.
+- No privileged Supabase key in any of 13 pre-auth chunks.
+
+### Active
+- Three ranked survivors: (1) post-auth cross-tenant BOLA via RLS gap (conf 65, AUTH_HELPED, HIGH/CRITICAL); (2) forced-login via URL-fragment sink on `/login` (conf 55, AUTH_HELPED, MEDIUM); (3) GoTrue `/auth/v1/verify` token-state oracle (conf 60, PASSIVE, LOW).
+- Wrapper/state: `{"phase": "POC", "target": "api"}`.
+
+### Blocked
+- BOLA test needs **2 invited kurs.onecode.de accounts** (anonymous signup disabled, no free second `authenticated` principal; JWT forgery closed).
+- Forced-login sink needs a valid attacker token pair (invited account) + victim click.
+- cto.onecode.de takeover only advanceable by owner claim attempt (HUMAN_ONLY).
+- No deploy signal on kurs since 2026-09-19 11:33Z → build-diffing is event-triggered only.
+
+## Next Move
+1. **[NEXT] HUMAN:** request two invited `kurs.onecode.de` accounts (A, B); obtain A's Bearer via password-grant, then run read-only `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` and `GET /rest/v1/profiles?select=id,email` with A's Bearer (apikey header) to test cross-tenant row visibility (sole path to the HIGH/CRITICAL BOLA finding).
+2. **[NEXT] PROBE:** (read-only, verified-passive) `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user"` to re-confirm router-wide credentialed-CORS reflection (401 + `ACAO:<origin>` + `ACAC:true`) if recon resumes.
+
+## Relevant Files
+- `inventory/onecode.md`: canonical host inventory, CNAME/port recon, dated probe log for all onecode assets.
+- `scope.yml`: authoritative in-scope asset list.
+- `art/lead_nemotron3.txt`: source of S3-plane lead + queued probes.
+- `art/lead_bigpickle.txt`: source of forced-login fragment-sink lead + queued BOLA HUMAN step.
+- `hypotheses-bigpickle.txt` / `hypotheses-nemotron3.txt`: aggregated hypotheses + NEXT actions feeding the ranked list.
+- Knowledge-base (seed) + MY LAST LEADS tail: accepted/rejected findings, hashes, and priority scoring used above.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mecho "=== settings body ==="; curl -sS -m 10 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" 2>&1; echo; echo "=== /auth/v1/user CORS ==="; curl -sS -m 10 -D - -o /dev/null -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" 2>&1 | grep -iE 'HTTP|access-control|vary'; echo "=== S3 bogus cred ==="; curl -sS -m 10 -D - "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" -H "Authorization: AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20260101/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-date, Signature=0000000000000000000000000000000000000000000000000000000000000000" -H "x-amz-date: 20260101T000000Z" 2>&1 | grep -iE 'HTTP|error|code|message|signature|accesskey' | head -20
+=== settings body ===
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+=== /auth/v1/user CORS ===
+HTTP/2 401 
+access-control-allow-origin: https://evil.example
+vary: Origin
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+set-cookie: __cf_bm=e.sSjG.Et_yzjRLW5UExLDIlw34pnhiCJjKWpIIY7Pw-1791530186.2516649-1.0.1.1-i1TRnzsmgeJL7zqrFTRbtozaS3katJYKfg6nseBhDCw_2P0DLqfHmMBL.T.URaSx6xp97BRqL5QaaJsq0GPb0_5l98oAGCTy2UehuWOUf7p.Zdwnp7K0R4QUFVuN_fXB; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Fri, 09 Oct 2026 07:46:26 GMT
+=== S3 bogus cred ===
+HTTP/2 403 
+set-cookie: __cf_bm=H4Pv7uGjqK_aa8DYfoEwcWCtOBtuKRrWeH1B4C8IYK8-1791530186.5581837-1.0.1.1-JCNC_H00jbQDUtYdLU06TTQaR.O8fiVnLNFInFlytz02FzIglSD67iutuWItNyN8LR298VOpUyfWlEngrCpRLkS5f4j4UOoK.1r0wvRr2VZeE7FzqlSEBl.iMk_BiCqp; HttpOnly; SameSite=None; Secure; Path=/; Domain=storage.supabase.co; Expires=Fri, 09 Oct 2026 07:46:26 GMT
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Error xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Resource/><Code>InvalidAccessKeyId</Code><Message>The Access Key Id you provided does not exist in our records.</Message></Error>
+[0m
+Network is live. Let me probe a few things to find a real delta.
+[0m$ [0mecho "=== kurs /login flight ==="; curl -sS -m 10 -H 'RSC: 1' -H 'Next-Router-State-Tree: %5B%22%22%2C%7B%22children%22%3A%5B%22login%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%5D%7D%5D%7D%2Cnull%2Cnull%2Ctrue%5D' "https://kurs.onecode.de/login" 2>&1 | grep -oE '(34891|HashSessionHandoff|einladung|passwort-neu)' | sort | uniq -c; echo "=== chunk hash check ==="; curl -sS -m 10 "https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js" 2>&1 | sha256sum
+=== kurs /login flight ===
+=== chunk hash check ===
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  -
+[0m
+Live probes confirm no drift. Let me confirm the `/login` handoff module still ships (chunk hash unchanged, so RSC mount should persist).
+[0m$ [0mecho "=== HTML grep ==="; curl -sS -m 10 "https://kurs.onecode.de/login" 2>&1 | grep -oE '34891|HashSessionHandoff|einladung|passwort-neu|__next_f' | sort | uniq -c; echo "=== flight raw (first 400 chars of rsc) ==="; curl -sS -m 10 -H 'RSC: 1' -H 'Next-Router-State-Tree: %5B%22%22%2C%7B%22children%22%3A%5B%22login%22%2C%7B%22children%22%3A%5B%22__PAGE__%22%2C%7B%7D%5D%7D%5D%7D%2Cnull%2Cnull%2Ctrue%5D' "https://kurs.onecode.de/login" 2>&1 | head -c 400; echo
+=== HTML grep ===
+      1 34891
+      1 HashSessionHandoff
+      3 __next_f
+=== flight raw (first 400 chars of rsc) ===
+[0m
+Live state confirmed — no drift. `/login` still ships `HashSessionHandoff` (module `34891`, present in SSR flight), sink chunk `1a4tqdnsy9k1l.js` still sha256 `5a72d2cd…`, `cto` still dangling (`cname.perspective-dns.com`, TLS handshake-fail), Supabase settings unchanged. One KB contradiction resolved.
+
+```
+STEP 1 — DELTA
+
+[CHANGED] S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFODNN7EXAMPLE) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it is credentials-class enumeration -> out of passive bounds, NOT reportable, no candidate IDs.
+[CHANGED] Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-only, no auth cookie on supabase.co; only __cf_bm SameSite=None). No new impact.
+[VERIFIED] kurs.onecode.de/login -> 200; /login SSR flight still contains module 34891 + HashSessionHandoff; sink chunk sha256 5a72d2cd... unchanged => NO deploy.
+[VERIFIED] cto.onecode.de CNAME still -> cname.perspective-dns.com; TLS handshake fail (day ~60 dangling).
+[VERIFIED] /auth/v1/settings unchanged: disable_signup=true, mailer_autoconfirm=false, all external providers false, saml_enabled=false, saml_private_key_next_configured=true.
+NO_DELTA on onecode.de/www/mta-sts, GitHub orgs, JWKS/ES256 verifier, storage bucket oracle.
+(Probe caveat: my Header-RSC flight call returned empty; the SSR HTML mount is authoritative. No state change.)
+
+STEP 2 — ASSET STATE
+
+IDLE: onecode.de, www.onecode.de (Webflow static, no dynamic surface); mta-sts.onecode.de (CF static, mail config)
+PRIO:
+  onecode:rest      aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1   (post-auth BOLA, AUTH_HELPED, HIGH)
+  onecode:login     kurs.onecode.de/login                       (fragment session-adoption sink, AUTH_HELPED, MEDIUM)
+  cto.onecode.de:bfe4  cto.onecode.de                           (dangling CNAME, HUMAN_ONLY, MEDIUM)
+  go:verify         /auth/v1/verify                             (token-state oracle, PASSIVE, LOW)
+
+STEP 3 — RANKED HYPOTHESES
+
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1
+class: IDOR/BOLA (RLS gap on tenant-scoped tables)
+cwe: CWE-639  conf: 65  status: AUTH_HELPED
+why: publishable key is platform-rejected for REST (401 UNAUTHORIZED_INVALID_API_KEY_TYPE), so every row read is an authenticated user's Bearer; if RLS on tenant tables is not strictly owner-scoped, principal A reads principal B's rows.
+verify_step: with invited account A's access_token (read-only GET): curl 'https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=id,email' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' -H "Authorization: Bearer $A"  ->  >1 distinct principal => confirmed; repeat on enrollments.
+blockers: requires 1-2 invited kurs accounts.
+
+asset: kurs.onecode.de/login
+class: session adoption / fixation via URL-fragment sink
+cwe: CWE-384  conf: 50  status: AUTH_HELPED
+why: HashSessionHandoff (module 34891) parses location.hash access_token+refresh_token into setSession() with no state/nonce/PKCE; default redirect '/'. Attacker-supplied fragment is adopted by victim.
+verify_step: obtain valid token pair from invited account; open https://kurs.onecode.de/login#access_token=..&refresh_token=.. in clean context; confirm GET /auth/v1/user returns the attacker principal => session adopted.
+blockers: needs invited account. Nuance: Supabase refresh-token rotation may invalidate the attacker's own session, capping impact.
+
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+class: account/token-state oracle
+cwe: CWE-204  conf: 60  status: PASSIVE
+why: observably distinct responses for consumed/invalid/expired token_hash could leak token or account state.
+verify_step: read-only differential GETs to /auth/v1/verify?type=recovery&token_hash=<shapes> with apikey; compare status+body (never follow with a mutating verify).
+
+STEP 4 — SELF-CRITIQUE
+- All three leads are gated on an invited account or are LOW; the engagement's only high-value path is credential-gated -> HUMAN is the true bottleneck, not recon.
+- H1 conf 65 rests on inferred table names (profiles/enrollments) and an unproven RLS gap; the platform-locked REST key raises (not proves) the odds. Downgrade to 55 until an account is tested.
+- H2 may be defeated by refresh-token rotation; verify adoption BEFORE writing it up. Do not over-claim XSS.
+- S3 key-ID oracle captured [CHANGED] but is a deliberate non-finding (credentials-class, no candidates).
+- CORS re-confirmed as capped; resist re-litigating it.
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B). If granted, immediately run H1 read-only cross-tenant REST probe with A's Bearer; if not granted within the cycle, pivot to [NEXT] PROBE H3 differential /auth/v1/verify (read-only) as the only account-free signal.
+```

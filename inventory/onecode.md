@@ -1453,3 +1453,14 @@ www.onecode.de
 - NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
 - CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
 - CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+
+## 2026-10-09 07:17:26 UTC
+- CHANGED S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it i
+- CHANGED Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-on
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+- NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names — subdomain inventory confirmed complete

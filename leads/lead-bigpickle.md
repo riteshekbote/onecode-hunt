@@ -7359,3 +7359,13 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-20; /login 200 (18 702 B), main+sink chunk sha256 byte-identical — build-diff must stay event-triggered
 [LEARN] ACCEPTED MISCONFIG @ onecode.de zone: crt.sh re-query 00:43Z exactly 5 names; three independent CT sources agree — subdomain inventory complete
 [RISK] onecode: 49 — all passive surface converged (20 days no deploy; REST/storage/S3/cto/GitHub all non-permissive or impact-capped). No customer-data access without credentials; two FINAL AUTH_HELPED leads (BOLA conf 65, sink conf 55) + one PASSIVE LOW oracle. Score static until invited-account BOLA test, cto claim attempt, or a deploy.
+## 2026-10-09 07:17:14 UTC [target] (model bigpickle)
+[CHANGED] S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) -> 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it is credentials-class enumeration -> out of passive bounds, NOT reportable, no candidate IDs.
+[CHANGED] Re-verified credentialed CORS live: GET /auth/v1/user with Origin: https://evil.example + apikey -> 401 + ACAO: <evil origin> + ACAC: true. Confirms tier-B model; impact still capped (GoTrue Bearer-only, no auth cookie on supabase.co; only __cf_bm SameSite=None). No new impact.
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1
+class: IDOR/BOLA (RLS gap on tenant-scoped tables)
+asset: kurs.onecode.de/login
+class: session adoption / fixation via URL-fragment sink
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+class: account/token-state oracle
+[NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B). If granted, immediately run H1 read-only cross-tenant REST probe with A's Bearer; if not granted within the cycle, pivot to [NEXT] PROBE H3 differential /auth/v1/verify (read-only) as the only account-free signal.
