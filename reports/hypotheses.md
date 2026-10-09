@@ -3896,3 +3896,42 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ forma
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+
+## RANKED HYPOTHESES 2026-10-09 00:48:16 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [55] kurs.onecode.de/login: Forced-login via URL-fragment session sink mounted on public /login (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request two invited `kurs.onecode.de` accounts (A,B); execute password-grant to obtain A's Bearer, then read-only `GET /rest/v1/enrollments?select=*` and
+- NEXT(hypotheses-nemotron3.txt): PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth
+- LEARN: REJECTED AUTH @ kurs.onecode.de/login: forged/null session cookies (5 variants), CVE-2025-29927 header, PKCE `?code=` injection, and reflected `?error=<script>`
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co: anonymous sign-in disabled + signup disabled + GoTrue admin plane 401 + ES256-only verifier with all alg/
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: tier-B CORS (apikey-bearing → reflected Origin + ACAC:true) is router-wide and stable, but impact
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy in 20 days; build-diff must stay event-triggered — fixed-cadence probing returns byte-identical hashes and only 
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed b
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior diff
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ forma
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+- LEARN: REJECTED MISCONFIG @ github/OneCodeDevs+OneCode: public repos compass (Kotlin OSS nav lib, de.onecode groupId) + hello-guide (test); clone scan zero secrets/int
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-20; /login 200 (18 702 B), main+sink chunk sha256 byte-identical — build-diff must stay event-triggered
+- LEARN: ACCEPTED MISCONFIG @ onecode.de zone: crt.sh re-query 00:43Z exactly 5 names; three independent CT sources agree — subdomain inventory complete
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-20; /login 200 (18 702 B), main+sink chunk sha256 byte-identical — build-diff must stay event-triggered
+- LEARN: ACCEPTED MISCONFIG @ onecode.de zone: crt.sh re-query 00:43Z exactly 5 names; three independent CT sources agree — subdomain inventory complete
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane confirmed live (403 Missing signature), independent Sig
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→refle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: verify is the 7th pre-gate route (keyless), exactly-matched; open-redirect branch closed b
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS/auth gate is route-registration-ordered (three tiers), not blanket; reflection behavior diff
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1: bucket-existence oracle spans 10 route classes returning byte-identical NoSuchBucket, S3 plane
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ forma
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
