@@ -1514,3 +1514,5 @@ www.onecode.de
 - NEW aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*: 18 names all uniform `{"code":"NOT_FOUND"}` -> no function-name oracle; Edge Functions absent; error CORS `ACAO:*`.
 - CHANGED kurs.onecode.de/login sha256 unchanged 99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450 (18702 B) -> no deploy; cto.onecode.de still HTTP 409.
 - NEW NO_DELTA — all surfaces identical to 2026-10-10 05:17Z: kurs.onecode.de no deploy day-21 (main chunk f916f314... byte-identical, pre-auth frozen at 4 pages), cto.onecode.de CNAME→cname.perspective-dns
+
+## 2026-10-10 16:20:19 UTC

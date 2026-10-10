@@ -7723,3 +7723,5 @@ testability: PASSIVE
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle.
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue.
 [RISK] onecode: 55 — surface converged, 0 reportable findings in 5+ weeks; new Realtime/Edge-Function surfaces closed negative; all survivors human-gated.
+## 2026-10-10 16:20:08 UTC [target] (model bigpickle)
+[RISK] Low for in-scope program (no activity on confirmed assets); compliance risk if the off-domain host is tested unconfirmed.

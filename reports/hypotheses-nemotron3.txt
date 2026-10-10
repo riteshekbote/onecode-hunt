@@ -1,5 +1,4 @@
-## 2026-10-10 11:16:04 UTC [target] (model nemotron3)
-[NEW] NO_DELTA — all surfaces identical to 2026-10-10 05:17Z: kurs.onecode.de no deploy day-21 (main chunk f916f314... byte-identical, pre-auth frozen at 4 pages), cto.onecode.de CNAME→cname.perspective-dns.com day-59+ HTTP 409 zero TXT, Supabase GoTrue CORS auth-state discriminator re-verified, S3-compatible storage plane live (403 Missing signature), Storage bucket-existence oracle route-table-complete (81 names excluded), REST monitor closed 09-17 (27 probes 503↔401 never 200+rows).
+## 2026-10-10 16:17:55 UTC [target] (model nemotron3)
 [PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,9.15,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink,.well-known},8.15,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
 [PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
@@ -8,7 +7,7 @@
 class: MISCONFIG
 asset: aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3
 confidence: 75
-reasoning: New host aygnpacdkgtsfnhgcyjc.storage.supabase.co serves S3-compatible API (GET /storage/v1/s3 → 403 S3 XML "Missing signature", re-confirmed 2026-10-10). SigV4 keys are a separate credential store from apikey/Bearer plane; S3 layer does not evaluate storage.objects RLS policies. Pre-auth access-key-ID oracle confirmed (distinguishable errors: 403 Missing signature vs 400 InvalidAccessKeyId). Host unprobed for 26+ days. Path-style only under /storage/v1/s3 prefix. Signed URL route /storage/v1/object/sign/{bucket}/{key} mounted and bucket-resolves pre-auth.
+reasoning: New host aygnpacdkgtsfnhgcyjc.storage.supabase.co serves S3-compatible API (GET /storage/v1/s3 → 403 S3 XML "Missing signature", re-confirmed 2026-10-10). SigV4 keys are a separate credential store from apikey/Bearer plane; S3 layer does not evaluate storage.objects RLS policies. Pre-auth access-key-ID oracle confirmed (distinguishable errors: 403 Missing signature vs 403 InvalidAccessKeyId "does not exist in our records"). Host unprobed for 26+ days. Path-style only under /storage/v1/s3 prefix. Signed URL route /storage/v1/object/sign/{bucket}/{key} mounted and bucket-resolves pre-auth.
 evidence_needed: Valid S3 credentials (access key ID + secret) that authorize bucket operations; or bucket policy allowing anonymous s3:GetObject/s3:ListBucket
 verify_steps: PASSIVE: curl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" (confirms S3 XML error); PASSIVE: curl -sS -D- -H "Authorization: AWS4-HMAC-SHA256 Credential=BOGUS/20261010/us-east-1/s3/aws4_request,SignedHeaders=host,Signature=dummy" "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" (validates InvalidAccessKeyId vs MissingSignature distinction); PASSIVE: curl -sS -D- "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3/?list-type=2&max-keys=1" (tests anonymous LIST)
 impact: If valid SigV4 credentials obtained or bucket policy permissive → full storage access bypassing RLS, course resources, user uploads — HIGH
@@ -39,6 +38,12 @@ testability: HUMAN_ONLY
 [FINAL] 2. S3-compatible storage plane with independent SigV4 authz bypasses RLS (confidence 75, MISCONFIG, PASSIVE→AUTH_HELPED) — NEW host, separate authz plane, highest severity if creds found
 [FINAL] 3. Dangling Perspective CNAME takeover on cto.onecode.de (confidence 58, MISCONFIG, HUMAN_ONLY) — actionable with Perspective account
 [NEXT] PROBE: curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/user" -v (validates reflected-origin+ACAC on authenticated user endpoint; CORS headers present on 401 too)
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1: anon WS accepts arbitrary channel joins but returns no postgres_changes data and no table-existence oracle — no finding.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1: anon WS accepts arbitrary channel joins but returns no postgres_changes data and no table-existence oracle — no finding.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class.
 [LEARN] REJECTED AUTH @ kurs.onecode.de: 38+ JWT alg/key-confusion probes + 5 forged-cookie variants all negative; ES256 pinning holds.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth

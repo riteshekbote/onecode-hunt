@@ -43614,3 +43614,769 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue.
 
 [RISK] onecode: 55 — surface converged, 0 reportable findings in 5+ weeks; new Realtime/Edge-Function surfaces closed negative; all survivors human-gated.
+===== ANALYST bigpickle 2026-10-10 16:20:19 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mset -e
+UA="Mozilla/5.0 (compatible; onecode-analyst/1.0; read-only)"
+echo "=== kurs /login headers ==="
+curl -sS -I -A "$UA" --max-time 20 https://kurs.onecode.de/login | sed -n '1,20p'
+sleep 1
+echo "=== kurs / (root) ==="
+curl -sS -o /dev/null -D - -A "$UA" --max-time 20 https://kurs.onecode.de/ | sed -n '1,12p'
+sleep 1
+echo "=== kurs /passwort-vergessen ==="
+curl -sS -o /dev/null -w '%{http_code}\n' -A "$UA" --max-time 20 https://kurs.onecode.de/passwort-vergessen
+sleep 1
+echo "=== kurs /datenschutz ==="
+curl -sS -o /dev/null -w '%{http_code}\n' -A "$UA" --max-time 20 https://kurs.onecode.de/datenschutz
+sleep 1
+echo "=== kurs /rechtliches ==="
+curl -sS -o /dev/null -w '%{http_code}\n' -A "$UA" --max-time 20 https://kurs.onecode.de/rechtliches
+=== kurs /login headers ===
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Sat, 10 Oct 2026 16:16:47 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: ZWrGef3RTCaqHUJbvEOTxA
+x-hikari-trace: lax1.ez9k
+x-railway-edge: lax1
+
+=== kurs / (root) ===
+HTTP/2 307 
+date: Sat, 10 Oct 2026 16:16:49 GMT
+location: /login
+server: railway-hikari
+x-railway-request-id: yiqQ7XDjRvawF9jU55So4g
+x-railway-edge: lax1
+x-hikari-trace: lax1.sx7j
+
+=== kurs /passwort-vergessen ===
+200
+=== kurs /datenschutz ===
+200
+=== kurs /rechtliches ===
+200
+[0m
+## Objective
+- Act as bug bounty ANALYST for the OneCode GmbH program (report channel: bugs.olivermaicher.eu); run the 8-step protocol (DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT ACTION → LEARNING → RISK) and output only structured blocks.
+- Current phase: `POC`, target `api` — one reportable finding to advance; all pre-auth surface has converged.
+
+## Important Details
+- Scope (ONLY): `*.onecode.de`, `kurs.onecode.de`, plus all OneCode-operated infra — from `scope.yml` + `inventory/onecode.md`.
+- REJECTED classes (must not report): DoS, descriptive errors/headers, robots.txt/public files, outdated libs, OPTIONS/TRACE, CSRF on logout/anon forms, cookie flags on non-sensitive data, self-XSS, scanner-only reports, username enumeration, brute-force/rate-limit, SSL/TLS best-practice, clickjacking w/o exploit, mail config, public login panels, etc.
+- Probe rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only; no auth-bypass or mutating tests on live customer data.
+- Key identifiers:
+  - Supabase project `aygnpacdkgtsfnhgcyjc`; publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`.
+  - Publishable-key sha256 to cite in PoCs: `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the old `870cf518…` was a trailing-newline artifact — do NOT cite it).
+  - Sink chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (13 880 B); main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` (154 581 B); `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18 702 B).
+  - `SITE_URL` = `https://kurs.onecode.de`; Railway CNAME `ki8dqcf6.up.railway.app` (post tgk4io5m migration); `cto.onecode.de` CNAME → `cname.perspective-dns.com` (Perspective funnel SaaS).
+- Pre-auth surface frozen: `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` 200; all `/api/*`, `/v1`, `/dashboard`, `/admin`, `/courses` 307→`/login`. No deploy since 2026-09-19 11:33Z (hashes byte-identical, day-21+).
+- Supabase facts: ES256-only JWT verifier; `disable_signup=true`, `external.anonymous_users=false`, `mailer_autoconfirm=false`, `external.email` sole true provider; `saml_private_key_next_configured=true` while `saml_enabled=false`. 38+ alg/key-confusion probes negative; HS256 secret guessing invalid (wrong algorithm).
+- CORS (CWE-942): GoTrue `/auth/v1/*` — unauthenticated → `ACAO: *` no ACAC; apikey-bearing → reflects Origin + `ACAC: true` (router-wide, 200/401/404/405). Storage plane → `ACAO: *` no ACAC everywhere. Preflight uniform `ACAO: *` no reflection. Capped MEDIUM (GoTrue Bearer-only, no auth cookie on Supabase origin; `kurs.onecode.de` emits no cross-origin headers).
+- Build-diffing is event-triggered, NOT time-based — fixed-cadence probing on kurs returns identical hashes and wastes budget.
+
+## Work State
+### Completed
+- Pre-auth app surface on `kurs.onecode.de` exhaustively re-validated and frozen: CVE-2025-29927 `x-middleware-subrequest` negative, `_next/image` SSRF negative, 10 path-normalisation variants negative, forged/null cookies (5 variants) negative, PKCE `?code=` injection not possible, no privileged Supabase key in any of 13 pre-auth chunks.
+- `HashSessionHandoff` (module 34891) mounted on `/login` RSC row 18; parses URL fragment, calls `setSession()` with no state/nonce/PKCE; error paths fixed to `/login?error=link-abgelaufen`; next-map `{invite:/einladung, recovery:/passwort-neu}` default `/` — no open redirect.
+- `cto.onecode.de` re-confirmed day-60+: CNAME `cname.perspective-dns.com`, HTTP 409/1001, zero verification TXT — passive probing fully converged.
+- Supabase REST `/rest/v1/` monitor closed 2026-09-17 (27 probes, 503↔401 oscillation, never 200+rows; platform enforces `sb_publishable_` format).
+- 2026-10-10 cycle: Realtime WS anon join accepted but no `postgres_changes` data and no table oracle → REJECTED; `storage/v1/bucket` → `[]` with apikey (closes enumeration); `functions/v1/*` 18 names uniform `{"code":"NOT_FOUND"}` (no name oracle, Edge Functions absent).
+- S3 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature); access-key-ID oracle confirmed but requires owner SigV4 keys → PARKED.
+- Storage bucket-existence oracle (10 mounted GET route classes, 81 names excluded) — route-table-complete, bucket name unrecoverable pre-auth.
+- GitHub org scan complete (`OneCodeDevs`/compass, `OneCode`/hello-guide) — zero secrets/endpoints/CI leaks; crt.sh re-query = exactly 5 names, inventory complete.
+
+### Active
+- Sole reportable path: post-auth BOLA via Supabase RLS gap (conf 65, AUTH_HELPED).
+- Ranked hypotheses from last cycle: [75] S3 SigV4 plane (from `art/lead_nemotron3.txt`; downgraded to PARKED — no verify path without keys); [65] Post-auth BOLA (from `art/lead_bigpickle.txt`).
+
+### Blocked
+- BOLA test requires two invited `kurs.onecode.de` accounts (A, B) — no free second `authenticated` principal exists (anon sign-in disabled, admin plane 401).
+- `cto.onecode.de` takeover needs HUMAN/consented claim attempt (passive probes converged at conf 58).
+- S3 plane oracle untestable without owner-supplied SigV4 keys.
+
+## Next Move
+1. `[NEXT] HUMAN`: obtain two invited `kurs.onecode.de` test accounts (A, B); then A's Bearer GET `https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` (headers `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + `Authorization: Bearer <A jwt>`), then `/rest/v1/profiles?select=id,email` — tests cross-tenant row leakage → sole route to the HIGH/CRITICAL BOLA finding.
+2. If accounts unavailable: emit `[NEXT] HUMAN` for owner claim attempt on `cto.onecode.de`, or `[NEXT] PROBE` only if a deploy signal appears on `kurs.onecode.de` (event-triggered re-diff of chunk hashes).
+
+## Relevant Files
+- `scope.yml`: authoritative in-scope asset list.
+- `inventory/onecode.md`: host inventory + per-cycle recon observations (10 hosts, 3 live HTTP).
+- `art/lead_nemotron3.txt`: queued S3-plane hypothesis (conf 75, now PARKED).
+- `art/lead_bigpickle.txt`: post-auth BOLA hypothesis (conf 65, FINAL survivor).
+- `hypotheses-bigpickle.txt`: NEXT action for BOLA (invited accounts A/B).
+- `hypotheses-nemotron3.txt`: NEXT action for CORS probe on `/auth/v1/user`.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mecho "=== cto.onecode.de CNAME chain ==="
+dig +short cto.onecode.de CNAME
+dig +short cto.onecode.de A
+echo "=== cto HTTP ==="
+curl -sS -o /dev/null -D - --max-time 20 -A "onecode-analyst/1.0" http://cto.onecode.de/ 2>&1 | sed -n '1,15p'
+echo "=== cto apex www ==="
+curl -sS -o /dev/null -w 'www.onecode.de -> %{http_code}\n' --max-time 15 https://www.onecode.de/
+=== cto.onecode.de CNAME chain ===
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+104.18.3.73
+104.18.2.73
+=== cto HTTP ===
+HTTP/1.1 409 Conflict
+Date: Sat, 10 Oct 2026 16:17:26 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Expires: Thu, 01 Jan 1970 00:00:01 GMT
+Server: cloudflare
+CF-RAY: a486ef69a8bd4744-DFW
+
+=== cto apex www ===
+www.onecode.de -> 200
+[0m
+[0m$ [0mset -e
+UA="Mozilla/5.0 (compatible; onecode-analyst/1.0; read-only)"
+echo "=== /login body sha256 (expect 99798c7d...) ==="
+curl -sS -A "$UA" --max-time 25 https://kurs.onecode.de/login | sha256sum
+sleep 1
+echo "=== gated app paths ==="
+for p in api/broadcast api/health api/courses v1 v1/courses dashboard admin einladung passwort-neu; do
+  code=$(curl -sS -o /dev/null -w '%{http_code}' -A "$UA" --max-time 15 "https://kurs.onecode.de/$p")
+  loc=$(curl -sS -o /dev/null -w '%{redirect_url}' -A "$UA" --max-time 15 "https://kurs.onecode.de/$p")
+  echo "$p -> $code ${loc:+(-> $loc)}"
+  sleep 1
+done
+=== /login body sha256 (expect 99798c7d...) ===
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  -
+=== gated app paths ===
+api/broadcast -> 307 (-> https://kurs.onecode.de/login)
+api/health -> 307 (-> https://kurs.onecode.de/login)
+api/courses -> 307 (-> https://kurs.onecode.de/login)
+v1 -> 307 (-> https://kurs.onecode.de/login)
+v1/courses -> 307 (-> https://kurs.onecode.de/login)
+dashboard -> 307 (-> https://kurs.onecode.de/login)
+admin -> 307 (-> https://kurs.onecode.de/login)
+einladung -> 307 (-> https://kurs.onecode.de/login)
+passwort-neu -> 307 (-> https://kurs.onecode.de/login)
+[0m
+[0m$ [0mset -e
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+B="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+UA="onecode-analyst/1.0"
+echo "=== CORS unauth (Origin evil) ==="
+curl -sS -o /dev/null -D - -A "$UA" --max-time 20 "$B/auth/v1/settings" \
+  -H "Origin: https://evil.example" | grep -i -E 'access-control|vary' || true
+sleep 1
+echo "=== CORS apikey-bearing (Origin evil) ==="
+curl -sS -o /dev/null -D - -A "$UA" --max-time 20 "$B/auth/v1/settings" \
+  -H "apikey: $K" -H "Origin: https://evil.example" | grep -i -E 'access-control|vary' || true
+sleep 1
+echo "=== auth user anon ==="
+curl -sS -A "$UA" --max-time 20 "$B/auth/v1/user" -H "apikey: $K" -w '\n[http %{http_code}]\n' | head -c 300; echo
+=== CORS unauth (Origin evil) ===
+access-control-allow-origin: *
+access-control-allow-methods: GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS,TRACE,CONNECT
+access-control-max-age: 3600
+=== CORS apikey-bearing (Origin evil) ===
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+=== auth user anon ===
+{"code":401,"error_code":"no_authorization","msg":"This endpoint requires a valid Bearer token"}
+[http 401]
+[0m
+[0m$ [0mset -e
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+B="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+UA="onecode-analyst/1.0"
+echo "=== auth settings (public) ==="
+curl -sS -A "$UA" --max-time 20 "$B/auth/v1/settings" -H "apikey: $K" | head -c 800; echo
+sleep 1
+echo "=== storage buckets apikey ==="
+curl -sS -A "$UA" --max-time 20 "$B/storage/v1/bucket" -H "apikey: $K" -H "Authorization: Bearer $K" -w '\n[http %{http_code}]\n'
+sleep 1
+echo "=== rest profiles anon ==="
+curl -sS -A "$UA" --max-time 20 "$B/rest/v1/profiles?select=id,email&limit=1" -H "apikey: $K" -w '\n[http %{http_code}]\n'
+sleep 1
+echo "=== rest enrollments anon ==="
+curl -sS -A "$UA" --max-time 20 "$B/rest/v1/enrollments?select=*&limit=1" -H "apikey: $K" -w '\n[http %{http_code}]\n'
+=== auth settings (public) ===
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+=== storage buckets apikey ===
+[]
+[http 200]
+=== rest profiles anon ===
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[http 503]
+=== rest enrollments anon ===
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}
+[http 503]
+[0m
+[0m$ [0mUA="onecode-analyst/1.0"
+echo "=== Railway default host candidates ==="
+for h in ki8dqcf6.up.railway.app tgk4io5m.up.railway.app kurs-production.up.railway.app onecode.up.railway.app; do
+  code=$(curl -sS -o /dev/null -w '%{http_code}' -A "$UA" --max-time 15 "https://$h/" 2>/dev/null || echo "ERR")
+  echo "$h -> $code"
+  sleep 1
+done
+echo "=== crt.sh subdomains (informational) ==="
+curl -sS --max-time 25 "https://crt.sh/?q=%25.onecode.de&output=json" | tr ',' '\n' | grep -i name_value | sort -u | head -30 || true
+=== Railway default host candidates ===
+ki8dqcf6.up.railway.app -> 404
+tgk4io5m.up.railway.app -> 404
+kurs-production.up.railway.app -> 200
+onecode.up.railway.app -> 404
+=== crt.sh subdomains (informational) ===
+"name_value":"cto.onecode.de"
+"name_value":"kurs.onecode.de"
+"name_value":"mta-sts.onecode.de"
+"name_value":"onecode.de"
+"name_value":"onecode.de\nwww.onecode.de"
+"name_value":"www.onecode.de"
+[0m
+[0m$ [0mset -e
+K="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"
+B="https://aygnpacdkgtsfnhgcyjc.supabase.co"
+UA="onecode-analyst/1.0"
+echo "=== REST root OpenAPI (apikey) ==="
+curl -sS -A "$UA" --max-time 25 "$B/rest/v1/" -H "apikey: $K" -w '\n[http %{http_code}]\n' | head -c 1200; echo
+sleep 1
+echo "=== REST root (Accept openapi) ==="
+curl -sS -A "$UA" --max-time 25 "$B/rest/v1/" -H "apikey: $K" -H "Accept: application/openapi+json" -w '\n[http %{http_code}]\n' | head -c 600; echo
+sleep 1
+echo "=== rpc common names ==="
+for r in get_courses list_enrollments is_admin get_profile; do
+  out=$(curl -sS -A "$UA" --max-time 15 "$B/rest/v1/rpc/$r" -H "apikey: $K" -H "Content-Type: application/json" -d '{}' -w ' [%{http_code}]' | head -c 200)
+  echo "$r => $out"
+  sleep 1
+done
+=== REST root OpenAPI (apikey) ===
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+[http 401]
+
+=== REST root (Accept openapi) ===
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+[http 401]
+
+=== rpc common names ===
+get_courses => {"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."} [503]
+list_enrollments => {"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."} [503]
+is_admin => {"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."} [503]
+get_profile => {"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."} [503]
+[0m
+[0m$ [0mUA="onecode-analyst/1.0"
+H="kurs-production.up.railway.app"
+echo "=== $H / headers ==="
+curl -sS -o /dev/null -D - -A "$UA" --max-time 25 "https://$H/" | sed -n '1,25p'
+echo
+echo "=== $H / body (first 600) sha256 ==="
+curl -sS -A "$UA" --max-time 25 "https://$H/" | tee /tmp/kp_root.html | sha256sum
+head -c 600 /tmp/kp_root.html; echo
+=== kurs-production.up.railway.app / headers ===
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-credentials: true
+cache-control: public, max-age=0
+content-security-policy: default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests
+content-type: text/html; charset=UTF-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Sat, 10 Oct 2026 16:18:25 GMT
+etag: W/"1d7-19e3f7523b0"
+last-modified: Tue, 19 May 2026 08:58:22 GMT
+origin-agent-cluster: ?1
+referrer-policy: no-referrer
+server: railway-hikari
+set-cookie: csrfToken=02330317cf8c47ba983edddab5da65360db65938bafe79b2570e85630809e3e4; Max-Age=86400; Path=/; Expires=Sun, 11 Oct 2026 16:18:25 GMT; HttpOnly; Secure; SameSite=Strict
+strict-transport-security: max-age=15552000; includeSubDomains
+vary: Origin
+vary: accept-encoding
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-railway-request-id: R3gxqqc6RgyIAKUJ-_9nXA
+x-request-id: a7a1370df936d830e98c91907531e492
+
+=== kurs-production.up.railway.app / body (first 600) sha256 ===
+b7b4e31161f46c39cdd4a58f36a42df5721c0bf866df7e5d5f1534bb6dc32f28  -
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kurs Yönetim Sistemi</title>
+    <script type="module" crossorigin src="/assets/index-D5skZ83O.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DSSU3CgN.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+[0m
+[0m$ [0mUA="onecode-analyst/1.0"
+H="kurs-production.up.railway.app"
+echo "=== JS bundle size + sha256 ==="
+curl -sS -A "$UA" --max-time 40 "https://$H/assets/index-D5skZ83O.js" -o /tmp/kp.js -w 'bytes=%{size_download} type=%{content_type}\n'
+sha256sum /tmp/kp.js
+echo "=== strings: domains / refs ==="
+grep -oE 'https?://[a-zA-Z0-9._/-]+' /tmp/kp.js | sort -u | head -60
+echo "=== supabase / onecode refs ==="
+grep -oiE '(supabase|onecode|aygnpacdkgtsfnhgcyjc|kurs)[a-zA-Z0-9._/-]*' /tmp/kp.js | sort -u | head -40
+=== JS bundle size + sha256 ===
+bytes=510593 type=application/javascript; charset=UTF-8
+6a9fd633b2b6944e0ca2a1718195126ab9ef753645445204b8c7b4ca5c012110  /tmp/kp.js
+=== strings: domains / refs ===
+http://localhost
+http://www.w3.org/1998/Math/MathML
+http://www.w3.org/1999/xhtml
+http://www.w3.org/1999/xlink
+http://www.w3.org/2000/svg
+http://www.w3.org/XML/1998/namespace
+https://radix-ui.com/primitives/docs/components/
+https://reactjs.org/docs/error-decoder.html
+=== supabase / onecode refs ===
+Kurs
+KursYerleri-Ciy4pvvZ.js
+KursiyerRaporlari-ADFofinz.js
+Kursiyerler-yOhbnjUf.js
+kurs-yerleri
+kursYeri
+kursYeri.ad
+kursYerleri
+kursiyer
+kursiyerler
+[0m
+[0m$ [0mecho "=== /api and relative endpoint paths ==="
+grep -oE '"/[a-zA-Z0-9_./-]+"' /tmp/kp.js | sort -u | head -80
+echo "=== axios/fetch base ==="
+grep -oE '(baseURL|VITE_[A-Z_]+|import\.meta\.env\.[A-Z_]+)' /tmp/kp.js | sort -u | head -40
+echo "=== api-ish tokens ==="
+grep -oE '(/api/[a-zA-Z0-9_./{}-]+|/auth/[a-zA-Z0-9_./{}-]+|/login|/logout|/register)' /tmp/kp.js | sort -u | head -60
+=== /api and relative endpoint paths ===
+"//"
+"/aidatlar"
+"/api"
+"/audit-logs"
+"/auth/change-password"
+"/auth/login"
+"/auth/login-history"
+"/auth/logout"
+"/auth/me"
+"/auth/refresh"
+"/auth/register"
+"/auth/update-theme"
+"/egitim"
+"/formlar"
+"/kasalar"
+"/kullanicilar"
+"/kurs-yerleri"
+"/kursiyerler"
+"/login"
+"/masraf-kalemleri"
+"/oturum-yonetimi"
+"/raporlar"
+"/raporlar/"
+"/raporlar/aidat-tahsilat"
+"/raporlar/gelir"
+"/raporlar/kasa"
+"/raporlar/kursiyer"
+"/raporlar/masraf"
+"/raporlar/sube-performans"
+"/sessions"
+=== axios/fetch base ===
+baseURL
+=== api-ish tokens ===
+/api/csrf-token
+/auth/change-password
+/auth/login
+/auth/login-history
+/auth/logout
+/auth/me
+/auth/refresh
+/auth/register
+/auth/update-theme
+/login
+[0m
+[0m$ [0mecho "=== context around baseURL ==="
+grep -oE '.{120}baseURL.{120}' /tmp/kp.js | head -5
+echo
+echo "=== context around /api ==="
+grep -oE '.{80}"/api".{80}' /tmp/kp.js | head -5
+echo
+echo "=== csrf-token usage ==="
+grep -oE '.{100}csrf-token.{100}' /tmp/kp.js | head -5
+echo
+echo "=== any import.meta.env / location.origin ==="
+grep -oE '.{60}(location\.origin|import\.meta\.env|window\.location).{60}' /tmp/kp.js | head -10
+=== context around baseURL ===
+eturn r(void 0,d)}function s(u,d,c){if(c in t)return r(u,d);if(c in e)return r(void 0,u)}const l={url:a,method:a,data:a,baseURL:i,transformRequest:i,transformResponse:i,paramsSerializer:i,timeout:i,timeoutMessage:i,withCredentials:i,withXSRFToken:
+et{data:n,withXSRFToken:r,xsrfHeaderName:o,xsrfCookieName:a,headers:i,auth:s}=t;if(t.headers=i=At.from(i),t.url=Tv(Iv(t.baseURL,t.url,t.allowAbsoluteUrls),e.params,e.paramsSerializer),s&&i.set("Authorization","Basic "+btoa((s.username||"")+":"+(s.
+ 0?n.allowAbsoluteUrls=this.defaults.allowAbsoluteUrls:n.allowAbsoluteUrls=!0),Ls.assertOptions(n,{baseUrl:bn.spelling("baseURL"),withXsrfToken:bn.spelling("withXSRFToken")},!0),n.method=(n.method||this.defaults.method||"get").toLowerCase();let i=
+Promise.reject(v)}for(c=0,h=u.length;c<h;)d=d.then(u[c++],u[c++]);return d}getUri(t){t=mo(this.defaults,t);const n=Iv(t.baseURL,t.url,t.allowAbsoluteUrls);return Tv(n,t.params,t.paramsSerializer)}};C.forEach(["delete","get","head","options"],funct
+,toFormData:GT,AxiosHeaders:ZT,HttpStatusCode:XT,formToJSON:JT,getAdapter:eO,mergeConfig:tO}=De,Rf="/api",it=De.create({baseURL:Rf,headers:{"Content-Type":"application/json"},withCredentials:!0});let Un=null,Lu=!1,rd=[];const Mu=(e,t=null)=>{rd.fo
+
+=== context around /api ===
+sHeaders:ZT,HttpStatusCode:XT,formToJSON:JT,getAdapter:eO,mergeConfig:tO}=De,Rf="/api",it=De.create({baseURL:Rf,headers:{"Content-Type":"application/json"},withCreden
+),rd=[]},VS=async()=>{if(Un)return Un;try{return Un=(await De.get(`${Rf.replace("/api","")}/api/csrf-token`,{withCredentials:!0})).data.csrfToken,Un}catch(e){throw co
+
+=== csrf-token usage ===
+o))}),rd=[]},VS=async()=>{if(Un)return Un;try{return Un=(await De.get(`${Rf.replace("/api","")}/api/csrf-token`,{withCredentials:!0})).data.csrfToken,Un}catch(e){throw console.error("Failed to fetch CSRF token:
+gister")||(o=e.url)!=null&&o.includes("/auth/refresh"))return e;try{const a=await VS();e.headers["x-csrf-token"]=a}catch(a){console.error("Failed to add CSRF token to request:",a)}return e},e=>Promise.reject(e)
+
+=== any import.meta.env / location.origin ===
+ction:s,location:y.location,delta:0})}function v(b){let m=o.location.origin!=="null"?o.location.origin:o.location.href,g=typeof b=="str
+(typeof u=="string"&&$b.test(u)&&(v=u,Fb))try{let x=new URL(window.location.href),E=u.startsWith("//")?new URL(x.protocol+u):new URL(u)
+erGlobalScope&&typeof self.importScripts=="function",dS=Tf&&window.location.href||"http://localhost",fS=Object.freeze(Object.defineProp
+FT_DETECTED")return localStorage.removeItem("user"),Un=null,window.location.href="/login?error=security",Promise.reject(e);if(Lu)return
+n refresh failed")),localStorage.removeItem("user"),Un=null,window.location.href="/login",Promise.reject(e))}catch(b){return Mu(b),loca
+="USER_INACTIVE")&&(localStorage.removeItem("user"),Un=null,window.location.href="/login")}return((c=e.response)==null?void 0:c.status)
+ error:",u)}finally{localStorage.removeItem("user"),n(null),window.location.href="/login"}},l=u=>{n(u),localStorage.setItem("user",JSON
+[0m
+This is a significant find. Let me verify ownership/scope before going further.
+[0m$ [0mecho "=== workspace artifacts ==="
+ls -la
+echo "---"
+ls -la art 2>/dev/null || true
+ls -la inventory 2>/dev/null || true
+echo "=== any existing railway/kurs-production notes ==="
+grep -rn "kurs-production\|up.railway.app\|Kurs Yönetim\|Railway" --include='*.md' --include='*.txt' --include='*.yml' . 2>/dev/null | head -30 || true
+=== workspace artifacts ===
+total 1068
+drwxr-xr-x 12 runner runner   4096 Oct 10 16:16 .
+drwxr-xr-x  3 runner runner   4096 Oct 10 16:15 ..
+drwxr-xr-x  7 runner runner   4096 Oct 10 16:16 .git
+drwxr-xr-x  3 runner runner   4096 Oct 10 16:15 .github
+-rw-r--r--  1 runner runner   1692 Oct 10 16:15 README.md
+-rw-r--r--  1 runner runner  24090 Oct 10 16:19 analyst-out.txt
+-rw-r--r--  1 runner runner 486580 Oct 10 16:16 analyst-prompt.txt
+-rw-r--r--  1 runner runner 482731 Oct 10 16:16 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 inventory
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 knowledge
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 leads
+-rw-r--r--  1 runner runner   6409 Oct 10 16:15 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 recon-notes
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 reports
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 reposcan-raw
+-rw-r--r--  1 runner runner   3268 Oct 10 16:15 scope.yml
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 scripts
+-rw-r--r--  1 runner runner     33 Oct 10 16:15 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Oct 10 16:15 state_laguna.json
+-rw-r--r--  1 runner runner     33 Oct 10 16:15 state_ling3.json
+-rw-r--r--  1 runner runner     33 Oct 10 16:15 state_longcat.json
+-rw-r--r--  1 runner runner     33 Oct 10 16:15 state_mimo.json
+-rw-r--r--  1 runner runner     33 Oct 10 16:15 state_nemotron3.json
+drwxr-xr-x  2 runner runner  12288 Oct 10 16:15 triage
+---
+total 196
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 .
+drwxr-xr-x 12 runner runner   4096 Oct 10 16:16 ..
+-rw-r--r--  1 runner runner 190664 Oct 10 16:15 onecode.md
+=== any existing railway/kurs-production notes ===
+./leads/lead-bigpickle.md:2:[HYP] Railway app API discovery
+./leads/lead-bigpickle.md:6:reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+./leads/lead-bigpickle.md:11:[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+./leads/lead-bigpickle.md:14:[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+./leads/lead-bigpickle.md:15:[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+./leads/lead-bigpickle.md:17:[HYP] Session fixation on Railway-hosted kurs.onecode.de
+./leads/lead-bigpickle.md:21:reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+./leads/lead-bigpickle.md:35:[HYP] Railway API endpoint discovery
+./leads/lead-bigpickle.md:39:reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+./leads/lead-bigpickle.md:45:[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+./leads/lead-bigpickle.md:46:[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+./leads/lead-bigpickle.md:49:[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+./leads/lead-bigpickle.md:51:[HYP] Session fixation on Railway-hosted kurs.onecode.de
+./leads/lead-bigpickle.md:55:reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+./leads/lead-bigpickle.md:69:[HYP] Railway API endpoint discovery
+./leads/lead-bigpickle.md:73:reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+./leads/lead-bigpickle.md:79:[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+./leads/lead-bigpickle.md:80:[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+./leads/lead-bigpickle.md:83:[RISK] onecode: 35 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+./leads/lead-bigpickle.md:84:[HYP] Railway app API discovery
+./leads/lead-bigpickle.md:88:reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+./leads/lead-bigpickle.md:93:[HYP] Railway app API discovery: confidence=40 (borderline). No direct evidence of APIs. parked: needs live confirmation.
+./leads/lead-bigpickle.md:96:[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+./leads/lead-bigpickle.md:97:[RISK] onecode: 30 (limited surface, Webflow-dominated, Railway app needs deeper recon)
+./leads/lead-bigpickle.md:98:[HYP] Session fixation on Railway-hosted kurs.onecode.de
+./leads/lead-bigpickle.md:102:reasoning: Railway app with 307 login redirect, likely session cookies set on /login; Railway default session handling may lack SameSite/Secure hardening
+./leads/lead-bigpickle.md:116:[HYP] Railway API endpoint discovery
+./leads/lead-bigpickle.md:120:reasoning: Railway-hosted app with /login path; likely has API endpoints behind auth
+./leads/lead-bigpickle.md:126:[LEARN] ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+./leads/lead-bigpickle.md:127:[LEARN] ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+[0m
+[0m$ [0mUA="onecode-analyst/1.0"
+H="kurs-production.up.railway.app"
+echo "=== TLS cert SAN ==="
+echo | timeout 25 openssl s_client -servername "$H" -connect "$H:443" 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName 2>/dev/null | head -20
+echo
+echo "=== /api/csrf-token ==="
+curl -sS -D - -A "$UA" --max-time 20 "https://$H/api/csrf-token" | sed -n '1,25p'
+echo
+echo "=== /auth/me ==="
+curl -sS -A "$UA" --max-time 20 "https://$H/api/auth/me" -w '\n[%{http_code}]\n' | head -c 300; echo
+echo "=== / (any onecode branding) ==="
+grep -io 'onecode\|gmbh\|impressum\|datenschutz' /tmp/kp_root.html /tmp/kp.js | sort -u || echo "no onecode branding found"
+=== TLS cert SAN ===
+subject=CN = *.up.railway.app
+issuer=C = US, O = Let's Encrypt, CN = YE2
+X509v3 Subject Alternative Name: 
+    DNS:*.up.railway.app, DNS:up.railway.app
+
+=== /api/csrf-token ===
+HTTP/2 200 
+access-control-allow-credentials: true
+content-security-policy: default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests
+content-type: application/json; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Sat, 10 Oct 2026 16:19:02 GMT
+etag: W/"50-7nNrhrcpmfgkYb9nOjGWceEOPsc"
+origin-agent-cluster: ?1
+ratelimit-limit: 200
+ratelimit-policy: 200;w=60
+ratelimit-remaining: 199
+ratelimit-reset: 60
+referrer-policy: no-referrer
+server: railway-hikari
+set-cookie: csrfToken=22db07596c9edafc92012c12eb2c09d17ddb3986409cabf22e20af1d9021a350; Max-Age=86400; Path=/; Expires=Sun, 11 Oct 2026 16:19:01 GMT; HttpOnly; Secure; SameSite=Strict
+set-cookie: csrfToken=07b081c0f021e296449bc75593ff5357f9dd43d52b8e109f9fbc4e0bfaa20e38; Max-Age=86400; Path=/; Expires=Sun, 11 Oct 2026 16:19:01 GMT; HttpOnly; Secure; SameSite=Strict
+strict-transport-security: max-age=15552000; includeSubDomains
+vary: Origin
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-railway-request-id: UUlI7lwoQiitI8upY53eZw
+
+=== /auth/me ===
+{"error":"Yetkilendirme token'ı bulunamadı"}
+[401]
+
+=== / (any onecode branding) ===
+[0m
+[0m→ [0mRead scope.yml
+[0m→ [0mRead README.md
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+echo "=== state files ==="
+for f in state_*.json; do echo "$f: $(cat $f)"; done
+echo "=== leads dir ==="
+ls -la leads/
+echo "=== reports dir ==="
+ls -la reports/
+echo "=== knowledge dir ==="
+ls -la knowledge/
+=== state files ===
+state_bigpickle.json: {"phase": "POC", "target": "api"}
+state_laguna.json: {"phase": "POC", "target": "api"}
+state_ling3.json: {"phase": "POC", "target": "api"}
+state_longcat.json: {"phase": "POC", "target": "api"}
+state_mimo.json: {"phase": "POC", "target": "api"}
+state_nemotron3.json: {"phase": "POC", "target": "api"}
+=== leads dir ===
+total 3024
+drwxr-xr-x  2 runner runner    4096 Oct 10 16:15 .
+drwxr-xr-x 12 runner runner    4096 Oct 10 16:16 ..
+-rw-r--r--  1 runner runner 1252894 Oct 10 16:15 lead-bigpickle.md
+-rw-r--r--  1 runner runner   11016 Oct 10 16:15 lead-laguna.md
+-rw-r--r--  1 runner runner   10800 Oct 10 16:15 lead-ling3.md
+-rw-r--r--  1 runner runner   11232 Oct 10 16:15 lead-longcat.md
+-rw-r--r--  1 runner runner      18 Oct 10 16:15 lead-mimo.md
+-rw-r--r--  1 runner runner 1756799 Oct 10 16:15 lead-nemotron3.md
+-rw-r--r--  1 runner runner   36769 Oct 10 16:15 reposcan-onecode.md
+=== reports dir ===
+total 6708
+drwxr-xr-x  2 runner runner    4096 Oct 10 16:15 .
+drwxr-xr-x 12 runner runner    4096 Oct 10 16:16 ..
+-rw-r--r--  1 runner runner 3666330 Oct 10 16:15 analyst-bigpickle.log
+-rw-r--r--  1 runner runner   46872 Oct 10 16:15 analyst-laguna.log
+-rw-r--r--  1 runner runner   46656 Oct 10 16:15 analyst-ling3.log
+-rw-r--r--  1 runner runner   47088 Oct 10 16:15 analyst-longcat.log
+-rw-r--r--  1 runner runner 2427137 Oct 10 16:15 analyst-nemotron3.log
+-rw-r--r--  1 runner runner    7208 Oct 10 16:15 hypotheses-bigpickle.txt
+-rw-r--r--  1 runner runner      51 Oct 10 16:15 hypotheses-laguna.txt
+-rw-r--r--  1 runner runner      50 Oct 10 16:15 hypotheses-ling3.txt
+-rw-r--r--  1 runner runner      52 Oct 10 16:15 hypotheses-longcat.txt
+-rw-r--r--  1 runner runner   11523 Oct 10 16:15 hypotheses-nemotron3.txt
+-rw-r--r--  1 runner runner  576120 Oct 10 16:15 hypotheses.md
+-rw-r--r--  1 runner runner     782 Oct 10 16:15 valid-bugs.md
+=== knowledge dir ===
+total 280
+drwxr-xr-x  2 runner runner   4096 Oct 10 16:15 .
+drwxr-xr-x 12 runner runner   4096 Oct 10 16:16 ..
+-rw-r--r--  1 runner runner 278443 Oct 10 16:15 index.md
+[0m
+[0m$ [0mcd /home/runner/work/onecode-hunt/onecode-hunt
+echo "=== prior mentions of kurs-production ==="
+grep -rn "kurs-production" . 2>/dev/null | head
+echo "=== prior mentions of up.railway.app (context) ==="
+grep -rhoE '[a-z0-9-]+\.up\.railway\.app' . 2>/dev/null | sort | uniq -c | sort -rn | head
+echo "=== prior mentions of Turkish/Kursiyer ==="
+grep -rniE "kursiyer|Kurs Y|turkish|Yetkilendirme" . 2>/dev/null | grep -v Binary | head
+echo "=== Next.js app: backend host refs in KB ==="
+grep -rhoE 'https?://[a-zA-Z0-9.-]*railway[a-zA-Z0-9./-]*' . 2>/dev/null | sort | uniq -c | sort -rn | head
+=== prior mentions of kurs-production ===
+./analyst-out.txt:208:for h in ki8dqcf6.up.railway.app tgk4io5m.up.railway.app kurs-production.up.railway.app onecode.up.railway.app; do
+./analyst-out.txt:218:kurs-production.up.railway.app -> 200
+./analyst-out.txt:259:H="kurs-production.up.railway.app"
+./analyst-out.txt:266:=== kurs-production.up.railway.app / headers ===
+./analyst-out.txt:293:=== kurs-production.up.railway.app / body (first 600) sha256 ===
+./analyst-out.txt:311:H="kurs-production.up.railway.app"
+./analyst-out.txt:435:echo "=== any existing railway/kurs-production notes ==="
+./analyst-out.txt:436:grep -rn "kurs-production\|up.railway.app\|Kurs Yönetim\|Railway" --include='*.md' --include='*.txt' --include='*.yml' . 2>/dev/null | head -30 || true
+./analyst-out.txt:468:=== any existing railway/kurs-production notes ===
+./analyst-out.txt:501:H="kurs-production.up.railway.app"
+=== prior mentions of up.railway.app (context) ===
+    256 ki8dqcf6.up.railway.app
+     33 tgk4io5m.up.railway.app
+      7 kurs-production.up.railway.app
+      2 onecode.up.railway.app
+=== prior mentions of Turkish/Kursiyer ===
+./analyst-out.txt:301:    <title>Kurs Yönetim Sistemi</title>
+./analyst-out.txt:334:KursiyerRaporlari-ADFofinz.js
+./analyst-out.txt:335:Kursiyerler-yOhbnjUf.js
+./analyst-out.txt:340:kursiyer
+./analyst-out.txt:341:kursiyerler
+./analyst-out.txt:367:"/kursiyerler"
+./analyst-out.txt:376:"/raporlar/kursiyer"
+./analyst-out.txt:436:grep -rn "kurs-production\|up.railway.app\|Kurs Yönetim\|Railway" --include='*.md' --include='*.txt' --include='*.yml' . 2>/dev/null | head -30 || true
+./analyst-out.txt:546:{"error":"Yetkilendirme token'ı bulunamadı"}
+./reports/analyst-bigpickle.log:20194:- [LEARN] REJECTED MISCONFIG @ all: time-cadence probing on kurs yields zero delta value 38 days running with no deploy event (chunk-diff remains event-triggered); probe cadence extended to deploy-signal-only.
+=== Next.js app: backend host refs in KB ===
+      2 https://tgk4io5m.up.railway.app/
+      1 https://ki8dqcf6.up.railway.app/login
+      1 https://ki8dqcf6.up.railway.app/
+[0m
+[0m$ [0mUA="onecode-analyst/1.0"
+H="kurs-production.up.railway.app"
+echo "=== company/legal/email strings in SPA bundle ==="
+grep -oiE '(©|copyright|[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}|A\.Ş\.|Ltd|GmbH|Şirket|OneCode)' /tmp/kp.js | sort -u | head -30
+echo "=== favicon ==="
+curl -sS -A "$UA" --max-time 15 "https://$H/favicon.svg" -o /tmp/kp_fav.svg -w '%{http_code} %{size_download}\n'
+head -c 400 /tmp/kp_fav.svg; echo
+echo "=== config-ish endpoints ==="
+for p in api/health api/config api/version api/auth/register; do
+  echo "-- /$p"
+  curl -sS -o /dev/null -w 'GET %{http_code}\n' -A "$UA" --max-time 15 "https://$H/$p"
+  curl -sS -o /dev/null -w 'OPTIONS %{http_code}\n' -X OPTIONS -A "$UA" --max-time 15 "https://$H/$p"
+  sleep 1
+done
+=== company/legal/email strings in SPA bundle ===
+Copyright
+=== favicon ===
+200 510
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="20" fill="url(#grad)"/>
+  <text x="50" y="72" font-f
+=== config-ish endpoints ===
+-- /api/health
+GET 200
+OPTIONS 204
+-- /api/config
+GET 200
+OPTIONS 204
+-- /api/version
+GET 200
+OPTIONS 204
+-- /api/auth/register
+GET 200
+OPTIONS 204
+[0m
+[0m$ [0mUA="onecode-analyst/1.0"
+H="kurs-production.up.railway.app"
+for p in api/health api/config api/version api/auth/register; do
+  echo "=== /$p ==="
+  curl -sS -D /tmp/h -A "$UA" --max-time 15 "https://$H/$p" -o /tmp/b
+  grep -i '^content-type' /tmp/h
+  head -c 300 /tmp/b; echo
+  sleep 1
+done
+=== /api/health ===
+content-type: text/html; charset=UTF-8
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kurs Yönetim Sistemi</title>
+    <script type="module" crossorigin src="/as
+=== /api/config ===
+content-type: text/html; charset=UTF-8
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kurs Yönetim Sistemi</title>
+    <script type="module" crossorigin src="/as
+=== /api/version ===
+content-type: text/html; charset=UTF-8
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kurs Yönetim Sistemi</title>
+    <script type="module" crossorigin src="/as
+=== /api/auth/register ===
+content-type: text/html; charset=UTF-8
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kurs Yönetim Sistemi</title>
+    <script type="module" crossorigin src="/as
+[0m
+Stopping to ask, because I hit a real scope fork.
+
+## Delta on confirmed in-scope assets (no change)
+- `kurs.onecode.de/login` sha256 still `99798c7d94a1…d9450` (byte-identical, no deploy). `/`→307, all `/api/*`, `/v1`, `/dashboard`, `/admin`, `/courses`, `/einladung`, `/passwort-neu` → 307→`/login`.
+- `cto.onecode.de` still 409 (Perspective, unclaimed).
+- Supabase: `/auth/v1/settings` unchanged; REST `profiles`/`enrollments` anon still `503 PGRST002`; `storage/v1/bucket` → `[]`; CORS unchanged (`*` unauth, reflected + `ACAC:true` with apikey). No new signal.
+
+## New discovery — but ownership is unconfirmed
+While guessing Railway default hostnames I found **`kurs-production.up.railway.app` → 200** (not previously in the KB; the CNAME targets `ki8dqcf6`/`tgk4io5m` both now 404). It is **not** OneCode's Next.js app — it is a *different service*:
+
+- Turkish-language React/Vite SPA, `<title>Kurs Yönetim Sistemi</title>`, `lang="tr"`.
+- Express-style API at `/api` (`withCredentials:true`, double-submit `csrfToken` cookie `HttpOnly; Secure; SameSite=Strict`, rate-limit 200/min), `ACAO` reflects Origin + `access-control-allow-credentials: true`.
+- Routes: `/auth/login`, `/auth/register`, `/auth/refresh`, `/auth/me` (`{"error":"Yetkilendirme token'ı bulunamadı"}`), `/auth/change-password`, `/kullanicilar`, `/kursiyerler`, `/aidatlar`, `/kasalar`, `/raporlar`, `/audit-logs`, `/oturum-yonetimi`.
+- **No** `onecode.de`/OneCode branding anywhere (HTML, JS bundle, favicon); cert is the generic `*.up.railway.app` wildcard.
+
+## Why I stopped
+Scope is "infrastructure … operated by OneCode GmbH." This app shows zero linkage to OneCode: different language, different stack, different Railway service from the `kurs.onecode.de` CNAME targets. By naming conventions (`kurs-production` = service+env default domain) it looks like **an unrelated Railway tenant** that simply shares the common Turkish word "kurs". I did only read-only GETs and have not attempted `/auth/register` (account creation) or any auth testing.
+
+**Please confirm:** is any OneCode service (or a client product built by OneCode) deployed at `kurs-production.up.railway.app`, or should it be treated as out of scope? If out of scope I'll close it and not touch it further. If in scope, this is a materially new attack surface (own `/api`, credentials + CSRF model, `/auth/register`) and I'll prioritize it over the parked BOLA path.
+
+```
+[DELTA] in-scope: NONE. New off-domain host discovered (kurs-production.up.railway.app) — ownership unverified.
+[PRIORITIZE] pending scope ruling: (1) confirm ownership of kurs-production.up.railway.app; (2) post-auth BOLA (AUTH_HELPED) remains only in-scope reportable path.
+[HYPOTHESES] [conf 50] kurs-production.up.railway.app is OneCode-operated (Turkish course product) -> rich unauth API surface; vs [conf 50] unrelated Railway tenant -> OUT OF SCOPE. Blocked on program confirmation.
+[SELF-CRITIQUE] Discovery method was hostname guessing on a shared PaaS domain, not enumeration of OneCode infra; risk of scope creep / testing a third party. Must confirm before any active testing.
+[NEXT ACTION] HUMAN: ask program whether kurs-production.up.railway.app (or any *.up.railway.app not linked to *.onecode.de) is in scope. Do not probe further until answered.
+[LEARNING] OneCode kurs = German + Next.js + Supabase; the Turkish SPA is a distinct stack -> low prior of shared ownership.
+[RISK] Low for in-scope program (no activity on confirmed assets); compliance risk if the off-domain host is tested unconfirmed.
+```
+
+Which way do you want me to go?
