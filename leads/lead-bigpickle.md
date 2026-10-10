@@ -7625,3 +7625,41 @@ class: account/token-state oracle
 [NEXT] HUMAN: request two invited kurs.onecode.de accounts (A,B). If granted, immediately run H1 read-only cross-tenant REST probe with A's Bearer; if not granted within the cycle, pivot to [NEXT] PROBE H3 differential /auth/v1/verify (read-only) as the only account-free signal.
 ## 2026-10-09 19:46:30 UTC [target] (model bigpickle)
 ## 2026-10-09 23:55:50 UTC [target] (model bigpickle)
+## 2026-10-10 05:17:39 UTC [target] (model bigpickle)
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co, 6.85, cloud+business+tech_exposure (gated by auth)
+[PRIO] kurs.onecode.de, 6.75, attack_surface+tech_exposure+cloud
+[PRIO] cto.onecode.de, 4.70, freshness+gate_ease(no-auth) but low business/tech
+[HYP] Post-auth BOLA via Supabase RLS gap
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/
+confidence: 65
+reasoning: signup/anon disabled → no unprivileged authenticated principal obtainable passively; REST monitor never returned 200+rows; only service-role/publishable paths ever probed, so cross-tenant RLS reads are untested; client sink treats RLS as sole tenant boundary.
+evidence_needed: two invited accounts A,B; with A's JWT read B's rows.
+verify_steps: GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=* with headers apikey:<pub> + Authorization:Bearer <A jwt>; then GET /rest/v1/profiles?select=id,email.
+impact: cross-tenant PII/record read → HIGH/CRITICAL if rows leak.
+testability: AUTH_HELPED
+[HYP] Forced-login fragment sink session adoption
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 45
+reasoning: HashSessionHandoff (module 34891, RSC row 18) reads window.location.hash access_token+refresh_token → setSession() with no state/nonce/PKCE; but signup disabled means attacker cannot mint a token pair.
+evidence_needed: attacker-controlled valid token pair + victim visit to /login#access_token=…&refresh_token=…
+verify_steps: GET https://kurs.onecode.de/login, confirm modules 34891/28420 in RSC payload; static read of sink chunk only.
+impact: session fixation IF tokens are attacker-mintable → MEDIUM, currently gated.
+testability: HUMAN_ONLY
+[HYP] GoTrue /auth/v1/verify token-state oracle
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify
+confidence: 40
+reasoning: 7th pre-gate keyless route; response/Location/#error may differ by token validity.
+evidence_needed: differential status/Location for garbage vs well-formed token.
+verify_steps: GET /auth/v1/verify?type=recovery&token=<garbage32>&redirect_to=https://example.org/ (read-only).
+impact: low; token-state oracle only.
+testability: PASSIVE
+[PARKED] GoTrue verify oracle: descriptive-error class (explicitly out-of-scope) + impact-capped; no boundary crossed.
+[PARKED] Fragment sink session adoption: signup disabled removes attacker's token-minting; only exploitable with a pre-leaked invite token → HUMAN_ONLY.
+[FINAL] 1. Post-auth BOLA via Supabase RLS gap (conf 65, AUTH_HELPED) — sole reportable path.
+[NEXT] HUMAN: obtain two invited `kurs.onecode.de` test accounts (A,B); then A's Bearer `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` to test B's row leakage (sole route to the HIGH/CRITICAL finding).
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: 38+ JWT alg/key-confusion probes + 5 forged-cookie variants all negative; ES256 pinning holds.
+[RISK] onecode: 55 — surface converged, 0 reportable findings in 5+ weeks, all survivors human-gated.

@@ -1496,3 +1496,10 @@ www.onecode.de
 - NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (`/object/sign`, `/storage/v1/s3
 - NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
 - NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names — subdomain inventory confirmed complete
+
+## 2026-10-10 05:17:48 UTC
+- NEW S3 access-key-ID oracle contradiction resolved: bogus SigV4 credential (AKIAIOSFOD_REDACTED) → 403 InvalidAccessKeyId "does not exist in our records" (NOT InvalidSignature). Oracle is real, but it is 
+- NEW GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks.
+- NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — subdomain inventory confirmed complete, zero new surface.
+- CHANGED kurs.onecode.de: no deploy day-21; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200.
+- CHANGED cto.onecode.de: CNAME→`cname.perspective-dns.com` day-59+, HTTP 409, zero verification TXT — passive probing fully converged.
