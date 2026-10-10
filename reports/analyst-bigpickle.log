@@ -44380,3 +44380,185 @@ Scope is "infrastructure … operated by OneCode GmbH." This app shows zero link
 ```
 
 Which way do you want me to go?
+===== ANALYST bigpickle 2026-10-10 20:12:13 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u; echo "---"; curl -sS -m 20 -I https://kurs.onecode.de/login 2>&1 | head -30
+Sat Oct 10 20:10:39 UTC 2026
+---
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Sat, 10 Oct 2026 20:10:40 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: lIe15aJnTKO9-4I121mRUA
+x-hikari-trace: iad1.trg5
+x-railway-edge: iad1
+[0m
+[0m$ [0mcurl -sS -m 20 -D- -o /dev/null https://cto.onecode.de/ 2>&1 | head -20; echo "=== dig ==="; dig +short cto.onecode.de CNAME 2>&1; dig +short kurs.onecode.de CNAME 2>&1
+curl: (35) OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+=== dig ===
+cname.perspective-dns.com.
+ki8dqcf6.up.railway.app.
+[0m
+I'll run a small set of read-only probes to establish a genuine live delta before producing the structured analysis.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; echo "=== storage/v1/bucket ==="; curl -sS -m 20 -D- -H "apikey: $K" -H "Authorization: Bearer $K" https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket 2>&1 | head -30; echo; echo "=== auth/v1/settings ==="; curl -sS -m 20 -o /dev/null -w "%{http_code}\n" -H "apikey: $K" https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings 2>&1
+=== storage/v1/bucket ===
+HTTP/2 200 
+date: Sat, 10 Oct 2026 20:10:41 GMT
+content-type: application/json; charset=utf-8
+content-length: 2
+cf-ray: a4884516e9d92881-ORD
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a12770-6a55-7390-9bc7-6ebce48c5c6f
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=2JOK.TACWQifuotZKTb._5u1MDaPHAcaBpnkaOZ0LOA-1791663041.1041005-1.0.1.1-oWRWRYzZ92r6jeR0XKChwoX99WZhnzPZaJqVjh8Cpy0Kf8pPGyiQQ0lD1dtj9BQhAh98VuNhtcnq9R_dgco8OevaUNhXUXhR0VKiX2XSyLTz7yONECsPjHLdaD4rwRAY; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 10 Oct 2026 20:40:41 GMT
+alt-svc: h3=":443"; ma=86400
+
+[]
+=== auth/v1/settings ===
+200
+[0m
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; echo "=== rest/v1/profiles ==="; curl -sS -m 20 -D- -H "apikey: $K" -H "Authorization: Bearer $K" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/profiles?select=*" 2>&1 | head -25; echo "=== main chunk ==="; curl -sS -m 25 https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js 2>/dev/null | sha256sum
+=== rest/v1/profiles ===
+HTTP/2 503 
+date: Sat, 10 Oct 2026 20:10:43 GMT
+content-type: application/json; charset=utf-8
+cf-ray: a488451baadd508f-ORD
+cf-cache-status: DYNAMIC
+set-cookie: __cf_bm=6idujq8xDk.Nny1BtqEeHjCJa7GkzO37D6TsF0Y55j8-1791663041.863586-1.0.1.1-BsE1riGQizH1aAhNssAjIWazffo0cvhQDW4ffXeOItvMRr8wgdsNs.W2itG_7PD.styxNFNDt1CufS2A7XVOQXXI1aReIGB..yU4KXFirpoCURoKF1vyfY2LebIEMHKs; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 10 Oct 2026 20:40:43 GMT
+retry-after: 0
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Accept-Encoding
+proxy-status: PostgREST; error=PGRST002
+x-content-type-options: nosniff
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a12770-6d4c-7c6b-9b48-8790c171aa93
+x-envoy-attempt-count: 6
+x-envoy-upstream-service-time: 1018
+alt-svc: h3=":443"; ma=86400
+
+{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}=== main chunk ===
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  -
+[0m
+## Objective
+- Operate the 8-step bug-bounty analyst workflow (DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT → LEARNING → RISK) against the OneCode GmbH program (report channel `bugs.olivermaicher.eu`), currently in phase=POC, target=`api`.
+- Find and prove a reportable HIGH/CRITICAL finding on in-scope `*.onecode.de` / `kurs.onecode.de` and its company-owned Supabase backend.
+
+## Important Details
+- In-scope ONLY: `*.onecode.de`, `kurs.onecode.de`, plus company-owned infra/web apps/APIs/cloud/portals/domains.
+- Rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only for live probes; never mutating/auth-bypass tests on live customer data; sha256 any secret; all claims trace to context or own read-only probes; no REJECTED class.
+- REJECTED classes include: DoS/lockout, descriptive errors/headers only, `OPTIONS`/`TRACE`, scanner reports w/o POC, SSL/TLS best practice, username enumeration, SPF/DKIM/DMARC, clickjacking w/o exploit, known-vuln library w/o program exploit.
+- Key assets: `kurs.onecode.de` = Railway-hosted Next.js/Turbopack App Router (`server: railway-hikari`, `x-railway-edge` iad1/lax1 flapping = noise), CNAME `ki8dqcf6.up.railway.app`; Supabase project `aygnpacdkgtsfnhgcyjc.supabase.co` + `.storage.supabase.co`.
+- Publishable key plaintext: `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (KB's `870cf518…` was a trailing-newline artifact — all PoCs must cite `43ccb834…`).
+- Frozen hashes (no deploy since 2026-09-19 11:33Z, day-21+): main chunk `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page = 18 702 B sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`.
+- Auth stack: Supabase email-only, `disable_signup:true`, `mailer_autoconfirm:false`, `external.anonymous_users:false`, all external OAuth false, `passkeys_enabled:false`, `saml_enabled:false` but `saml_private_key_next_configured:true`.
+- Verified negatives (do not re-mine): pre-auth surface = `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200, all `/api/*,/v1,/admin,/dashboard,/courses` 307→/login; forged/null cookies (5 variants) negative; CVE-2025-29927 negative; `_next/image` SSRF negative; no PKCE code injection; no privileged key in 13 pre-auth chunks; JWT alg/key-confusion closed (38 probes, ES256-only verifier); GoTrue `redirect_to` allowlist exact-origin (15+ shapes); `/auth/v1/logout?returnTo=` 405; `/auth/v1/authorize` inert; shadow hostnames `api./functions./realtime.<ref>` = 0 A records; subdomain inventory = exactly 5 CT names `onecode.de, www, kurs, cto, mta-sts`.
+- Confirmed/accepted observations (low-severity, non-reportable alone): GoTrue credentialed-CORS reflection (tier model: apikey-bearing resource paths reflect Origin + `ACAC:true`; 7 pre-gate routes: `jwks.json, openid-configuration, oauth-authorization-server, oauth/authorize, oauth/token, oauth/userinfo, verify`); preflight never reflects; Bearer-only origin caps ceiling to MEDIUM; S3 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` live (403 Missing signature, independent SigV4); storage bucket-existence oracle route-table-complete (10 classes, 81 names excluded, bucket name unrecoverable pre-auth).
+- `cto.onecode.de`: CNAME→`cname.perspective-dns.com` stable 59+ days, HTTP 409 `error code:1001`, HTTPS handshake-fail, zero verification TXT; conf 58, HUMAN_ONLY (claim attempt is only proof path).
+- Closed monitors (do not re-probe on cadence): Supabase `/rest/v1/*` (26 probes 503↔401, never 200+rows, closed 09-17); `/storage/v1/bucket` `[]` (uninformative — anon cannot SELECT `storage.buckets`); `/functions/v1/*` 404 uniform (Edge Functions absent); `/realtime/v1/*` no postgres_changes data/oracle; build-diff on kurs is event-triggered, not time-based.
+
+## Work State
+### Completed
+- Full pre-auth surface enumerated and exhaustively falsified over ~5 weeks (auth bypass, cookie forgery, middleware bypass, SSRF, XSS, open redirect, OAuth/SAML, PKCE, CORS, JWT forgery/confusion).
+- Supabase all planes mapped: GoTrue, PostgREST, Storage (+S3 sub-plane), Realtime, Functions, GraphQL (503).
+- Subdomain inventory + GitHub org scan (`OneCodeDevs`/`compass`, `OneCode`/`hello-guide`) complete, zero leaks.
+- Hash provenance defects corrected (publishable-key digest; 66-char sink hash typo).
+
+### Active
+- Phase=POC, target=`api`. Sole actionable reportable lead = post-auth BOLA via Supabase RLS gap (conf 65, AUTH_HELPED).
+- Priority scores: `aygnpacdkgtsfnhgcyjc.supabase.co` 6.85 (auth-gated); `kurs.onecode.de` 6.75; `cto.onecode.de` 4.70.
+
+### Blocked
+- BOLA test requires two invited `kurs.onecode.de` accounts (A,B) — invite-only, no signup/anon route → only non-intrusive execution path.
+- `cto.onecode.de` subdomain takeover is HUMAN_ONLY (owner claim attempt).
+- Realtime channel, GoTrue `verify` oracle, fragment-sink session adoption all PARKED (speculative / OOS descriptive-error class / attacker-token-minting removed by `disable_signup`).
+
+## Next Move
+1. `[NEXT] HUMAN`: obtain two invited `kurs.onecode.de` test accounts (A,B); then `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` with headers `apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` + `Authorization: Bearer <A jwt>`, then `GET /rest/v1/profiles?select=id,email` — test cross-tenant row leakage (sole route to HIGH/CRITICAL BOLA).
+2. Continue passive monitors event-triggered only: re-diff `kurs.onecode.de` chunks on deploy signal; re-check `cto.onecode.de` CNAME/409; no fixed-cadence REST/S3 re-probes (all closed/converged, RISK 55).
+
+## Relevant Files
+- `inventory/onecode.md`: OneCode host inventory + passive recon (10 hosts, 3 live HTTP); subdomain set complete at 5 CT names.
+- `scope.yml`: authoritative in/out-of-scope definitions for the program.
+- `art/lead_nemotron3.txt`: source of the conf-75 S3-plane lead (downgraded to PARKED — untestable without owner SigV4 keys).
+- `hypotheses-nemotron3.txt`: queued NEXT probe (CORS on `/auth/v1/*` with `apikey` + `Origin: https://evil.example`).
+- `bugs.olivermaicher.eu`: report submission channel.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Live delta noted. One disambiguating batch for the new `PGRST002` signal, then I'll stop.
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; B="https://aygnpacdkgtsfnhgcyjc.supabase.co"; sleep 2; echo "=== /rest/v1/ root ==="; curl -sS -m 20 -D- -H "apikey: $K" -H "Authorization: Bearer $K" "$B/rest/v1/" 2>&1 | tail -6; echo; echo "=== /auth/v1/health ==="; curl -sS -m 20 -D- -H "apikey: $K" "$B/auth/v1/health" 2>&1 | tail -6; echo; echo "=== /auth/v1/settings body ==="; curl -sS -m 20 -H "apikey: $K" "$B/auth/v1/settings" 2>&1 | head -c 600
+=== /rest/v1/ root ===
+set-cookie: __cf_bm=COmzeDHLwLw8t98ifbD2LNLJ7Nj3dkTBnoOUe4BjP34-1791663079.2150946-1.0.1.1-UPkV9IypOnvaEVjKoOLOGDsKaeHhxpmRTERMvSd6NzVCOvaQKf0Gv_rp4BuvC2FtW5MJbP9iosHJThyGrECS8e4oVvCnYgdzdijzQsQSbae1kTMh62.JXxki5fPyTpaB; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Sat, 10 Oct 2026 20:41:19 GMT
+server: cloudflare
+cf-ray: a48846051d7db4b8-ORD
+alt-svc: h3=":443"; ma=86400
+
+{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}
+=== /auth/v1/health ===
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 0
+alt-svc: h3=":443"; ma=86400
+
+{"version":"v2.197.0","name":"GoTrue","description":"GoTrue is a user registration and authentication API"}
+=== /auth/v1/settings body ===
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabl
+[0m
+[0m$ [0mK="sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30"; B="https://aygnpacdkgtsfnhgcyjc.supabase.co"; echo "=== /storage/v1/bucket repeat ==="; curl -sS -m 20 -o /dev/null -w "%{http_code}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "$B/storage/v1/bucket" 2>&1; echo "=== /rest/v1/ with select=1 ==="; curl -sS -m 20 -o /dev/null -w "%{http_code}\n" -H "apikey: $K" -H "Authorization: Bearer $K" "$B/rest/v1/profiles?select=1&limit=1" 2>&1; echo "=== /rest/v1/ anon (no auth) ==="; curl -sS -m 20 -o /dev/null -w "%{http_code}\n" -H "apikey: $K" "$B/rest/v1/profiles?select=1&limit=1" 2>&1
+=== /storage/v1/bucket repeat ===
+200
+=== /rest/v1/ with select=1 ===
+503
+=== /rest/v1/ anon (no auth) ===
+503
+[0m
+[DELTA] — live probes 2026-10-10 20:10 UTC vs frozen KB
+- **NEW (availability, REJECTED class):** `/rest/v1/*` now returns uniform `503 PGRST002` ("Could not query the database for the schema cache") for **both** anon apikey and `Authorization: Bearer <key>` — no `401`, no rows. Prior 26-probe "503↔401 alternation" is now resolved to **pure 503**: the PostgREST/DB plane is down, and it is *not* an auth boundary.
+- **NEW (hardening, non-reportable):** `/rest/v1/` root with publishable key → `{"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."}` — OpenAPI/root introspection is now gated to secret keys.
+- **NEW (fingerprint):** `/auth/v1/health` → `GoTrue v2.197.0` (add to inventory).
+- **UNCHANGED:** `storage/v1/bucket` `[]` (200); `auth/v1/settings` reconfirms `disable_signup:true`, email-only, `saml_private_key_next_configured:true`; kurs main chunk sha256 `f916f314…` (no deploy); `cto.onecode.de` CNAME `cname.perspective-dns.com` + TLS handshake failure.
+- No status change on any accepted finding.
+
+[PRIORITIZE]
+- Novel juice today = REST-root secret-key gate + GoTrue version. **Both non-reportable** (correct hardening / benign fingerprint).
+- `PGRST002` is availability → **REJECTED class**. Do not spend probes re-mining it.
+- Net: surface remains converged. No new reportable lead.
+
+[HYPOTHESES]
+- **H1 · PARKED:** Supabase project paused (free-tier ~7-day inactivity) → PostgREST 503 while gateway/auth/storage cache still serve. Predicts REST stays 503 for hours–days.
+- **H2 · PARKED:** PostgREST schema-cache warmup after DB restart → transient.
+- **H3 · REJECTED:** REST auth-boundary difference — falsified, anon == bearer == 503.
+
+[SELF-CRITIQUE]
+- `503/PGRST002` is descriptive/availability → REJECTED (DoS, descriptive errors). Single sample cannot separate paused vs transient, and both yield **zero** reportability.
+- `cto.onecode.de` and the AUTH_HELPED BOLA remain the only non-REJECTED survivors — unchanged; the latter is now **infra-gated in addition to** account-gated.
+
+[NEXT]
+1. **STOP** active `/rest/v1/*` probing — availability-only, REJECTED, raises RISK with no novelty.
+2. **HUMAN (sole forward path):** obtain two invited `kurs.onecode.de` accounts; run the cross-tenant BOLA test **only when REST returns 200/206/401**, never on 503.
+3. Event-triggered monitors only: re-hash kurs chunks on a deploy signal; re-check `cto.onecode.de` CNAME/409.
+
+[LEARNING]
+- Hardening is actively landing (REST root now secret-key gated) → program is maturing and the pre-auth surface is shrinking. Update inventory with `GoTrue v2.197.0`.
+- Treat availability states as orthogonal to auth; the old "503↔401" signal was noise now confirmed.
+
+[RISK]
+- ~55, holding. All remaining live pokes are in a REJECTED availability class; ≤1rps unchanged; detection surface flat.
+
+I've stopped. Decision point: every non-REJECTED path is now human/infra-gated, so I need input before continuing —
+
+1. Are you able to obtain **two invited test accounts** (A,B) for the BOLA test? If not, this engagement is at a natural convergence point (no automatable HIGH/CRITICAL path remains).
+2. Is the Supabase `rest` plane being down (`PGRST002`) **expected** (e.g., project paused / mid-maintenance)? That determines whether to keep the BOLA lead at conf 65 or park it.
+3. Do you want me to keep running only the **event-triggered** monitors (deploy diff on kurs, cto CNAME), or close the engagement?
