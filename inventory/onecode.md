@@ -1503,3 +1503,14 @@ www.onecode.de
 - NEW crt.sh re-query 2026-10-09 00:43Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — subdomain inventory confirmed complete, zero new surface.
 - CHANGED kurs.onecode.de: no deploy day-21; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200.
 - CHANGED cto.onecode.de: CNAME→`cname.perspective-dns.com` day-59+, HTTP 409, zero verification TXT — passive probing fully converged.
+
+## 2026-10-10 11:20:27 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: Realtime enabled; anon publishable key performs WS upgrade (101) and phx_join on arbitrary realtime:public:<table> returns status:ok+sub id then
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list-buckets endpoint reachable with apikey → `[]` (zero anon-visible buckets), 400 without apikey; closes bucket-enumeration avenue.
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*: 18 function names all uniform {"code":"NOT_FOUND"} → no function-name oracle; Edge Functions absent; CORS ACAO:* on error.
+- CHANGED kurs.onecode.de/login sha256 unchanged 99798c7d… 18702 B → no deploy; cto.onecode.de still HTTP 409.
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: Realtime enabled — anon publishable key completes WS upgrade (101) and `phx_join` on arbitrary `realtime:public:<table>` returns status:ok+sub-i
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list-buckets reachable with apikey -> `[]` (zero anon-visible buckets), 400 without apikey; closes bucket enumeration.
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1/*: 18 names all uniform `{"code":"NOT_FOUND"}` -> no function-name oracle; Edge Functions absent; error CORS `ACAO:*`.
+- CHANGED kurs.onecode.de/login sha256 unchanged 99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450 (18702 B) -> no deploy; cto.onecode.de still HTTP 409.
+- NEW NO_DELTA — all surfaces identical to 2026-10-10 05:17Z: kurs.onecode.de no deploy day-21 (main chunk f916f314... byte-identical, pre-auth frozen at 4 pages), cto.onecode.de CNAME→cname.perspective-dns

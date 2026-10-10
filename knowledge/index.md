@@ -1187,3 +1187,10 @@
 - 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor closed 09-17 (27 probes 503↔401), never 200+rows; platform enforces sb_publishable_ format only
 - 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
 - 2026-10-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+- 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1: anon WS accepts arbitrary channel joins but no postgres_changes data and no table-existence oracle — no finding.
+- 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all names — Edge Functions absent, no oracle.
+- 2026-10-10 ACCEPTED @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with key — zero anon-visible buckets, closes enumeration.
+- 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1: anon WS accepts arbitrary channel joins but returns no postgres_changes data and no table-existence oracle — no finding.
+- 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle.
+- 2026-10-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue.
+- 2026-10-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-10
