@@ -1518,3 +1518,7 @@ www.onecode.de
 ## 2026-10-10 16:20:19 UTC
 
 ## 2026-10-10 20:12:13 UTC
+
+## 2026-10-10 23:42:29 UTC
+- NEW Realtime closed by direct measurement: `wss://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket` anon WS upgrade = 101, `phx_join` on `realtime:public:{profiles,enrollments,courses}` returns `phx
+- CHANGED KB's 2026-10-10 note "retracted: postgres_changes events DO fire" is CONTRADICTED by this controlled probe; realtime plane now formally negative.

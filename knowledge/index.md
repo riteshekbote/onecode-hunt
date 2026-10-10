@@ -1195,3 +1195,8 @@
 - 2026-10-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue.
 - 2026-10-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflected+ACAC:true) — live re-verified 2026-10-10
 - 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1: anon WS accepts arbitrary channel joins but returns no postgres_changes data and no table-existence oracle — no finding. (retracted: 10-10 live probe shows postgres_changes events DO fire)
+- 2026-10-10 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to subscribe... Realtime is enabled") for profiles/enrollments/courses — no anon data stream; supersedes the 10-10 retraction note.
+- 2026-10-10 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS credentialed reflection persists unchanged; impact capped (GoTrue Bearer-only, no app cookie on origin).
+- 2026-10-10 REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-21+; /login 18 702 B sha256 99798c7d... byte-identical; pre-auth surface frozen.
+- 2026-10-10 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409/1001, zero verification TXT — passive probes converged; only owner claim attempt advances it.
+- 2026-10-10 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts.

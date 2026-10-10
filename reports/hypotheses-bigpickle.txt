@@ -1,3 +1,48 @@
-## 2026-10-10 20:11:39 UTC [target] (model bigpickle)
-[NEXT]
-[RISK]
+## 2026-10-10 23:42:19 UTC [target] (model bigpickle)
+[NEW] Realtime closed by direct measurement: `wss://aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket` anon WS upgrade = 101, `phx_join` on `realtime:public:{profiles,enrollments,courses}` returns `phx_reply status:ok` with `postgres_changes` sub-ids, then server emits `system status:error "Unable to subscribe to changes with given parameters. Please check Realtime is enabled..."` for all three → anon role gets NO postgres_changes; data-leak refuted.
+[CHANGED] KB's 2026-10-10 note "retracted: postgres_changes events DO fire" is CONTRADICTED by this controlled probe; realtime plane now formally negative.
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,7.35,a=8,b=9,t=9,g=3,c=8,f=5
+[PRIO] cto.onecode.de,7.00,a=6,b=6,t=6,g=10,c=8,f=8
+[PRIO] kurs.onecode.de,6.70,a=7,b=9,t=8,g=2,c=7,f=5
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,6.55,a=7,b=8,t=7,g=3,c=8,f=5
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{enrollments,profiles}
+confidence: 65
+reasoning: Backend is single Supabase project for multi-tenant invite-only course platform; authenticated SELECTs governed by RLS; missing user_id filter yields cross-tenant rows. UUID PKs defeat ID guessing, so RLS gap is the realistic vector. Pre-auth fully exhausted; REST 401/503 block anon.
+evidence_needed: With account A's JWT (headers apikey:<pub> + Authorization: Bearer <A jwt>), GET /rest/v1/enrollments?select=* returns rows belonging to another user B.
+verify_steps: HUMAN obtains two invited accounts A,B; then GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=* and /rest/v1/profiles?select=id,email with A's Bearer token; compare to B's rows.
+impact: Cross-tenant enrollment/PII disclosure — HIGH.
+testability: AUTH_HELPED
+[HYP] Subdomain takeover via dangling Perspective SaaS CNAME on cto.onecode.de
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com (Perspective custom-domain target) stable day-59+; HTTP 409 "error code:1001" + TLS handshake failure + zero verification TXT ⇒ hostname appears unbound/reclaimable. Passive probing fully converged.
+evidence_needed: Successful claim of hostname cto.onecode.de at the Perspective provider, or provider API showing the hostname is unregistered.
+verify_steps: dig CNAME cto.onecode.de → cname.perspective-dns.com; curl http://cto.onecode.de/ → 409; HUMAN: attempt hostname claim in a Perspective account.
+impact: Attacker serves content on trusted *.onecode.de subdomain — phishing/cookie-scope — HIGH.
+testability: HUMAN_ONLY
+[HYP] Forced-login session fixation via HashSessionHandoff fragment sink
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 45
+reasoning: Module 34891 (RSC row 18) parses window.location.hash access_token+refresh_token and calls supabase setSession() with no state/nonce/PKCE; next-map {invite:/einladung, recovery:/passwort-neu}. Blind until an attacker-controlled valid token pair is supplied; signup disabled prevents minting.
+evidence_needed: Victim browser on /login#access_token=<attacker token>&refresh_token=<attacker token> adopts attacker session and navigates to an authenticated route.
+verify_steps: GET https://kurs.onecode.de/login (confirm modules 34891/28420 present in RSC payload); HUMAN with a valid invited token pair loads /login#access_token=...&refresh_token=... and checks whether victim is placed into attacker session.
+impact: Victim session fixation/redirect to attacker-controlled identity — MEDIUM (gated).
+testability: HUMAN_ONLY
+[PARKED] Realtime anon postgres_changes data leak: REFUTED 2026-10-10 23:41Z — WS 101 but subscription denied ("Realtime is enabled" error) for profiles/enrollments/courses; drop below threshold.
+[PARKED] S3-compatible storage plane (aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3): independent SigV4 authz confirmed live but no verify_steps possible without owner-supplied credentials — untestable-in-environment.
+[PARKED] Credentialed CORS reflection on GoTrue gateway: real but impact capped (Bearer-only, no cookie on that origin) — LOW, owner config fix, not a standalone report.
+[PARKED] Supabase Storage bucket enumeration: 200 `[]` for 20+ days; bucket name unrecoverable pre-auth — below threshold.
+[FINAL] 1. Post-auth cross-tenant BOLA via Supabase RLS gap (confidence 65, IDOR, AUTH_HELPED) — sole route to HIGH.
+[FINAL] 2. cto.onecode.de subdomain takeover via dangling Perspective CNAME (confidence 58, MISCONFIG, HUMAN_ONLY) — most complete finding, needs claim attempt.
+[FINAL] 3. Forced-login session fixation via HashSessionHandoff fragment sink (confidence 45, AUTH, HUMAN_ONLY) — gated on token pair.
+[NEXT] HUMAN: Obtain two invited kurs.onecode.de test accounts (A,B); with A's Bearer JWT run GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=* and /rest/v1/profiles?select=id,email (headers apikey:sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30 + Authorization: Bearer <A jwt>) to test cross-tenant row leakage.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to subscribe... Realtime is enabled") for profiles/enrollments/courses — no anon data stream; supersedes the 10-10 retraction note.
+[LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS credentialed reflection persists unchanged; impact capped (GoTrue Bearer-only, no app cookie on origin).
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-21+; /login 18 702 B sha256 99798c7d... byte-identical; pre-auth surface frozen.
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409/1001, zero verification TXT — passive probes converged; only owner claim attempt advances it.
+[LEARN] ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts.
+[RISK] onecode: 62 — Surface converged after 5+ weeks: kurs.onecode.de pre-auth frozen and clean (signup disabled, anon REST blocked, no OAuth, no deploy); realtime plane now measured negative; S3 plane untestable. Zero confirmed reportable findings. Residual: cto.onecode.de dangling CNAME (conf 58) is the only near-complete reportable item but needs a third-party claim (HUMAN); post-auth RLS-gap BOLA (conf 65) is the sole HIGH and requires two invited accounts; HashSessionHandoff fixation (conf 45) gated on a valid token pair. No new pre-auth attack surface remains.
