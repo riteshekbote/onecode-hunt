@@ -1217,3 +1217,8 @@
 - 2026-10-11 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts
 - 2026-10-11 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-22; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - 2026-10-11 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged
+- 2026-10-11 ACCEPTED OTHER @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed 2026-10-11 (Missing signature / InvalidSignature / InvalidAccessKeyId); plane remains closed to every unauthenticated shape.
+- 2026-10-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflects `Origin: https://evil.example` with `ACAC:true` and returns 200 when `apikey` supplied, but is Bearer-only — no cookie credential channel, impact LOW.
+- 2026-10-11 REJECTED AUTH @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/object/sign: `GET /storage/v1/object/sign/public/test.txt` → `400 InvalidRequest "querystring must have required property 'token'"` — token/signature precedes bucket lookup; no pre-auth private read, no bucket oracle.
+- 2026-10-11 REJECTED MISCONFIG @ kurs.onecode.de: `/login` byte-identical sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18702 B); no deploy day-22; pre-auth surface frozen.
+- 2026-10-11 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts.
