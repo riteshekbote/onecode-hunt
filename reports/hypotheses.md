@@ -4179,3 +4179,17 @@
 - LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
 - LEARN: ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited 
+
+## RANKED HYPOTHESES 2026-10-11 15:50:56 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Attempt to claim `cto.onecode.de` via Perspective SaaS dashboard — register Perspective account, add custom domain `cto.onecode.de`, verify DNS ownership
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to 
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucke
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
+- LEARN: REJECTED AUTH @ kurs.onecode.de: 38+ JWT alg/key-confusion probes + 5 forged-cookie variants all negative; ES256 pinning holds
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-22; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- LEARN: REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged
+- LEARN: ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited 

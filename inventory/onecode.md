@@ -1534,3 +1534,5 @@ www.onecode.de
 - CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
 - CHANGED Realtime closed by direct measurement: anon WS upgrade = 101, `phx_join` on `realtime:public:{profiles,enrollments,courses}` returns `phx_reply` with `status:error` "Unable to subscribe... Realtime is
 - CHANGED KB's 2026-10-10 note "retracted: postgres_changes events DO fire" CONTRADICTED by controlled probe; realtime plane formally negative
+
+## 2026-10-11 15:50:56 UTC
