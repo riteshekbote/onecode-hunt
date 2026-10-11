@@ -1538,3 +1538,8 @@ www.onecode.de
 ## 2026-10-11 15:50:56 UTC
 
 ## 2026-10-11 20:07:13 UTC
+
+## 2026-10-11 23:46:28 UTC
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ → 401 {"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."} (was 503 PGRST002 at root); table paths unchanged
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses,nonexistenttable123}(?select=*) → still 503 PGRST002 "Could not query the database for the schema cache. Retrying." — anon table 
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: disable_signup=true, email-only, all external providers false, saml_enabled=false, saml_private_key_next_configured=true, anonymous_users=false, pass
