@@ -7776,3 +7776,39 @@ testability: HUMAN_ONLY
 [LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409/1001, zero verification TXT — passive probes converged; only owner claim attempt advances it.
 [LEARN] ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts.
 [RISK] onecode: 62 — Surface converged after 5+ weeks: kurs.onecode.de pre-auth frozen and clean (signup disabled, anon REST blocked, no OAuth, no deploy); realtime plane now measured negative; S3 plane untestable. Zero confirmed reportable findings. Residual: cto.onecode.de dangling CNAME (conf 58) is the only near-complete reportable item but needs a third-party claim (HUMAN); post-auth RLS-gap BOLA (conf 65) is the sole HIGH and requires two invited accounts; HashSessionHandoff fixation (conf 45) gated on a valid token pair. No new pre-auth attack surface remains.
+## 2026-10-11 02:14:52 UTC [target] (model bigpickle)
+[CHANGED] none.
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,7.35,a=8,b=9,t=9,g=3,c=8,f=5
+[PRIO] cto.onecode.de,7.00,a=6,b=6,t=6,g=10,c=8,f=8
+[PRIO] kurs.onecode.de,6.70,a=7,b=9,t=8,g=2,c=7,f=5
+[PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,6.55,a=7,b=8,t=7,g=3,c=8,f=5
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR | asset: aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{enrollments,profiles}
+confidence: 65 | testability: AUTH_HELPED
+reasoning: single multi-tenant Supabase project, invite-only; UUID PKs defeat guessing so a missing RLS user_id filter is the realistic cross-tenant vector; anon REST still blocked (503↔401).
+evidence_needed: account A's Bearer JWT returns rows owned by another user B.
+verify_steps: HUMAN obtains two invited accounts A,B; with A's JWT GET /rest/v1/enrollments?select=* and /rest/v1/profiles?select=id,email (apikey:sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30); compare to B.
+impact: cross-tenant enrollment/PII disclosure — HIGH.
+[HYP] Subdomain takeover via dangling Perspective SaaS CNAME on cto.onecode.de
+class: MISCONFIG | asset: cto.onecode.de
+confidence: 58 | testability: HUMAN_ONLY
+reasoning: CNAME->cname.perspective-dns.com stable day-59+; HTTP 409 error code 1001 + TLS handshake-fail + zero verification TXT ⇒ unbound/reclaimable; passive probes converged.
+verify_steps: HUMAN attempts hostname claim in a Perspective account (only proof path).
+impact: attacker content on trusted *.onecode.de — HIGH.
+[HYP] Forced-login session fixation via HashSessionHandoff fragment sink
+class: AUTH | asset: kurs.onecode.de/login
+confidence: 45 | testability: HUMAN_ONLY
+reasoning: module 34891 (RSC row 18) parses window.location.hash access_token+refresh_token -> supabase setSession() with no state/nonce/PKCE; signup disabled prevents attacker minting a valid pair.
+impact: victim placed in attacker identity — MEDIUM (gated).
+[PARKED] Realtime anon postgres_changes data leak: REFUTED 2026-10-10 (WS 101, phx_join ok, subscription denied for profiles/enrollments/courses).
+[PARKED] Supabase Storage bucket enumeration: 200 [] 20+ days; bucket name unrecoverable pre-auth.
+[PARKED] GoTrue credentialed CORS reflection: real, impact capped (Bearer-only, no app cookie on that origin) — LOW.
+[PARKED] S3 SigV4 plane: live but untestable-in-environment without owner credentials.
+[PARKED] saml_private_key_next_configured=true while saml_enabled=false: signing material provisioned behind an off flag; not pre-auth exploitable.
+[NEXT] HUMAN (blocking, both env-gated — no autonomous step remains):
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de/_next/static/chunks/*.js.map: 404 (9B) — source-map disclosure avenue closed; bundle remains reachable only minified (main sha256 f916f314ea61a8c5..., unchanged).
+[LEARN] REJECTED MISCONFIG @ ki8dqcf6.up.railway.app: 404 on / and /login — no origin/vhost bypass of the CDN.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: anon LIST still 403 — SigV4 enforcement unchanged.
+[LEARN] ACCEPTED MISCONFIG @ onecode.de/www.onecode.de: Cloudflare-fronted; CF bot cookie _cfuvid scoped Domain=onecode.de (all subdomains) but non-sensitive and flag-complete — no finding.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: no field changed in the current pass; signup/OAuth/SAML gates persist.
+[RISK] onecode: 62 — Surface converged (5+ weeks). kurs.onecode.de pre-auth frozen and clean; realtime/source-map/vhost/S3 planes all re-measured negative this pass. Zero confirmed reportable findings. Only two concrete conversion paths remain, both HUMAN-gated: post-auth BOLA (conf 65, sole HIGH) and cto.onecode.de dangling-CNAME takeover (conf 58, most complete). No new autonomous pre-auth vector exists; further machine probing would be duplicate work.

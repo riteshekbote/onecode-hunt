@@ -1200,3 +1200,18 @@
 - 2026-10-10 REJECTED MISCONFIG @ kurs.onecode.de: no deploy day-21+; /login 18 702 B sha256 99798c7d... byte-identical; pre-auth surface frozen.
 - 2026-10-10 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409/1001, zero verification TXT — passive probes converged; only owner claim attempt advances it.
 - 2026-10-10 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts.
+- 2026-10-11 REJECTED MISCONFIG @ kurs.onecode.de/_next/static/chunks/*.js.map: 404 (9B) — source-map disclosure avenue closed; bundle remains reachable only minified (main sha256 f916f314ea61a8c5..., unchanged).
+- 2026-10-11 REJECTED MISCONFIG @ ki8dqcf6.up.railway.app: 404 on / and /login — no origin/vhost bypass of the CDN.
+- 2026-10-11 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: anon LIST still 403 — SigV4 enforcement unchanged.
+- 2026-10-11 ACCEPTED MISCONFIG @ onecode.de/www.onecode.de: Cloudflare-fronted; CF bot cookie _cfuvid scoped Domain=onecode.de (all subdomains) but non-sensitive and flag-complete — no finding.
+- 2026-10-11 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: no field changed in the current pass; signup/OAuth/SAML gates persist.
+- 2026-10-11 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to subscribe... Realtime is enabled") for profiles/enrollments/courses — no anon data stream; supersedes the 10-10 retraction note
+- 2026-10-11 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle
+- 2026-10-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue
+- 2026-10-11 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
+- 2026-10-11 REJECTED AUTH @ kurs.onecode.de: 38+ JWT alg/key-confusion probes + 5 forged-cookie variants all negative; ES256 pinning holds
+- 2026-10-11 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
+- 2026-10-11 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+- 2026-10-11 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-21; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+- 2026-10-11 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT — passive probing fully converged
+- 2026-10-11 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts
