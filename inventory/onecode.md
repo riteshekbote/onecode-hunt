@@ -1525,3 +1525,12 @@ www.onecode.de
 
 ## 2026-10-11 02:15:00 UTC
 - CHANGED none.
+
+## 2026-10-11 09:05:12 UTC
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405) re-verified live 2026-10-07
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No delta on `kurs.onecode.de` (day-21, main chunk f916f314ea61a8c5... byte-identical, pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200, all /api/* 307→/login)
+- CHANGED No delta on `cto.onecode.de` (CNAME→cname.perspective-dns.com day-59+, HTTP 409, zero verification TXT, passive probing fully converged)
+- CHANGED Realtime closed by direct measurement: anon WS upgrade = 101, `phx_join` on `realtime:public:{profiles,enrollments,courses}` returns `phx_reply` with `status:error` "Unable to subscribe... Realtime is
+- CHANGED KB's 2026-10-10 note "retracted: postgres_changes events DO fire" CONTRADICTED by controlled probe; realtime plane formally negative

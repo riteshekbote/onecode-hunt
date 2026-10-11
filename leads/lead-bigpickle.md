@@ -7812,3 +7812,4 @@ impact: victim placed in attacker identity — MEDIUM (gated).
 [LEARN] ACCEPTED MISCONFIG @ onecode.de/www.onecode.de: Cloudflare-fronted; CF bot cookie _cfuvid scoped Domain=onecode.de (all subdomains) but non-sensitive and flag-complete — no finding.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: no field changed in the current pass; signup/OAuth/SAML gates persist.
 [RISK] onecode: 62 — Surface converged (5+ weeks). kurs.onecode.de pre-auth frozen and clean; realtime/source-map/vhost/S3 planes all re-measured negative this pass. Zero confirmed reportable findings. Only two concrete conversion paths remain, both HUMAN-gated: post-auth BOLA (conf 65, sole HIGH) and cto.onecode.de dangling-CNAME takeover (conf 58, most complete). No new autonomous pre-auth vector exists; further machine probing would be duplicate work.
+## 2026-10-11 09:05:02 UTC [target] (model bigpickle)
