@@ -1543,3 +1543,11 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ → 401 {"message":"Secret API key required","hint":"Only secret API keys can be used for this endpoint."} (was 503 PGRST002 at root); table paths unchanged
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/{profiles,enrollments,courses,nonexistenttable123}(?select=*) → still 503 PGRST002 "Could not query the database for the schema cache. Retrying." — anon table 
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: disable_signup=true, email-only, all external providers false, saml_enabled=false, saml_private_key_next_configured=true, anonymous_users=false, pass
+
+## 2026-10-12 05:25:38 UTC
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ root: 503 PGRST002 → 401 "Secret API key required" (table paths unchanged; anon table REST still 503 PGRST002)
+- CHANGED kurs.onecode.de: no deploy day-22+; /login sha256 99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450 (18702 B) byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/dat
+- CHANGED cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged
+- CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed 2026-10-11; plane closed to every unauthenticated shape
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon blocked (503/401); BOLA remains sole HIGH, gated on 2 invited accounts
