@@ -51022,3 +51022,132 @@ Next steps (pick one per program priority; do not expand pre-auth):
 - (c) **AUTH_HELPED — S3-compatible storage (`storage.supabase.co/storage/v1/s3`)**: Requires valid SigV4 credentials or permissive bucket policy to demonstrate bypass of RLS (independent SigV4 authz). No pre-auth oracle.
 
 Which gated path do you prefer (a, b, or c)? I can proceed once specified.
+===== ANALYST bigpickle 2026-10-13 17:49:51 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "kurs /login: %{http_code}\n" --max-time 12 https://kurs.onecode.de/login; curl -sS -o /dev/null -w "kurs /: %{http_code}\n" --max-time 12 https://kurs.onecode.de/
+kurs /login: 200
+kurs /: 307
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w "jwks: %{http_code}\n" --max-time 12 https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json; curl -sS -D- -o /dev/null --max-time 12 -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" | grep -iE "^(HTTP|access-control|vary)"
+jwks: 200
+HTTP/2 200 
+access-control-allow-origin: https://evil.example
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+[0m
+## Objective
+- Act as bug-bounty ANALYST for the OneCode GmbH program (report channel: bugs.olivermaicher.eu); run the 8-step pipeline (DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT ACTION → LEARNING → RISK) and emit only structured blocks (`[NEW]/[CHANGED]/[PRIO]/[HYP]/[PARKED]/[FINAL]/[NEXT]/[LEARN]/[RISK]`).
+- Current state: `phase=POC`, `target=api` — convert the accepted passive findings into PoC-quality evidence and keep hunting high-value classes on `*.onecode.de`, `kurs.onecode.de` and the Supabase project.
+
+## Important Details
+- In-scope only: `*.onecode.de`, `kurs.onecode.de`, plus all company-owned infra/APIs/cloud/customer portals (per scope.yml + inventory/onecode.md). Inventory complete: exactly 5 CT names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`).
+- Probe rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only; no auth-bypass or mutating tests against live customer data; any scanner output needs manual validation; sha256 any secret; facts vs hypotheses strictly separated.
+- REJECTED/OOS classes (must not be reported): DoS/lockout, descriptive errors/headers only, robots.txt/public files, outdated libs, OPTIONS/TRACE, CSRF on logout/anon forms, cookie flags on non-sensitive data, self-XSS, scanner output w/o PoC, username enumeration, brute-force/rate-limit policy, SSL/TLS best practice, clickjacking w/o exploit, mail config, public login panels, lack of email verification, password-recovery policy, session control during email/password change, and any exposure of customer/employee/financial/auth data.
+- Key identifiers: Supabase project ref `aygnpacdkgtsfnhgcyjc`; publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the catalogued `870cf518cadbb13823395f6f7c2930ab0c8e0db734df71ea8e646264ee8803c6` was a trailing-newline artifact — all PoCs must cite `43ccb834…`).
+- kurs.onecode.de hashes (re-derive and assert 64-hex before recording): main chunk `0-mbmp1iqb6hj.js` = 154581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` = 13880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page = 18702 B sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`. No deploy since 2026-09-19 11:33Z; build-diffing is event-triggered, not time-triggered.
+- kurs.onecode.de CNAME → `ki8dqcf6.up.railway.app` (post-migration from `tgk4io5m`); `cto.onecode.de` CNAME → `cname.perspective-dns.com` (Perspective funnel SaaS), HTTP 409 `error code:1001`, TLS handshake-fail, zero verification TXT.
+- Pre-auth surface frozen at `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` 200; all `/api/*`, `/v1`, `/dashboard`, `/admin`, `/courses`, `/kurse`, `/einladung`, `/passwort-neu` → 307→/login.
+- Supabase auth: email-only, `disable_signup=true`, `mailer_autoconfirm=false`, `external.anonymous_users=false`, all external providers false, `saml_enabled=false` but `saml_private_key_next_configured=true`, `passkeys_enabled=false`; platform now rejects legacy JWT anon keys (only `sb_publishable_` format accepted); JWT verifier is ES256-only.
+
+## Work State
+### Completed
+- All pre-auth negatived: forged/null session cookies (5 variants), CVE-2025-29927 `x-middleware-subrequest`, path-normalization (10), header-desync (4), RSC/segment negotiation, `_next/image` SSRF, `?error=` reflected XSS, PKCE code injection, sourcemap disclosure, `ki8dqcf6.up.railway.app` vhost bypass.
+- JWT alg/key confusion comprehensively closed: 38+ probes across HS/RS/PS/ES/EdDSA × attacker keys, embedded JWK header injection, `alg:none` case variants, HS256 secret guessing — zero authenticated; ES256 pinning holds.
+- Supabase planes characterized: `/rest/v1` monitor formally closed 09-17 (26–27 probes, 503↔401 oscillation, never 200+rows; root flipped to 401 "Secret API key required" 10-11); `/functions/v1` uniform 404 (18 names, no oracle); `/realtime/v1` anon WS 101 + phx_join ok but `postgres_changes` denied; `/graphql/v1` 503 PGRST002; `/analytics/v1` 404 (not deployed); storage `/storage/v1/bucket` → 200 `[]` (uninformative; "zero buckets" inference retracted).
+- Storage bucket-existence oracle route-table-complete: 10 mounted GET classes return byte-identical `400 {"code":"NoSuchBucket"}`; 81 candidate names excluded; bucket name unrecoverable from 13 pre-auth chunks.
+- S3 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 S3 XML "Missing signature"), independent SigV4 authz (RLS-bypassing), 3-state key-ID oracle (Missing signature / InvalidSignature / InvalidAccessKeyId), also mounted on main api host; no pre-auth bucket oracle.
+- GoTrue `redirect_to` allowlist proven per-type and per-shape (15 off-origin shapes, 5 verify types, 2 token encodings, host-header injection) — zero off-origin redirects; `/auth/v1/authorize` inert; `/auth/v1/logout?returnTo=` → 405.
+- Accepted finding **FINAL**: reflected-origin credentialed CORS on GoTrue (`/auth/v1/*` + `.well-known`), conf 85, PASSIVE, MEDIUM — two policy forms: unauthenticated → `ACAO: *` no ACAC; apikey-bearing (header or `?apikey=`) → `ACAO: <arbitrary Origin>` + `ACAC: true` + `vary: Origin` + expose-headers `X-Total-Count, Link, X-Supabase-Api-Version`; `Origin: null` reflected; preflight never reflects; cache amplifier falsified (`vary: Origin`, `cf-cache-status: DYNAMIC`); not the app origin (kurs is CORS-clean); ceiling capped by Bearer-only + no auth cookie on that origin.
+- Pre-gate route set closed at 7 (`.well-known/jwks.json`, `.well-known/openid-configuration`, `.well-known/oauth-authorization-server`, `oauth/authorize`, `oauth/token`, `oauth/userinfo`, `verify`); OIDC discovery doc overstates surface (advertises RS256/HS256, only ES256 served; endpoints return `feature_disabled`).
+- No subdomain delta: 26 brute-forced hostnames NXDOMAIN; GitHub orgs `OneCodeDevs`/`OneCode` scanned — zero secrets; crt.sh confirms 5 names.
+
+### Active
+- PoC authoring for the credentialed-CORS finding (conf 85, PASSIVE, MEDIUM); ranked hypotheses: [85] GoTrue credentialed CORS, [75] S3 SigV4 plane bypassing RLS.
+- Parked: `HashSessionHandoff` fragment-token sink on `/login` (module 34891, no state/nonce/PKCE, fixed `{invite:/einladung, recovery:/passwort-neu}` next-map) — AUTH_HELPED, needs valid token pair.
+- Parked: post-auth BOLA via Supabase RLS gap (conf 65) — sole HIGH, needs 2 invited accounts.
+- Parked: `cto.onecode.de` dangling-CNAME takeover (conf 58) — HUMAN_ONLY claim attempt via Perspective dashboard.
+
+### Blocked
+- BOLA/RLS test blocked on two invited test accounts; no free second `authenticated` principal (signup disabled, anon sign-in disabled, admin plane 401, no service-role material in any pre-auth chunk).
+- S3 plane test blocked without owner-supplied SigV4 keys or permissive bucket policy.
+- `cto.onecode.de` takeover only provable by a consented HUMAN claim attempt (passive probes fully converged, day-60+).
+- Time-cadence probing on kurs.onecode.de returns identical hashes (day-22+) and burns request budget — event-triggered only.
+
+## Next Move
+1. `[NEXT] PROBE`: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings"` — confirm `ACAO: https://evil.example` + `ACAC: true` for the PoC write-up.
+2. `[NEXT] HUMAN`: attempt to claim `cto.onecode.de` via Perspective SaaS dashboard (register account, add custom domain, verify DNS ownership) — only proof path for the dangling-CNAME lead.
+
+## Relevant Files
+- `scope.yml`: program scope — only `*.onecode.de`, `kurs.onecode.de`, company-owned infra are eligible.
+- `inventory/onecode.md`: asset inventory + passive recon log (10 hosts, 3 live HTTP: kurs 307, www 200 CF, mta-sts 301).
+- `art/lead_bigpickle.txt`: source of the [85] GoTrue credentialed-CORS hypothesis.
+- `art/lead_nemotron3.txt`: source of the [75] S3 SigV4 plane hypothesis.
+- `hypotheses-bigpickle.txt`: queued NEXT probe for the CORS PoC.
+- `hypotheses-nemotron3.txt`: queued HUMAN action for the `cto.onecode.de` claim attempt.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mfor O in "null" "https://kurs.onecode.de"; do echo "== Origin: $O =="; curl -sS -D- -o /dev/null --max-time 12 -H "Origin: $O" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" | grep -iE "^(HTTP|access-control-allow-origin|access-control-allow-credentials)"; done
+echo "== Preflight OPTIONS =="; curl -sS -X OPTIONS -D- -o /dev/null --max-time 12 -H "Origin: https://evil.example" -H "Access-Control-Request-Method: GET" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" | grep -iE "^(HTTP|access-control-allow-origin|access-control-allow-credentials)"
+== Origin: null ==
+HTTP/2 200 
+access-control-allow-origin: null
+access-control-allow-credentials: true
+== Origin: https://kurs.onecode.de ==
+HTTP/2 200 
+access-control-allow-origin: https://kurs.onecode.de
+access-control-allow-credentials: true
+== Preflight OPTIONS ==
+HTTP/2 200 
+access-control-allow-origin: *
+[0m
+[0m$ [0mecho "== S3 plane =="; curl -sS -D- -o /dev/null --max-time 12 "https://aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3" | grep -iE "^(HTTP|<)" | head -5
+echo "== cto =="; curl -sS -o /dev/null -w "cto HTTP: %{http_code}\n" --max-time 12 https://cto.onecode.de/ 2>&1 | head -1
+echo "== www =="; curl -sS -o /dev/null -w "www HTTP: %{http_code}\n" --max-time 12 https://www.onecode.de/
+== S3 plane ==
+HTTP/2 403 
+== cto ==
+curl: (35) OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+== www ==
+www HTTP: 200
+[0m
+## [DELTA]
+- NEW live confirmation (2026-10-13): GoTrue credentialed-CORS FINAL reproduced byte-for-byte — `Origin: https://evil.example` → `ACAO: https://evil.example` + `ACAC: true` + `vary: Origin`; `Origin: null` → `ACAO: null` + `ACAC: true`; preflight OPTIONS → `ACAO: *`, no `ACAC`.
+- NEW: no change to any frozen surface — `kurs /login` 200, `kurs /` 307; `cto.onecode.de` TLS handshake-fail unchanged; `www` 200; S3 plane `.../storage/v1/s3` 403 unchanged.
+- No new hosts/CT names, no new routes, no new secrets. Delta = PoC evidence only, no new attack surface.
+
+## [PRIO]
+1. [85] GoTrue credentialed CORS — PASSIVE, MEDIUM, PoC-ready now.
+2. [75] S3 storage plane (`storage.supabase.co/storage/v1/s3`) — independent SigV4 authz, RLS-bypassing — AUTH_HELPED.
+3. [65] Post-auth BOLA via RLS gap — sole HIGH — AUTH_HELPED.
+4. [58] `cto.onecode.de` dangling CNAME — HUMAN_ONLY.
+
+## [HYP]
+- H1 (conf 85): CORS is real and reproducible on demand; impact ceiling is capped — Bearer-only auth, **no ambient cookie**, `vary: Origin` kills cache amplification, kurs app origin is CORS-clean. Reportable, but this alone is a boundary/best-practice finding, not a data-takeover.
+- H2 (conf 75): S3 endpoint performs its own SigV4 authorization and bypasses Postgres RLS; a key-ID oracle exists (Missing signature / `InvalidSignature` / `InvalidAccessKeyId`), but with no pre-auth bucket-name oracle and no keys, no POC is possible from outside.
+- H3 (conf 65): the two parked AUTH_HELPED leads (BOLA/RLS + `HashSessionHandoff` fragment sink) share one root blocker — a second authenticated principal. Not independently testable.
+
+## [PARKED]
+- `HashSessionHandoff` fragment-token sink (`/login`, module 34891; no state/nonce/PKCE) — AUTH_HELPED, needs a valid token pair.
+- Post-auth BOLA/RLS — AUTH_HELPED, needs 2 invited accounts.
+- `cto.onecode.de` takeover — HUMAN_ONLY (consented human claim via Perspective dashboard only).
+- S3 SigV4 plane escape — AUTH_HELPED (owner keys / permissive policy).
+
+## [FINAL]
+- GoTrue credentialed CORS on `/auth/v1/*` + `.well-known` — conf 85, PASSIVE, MEDIUM. Evidence captured this cycle. Accepted.
+
+## [NEXT]
+- [NEXT] PROBE (done): CORS PoC requests captured — fixture = `curl -sS -D- -H 'Origin: https://evil.example' -H 'apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30' https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings`. Attach to FINAL write-up.
+- [NEXT] HUMAN: since all remaining lines are credential-gated, the single highest-leverage unblock is provisioning **2 invited test accounts** — this converts the conf-65 HIGH (BOLA) from PARKED to testable and is the only path to escalate above MEDIUM.
+- [NEXT] HUMAN: attempt the `cto.onecode.de` claim via Perspective (proof-only path for the dangling-CNAME lead).
+
+## [LEARN]
+- The program is now credential-bound: every surviving non-MEDIUM lead requires an authenticated principal or owner-supplied keys. Continued passive cycling on frozen surfaces yields zero delta and burns budget — switch from discovery to **social/credential acquisition** as the pacing function.
+- `ACAO:*` on preflight vs reflected-origin + ACAC on simple requests is the definitive shape discriminator for this GoTrue CORS behavior; re-confirm it in every future PoC rather than trusting the cached note.
+
+## [RISK]
+- Risk of **false-positive over-reporting**: the CORS finding has no ambient cookie and no demonstrated cross-origin data theft — do not inflate it to HIGH or imply exfiltration. Report at MEDIUM with the ceiling stated explicitly, or it will be rejected as best-practice noise.
+- Risk of **scope/authorization violation**: do not attempt `cto.onecode.de` claim or any account creation/purchase without explicit human approval — both are mutating and sit outside passive rules.
+
+Stopping here — no further testable delta exists without the credential or human-claim unblocks above. Want me to draft the final CORS report write-up, or proceed with one of the [NEXT] HUMAN actions?
