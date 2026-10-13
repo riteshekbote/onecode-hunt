@@ -1583,3 +1583,10 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon blocked (503/401); BOLA remains sole HIGH, gated on 2 invited accounts (conf 65)
 - NEW No new passive probes executed since 2026-10-12 21:55Z (5 hours ago); all surfaces identical to last lead update
 - CHANGED Supabase REST `/rest/v1/` root flipped from 503 PGRST002 to 401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503); gateway oscillation continues but no permissive state observed
+
+## 2026-10-13 10:27:44 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json exposes ES256-only key while OIDC discovery advertises RS256/HS256/ES256 (pre-auth, no credentials)
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/* CORS auth-state discriminator confirmed: apikey-bearing requests reflect arbitrary Origin with ACAC:true and vary:Origin; unauthenticated requests return ACA
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/s3 (S3-compatible) accessible pre-auth, returns 403 XML; independent SigV4 authz plane — no bucket oracle on S3 (requires SigV4)
+- CHANGED Supabase REST `/rest/v1/` root flipped from 503 PGRST002 to 401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503); gateway oscillation continues but no permissive state observed
+- NEW No new passive probes executed since 2026-10-12 21:55Z (5 hours ago); all surfaces identical to last lead update

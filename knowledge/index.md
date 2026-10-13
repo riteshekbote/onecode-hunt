@@ -1296,3 +1296,6 @@
 - 2026-10-13 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-22; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - 2026-10-13 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged
 - 2026-10-13 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts
+- 2026-10-13 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/*: apikey-bearing requests reflect Origin with ACAC:true (credentialed reflection) while unauthenticated return wildcard; well-known also reflects without apikey
+- 2026-10-13 REJECTED AUTH @ kurs.onecode.de: fragment sink needs valid token pair (not pre-auth exploitable alone); requires AUTH_HELPED to demonstrate
+- 2026-10-13 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: SigV4-required, independent authz plane; no pre-auth oracle demonstrated
