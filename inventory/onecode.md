@@ -1567,3 +1567,19 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed (Missing signature / InvalidSignature / InvalidAccessKeyId); plane closed to every unauthenticated shape
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon blocked (503/401); BOLA remains sole HIGH, gated on 2 invited accounts (conf 65)
+
+## 2026-10-13 02:57:14 UTC
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ root flipped 503 PGRST002 → 401 "Secret API key required" (table paths unchanged, still 503)
+- CHANGED kurs.onecode.de: no deploy day-22+; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged
+- CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed (Missing signature / InvalidSignature / InvalidAccessKeyId); plane closed to every unauthenticated shape
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon blocked (503/401); BOLA remains sole HIGH, gated on 2 invited accounts (conf 65)
+- NEW aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/ root flipped 503 PGRST002 → 401 "Secret API key required" (table paths unchanged, still 503)
+- CHANGED kurs.onecode.de: no deploy day-22+; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged
+- CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed (Missing signature / InvalidSignature / InvalidAccessKeyId); plane closed to every unauthenticated shape
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon blocked (503/401); BOLA remains sole HIGH, gated on 2 invited accounts (conf 65)
+- NEW No new passive probes executed since 2026-10-12 21:55Z (5 hours ago); all surfaces identical to last lead update
+- CHANGED Supabase REST `/rest/v1/` root flipped from 503 PGRST002 to 401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503); gateway oscillation continues but no permissive state observed
