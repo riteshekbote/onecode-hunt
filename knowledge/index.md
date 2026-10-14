@@ -1316,3 +1316,7 @@
 - 2026-10-14 REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-22; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
 - 2026-10-14 REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged
 - 2026-10-14 ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts
+- 2026-10-14 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: Origin reflection + `ACAC:true` requires the public publishable apikey and the app uses Bearer-in-localStorage (no cookie), so there is no ambient credential → not exploitable.
+- 2026-10-14 ACCEPTED AUTH @ kurs.onecode.de: `/login` byte-identical since 2026-09-19; pre-auth surface frozen, no new deploy.
+- 2026-10-14 ACCEPTED MISCONFIG @ cto.onecode.de: dangling Perspective CNAME day-60+, 409 + TLS fail → HUMAN claim is the only proof path.
+- 2026-10-14 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA remains sole HIGH (65); gated on two invited accounts; pre-auth exhausted.
