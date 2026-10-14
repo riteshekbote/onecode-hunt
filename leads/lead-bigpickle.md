@@ -8458,3 +8458,4 @@ testability: HUMAN_ONLY
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dangling Perspective CNAME day-60+, 409 + TLS fail → HUMAN claim is the only proof path.
 [LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA remains sole HIGH (65); gated on two invited accounts; pre-auth exhausted.
 [RISK] onecode: 60 — pre-auth surface fully converged/clean (frozen `/login`, REST anon-blocked, no buckets/functions/OAuth, S3 unauth-closed); the CORS lead is now retired as a non-finding; residual risk is concentrated in one unverifiable HIGH (post-auth BOLA, needs owner-issued invites) plus the HUMAN_ONLY cto takeover.
+## 2026-10-14 21:29:27 UTC [target] (model bigpickle)
