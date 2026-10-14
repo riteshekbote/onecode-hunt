@@ -1,4 +1,14 @@
-## 2026-10-14 06:47:48 UTC [target] (model nemotron3)
+## 2026-10-14 12:52:06 UTC [target] (model nemotron3)
+[NEW] Supabase REST `/rest/v1/` root flipped 503→401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503); gateway oscillation continues, no permissive state
+[NEW] S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verified (400 InvalidSignature vs 403 Missing signature), never probed in 26 days
+[NEW] GoTrue gateway CORS auth-state discriminator re-verified live 2026-10-07: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405)
+[NEW] Supabase Storage bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes failing before bucket lookup (/object/sign, /storage/v1/s3)
+[CHANGED] kurs.onecode.de: no deploy day-22+; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+[CHANGED] cto.onecode.de: CNAME→cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged, HUMAN_ONLY claim path
+[CHANGED] Supabase REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to subscribe... Realtime is enabled") — no anon data stream
+[CHANGED] aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle
 [PRIO] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3,9.15,attack_surface=9 business_value=9 tech_exposure=9 gate_ease=10 cloud_surface=9 freshness=9
 [PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/{settings,user,verify,authorize,token,otp,recover,invite,signup,magiclink,.well-known},8.15,attack_surface=8 business_value=8 tech_exposure=8 gate_ease=9 cloud_surface=8 freshness=8
 [PRIO] cto.onecode.de,7.10,attack_surface=6 business_value=6 tech_exposure=6 gate_ease=10 cloud_surface=8 freshness=9
@@ -51,4 +61,7 @@ testability: HUMAN_ONLY
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtree bounded-root / segment-delimited / unbounded-depth
 [LEARN] ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+[LEARN] REJECTED MISCONFIG @ kurs.onecode.de: no deploy, day-22; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen
+[LEARN] REJECTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged
+[LEARN] ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: 503 PGRST002 persists; anon REST still blocked; BOLA remains sole HIGH, gated on 2 invited accounts
 [RISK] onecode: 70 — Primary asset kurs.onecode.de: Supabase-backed Next.js with solid pre-auth defaults (signup disabled, anon REST blocked, no OAuth, email confirm required). Pre-auth surface = 4 pages at 200, all /api/* auth-gated. CRITICAL NEW: S3-compatible storage plane aygnpacdkgtsfnhgcyjc.storage.supabase.co deployed pre-auth with independent SigV4 authz (bypasses RLS), access-key-ID oracle confirmed, signed URL routes functional. GoTrue gateway has reflected-origin credentialed CORS with valid apikey (allows cross-origin authenticated identity reads), plus unconditional reflection on well-known endpoints. Highest residual risk = post-auth cross-tenant BOLA via RLS gap (conf 65) requiring 2 invited accounts. cto.onecode.de dangling CNAME (conf 58) adds theoretical takeover surface actionable with Perspective account. Supabase Storage bucket-existence oracle confirmed (81 names excluded) but bucket names unrecoverable pre-auth.

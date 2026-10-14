@@ -51938,3 +51938,154 @@ Let me write this concisely.</think>All probes confirm a converged, no-change st
 **7. RISK** DB is currently degraded (`PGRST002`); avoid hammering REST/storage. No DoS-class probing.
 
 **Need input:** Do you want me to (a) proceed assuming test accounts will be provisioned, (b) freeze and monitor only on deploy signal, or (c) escalate the `cto.onecode.de`/Perspective takeover for human attempt? I recommend (c) — it is the only path with a plausible HIGH-and-reportable outcome that doesn't require credentials.
+===== ANALYST bigpickle 2026-10-14 12:52:20 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -D- -o /dev/null --max-time 20 https://kurs.onecode.de/login 2>&1 | head -40; echo "---BODYHASH---"; curl -sS --max-time 20 https://kurs.onecode.de/login 2>/dev/null | sha256sum
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Wed, 14 Oct 2026 12:46:31 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: EG4Ymu2bTGarWnEOYqdHTg
+x-railway-edge: lax1
+x-hikari-trace: lax1.ez9k
+
+---BODYHASH---
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  -
+[0m
+[0m$ [0mcurl -sS -D- --max-time 20 -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings" 2>&1 | head -40
+HTTP/2 200 
+date: Wed, 14 Oct 2026 12:46:32 GMT
+content-type: application/json
+cf-ray: a4a6aff9fe506b57-DFW
+cf-cache-status: DYNAMIC
+access-control-allow-origin: https://evil.example
+set-cookie: __cf_bm=aJOH3wO0jez.d56pJlB14SnoXqSd2dAWeCGPaa_21WY-1791981992.000663-1.0.1.1-RpDosKo6UNcPmgV4UH4gu1baVlgQCPlvY9Pml5IoKs9li8mmUhght9pb2ehjos057yNflq0.7oI1XJz2yzatf1WS0puw81OiHmQD7S8n1Ub2gXxaIre4u0nRmAxdYq1q; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Wed, 14 Oct 2026 13:16:32 GMT
+server: cloudflare
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+vary: Origin, Accept-Encoding
+access-control-allow-credentials: true
+access-control-expose-headers: X-Total-Count, Link, X-Supabase-Api-Version
+sb-gateway-version: 2
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a13a73-38d2-7bca-8125-3f1e4912f243
+x-content-type-options: nosniff
+x-envoy-attempt-count: 1
+x-envoy-upstream-service-time: 76
+alt-svc: h3=":443"; ma=86400
+
+{"external":{"anonymous_users":false,"apple":false,"azure":false,"bitbucket":false,"discord":false,"facebook":false,"snapchat":false,"figma":false,"fly":false,"github":false,"gitlab":false,"google":false,"keycloak":false,"kakao":false,"linkedin":false,"linkedin_oidc":false,"notion":false,"spotify":false,"slack":false,"slack_oidc":false,"workos":false,"twitch":false,"twitter":false,"email":true,"phone":false,"zoom":false},"disable_signup":true,"mailer_autoconfirm":false,"phone_autoconfirm":false,"sms_provider":"twilio","saml_enabled":false,"saml_private_key_next_configured":true,"passkeys_enabled":false}
+[0m
+[0m$ [0mdig +short cto.onecode.de CNAME; echo "---HTTP---"; curl -sS -D- -o /dev/null --max-time 20 http://cto.onecode.de/ 2>&1 | head -20
+cname.perspective-dns.com.
+---HTTP---
+HTTP/1.1 409 Conflict
+Date: Wed, 14 Oct 2026 12:46:32 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Length: 16
+Connection: close
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: same-origin
+Cache-Control: private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Expires: Thu, 01 Jan 1970 00:00:01 GMT
+Server: cloudflare
+CF-RAY: a4a6affd9a143ac4-DFW
+[0m
+[0m$ [0mcurl -sS -D- --max-time 20 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" -H "Authorization: Bearer sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket" 2>&1 | head -30
+HTTP/2 200 
+date: Wed, 14 Oct 2026 12:46:33 GMT
+content-type: application/json; charset=utf-8
+content-length: 2
+cf-ray: a4a6b000dc837d9f-DFW
+cf-cache-status: DYNAMIC
+access-control-allow-origin: *
+server: cloudflare
+x-content-type-options: nosniff
+sb-gateway-mode: direct
+sb-gateway-version: 1
+sb-project-ref: aygnpacdkgtsfnhgcyjc
+sb-request-id: 01a13a73-3c93-7a64-b441-463019c35097
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+set-cookie: __cf_bm=o.mdaraOH2ywp4D3Wk_OCYwCDCztWrDogUQZhFrZmx0-1791981993.102132-1.0.1.1-SiKw0bSDplNMAWQsAEoUYka3CgBwwPFvH9_bhNMWS8kTVva.eDdqnC9NAhsUCCO_435DoS4JJWqGVTQZ5DZxY3Io3AvYemeYtlIuC6AZ8Nq7fTc8Ecv_hV51tfnms22h; HttpOnly; SameSite=None; Secure; Path=/; Domain=supabase.co; Expires=Wed, 14 Oct 2026 13:16:33 GMT
+alt-svc: h3=":443"; ma=86400
+
+[]
+[0m
+## Objective
+- Continue the autonomous bug-bounty engagement against the OneCode GmbH program (report channel: bugs.olivermaicher.eu); currently in phase `POC`, target `api`.
+- Prove/close the top remaining leads: post-auth BOLA via Supabase RLS gap (needs 2 invited accounts), GoTrue credentialed CORS misconfig, S3 plane exposure, and `cto.onecode.de` dangling-CNAME takeover.
+
+## Important Details
+- In-scope only: `*.onecode.de`, `kurs.onecode.de`, and company-owned infra. Passive-first, ≤1 rps, GET/HEAD/OPTIONS only; no mutating/auth-bypass tests against live customer data.
+- Out-of-scope (do not report): DoS, descriptive headers/errors, robots.txt, outdated libs, OPTIONS/TRACE, CSRF logout/anon, cookie flags on non-sensitive data, self-XSS, username enum, brute-force, SSL/TLS best practice, mail config, clickjacking w/o exploit, public login panels, lack of email verification.
+- Key credentials/identifiers: Supabase project `aygnpacdkgtsfnhgcyjc`; publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (prior `870cf518…` was a newline artifact — cite only `43ccb834…`).
+- `kurs.onecode.de`: Railway-hosted Next.js/Turbopack App Router; CNAME `ki8dqcf6.up.railway.app`; auth = Supabase (email-only, signup disabled, `mailer_autoconfirm=false`, all external OAuth false, `anonymous_users=false`, `passkeys_enabled=false`, `saml_enabled=false` but `saml_private_key_next_configured=true`).
+- `kurs` build hashes (no deploy since 2026-09-19 11:33Z): main `0-mbmp1iqb6hj.js` = 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink `1a4tqdnsy9k1l.js` = 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` 18 702 B sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`. Build-diffing is event-triggered, not time-based.
+- `kurs` pre-auth surface frozen: `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` = 200; all `/api/*`, `/v1`, `/dashboard`, `/admin`, `/courses` = 307→/login.
+- Supabase planes: REST `/rest/v1` anon-blocked (oscillates 503 PGRST002 ↔ 401; monitor formally closed 2026-09-17 after 27 probes); storage `/storage/v1` bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded, bucket name unrecoverable pre-auth); S3 plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` SigV4-enforced (403 Missing signature, 3-state key-ID oracle, closed pre-auth); JWT verifier ES256-only (all alg/key/jwk confusion closed, 38+ probes).
+- `cto.onecode.de`: CNAME→`cname.perspective-dns.com.` (Perspective funnel SaaS), HTTP 409 `error code:1001`, TLS handshake-fail, zero verification TXT — day-60+, unbound/reclaimable, conf 58, proof path HUMAN_ONLY.
+- `HashSessionHandoff` (module 34891) mounted on `/login` RSC payload row 18 — parses URL fragment, `setSession()` with no state/nonce/PKCE; fixed redirect map `{invite:/einladung,recovery:/passwort-neu}` default `/`; needs a valid token pair → AUTH_HELPED.
+- Current RISK score: 70.
+
+## Work State
+### Completed
+- All pre-auth surface on `kurs.onecode.de` exhaustively enumerated and exhausted (path normalization, header desync, CVE-2025-29927 `x-middleware-subrequest`, `_next/image` SSRF, PKCE injection, forged cookies — all negative).
+- Supabase auth/storage/REST/realtime/functions/graphql/OIDC discovery planes characterized; JWT algorithm/key confusion and HS256 secret-guessing closed; admin plane unreachable pre-auth.
+- GoTrue CORS mapped to three-tier route-registration model incl. 7 pre-gate routes (well-known, oauth/authorize|token|userinfo, verify); preflight never reflects; credentialed reflection confirmed via header or `?apikey=` query.
+- S3-compatible storage plane discovered and bounded (no pre-auth oracle on S3 shapes).
+- `cto.onecode.de` takeover hypothesis resolved to provider + conf 58 (HUMAN_ONLY).
+- Subdomain inventory confirmed complete (5 names); GitHub org scan clean.
+
+### Active
+- POC phase on `api`; latest ranked hypothesis: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (conf 75, PARKED AUTH_HELPED).
+- Aggregated state as of 2026-10-14 06:47:59 UTC: no new passive probes since 2026-10-12 21:55Z; all surfaces identical (REST root 401 / table paths 503, kurs no deploy day-22+, cto CNAME day-60+).
+- Final-type leads: credentialed CORS on GoTrue (conf 85, PASSIVE, MEDIUM); S3 bypass (conf 75, AUTH_HELPED); fragment sink forced-login (conf 70, AUTH_HELPED).
+
+### Blocked
+- Post-auth BOLA/RLS test requires 2 invited test accounts (AUTH_HELPED) — highest-value lead (conf 65).
+- `cto.onecode.de` claim requires HUMAN action (register Perspective account, add custom domain, verify DNS ownership) — only proof path.
+- S3 RLS-bypass needs owner-supplied SigV4 keys or permissive bucket policy — untestable passively.
+- Fragment sink needs a valid attacker-supplied token pair — not exploitable pre-auth alone.
+
+## Next Move
+1. [NEXT] PROBE: `curl -sS -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings"` — reconfirm credentialed CORS reflection (ACAO reflected + ACAC:true + vary:Origin) for the final MEDIUM finding.
+2. [NEXT] HUMAN: Attempt to claim `cto.onecode.de` via Perspective SaaS dashboard (register, add custom domain, verify DNS ownership); alternatively drive the AUTH_HELPED BOLA test with 2 invited accounts.
+
+## Relevant Files
+- `inventory/onecode.md`: full host inventory, passive recon table, per-cycle probe log (10 hosts, 3 live HTTP).
+- `scope.yml`: authoritative in-scope asset list (`*.onecode.de`, `kurs.onecode.de`).
+- `art/lead_nemotron3.txt`: source of the conf-75 S3-plane lead.
+- `hypotheses-nemotron3.txt`: queued hypotheses/NEXT (incl. cto.onecode.de HUMAN claim).
+- `bugs.olivermaicher.eu`: OneCode GmbH report channel.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+No delta from the knowledge base — all four probes match known state. Here is the current assessment.
+
+## STATE DELTA
+- `kurs.onecode.de/login`: HTTP 200, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18 702 B) — identical, no deploy (day-25).
+- GoTrue `/auth/v1/settings`: HTTP 200 — `disable_signup:true`, `mailer_autoconfirm:false`, all external OAuth false, `saml_enabled:false`, `saml_private_key_next_configured:true`, `passkeys_enabled:false`. Unchanged.
+- `cto.onecode.de`: CNAME still `cname.perspective-dns.com.`, HTTP 409 `error code:1001` — still dangling (day-60+).
+- Storage `/storage/v1/bucket` (anon Bearer): HTTP 200 `[]` with `access-control-allow-origin: *` (wildcard, not reflected), `sb-gateway-mode: direct`. Unchanged.
+- Net: surface fully converged, no new deploy/artifact, no new reachable unauthenticated path.
+
+## FINDING CONFIRMED (re-verified)
+- Fedicated CORS on GoTrue `/auth/v1/settings`: `access-control-allow-origin: https://evil.example` reflected and `access-control-allow-credentials: true` with `Vary: Origin`. Requires attacker-supplied `apikey`; credentials are `Authorization: Bearer <jwt>` only — **no cookie channel**, so practical impact remains LOW/informational. Not materially reportable as MEDIUM.
+
+## BLOCKERS / REQUESTS
+- **Post-auth BOLA (conf 65, highest value):** requires **2 invited test accounts** on `kurs.onecode.de`. Cannot be tested unauthenticated — every mutating/authenticated test is out of the passive-first ruleset.
+- **`cto.onecode.de` takeover (conf 58):** requires a HUMAN to register on Perspective SaaS, add the custom domain, and verify DNS ownership. No agent-reachable mutation allowed.
+- **S3 SigV4 RLS-bypass (conf 75):** requires owner-supplied SigV4 credentials or a permissive bucket policy; untestable passively.
+- **Fragment/invite sink (`HashSessionHandoff`, conf 70):** requires a valid attacker-controlled token pair — needs the accounts above.
+
+## NEXT MOVE
+All passive, pre-auth avenues are exhausted and remaining leads are gated behind credentials or human action. Before I continue, I need clarification:
+
+1. Can you provide **2 invited test accounts** on `kurs.onecode.de` so I can run the post-auth BOLA/RLS (row-owner) test — the only high-impact lead left?
+2. Or authorize/perform the **human step on `cto.onecode.de`** (register + add custom domain on Perspective) to prove the subdomain takeover?
+3. Otherwise: do you want me to write up the consolidated low-severity findings (CORS misconfig, bucket oracle, dangling CNAME) as-is and close out the engagement?
+
+I will not take mutating or takeover-caliming actions without explicit go-ahead.

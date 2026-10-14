@@ -1612,3 +1612,15 @@ www.onecode.de
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
 
 ## 2026-10-14 06:47:59 UTC
+
+## 2026-10-14 12:52:20 UTC
+- NEW Supabase REST `/rest/v1/` root flipped 503→401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503); gateway oscillation continues, no permissive state
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS auth-state discriminator re-verified live 2026-10-07: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405)
+- NEW Supabase Storage bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes failing before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED kurs.onecode.de: no deploy day-22+; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED cto.onecode.de: CNAME→cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED Supabase REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces `sb_publishable_` format only
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to subscribe... Realtime is enabled") — no anon data stream
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle
