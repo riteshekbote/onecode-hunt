@@ -8403,3 +8403,4 @@ testability: AUTH_HELPED
 [RISK] onecode: 70 — Credentialed CORS on identity gateway allows cross-origin reads with apikey (MEDIUM, PASSIVE). Fragment sink is design-level (MEDIUM, AUTH_HELPED). S3 plane structurally separate (HIGH if misconfigured, AUTH_HELPED). No pre-auth data exposure on REST/Storage public download paths.
 ## 2026-10-13 17:48:45 UTC [target] (model bigpickle)
 ## 2026-10-13 22:30:01 UTC [target] (model bigpickle)
+## 2026-10-14 01:25:34 UTC [target] (model bigpickle)
