@@ -1642,3 +1642,11 @@ www.onecode.de
 - CHANGED cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged
 - CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed (Missing signature / InvalidSignature / InvalidAccessKeyId); plane closed to every unauthenticated shape
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+
+## 2026-10-15 00:12:07 UTC
+- CHANGED Supabase REST `/rest/v1/` root flipped 503→401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503 PGRST002); gateway oscillation continues, no permissive state
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/.well-known/jwks.json exposes ES256-only key while OIDC discovery advertises RS256/HS256/ES256 (pre-auth, no credentials)
+- CHANGED kurs.onecode.de: no deploy day-22+; main chunk f916f314ea61a8c5... byte-identical; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged
+- CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed (Missing signature / InvalidSignature / InvalidAccessKeyId); plane closed to every unauthenticated shape
+- CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
