@@ -8537,3 +8537,11 @@ testability: PASSIVE
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dangling Perspective CNAME day-60+, 409+TLS-fail, zero verification TXT → unbound/reclaimable (conf 58); HUMAN claim required for proof.
 [LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: Origin reflection + ACAC:true requires apikey-bearing request but no ambient credential exists (Bearer-in-localStorage; no app session cookie on that origin). Not exploitable in current app posture.
 [RISK] onecode: 60 — Pre-auth surface frozen and clean (frozen `/login`, REST anon-blocked 503↔401, no buckets/functions/OAuth exploitable pre-auth, S3 SigV4-enforced). CORS lead retired as non-finding. Residual risk concentrated in (1) post-auth BOLA via RLS gap (HIGH, AUTH_HELPED, needs two invited accounts) and (2) cto.onecode.de takeover (MEDIUM, HUMAN_ONLY).
+## 2026-10-15 09:44:35 UTC [target] (model bigpickle)
+[PRIO] api / poc — no delta; both live leads remain escalation-gated
+[HYP]  H1 post-auth BOLA via RLS gap (conf 65, AUTH_HELPED, HIGH) — blocked
+[PARKED] GoTrue CORS reflection — no ambient credential channel, retired
+[FINAL] (none this cycle — zero-delta verification cycle)
+[NEXT]  HUMAN gate required to advance either lead:
+[LEARN] Storage bucket-enumeration endpoint stays empty-list under publishable key; confirms route-table-complete oracle holds. kurs hash stable since 09-19 → no deploy.
+[RISK] 60 (unchanged — no new exposure, no remediation observed)

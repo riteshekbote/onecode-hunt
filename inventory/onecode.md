@@ -1658,3 +1658,5 @@ www.onecode.de
 - CHANGED cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged
 - CHANGED aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed (Missing signature / InvalidSignature / InvalidAccessKeyId); plane closed to every unauthenticated shape
 - CHANGED aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: reflected ACAO+ACAC with apikey re-confirmed, but Bearer-only — LOW, no cookie channel
+
+## 2026-10-15 09:45:39 UTC
