@@ -8545,3 +8545,11 @@ testability: PASSIVE
 [NEXT]  HUMAN gate required to advance either lead:
 [LEARN] Storage bucket-enumeration endpoint stays empty-list under publishable key; confirms route-table-complete oracle holds. kurs hash stable since 09-19 → no deploy.
 [RISK] 60 (unchanged — no new exposure, no remediation observed)
+## 2026-10-15 14:49:01 UTC [target] (model bigpickle)
+[PRIO] 6.4 kurs.onecode.de (auth surface) | 6.0 supabase auth/v1 | 5.6 cto.onecode.de
+[HYP] (blocked) [75/65] Cross-tenant BOLA post-auth via Supabase RLS gap — needs two invited test accounts [AUTH_HELPED/HUMAN]; (blocked) [58] cto subdomain takeover — needs Perspective dashboard claim attempt [HUMAN_ONLY]; [45] GoTrue credentialed CORS — PARKED (app uses Bearer-in-localStorage, no ambient Supabase cookie)
+[PARKED] S3-plane SigV4 differential (untestable without owner keys); GoTrue CORS reflection (no ambient credential); OIDC/GoTrue discovery-doc mismatch (config-toggle only, no live probe)
+[FINAL] HIGH: cross-tenant BOLA (AUTH_HELPED, conf 65). MEDIUM: cto.onecode.de takeover (MISCONFIG, conf 58, HUMAN_ONLY). Both unchanged.
+[NEXT] HUMAN: obtain two invited test accounts for kurs.onecode.de to execute the BOLA probe set (GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments?user_id={B_id} + authenticated REST rowset diff). If not available, keep cto claim as the other HUMAN path.
+[LEARN] Three kurs chunk/page hashes match exactly — confirms event-triggered build-diffing, no build drift. cto CNAME unchanged, takeover surface still live. Storage control/root still 404, auth health 401 — closed monitors still closed.
+[RISK] 60 (stable, no delta)
