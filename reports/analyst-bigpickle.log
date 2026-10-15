@@ -53277,3 +53277,116 @@ STEP 7 — RISK
 - `(none)` — Investigation is live read-only against external hosts (`kurs.onecode.de`, `aygnpacdkgtsfnhgcyjc.supabase.co`, `aygnpacdkgtsfnhgcyjc.storage.supabase.co`, `cto.onecode.de`, `onecode.de`, `www.onecode.de`, `mta-sts.onecode.de`). No local repo/files referenced in the conversation; continue by probing the above endpoints per constraints.
 Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
 Need two invited test accounts for `kurs.onecode.de` (AUTH_HELPED). With A and B sessions, run read-only cross-tenant BOLA diff: GET `/api/courses|/api/resources|/api/enrollments` and authenticated REST rowsets to test the HIGH-severity RLS gap. `cto.onecode.de` dangling CNAME (MEDIUM) also needs owner approval for provider claim. No further pre-auth probing is productive.
+===== ANALYST bigpickle 2026-10-15 04:56:16 UTC =====
+[0m
+> build · big-pickle
+[0m
+STEP 1 — DELTA
+NO_DELTA — kurs.onecode.de frozen (no deploy since 2026-09-19 11:33Z; main/sink chunks byte-identical day-22+); pre-auth surface = {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200. cto.onecode.de CNAME→cname.perspective-dns.com day-60+ (409/1001, TLS handshake-fail, zero verification TXT). aygnpacdkgtsfnhgcyjc.supabase.co REST oscillates 503↔401, never permissive; anon blocked. Storage 200 [] (zero buckets), Functions 404, Realtime auth-gated, no pre-auth data exposure. BOLA remains sole HIGH, gated on 2 invited accounts; cto takeover HUMAN_ONLY.
+
+STEP 2 — PRIORITIZE
+[PRIO] kurs.onecode.de,6.4,a=7,b=9,t=9,g=1,c=7,f=2
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1,6.0,a=7,b=5,t=7,g=6,c=7,f=2
+[PRIO] cto.onecode.de,5.6,a=6,b=6,t=5,g=7,c=6,f=2
+
+STEP 3 — HYPOTHESES
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1
+confidence: 65
+reasoning: Single Supabase project backs invite-only course platform (enrollments/resources). UUID PKs weaken guessable enumeration; anon REST blocked (503/401), so pre-auth bypass absent. Cross-tenant SELECT plausible if RLS misses user_id/tenant predicate on app API endpoints (/api/*,/v1).
+evidence_needed: Account A can retrieve row(s) owned by Account B via authenticated app route or authenticated REST while switching principals.
+verify_steps: (AUTH_HELPED) Obtain two invited accounts A and B. With A session, GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments?user_id={B_id} and diff rowsets vs B; also compare authenticated REST queries filtered by owner vs cross-owner (read-only).
+impact: Cross-tenant PII/enrollment disclosure — severity HIGH.
+testability: AUTH_HELPED
+
+[HYP] Subdomain takeover of cto.onecode.de via dangling Perspective CNAME
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME→cname.perspective-dns.com stable day-60+; HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT = hostname unbound and plausibly reclaimable at Perspective SaaS.
+evidence_needed: Successful claim of cto.onecode.de in Perspective dashboard and serving arbitrary content on https://cto.onecode.de (with valid cert).
+verify_steps: (HUMAN_ONLY) Register Perspective account, add custom domain cto.onecode.de, complete provider verification per docs; verify content served and HTTPS (read-only verification of claim state).
+impact: Attacker controls cto.onecode.de (phishing, cookie scope) — severity MEDIUM.
+testability: HUMAN_ONLY
+
+[HYP] GoTrue credentialed CORS reflection on auth plane
+class: MISCONFIG
+asset: aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1
+confidence: 45
+reasoning: Apikey-bearing requests reflect arbitrary Origin with ACAC:true and vary:Origin across 200/401/404/405 on GoTrue resource paths; well-known paths also reflect without apikey. App session is Bearer-in-localStorage (no cookie set on Supabase origin by app), so browser ambient credential to reflected origin is absent.
+evidence_needed: Victim browser, without app session cookie on Supabase origin, automatically attaching a secret credential to a response from a reflected origin.
+verify_steps: (PASSIVE) curl -D- -H "Origin: https://evil.example" -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" https://aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings. Repeat with no apikey to confirm wildcard+no-ACAC vs reflected+ACAC (read-only).
+impact: Potential cross-origin read of authenticated responses if ambient credential exists; currently bounded to LOW due to Bearer-only sessions and no cookie on that origin.
+testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] GoTrue credentialed CORS reflection on auth plane: confidence 45 < 40? 45>=40, but ambient credential absent (app uses Bearer-in-localStorage, no app session cookie on Supabase origin). Impact LOW; no concrete cross-origin read path demonstrated with ambient credential. Confidence below practical exploitation threshold; park as informational.
+[FINAL] Post-auth cross-tenant BOLA via Supabase RLS policy gap (IDOR, conf 65, AUTH_HELPED) — HIGH
+[FINAL] Subdomain takeover of cto.onecode.de via dangling Perspective CNAME (MISCONFIG, conf 58, HUMAN_ONLY) — MEDIUM
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Obtain two invited test accounts for kurs.onecode.de to execute the post-auth cross-tenant BOLA test (Account A vs B: GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments?user_id={B_id} and authenticated REST rowsets). This is the only HIGH-severity finding and cannot be tested pre-auth.
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA remains sole HIGH (65); gated on two invited accounts; pre-auth surface exhausted and non-permissive.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: dangling Perspective CNAME day-60+, 409+TLS-fail, zero verification TXT → unbound/reclaimable (conf 58); HUMAN claim required for proof.
+[LEARN] REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: Origin reflection + ACAC:true requires apikey-bearing request but no ambient credential exists (Bearer-in-localStorage; no app session cookie on that origin). Not exploitable in current app posture.
+
+STEP 7 — RISK
+[RISK] onecode: 60 — Pre-auth surface frozen and clean (frozen `/login`, REST anon-blocked 503↔401, no buckets/functions/OAuth exploitable pre-auth, S3 SigV4-enforced). CORS lead retired as non-finding. Residual risk concentrated in (1) post-auth BOLA via RLS gap (HIGH, AUTH_HELPED, needs two invited accounts) and (2) cto.onecode.de takeover (MEDIUM, HUMAN_ONLY).
+## Objective
+- Continue a read-only bug bounty hunt against OneCode GmbH scoped assets (`*.onecode.de`, `kurs.onecode.de`, and OneCode GmbH-operated infrastructure/APIs/cloud/domains).
+- Identify real logic flaws (IDOR/BOLA, broken auth/session, SSRF-to-cloud-metadata, JWT alg/key confusion, OAuth redirect_uri/state, subdomain takeover) with passive-first, <=1 rps, GET/HEAD/OPTIONS only. Avoid all out-of-scope classes.
+
+## Important Details
+- **Scope**: `*.onecode.de`, `kurs.onecode.de`, and all company-owned infrastructure, web applications, APIs, development platforms, cloud environments, customer portals, websites, and domains operated by OneCode GmbH.
+- **Out of scope**: DoS, account-lockout DoS, descriptive errors/headers only, robots.txt/public files, outdated library version alone, OPTIONS/TRACE abuse, CSRF on logout/anon forms, cookie flags on non-sensitive, self-XSS, scanner-only, social/physical, username enumeration, brute-force/rate-limit policy, TLS best practice/attacks, clickjacking without exploit, mail SPF/DKIM/DMARC, policy-only, autocomplete, public login panels, lack of email verification, session control on email/password change, exposing customer/employee/financial/auth data in testing.
+- **Rules**: passive-first, <=1 rps, GET/HEAD/OPTIONS only for live probes; no auth-bypass/mutating tests against live customer data; sha256 any secret; facts vs hypotheses separated; trace to evidence; <=1 probe/day cadence for REST monitors.
+- **Key asset mapping**:
+  - `kurs.onecode.de` -> `ki8dqcf6.up.railway.app` (Railway, Next.js/Turbopack App Router). Pre-auth surface: `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` (200). All `/api/*`, `/v1/*`, `/admin`, `/courses`, `/dashboard`, `/einladung`, `/passwort-neu` -> 307→/login.
+  - `cto.onecode.de` -> `cname.perspective-dns.com` (Perspective funnel SaaS). Day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT (unbound/reclaimable) — **HUMAN_ONLY**.
+  - `aygnpacdkgtsfnhgcyjc.supabase.co` (GoTrue/REST/Storage/Realtime/Functions/GraphQL)
+  - `aygnpacdkgtsfnhgcyjc.storage.supabase.co` (S3-compatible `/storage/v1/s3`)
+- **Supabase identity**: project `aygnpacdkgtsfnhgcyjc`, publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30` (sha256 of bytes `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`).
+- **Auth config**: email-only, `disable_signup=true`, `mailer_autoconfirm=false`, all external OAuth false, `passkeys_enabled=false`, `saml_enabled=false`, `saml_private_key_next_configured=true`, `external.anonymous_users=false`. GoTrue is Bearer-only (no app session cookie on Supabase origin). `SITE_URL = https://kurs.onecode.de`.
+- **App code signal**: `HashSessionHandoff` (module 34891, chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`) mounted on `/login` RSC payload; parses URL fragment `access_token`+`refresh_token` with **no state/nonce/PKCE binding** (forced-login sink) but requires a valid token pair. Error paths fixed to `/login?error=link-abgelaufen`. No open redirect from sink (next-map `{invite:/einladung,recovery:/passwort-neu}` default `/`).
+- **Pre-auth surface state (stable)**: `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` -> 200. All `/api/*`, `/v1/*`, `/admin`, `/courses`, `/dashboard`, `/einladung`, `/passwort-neu` -> 307→/login. Main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` byte-identical since 2026-09-19 11:33Z (build-diff **event-triggered**, not time-based).
+- **Supabase planes (pre-auth)**: REST monitor formally closed 2026-09-17 (27 probes 503↔401, never 200+rows); platform enforces `sb_publishable_` format only (legacy JWT `eyJhbGci...` rejected). Storage: `GET /storage/v1/bucket` -> `200 []` (zero anon-visible buckets); bucket-existence oracle route-table-complete (10 GET classes) but bucket name unrecoverable from pre-auth bundles. Functions: `404` (uniform) — none deployed. Realtime: anon WS upgrade 101 but `postgres_changes` denied ("Realtime is enabled") for tested tables — no anon data stream. S3-compatible `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` requires SigV4 (403 Missing signature), independent authz, no pre-auth oracle demonstrated. GoTrue: CORS auth-state discriminator known; OIDC discovery at `/auth/v1/.well-known/*` (ES256-only JWKS) present; `redirect_to` allowlist exact-origin across tested shapes; `verify` is 7th pre-gate route (keyless) with token-state oracle but open-redirect closed.
+- **Inventory**: exactly 5 names from CT (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`); 26 plausible subdomains DNS-checked -> zero A/CNAME. GitHub orgs `OneCodeDevs` + `OneCode` scanned -> minimal public repos, no secrets/internal endpoints/CI leaks found.
+- **Top residual risk**: Post-auth cross-tenant BOLA via Supabase RLS gap on `kurs.onecode.de` + `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1`, conf **65**, **AUTH_HELPED** (need two invited test accounts). `cto.onecode.de` dangling Perspective CNAME conf **58**, **HUMAN_ONLY** (claim via Perspective dashboard).
+
+## Work State
+### Completed
+- **Surface mapping**: Pre-auth surface fully characterized and frozen since 2026-09-19 (4 pages 200, rest 307). Railway migration `tgk4io5m`->`ki8dqcf6.up.railway.app` verified, app behavior unchanged.
+- **Supabase pre-auth sweep**: REST monitor closed; Storage/Functions/Realtime/S3 characterized; bucket-existence oracle validated and route-table-complete; JWT alg/key confusion comprehensively tested (38+ probes) -> ES256 pinning holds, attacker keys rejected.
+- **Auth hardening checks**: CVE-2025-29927 (`x-middleware-subrequest`) negative; `_next/image` SSRF negative; path-normalization/header-desync negative; 5 forged-cookie variants negative; PKCE/code injection negative; GoTrue `redirect_to` allowlist closed across 15+ shapes; `GET /auth/v1/logout?returnTo=` -> 405.
+- **CORS model**: Three-tier model established (well-known+OAuth-router reflect unconditionally with ACAC:true; `/auth/v1/*` resource paths reflect with ACAC:true only when apikey present, else wildcard no ACAC; fallthrough tier C). Preflight never reflects. Impact bounded (GoTrue Bearer-only, no app cookie on Supabase origin).
+- **Discovery documents**: `/auth/v1/.well-known/openid-configuration` + `jwks.json` read; JWKS ES256-only (`kid 4f59d46f-c3e6-47c7-a717-fabf016650c9`); some advertised OIDC fields overstate deployed surface (documented).
+- **Inventory/subdomain**: CT + DNS sweep complete; GitHub scan complete; S3-compatible host `aygnpacdkgtsfnhgcyjc.storage.supabase.co` characterized.
+
+### Active
+- **HYP-1 (HIGH)**: Post-auth cross-tenant BOLA via Supabase RLS gap on `kurs.onecode.de` + `aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1` (conf 65, AUTH_HELPED). Design: with Account A session vs Account B, GET `/api/courses|/api/resources|/api/enrollments?user_id={B_id}` and compare authenticated REST rowsets against owner-filtered queries. Read-only.
+- **HYP-2 (MEDIUM)**: Subdomain takeover of `cto.onecode.de` via dangling Perspective CNAME (conf 58, HUMAN_ONLY). CNAME `cname.perspective-dns.com`, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT -> unbound/reclaimable. Requires Perspective dashboard claim + HTTPS verification.
+
+### Blocked
+- **No pre-auth path to second authenticated principal**: `external.anonymous_users=false`, `disable_signup=true`, email-only; GoTrue admin plane 401; REST anon blocked; no service-role material in pre-auth bundles. Cannot execute BOLA pre-auth.
+- **cto takeover unprovable by passive probes**: requires active claim flow in Perspective SaaS (HUMAN_ONLY). No automated takeover attempt permitted by rules.
+- **Build-diffing event-triggered**: Main/sink/page chunks byte-identical since 2026-09-19 11:33Z; fixed time-cadence probing yields zero delta and wastes request budget.
+
+## Next Move
+1. **HUMAN: Obtain two invited test accounts for `kurs.onecode.de`** (Account A, Account B). These are required to execute the post-auth cross-tenant BOLA test (AUTH_HELPED). Do not create accounts via public signup (disabled).
+2. **HUMAN (or owner-approved): Attempt claim of `cto.onecode.de` via Perspective SaaS dashboard** (register Perspective account, add custom domain `cto.onecode.de`, complete provider verification, verify content + HTTPS). Keep strictly to verification/claim flow; no destructive actions.
+
+## Relevant Files
+- **Knowledge Base (seed + running log)**: `art/knowledge_base.jsonl` (or equivalent KB file used by this run) — contains all ACCEPTED/REJECTED entries, timestamps, hosts, endpoints, keys/hashes, CORS/route maps. **Why**: preserves exact evidence chain (e.g. sink chunk sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`, main `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`, publishable bytes sha256 `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a`).
+- **Inventory**: `inventory/onecode.md` — discovered hosts (10), live HTTP (3), CNAMEs, deep scan notes. **Why**: authoritative in-scope host list.
+- **Scope**: `scope.yml` — program scope definition. **Why**: enforce in-scope/out-of-scope boundaries.
+- **Artifacts (chunk maps)**: `art/chunk_refs_kurs.json` (if present) — 13 pre-auth chunk refs, RSC payload mapping showing `HashSessionHandoff` mounted at `/login` row 18 (`I[34891,…]`). **Why**: bundle-level evidence for the fragment sink.
+- **Hypotheses**: `art/hypotheses-bigpickle.txt`, `art/hypotheses-nemotron3.txt`, `art/lead_bigpickle.txt`, `art/lead_nemotron3.txt` — ranked hypotheses, NEXT/LEARN, conf values. **Why**: preserves the 65/58 leads and decision history.
+- **Leads log**: `art/lead_update.jsonl` (or running lead updates) — timestamped `[NEW]/[CHANGED]/[REJECTED]/[ACCEPTED]` entries. **Why**: reproducible audit trail of CORS/REST/Realtime/S3 findings.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+- **Blocked (HYP-1, HIGH):** Awaiting two invited test accounts (A, B) for `kurs.onecode.de` to test post-auth cross-tenant BOLA. Cannot test pre-auth.
+- **Blocked (HYP-2, MEDIUM):** `cto.onecode.de` takeover is **HUMAN_ONLY** — requires claim via Perspective SaaS dashboard.
+
+**Need clarification:** Please provide the two invited accounts or specify which hypothesis to proceed with.
