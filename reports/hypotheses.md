@@ -4673,3 +4673,53 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+
+## RANKED HYPOTHESES 2026-10-15 22:12:23 UTC
+- [75] aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: S3-compatible storage plane with independent SigV4 authz bypasses Supabase RLS (from art/lead_nemotron3.txt)
+- [40] kurs.onecode.de: Railway app API discovery (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://kurs.onecode.de/api/ HEAD (expect 301/302/401/403/200)
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Attempt to claim `cto.onecode.de` via Perspective SaaS dashboard — register Perspective account, add custom domain `cto.onecode.de`, verify DNS ownership
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, like
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible
+- LEARN: REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- LEARN: ACCEPTED MISCONFIG @ kurs.onecode.de: confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
+- LEARN: ACCEPTED AUTH @ kurs.onecode.de: no pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+- LEARN: REJECTED IDOR(pre-auth) @ api: no pre-auth endpoints found; only post-auth BOLA testable which needs account.
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: registered /api,/v1 routers + course semantics => BOLA chain plausible; gate_ease=LOW (invite-only).
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA remains sole HIGH (65); gated on two invited accounts; pre-auth surface exhausted and non-permissive.
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: dangling Perspective CNAME day-60+, 409+TLS-fail, zero verification TXT → unbound/reclaimable (conf 58); HUMAN claim requir
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: Origin reflection + ACAC:true requires apikey-bearing request but no ambient credential exists (B
+- LEARN: Storage bucket-enumeration endpoint stays empty-list under publishable key; confirms route-table-complete oracle holds. kurs hash stable since 09-19 → no deploy
+- LEARN: Three kurs chunk/page hashes match exactly — confirms event-triggered build-diffing, no build drift. cto CNAME unchanged, takeover surface still live. Storage c
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: monitor formally closed 09-17 (27 probes 503↔401), never 200+rows; anon table REST still 503 PGRS
+- LEARN: ACCEPTED IDOR(post-auth) @ aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1: anon blocked (503/401); BOLA remains sole HIGH, gated on 2 invited accounts (conf 65)
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME cname.perspective-dns.com day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — unbound/re
+- LEARN: ACCEPTED OTHER @ aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3: 3-state key-ID oracle re-confirmed 2026-10-11 (Missing signature / InvalidSignature / I
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1: CORS auth-state discriminator confirmed (unauthenticated→wildcard no ACAC; apikey-bearing→reflect
+- LEARN: REJECTED AUTH @ kurs.onecode.de: 38+ JWT alg/key-confusion probes + 5 forged-cookie variants all negative; ES256 pinning holds; HashSessionHandoff mounted on /l
+- LEARN: REJECTED MISCONFIG @ kurs.onecode.de: no deploy since 2026-09-19 11:33Z; /login sha256 99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450 byte-ide
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/realtime/v1/websocket: controlled WS probe shows anon phx_join ok but postgres_changes denied ("Unable to 
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/functions/v1: uniform 404 for all 18 names — Edge Functions absent, no name oracle
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns [] with publishable key — zero anon-visible buckets, closes bucke
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
+- LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
+- LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi

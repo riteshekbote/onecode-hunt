@@ -1338,3 +1338,29 @@
 - 2026-10-15 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing material already provisioned while feature flag off; enabling is single config toggle
 - 2026-10-15 Storage bucket-enumeration endpoint stays empty-list under publishable key; confirms route-table-complete oracle holds. kurs hash stable since 09-19 → no deploy.
 - 2026-10-15 Three kurs chunk/page hashes match exactly — confirms event-triggered build-diffing, no build drift. cto CNAME unchanged, takeover surface still live. Storage control/root still 404, auth health 401 — closed monitors still closed.
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+- 2026-10-15 ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+- 2026-10-15 ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+- 2026-10-15 ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: Railway app likely has API surface
+- 2026-10-15 ACCEPTED AUTH @ kurs.onecode.de: Railway-hosted apps with 307 login redirect are high-value for session fixation/IDOR; tech_exposure=8 (Railway, auth flow, likely API)
+- 2026-10-15 ACCEPTED IDOR @ kurs.onecode.de: Course platform semantics (enrollments, resources) strongly predict IDOR; gate_ease=9 (login required but test account feasible)
+- 2026-10-15 REJECTED XSS/IDOR/SSRF/OATH @ api: no endpoints identified yet
+- 2026-10-15 ACCEPTED MISCONFIG @ kurs.onecode.de: confirmed Next.js/Turbopack App Router with registered /api + /v1 routes (auth-gated) -> post-auth BOLA surface real.
+- 2026-10-15 ACCEPTED AUTH @ kurs.onecode.de: no pre-auth session cookie; Next.js session gate on all routes; session-fixation pre-auth mechanism unsupported.
+- 2026-10-15 REJECTED IDOR(pre-auth) @ api: no pre-auth endpoints found; only post-auth BOLA testable which needs account.
+- 2026-10-15 ACCEPTED IDOR(post-auth) @ kurs.onecode.de: registered /api,/v1 routers + course semantics => BOLA chain plausible; gate_ease=LOW (invite-only).
