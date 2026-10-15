@@ -8553,3 +8553,5 @@ testability: PASSIVE
 [NEXT] HUMAN: obtain two invited test accounts for kurs.onecode.de to execute the BOLA probe set (GET /api/courses/{B_id}, /api/resources/{B_id}, /api/enrollments?user_id={B_id} + authenticated REST rowset diff). If not available, keep cto claim as the other HUMAN path.
 [LEARN] Three kurs chunk/page hashes match exactly — confirms event-triggered build-diffing, no build drift. cto CNAME unchanged, takeover surface still live. Storage control/root still 404, auth health 401 — closed monitors still closed.
 [RISK] 60 (stable, no delta)
+## 2026-10-15 19:00:40 UTC [target] (model bigpickle)
+[RISK] 60 (unchanged)
