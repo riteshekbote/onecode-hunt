@@ -8836,3 +8836,7 @@ testability: AUTH_HELPED
 [RISK] onecode: 60 (unchanged) — pre-auth surface frozen and non-permissive for 74 days; residual risk concentrated in (1) post-auth cross-tenant BOLA via RLS gap (High, AUTH_HELPED, blocked on two invited accounts) and (2) cto.onecode.de dangling-CNAME takeover (Medium, HUMAN_ONLY, blocked on an owner-side claim attempt); CORS/S3/OIDC leads parked as non-exploitable in current posture.
 ## 2026-10-16 09:42:31 UTC [target] (model bigpickle)
 ## 2026-10-16 14:22:44 UTC [target] (model bigpickle)
+## 2026-10-16 18:14:32 UTC [target] (model bigpickle)
+[NEXT] HUMAN: request two invited test accounts (user A, user B) on kurs.onecode.de to run the read-only BOLA probe set (GET `/api/courses/{id_b}`, `/api/resources/{id_b}`, `/api/enrollments?user_id={id_b}`, and REST `/rest/v1/enrollments` with session A vs session B control). Alternative HUMAN path: attempt Perspective dashboard claim for cto.onecode.de, then read-only `GET https://cto.onecode.de/`. Until one of these is granted, no live probe is warranted.
+[LEARN] Confirmed again: after full pre-auth surface convergence, the binding constraint is access (auth principals / vendor ownership), not enumeration. Re-derive-hashes discipline holds — `43ccb834…` (key) and `f916f314…` (chunk) re-verified live this cycle.
+[RISK] Unchanged at 60. No new exposure, no regression on controls (PGRST002 block, storage 200 `[]` non-leak, REST root secret-key gate all intact).

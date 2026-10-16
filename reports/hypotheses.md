@@ -4750,3 +4750,7 @@
 ## RANKED HYPOTHESES 2026-10-16 10:00:28 UTC
 
 ## RANKED HYPOTHESES 2026-10-16 14:39:10 UTC
+
+## RANKED HYPOTHESES 2026-10-16 18:14:41 UTC
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request two invited test accounts (user A, user B) on kurs.onecode.de to run the read-only BOLA probe set (GET `/api/courses/{id_b}`, `/api/resources/{id
+- LEARN: Confirmed again: after full pre-auth surface convergence, the binding constraint is access (auth principals / vendor ownership), not enumeration. Re-derive-hash
