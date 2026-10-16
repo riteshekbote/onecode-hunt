@@ -54748,3 +54748,102 @@ Parking again rather than emitting a time-cadence probe: every surface is frozen
 2. **Alternatively**, a Perspective account with the `cto.onecode.de` claim attempted — I'd verify with a read-only `GET https://cto.onecode.de/`.
 
 If neither is available right now, the correct state is to hold at risk 60 and wait for an event signal (chunk-hash change, cto DNS/TXT change). Want me to stay in that wait state?
+===== ANALYST bigpickle 2026-10-16 10:00:28 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sI --max-time 15 https://kurs.onecode.de/login | head -20; echo "---"; curl -s --max-time 15 https://kurs.onecode.de/login | sha256sum; curl -s --max-time 15 https://kurs.onecode.de/login | wc -c
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Fri, 16 Oct 2026 09:41:00 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: DmrqYZXRR9-tvIzgN8N_Fg
+x-hikari-trace: iad1.fp5t
+x-railway-edge: iad1
+
+---
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  -
+18702
+[0m
+[0m$ [0mcurl -s --max-time 15 "https://crt.sh/?q=%25.onecode.de&output=json" | python3 -c "import json,sys; d=json.load(sys.stdin); names=sorted(set(e['name_value'] for e in d)); print(len(names)); [print(n) for n in names]" 2>&1 | head -20
+6
+cto.onecode.de
+kurs.onecode.de
+mta-sts.onecode.de
+onecode.de
+onecode.de
+www.onecode.de
+www.onecode.de
+[0m
+## Objective
+- Run the 8-step analyst loop for the OneCode GmbH bug bounty program (report channel: bugs.olivermaicher.eu), producing structured [DELTA]/[PRIO]/[HYP]/[PARKED]/[FINAL]/[NEXT]/[LEARN]/[RISK] blocks across repeated cycles.
+- In-scope only: `*.onecode.de`, `kurs.onecode.de`, and OneCode-owned infra per scope.yml + inventory/onecode.md.
+
+## Important Details
+- Phase: `POC`, target: `api` (per `=== MY STATE ===`).
+- Live-probe rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only; no mutating/auth-bypass tests on live customer data; sha256 any secret; REJECTED classes excluded (see full OUT OF SCOPE list in prompt).
+- Key assets: `kurs.onecode.de` (Next.js/Turbopack on Railway), Supabase project `aygnpacdkgtsfnhgcyjc` (`aygnpacdkgtsfnhgcyjc.supabase.co`, `.storage.supabase.co`), `cto.onecode.de` (dangling Perspective CNAME).
+- Publishable key plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct digest = sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (older `870cf518...` was a trailing-newline artifact — all PoCs must cite `43ccb834...`).
+- kurs.onecode.de pre-auth surface frozen: `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches` at 200; all `/api/*`, `/v1`, `/admin`, `/dashboard` → 307 `/login`.
+- Build-diffing is EVENT-TRIGGERED only (no deploy since 2026-09-19 11:33Z). Reference hashes (64-hex, re-derive live before citing):
+  - main chunk `0-mbmp1iqb6hj.js` = 154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`
+  - sink chunk `1a4tqdnsy9k1l.js` = 13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`
+  - `/login` page = 18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`
+- Session cookie: `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, @supabase/ssr 0.12.4); Supabase origin is Bearer-only (no auth cookie) — caps CORS impact.
+- Verifier is ES256-only; 38+ JWT alg/key-confusion probes and 5 forged-cookie variants all negative.
+- REST monitor formally CLOSED 09-17 (27 probes, 503↔401, never 200+rows).
+- Methodology standing rules adopted: state whether a KB model survives or dies (not "exception"); every scope claim needs its own counter-example/negative control; re-derive hashes live and assert 64-hex length.
+
+## Work State
+### Completed
+- Full pre-auth characterization of kurs.onecode.de; all cheap bypass classes closed (CVE-2025-29927, path-normalization, header-desync, forged cookies, PKCE injection, reflected `?error=`, `_next/image` SSRF, source maps).
+- GoTrue/PostgREST/storage/edge/realtime/realtime-WS/S3 CORS matrix mapped; discriminator = apikey presence on `/auth/v1/*` resource paths; 7 pre-gate keyless routes enumerated; preflight never reflects.
+- JWT attack surface closed: alg confusion, embedded JWK, ES256→HS256, secret guessing all negative.
+- Storage bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded); storage hypothesis closed (no app storage literals in pre-auth chunks).
+- Subdomain inventory complete (5 CT names + 26 DNS-brute negatives); GitHub org scan clean; crt.sh/Certspotter agree.
+- `cto.onecode.de` takeover hypothesis stable at conf 58, HUMAN_ONLY.
+
+### Active
+- Emitting per-cycle 8-step blocks; latest cycle (2026-10-16 05:18Z) was zero-delta with three ranked hypotheses.
+
+### Blocked
+- Top lead (conf 65, AUTH_HELPED): cross-tenant BOLA via RLS gap needs two invited kurs test accounts.
+- Second lead (conf 58, HUMAN_ONLY): cto.onecode.de claim attempt requires a Perspective dashboard registration.
+
+## Next Move
+1. `[NEXT] HUMAN`: obtain two invited test accounts for kurs.onecode.de and run the BOLA probe set — with session A: `GET /api/courses/{id_b}`, `GET /api/resources/{id_b}`, `GET /api/enrollments?user_id={id_b}`, and `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` (Bearer A); diff against session B as control.
+2. Fallback HUMAN path: Perspective dashboard claim attempt for `cto.onecode.de`; otherwise only re-probe on a deploy signal (new chunk hash) or a state change on the Supabase gateway.
+
+## Relevant Files
+- (none) — all state lives in the conversation's knowledge base, last-leads, inventory/onecode.md, and hypotheses output blocks.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mdig +short cto.onecode.de CNAME; echo "---A---"; dig +short cto.onecode.de A; echo "---mta-sts---"; dig +short _mta-sts.onecode.de TXT
+cname.perspective-dns.com.
+---A---
+cname.perspective-dns.com.
+104.18.2.73
+104.18.3.73
+---mta-sts---
+"v=STSv1; id=2026022401"
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "keyless:%{http_code}\n" --max-time 10 "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*"; curl -s -o /dev/null -w "pubkey:%{http_code}\n" --max-time 10 -H "apikey: sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30" "https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*"
+keyless:401
+pubkey:503
+[0m
+State re-verified, zero delta: no deploy (`/login` hash matches reference `99798c7d…`, 18702 B), `cto.onecode.de` still dangling on Perspective, REST gateway still 401-keyless/503-pubkey.
+
+**Both remaining leads are blocked on human action:**
+
+1. **BOLA/RLS gap** (conf 65, `AUTH_HELPED`) — needs **two invited kurs.onecode.de test accounts** (session A + session B as control) to run the cross-tenant probe set.
+2. **cto.onecode.de takeover** (conf 58, `HUMAN_ONLY`) — needs a **Perspective dashboard registration** to attempt claiming the zone.
+
+Everything passive is converged; no further low-cost probes remain in scope.
+
+**How do you want to proceed?**
+- Provide one/both test accounts so I can run the BOLA probes?
+- Attempt the Perspective claim yourself and report back?
+- Or park the run until a deploy signal or scope change?

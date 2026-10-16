@@ -4746,3 +4746,5 @@
 - NEXT(hypotheses-bigpickle.txt): HUMAN: Obtain two invited test accounts for kurs.onecode.de and execute the BOLA probe set — with session A: GET /api/courses/{id_b}, /api/resources/{id_b}, /ap
 - LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA remains the sole High lead (conf 65); zero pre-auth observations in 74 days and no cheap second `authen
 - LEARN: REJECTED MISCONFIG @ all passive monitors: 2026-10-16 cycle is zero-delta — kurs chunk/page hashes byte-identical to the 2026-09-19 build, cto CNAME + 409 uncha
+
+## RANKED HYPOTHESES 2026-10-16 10:00:28 UTC
