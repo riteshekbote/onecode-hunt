@@ -54847,3 +54847,142 @@ Everything passive is converged; no further low-cost probes remain in scope.
 - Provide one/both test accounts so I can run the BOLA probes?
 - Attempt the Perspective claim yourself and report back?
 - Or park the run until a deploy signal or scope change?
+===== ANALYST bigpickle 2026-10-16 14:39:10 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-10-16 14:19:45 UTC
+[0m
+[0m$ [0mcurl -sS -o /dev/null -w '%{http_code} %{size_download}\n' --max-time 12 https://kurs.onecode.de/login 2>&1
+200 18702
+[0m
+[0m$ [0mdig +short cto.onecode.de @1.1.1.1 2>/dev/null; echo '---'; dig +short TXT cto.onecode.de @1.1.1.1 2>/dev/null
+cname.perspective-dns.com.
+104.18.3.73
+104.18.2.73
+---
+cname.perspective-dns.com.
+[0m
+## Objective
+- Act as senior bug bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu), running an 8-step hypothesis/prioritization loop over in-scope assets `*.onecode.de`, `kurs.onecode.de`, and OneCode-operated infra, emitting only structured `[DELTA]/[PRIO]/[HYP]/[PARKED]/[FINAL]/[NEXT]/[LEARN]/[RISK]` blocks each cycle.
+- Current state: `{"phase": "POC", "target": "api"}` — pre-auth surface exhausted; all live leads are escalation-gated (AUTH_HELPED / HUMAN_ONLY).
+
+## Important Details
+- In-scope ONLY: `*.onecode.de`, `kurs.onecode.de` + company-owned infra. Out-of-scope classes are enumerated exhaustively in the prompt (DoS, descriptive errors only, username enumeration, brute force, TLS best-practice, clickjacking w/o PoC, mail config, OPTIONS/TRACE, etc.).
+- Passive-first rules: ≤1 rps, GET/HEAD/OPTIONS only for live probes; no auth-bypass or mutating tests on live customer data; sha256 any secret; scanner output needs manual validation.
+- Report channel: bugs.olivermaicher.eu.
+- Supabase project ref: `aygnpacdkgtsfnhgcyjc`; publishable key plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, correct sha256 = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (old `870cf518…` was a trailing-newline artifact — PoCs must cite `43ccb834…`).
+- Session storage is a COOKIE: `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, @supabase/ssr@0.12.4), not localStorage.
+- kurs.onecode.de build fingerprints (unchanged since 2026-09-19 11:33Z): page `/login` 18 702 B sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`; main chunk `0-mbmp1iqb6hj.js` 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (64-hex — earlier 66-char variant was a transcription defect).
+- Build-diffing must stay EVENT-TRIGGERED (on deploy), not time-cadence; a time cadence returns identical hashes and only burns request budget.
+- Pre-auth surface frozen: `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` → 200; all `/api/*`, `/v1`, `/admin`, `/dashboard`, `/courses`, `/einladung`, `/passwort-neu` → 307 `/login`.
+- Verifier is ES256-only (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); all HS256/RS256/PS/EdDSA/alg:none/JWK-injection probes negative (38 live probes).
+- GoTrue CORS model (final form): three tiers keyed on route registration/gate ordering — (A) 6 pre-gate names + `/auth/v1/verify` (7th) reflect Origin with ACAC:true regardless of apikey; (B) `/auth/v1/*` resource paths reflect only when apikey present, else wildcard no ACAC; (C) fallthrough = `ACAO: *` + 9-method list. Preflight never reflects anywhere. No ambient cookie credential (GoTrue is Bearer-only) → impact capped LOW/MEDIUM, lead PARKED.
+- GoTrue `redirect_to` allowlist: exact-origin, enforced per verify type, 15+ off-origin shapes zero bypass; X-Forwarded-Host does not influence it; SITE_URL = `https://kurs.onecode.de`.
+- Storage bucket-existence oracle: 10 route-table-complete GET classes returning `400 {"code":"NoSuchBucket"}`; 81 candidate names excluded; bucket name unrecoverable pre-auth. `/object/upload/sign/{b}/{k}` mounted, POST-only (outside read-only bounds).
+- S3 plane (`aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`, also on main api host): SigV4 enforced, 3-state key-ID oracle, single-plane host, no bucket oracle; untestable without owner keys.
+- cto.onecode.de: CNAME `cname.perspective-dns.com.` → 104.18.2.73/104.18.3.73 stable 60+ days, HTTP 409 `error code:1001`, TLS handshake-fail, zero verification TXT; conf 58, HUMAN_ONLY claim path.
+- REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); anon table paths still 503 PGRST002, `/rest/v1/` root flipped to 401 "Secret API key required".
+- Realtime closed: anon WS upgrade 101, `phx_join` ok but `postgres_changes` denied for profiles/enrollments/courses.
+- No free second `authenticated` principal: anonymous login 404 at router, `disable_signup:true`, admin plane 401.
+- Methodology lessons recorded: every scope/route-set claim needs its own counter-example/negative-control path; re-derive all hashes live and assert 64-hex before recording; state whether a KB model survives or dies when contradicted.
+
+## Work State
+### Completed
+- Full pre-auth enumeration of kurs.onecode.de (74+ days, zero permissive observations).
+- Rejected/exhausted: CVE-2025-29927 middleware bypass, `_next/image` SSRF, path-normalization + header-desync bypasses, reflected XSS on all pre-auth pages, forged/null cookie bypass (5 variants), PKCE injection, JWT alg/key confusion (38 probes), ES256→HS256 confusion, embedded JWK injection, HS256 secret guessing, GoTrue open-redirect (15 shapes), logout redirect, host-header redirect influence, PostgREST schema disclosure, GraphQL introspection, storage public-bucket exposure, Edge Functions (18 names 404), Realtime postgres_changes, S3 pre-auth read, OIDC discovery exploitation, source-map disclosure, GitHub repo scan (no secrets), subdomain inventory (3 CT sources = 5 names).
+- PARKED: GoTrue credentialed CORS (no ambient credential), S3 SigV4 differential (needs owner keys), OIDC discovery-doc mismatch (config-toggle class).
+- HashSessionHandoff (module 34891) confirmed mounted on `/login` RSC row 18 — forced-login CWE-384 but needs genuine invited token pair.
+
+### Active
+- Zero-delta verification cycles; both ranked hypotheses blocked on escalation gates.
+- Ranked hypotheses: [65] post-auth cross-tenant BOLA via Supabase RLS gap (AUTH_HELPED, HIGH); [58] cto.onecode.de takeover (HUMAN_ONLY, MEDIUM); [45] HashSessionHandoff forced login (AUTH_HELPED, Low).
+- Risk score stable at 60.
+
+### Blocked
+- H1 BOLA: needs two invited test accounts (signup disabled, anonymous login 404, admin plane 401).
+- cto takeover: needs an owner-side Perspective dashboard claim attempt (HUMAN_ONLY).
+- HashSessionHandoff: needs one invited account token pair (AUTH_HELPED).
+
+## Next Move
+1. `HUMAN`: obtain two invited test accounts for kurs.onecode.de and execute BOLA probe set — with session A: `GET /api/courses/{id_b}`, `GET /api/resources/{id_b}`, `GET /api/enrollments?user_id={id_b}`, `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` (Bearer A), diff vs session B control.
+2. Fallback `HUMAN`: Perspective dashboard claim attempt for `cto.onecode.de` (register account, add custom domain, verify DNS), then read-only `GET https://cto.onecode.de/`.
+3. Otherwise: no further passive probing has value — only a deploy event on kurs.onecode.de or a config change should trigger a new cycle.
+
+## Relevant Files
+- (none — no local files; all work is live read-only HTTP/DNS probing against `kurs.onecode.de`, `cto.onecode.de`, `aygnpacdkgtsfnhgcyjc.supabase.co`, `aygnpacdkgtsfnhgcyjc.storage.supabase.co`)
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcurl -sS --max-time 12 https://kurs.onecode.de/login | sha256sum
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  -
+[0m
+[0m$ [0mcurl -sS --max-time 12 https://kurs.onecode.de/login | grep -oiE '(registrier|anmelden|sign ?up|konto erstellen|einladung)[^"<]{0,60}' | sort -u | head -20
+Anmelden
+Einladung ging.
+Einladung.
+Einladung.\
+[0m
+[0m$ [0mfor p in /registrieren /signup /register /anmelden; do code=$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 8 "https://kurs.onecode.de$p"); echo "$p -> $code"; done
+/registrieren -> 307 https://kurs.onecode.de/login
+/signup -> 307 https://kurs.onecode.de/login
+/register -> 307 https://kurs.onecode.de/login
+/anmelden -> 307 https://kurs.onecode.de/login
+[0m
+[0m$ [0mcurl -sS --max-time 25 "https://crt.sh/?q=%25.onecode.de&output=json" | python3 -c "
+import json,sys
+try:
+    d=json.load(sys.stdin)
+    names=sorted({n.strip().lower() for r in d for n in r.get('name_value','').split('\n')})
+    print('\n'.join(names))
+except Exception as e:
+    print('ERR', e)
+"
+curl: (7) Failed to connect to crt.sh port 443 after 445 ms: Couldn't connect to server
+ERR Expecting value: line 1 column 1 (char 0)
+[0m
+[0m$ [0mcurl -sS --max-time 12 -o /dev/null -w 'cto GET: %{http_code} (%{size_download}B)\n' https://cto.onecode.de/ ; curl -sS --max-time 12 https://cto.onecode.de/ 2>&1 | head -5
+curl: (35) OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+cto GET: 000 (0B)
+curl: (35) OpenSSL/3.0.13: error:0A000410:SSL routines::sslv3 alert handshake failure
+[0m
+[0m$ [0mcurl -sS --max-time 25 "https://api.certspotter.com/v1/issuances?domain=onecode.de&include_subdomains=true&expand=dns_names" | python3 -c "
+import json,sys
+try:
+    d=json.load(sys.stdin)
+    names=sorted({n.lower() for r in d for n in r.get('dns_names',[])})
+    print('\n'.join(names))
+except Exception as e:
+    print('ERR', e)
+" 2>&1
+kurs.onecode.de
+mta-sts.onecode.de
+onecode.de
+www.onecode.de
+[0m
+[0m$ [0mfor h in kurs.onecode.de cto.onecode.de mail.onecode.de mta-sts.onecode.de; do ip=$(dig +short A "$h" @1.1.1.1 | tr '\n' ' '); echo "$h -> $ip"; done
+kurs.onecode.de -> ki8dqcf6.up.railway.app. 69.46.46.42 
+cto.onecode.de -> cname.perspective-dns.com. 104.18.2.73 104.18.3.73 
+mail.onecode.de -> 95.130.17.37 
+mta-sts.onecode.de -> cdn.webflow.com. 198.202.211.1
+[0m
+**[DELTA]** 2026-10-16 14:19Z — zero delta across three independent drift detectors: (1) `/login` 200/18 702 B, sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` — byte-identical to the 09-19 fingerprint, no deploy; (2) gate routing unchanged — `/registrieren`, `/signup`, `/register`, `/anmelden` all 307 → `/login`, login copy still invite-only ("Einladung"); (3) infra inventory unchanged — `kurs→ki8dqcf6.up.railway.app`, `cto→cname.perspective-dns.com` (TLS handshake-fail, no verification TXT), `mail→95.130.17.37`, `mta-sts→cdn.webflow.com`; Certspotter returns no new names. crt.sh unreachable (CT-source outage, not a signal).
+
+**[PRIO]** No probe with positive expected value remains. Pre-auth surface frozen 74+ days; every live axis previously exhausted or formally closed (REST monitor, Realtime, storage oracle, S3, JWT confusion, GoTrue CORS/redirect, maps, Edge Functions, desync, middleware bypass).
+
+**[HYP]**
+- [65] Post-auth cross-tenant BOLA via RLS gap — **AUTH_HELPED**, HIGH — blocked on test principals
+- [58] `cto.onecode.de` takeover via Perspective — **HUMAN_ONLY**, MEDIUM — config unchanged, claim path unattempted
+- [45] HashSessionHandoff forced-login (CWE-384) — **AUTH_HELPED**, LOW — mounted, needs invited token pair
+
+**[PARKED]** GoTrue credentialed CORS (no ambient cookie credential ⇒ impact capped); S3 SigV4 differential (needs owner keys); OIDC discovery mismatch (config-toggle class).
+
+**[FINAL]** Zero-delta cycle. Emitting further cycles without an event signal only burns request budget; passive monitoring is exhausted by construction.
+
+**[NEXT]** Blocked on you — pick one:
+1. **AUTH_HELPED (preferred, unlocks P1):** two invited test accounts on kurs.onecode.de → I run the BOLA probe set (session A reads session B's course/resource/enrollment, diff vs control) plus the HashSessionHandoff token-pair test.
+2. **HUMAN_ONLY:** attempt a Perspective dashboard domain-claim for `cto.onecode.de` yourself, or authorize me to register an account and submit the claim (I'll then read back only `GET https://cto.onecode.de/`).
+3. Otherwise: trigger me only on an event — kurs.onecode.de deploy (hash change) or a new `onecode.de` subdomain.
+
+**[LEARN]** Config-drift can be detected passively for free (build hash + gate-route probes + CT/DNS inventory); signup-availability itself cannot (GoTrue exposes `disable_signup` only via POST), so the AUTH_HELPED gate must be cleared by you, not inferred.
+
+**[RISK]** 60 (unchanged; no new in-scope exposure found, no regression either).

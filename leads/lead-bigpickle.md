@@ -8835,3 +8835,4 @@ testability: AUTH_HELPED
 [LEARN] REJECTED MISCONFIG @ all passive monitors: 2026-10-16 cycle is zero-delta — kurs chunk/page hashes byte-identical to the 2026-09-19 build, cto CNAME + 409 unchanged, REST anon-blocked, storage control NoSuchBucket; build-diffing and DNS checks stay event-triggered, so time-cadence probing has no further value.
 [RISK] onecode: 60 (unchanged) — pre-auth surface frozen and non-permissive for 74 days; residual risk concentrated in (1) post-auth cross-tenant BOLA via RLS gap (High, AUTH_HELPED, blocked on two invited accounts) and (2) cto.onecode.de dangling-CNAME takeover (Medium, HUMAN_ONLY, blocked on an owner-side claim attempt); CORS/S3/OIDC leads parked as non-exploitable in current posture.
 ## 2026-10-16 09:42:31 UTC [target] (model bigpickle)
+## 2026-10-16 14:22:44 UTC [target] (model bigpickle)
