@@ -54507,3 +54507,76 @@ All leads are blocked waiting for human escalation. I need clarification on the 
 2. Attempt/confirm the Perspective custom-domain claim for cto.onecode.de (HUMAN_ONLY)
 
 Either will unblock the next cycle.
+===== ANALYST bigpickle 2026-10-16 00:31:53 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /tmp/opencode/login.html -w "%{http_code} %{size_download}\n" --max-time 15 https://kurs.onecode.de/login; sha256sum /tmp/opencode/login.html
+200 18702
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/opencode/login.html
+[0m
+[0m$ [0mdig +short @1.1.1.1 CNAME cto.onecode.de; dig +short @1.1.1.1 TXT cto.onecode.de; curl -s -o /dev/null -w "%{http_code}\n" --max-time 15 --resolve cto.onecode.de:80:104.18.2.73 http://cto.onecode.de/
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+409
+[0m
+## Objective
+- Run the deep-hunt bug-bounty analyst loop for the OneCode GmbH program (report channel: bugs.olivermaicher.eu) against in-scope assets `*.onecode.de` / `kurs.onecode.de`, producing structured STEP 1–7 blocks (DELTA, PRIORITIZE, HYPOTHESES, SELF-CRITIQUE, NEXT, LEARN, RISK).
+- Continuously maintain the knowledge base of accepted/rejected findings across ~73 days of cycles and avoid re-testing converged surfaces.
+
+## Important Details
+- In-scope: ONLY `*.oneode.de` / `kurs.onecode.de` and OneCode-operated infra. Subdomain inventory confirmed complete: exactly 5 CT names (`onecode.de`, `www`, `kurs`, `cto`, `mta-sts`) per Certspotter + crt.sh.
+- Passive-probe rules: ≤1 rps, GET/HEAD/OPTIONS only; no mutating/auth-bypass tests; no customer data exposure.
+- Supabase project: `aygnpacdkgtsfnhgcyjc.supabase.co`; publishable key plaintext `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`, correct sha256 = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (older catalogued `870cf518…` was a line-ending artifact — PoCs must cite `43ccb834…`).
+- JWT signing is **ES256 only** (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); all alg/key-confusion + embedded-JWK probes negative (38 probes). OIDC discovery doc inaccurately advertises RS256/HS256 and dead OAuth endpoints (`feature_disabled`).
+- `kurs.onecode.de`: Next.js/Turbopack on Railway; no deploy since 2026-09-19 11:33Z; main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`), sink chunk `1a4tqdnsy9k1l.js` (13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`); `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18 702 B). Pre-auth surface frozen at `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` 200; all `/api/*`, `/v1`, `/admin`, `/dashboard` 307→/login. Build-diffing is **event-triggered**, not time-based.
+- `HashSessionHandoff` (module 34891) mounted on `/login` RSC row 18; fragment→`setSession()` with no state/nonce/PKCE; requires valid token pair (CWE-384 forced-login, AUTH_HELPED, not pre-auth ATO).
+- CORS on Supabase: three tiers keyed on route registration (A: well-known + 6 pre-gate OAuth-router names reflect `Origin`+`ACAC:true` unconditionally, prefix-mounted unbounded depth; B: `/auth/v1/*` resource paths reflect with ACAC only when apikey present (header or query string); C: fallthrough → `ACAO:*`, no ACAC, 9-method list). Preflight never reflects. `verify` is the 7th pre-gate route (exactly matched, keyless, token-state oracle, open-redirect closed). No ambient credential on Supabase origin (Bearer-in-localStorage) → CORS impact capped LOW.
+- Storage: bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded, all `400 NoSuchBucket`); bucket name unrecoverable pre-auth; `/object/upload/sign/{b}/{k}` mounted (POST, out of read-only bounds, scope note). Storage host `aygnpacdkgtsfnhgcyjc.storage.supabase.co` is single-plane; S3 plane SigV4-enforced, 3-state key-ID oracle, no pre-auth oracle/read.
+- Realtime: anon WS upgrade 101 but `postgres_changes` denied for profiles/enrollments/courses — formally negative. Edge Functions: uniform 404 for 18 names — absent. REST monitor closed 09-17 (27 probes 503↔401, never 200+rows); `/rest/v1/` root flipped to 401 "Secret API key required" 2026-10-12.
+- `cto.onecode.de`: CNAME → `cname.perspective-dns.com.` (104.18.2.73/104.18.3.73), day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT → unbound/reclaimable; conf 58, HUMAN_ONLY.
+- GoTrue settings: `disable_signup=true`, `mailer_autoconfirm=false`, `anonymous_users=false`, all external providers false, `saml_enabled=false` but `saml_private_key_next_configured=true` (SAML material provisioned, enabling = single toggle), passkeys off.
+- Methodology notes: claims must carry counter-example controls; re-derive hashes live with 64-hex assertion; PASSIVE+HIGH+empty verify_steps is a contradiction.
+
+## Work State
+### Completed
+- ~73 days of cycles executed; pre-auth surface of all 5 onecode.de hosts and the Supabase project exhaustively characterized.
+- Closed/negative: pre-auth XSS, SSRF (`_next/image`), CVE-2025-29927 middleware bypass, JWT alg confusion, ES256→HS256 confusion, embedded JWK, HS256 secret forgery, open redirect (15 shapes), PKCE injection, forged cookies, path traversal, GraphQL introspection, Realtime data, Edge Functions, PostgREST anon exposure, storage bucket enumeration, GitHub repo scan (compass / hello-guide, no secrets), CORS cache amplification, SAML assertion injection.
+- Two FINAL findings standing: HIGH post-auth cross-tenant BOLA via RLS gap (conf 65, AUTH_HELPED); MEDIUM cto.onecode.de subdomain takeover (conf 58, HUMAN_ONLY).
+- GoTrue credentialed CORS reflection retired as informational (no ambient credential channel; Bearer-only origin).
+
+### Active
+- Analyst loop idle at STEP 1; current phase `POC`, target `api`. Risk score stable at 60. No deltas across multiple consecutive cycles.
+
+### Blocked
+- BOLA test requires **two invited test accounts** for kurs.onecode.de — cannot be tested pre-auth; signup disabled, no anonymous sign-in, no admin-plane access.
+- cto.onecode.de takeover requires a HUMAN claim attempt via Perspective dashboard (SaaS custom-subdomain claim cannot be proven passively).
+- S3-plane differential untestable without owner-supplied SigV4 keys (PARKED).
+
+## Next Move
+1. HUMAN: obtain two invited test accounts for kurs.onecode.de and execute the BOLA probe set — authenticated `GET /api/courses/{B_id}`, `/api/resources/{B_id}`, `/api/enrollments?user_id={B_id}` + REST rowset diff between Account A and Account B.
+2. Alternate HUMAN path: attempt Perspective claim of `cto.onecode.de` and verify content served with valid cert (MEDIUM finding).
+3. Until escalation: only re-verify on deploy signal (main-chunk hash change) — time-cadence probing of kurs/cto/Supabase has zero value.
+
+## Relevant Files
+- (none — all work is live HTTP/DNS probing; no local files in this conversation)
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Let me assess. I did two probes. Both unchanged: /login hash identical (99798c7d...), cto CNAME unchanged, 409 unchanged. No delta.
+
+Both live leads are escalation-gated. I should report no delta and reiterate the blocked state. The user says continue if next steps, or stop and ask. Given no delta and both leads blocked on HUMAN action, I should stop and state that.
+
+Let me maybe do one quick delta check on the main chunk hash to confirm no deploy signal, but I already have /login unchanged which is a strong signal. Actually the login page hash is a proxy; the deploy signal is the main chunk hash. But /login unchanged implies no deploy. Good enough.
+
+I should be concise. Report no delta, phase stays POC, both leads blocked, ask for the two test accounts / human claim.
+
+No need for more tools.</think>No delta. `/login` hash unchanged (`99798c7d…`), `cto.onecode.de` still CNAME→`cname.perspective-dns.com.` with HTTP 409 → no deploy signal, no DNS change.
+
+**STEP 1 — DELTA:** none across this cycle.
+**STEP 2 — PRIORITIZE:** no new surface; both standing findings remain escalation-gated.
+**STEP 3-6:** no hypotheses worth a passive probe; pre-auth surface is converged.
+
+**Blocked (needs you):**
+1. **HIGH BOLA** — supply two invited kurs.onecode.de accounts so I can run the authenticated cross-tenant probe set (`/api/courses/{B_id}`, `/api/resources/{B_id}`, `/api/enrollments?user_id={B_id}` + REST rowset diff A↔B). Signup is disabled and there's no anonymous sign-in, so this cannot be advanced passively.
+2. **MEDIUM subdomain takeover** — attempt the Perspective claim of `cto.onecode.de` from your dashboard and confirm content serves with a valid cert.
+
+Until one of those happens, continued cadence probing of kurs/cto/Supabase has zero yield. Which do you want to proceed with?

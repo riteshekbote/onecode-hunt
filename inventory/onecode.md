@@ -1666,3 +1666,13 @@ www.onecode.de
 ## 2026-10-15 19:00:59 UTC
 
 ## 2026-10-15 22:12:23 UTC
+
+## 2026-10-16 00:31:53 UTC
+- NEW aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3 confirmed as S3-compatible plane with independent SigV4 authz (bypasses RLS), access-key-ID oracle verified, never probed in 26 days
+- NEW GoTrue CORS auth-state discriminator re-verified live 2026-10-07: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405)
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes that fail before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No deploy on kurs.onecode.de day-22+; main chunk f916f314ea61a8c5... byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at {/login,/passwort-vergessen,/datenschutz,/rechtliches} 200
+- CHANGED cto.onecode.de CNAME→cname.perspective-dns.com day-60+, HTTP 409, zero verification TXT — passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED Supabase REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
+- CHANGED Post-auth BOLA via RLS gap remains sole HIGH (conf 65), gated on 2 invited accounts; pre-auth exhausted 22+ days
+- CHANGED JWT algorithm confusion comprehensively closed on both planes: 38 live probes across all algs × attacker keys — zero authenticated; ES256-only verifier confirmed
