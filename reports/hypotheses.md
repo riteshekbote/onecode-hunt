@@ -4740,3 +4740,9 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; /sso/saml/acs behind same saml_provider_disabled gate; subtre
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: saml_private_key_next_configured=true alongside saml_enabled=false — SAML signing materi
+
+## RANKED HYPOTHESES 2026-10-16 05:18:56 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Obtain two invited test accounts for kurs.onecode.de and execute the BOLA probe set — with session A: GET /api/courses/{id_b}, /api/resources/{id_b}, /ap
+- LEARN: ACCEPTED IDOR(post-auth) @ kurs.onecode.de: RLS-gap BOLA remains the sole High lead (conf 65); zero pre-auth observations in 74 days and no cheap second `authen
+- LEARN: REJECTED MISCONFIG @ all passive monitors: 2026-10-16 cycle is zero-delta — kurs chunk/page hashes byte-identical to the 2026-09-19 build, cto CNAME + 409 uncha

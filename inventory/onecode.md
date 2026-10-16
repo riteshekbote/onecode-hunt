@@ -1676,3 +1676,5 @@ www.onecode.de
 - CHANGED Supabase REST monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); platform enforces sb_publishable_ format only
 - CHANGED Post-auth BOLA via RLS gap remains sole HIGH (conf 65), gated on 2 invited accounts; pre-auth exhausted 22+ days
 - CHANGED JWT algorithm confusion comprehensively closed on both planes: 38 live probes across all algs × attacker keys — zero authenticated; ES256-only verifier confirmed
+
+## 2026-10-16 05:18:56 UTC
