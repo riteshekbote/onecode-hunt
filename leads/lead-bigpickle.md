@@ -8901,3 +8901,44 @@ testability: AUTH_HELPED
 [NEXT] HUMAN (only unblocked paths):
 [LEARN] The binding constraint is access ownership, not enumeration. 74+ days of anonymous probing closed the pre-auth plane; the three surviving hypotheses (BOLA 65, takeover 58, HashSessionHandoff 45) all require a principal or a vendor action we cannot create anonymously. Event-triggered watching (deploy hash, CNAME/TXT delta) is the only probe class that remains productive unattended.
 [RISK] 60/100. No claim in this cycle relies on scope over-generalization or unverified digests.
+## 2026-10-17 12:31:01 UTC [target] (model bigpickle)
+[PRIO]
+[PRIO] kurs.onecode.de (/api,/v1 post-auth),6.4,axis:a=6 b=8 t=7 g=3 c=6 f=3
+[PRIO] aygnpacdkgtsfnhgcyjc.supabase.co,6.2,axis:a=6 b=7 t=8 g=2 c=6 f=5
+[PRIO] cto.onecode.de,5.6,axis:a=6 b=5 t=3 g=4 c=4 f=2
+[HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap
+class: IDOR
+asset: kurs.onecode.de (/api,/v1) + aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1
+confidence: 65
+reasoning: Registered /api + /v1 routers behind Next.js session gate; backend is a single Supabase project with UUID PKs; missing RLS filter allowing cross-tenant SELECT is the only remaining plausible path. Anonymous sign-in disabled, signup disabled, GoTrue admin plane 401, verifier ES256-only; no cheap second authenticated principal exists. Two invited accounts are the only non-intrusive execution path.
+evidence_needed: Response delta when authenticated session A requests resources owned by account B via authenticated /api,/v1 handlers and via PostgREST rowsets (200+rows containing B’s data vs 403/404/empty consistent with control).
+verify_steps: (post-auth, read-only) With valid session tokens for account A and control B: GET https://kurs.onecode.de/api/courses/{id_b}, GET https://kurs.onecode.de/api/resources/{id_b}, GET https://kurs.onecode.de/api/enrollments?user_id={id_b}, and GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*&user_id=eq.{id_b} with Authorization: Bearer <token_A>; compare responses against session B control and against ids not owned by A.
+impact: Cross-tenant course/resource/PII disclosure across platform users — High.
+testability: AUTH_HELPED
+[HYP] Subdomain takeover of cto.onecode.de via dangling Perspective CNAME
+class: MISCONFIG
+asset: cto.onecode.de
+confidence: 58
+reasoning: CNAME `cname.perspective-dns.com.` stable 60+ days (A 104.18.2.73/104.18.3.73); HTTP 80 → 409 `error code:1001` (Cloudflare), HTTPS 443 TLS handshake-fail; authoritative TXT at the apex host contains zero verification records; provider is Perspective funnel SaaS custom-subdomain CNAME target; hostname is currently unbound and plausibly reclaimable.
+evidence_needed: Successful claim of cto.onecode.de in the Perspective dashboard and arbitrary content served over HTTPS with a valid certificate for cto.onecode.de.
+verify_steps: (HUMAN_ONLY, read-only after claim) Register/verify custom domain cto.onecode.de in Perspective (provider DNS verification flow). After verification, issue a read-only GET https://cto.onecode.de/ and confirm the expected served content and valid TLS certificate.
+impact: Attacker controls cto.onecode.de (phishing, brand abuse, cookie-scope considerations on parent domain) — Medium.
+testability: HUMAN_ONLY
+[HYP] Forced-login session injection via HashSessionHandoff fragment sink
+class: AUTH
+asset: kurs.onecode.de/login
+confidence: 45
+reasoning: Module 34891 `HashSessionHandoff` is mounted on the `/login` RSC payload (row 18) and runs on hydration; it parses `access_token`+`refresh_token` from `window.location.hash` and calls `setSession()` with no `state`, `nonce`, PKCE, or `sub` binding. Sink chunk `1a4tqdnsy9k1l.js` is present at sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`. Prior negative tests (5 forged/null cookie variants, CVE-2025-29927, PKCE `?code=`, header/path desync, reflected `?error=<script>`) confirm no pre-auth bypass, and post-setSession redirect map is limited to `{invite:/einladung,recovery:/passwort-neu}` defaulting to `/` (no off-origin). Exploitation requires a valid attacker token pair (invited account) and a victim click — forced login (CWE-384), not pre-auth ATO.
+evidence_needed: Victim browser visiting `https://kurs.onecode.de/login#access_token=<valid_attacker>&refresh_token=<valid_attacker>` results in the Supabase auth cookie being set and the session established as the attacker account (documented by post-auth landing), without any user interaction on the login form.
+verify_steps: (AUTH_HELPED, read-only observation) Obtain token pair for one invited test account T1. In a clean browser profile with no existing session, navigate to `https://kurs.onecode.de/login#access_token=<T1_AT>&refresh_token=<T1_RT>` and observe Set-Cookie for `sb-aygnpacdkgtsfnhgcyjc-auth-token` and final landing path; verify authenticated identity against a known authenticated endpoint in a controlled test session.
+impact: Forced login into attacker’s account on the course platform — Low.
+testability: AUTH_HELPED
+[PARKED] GoTrue credentialed CORS reflection — ambient credential absent (GoTrue Bearer-only; app session cookie scoped to kurs.onecode.de), no concrete cross-origin read path; informational only.
+[PARKED] S3-plane SigV4 differential — requires owner-supplied SigV4 keys; untestable in environment.
+[PARKED] OIDC discovery-doc mismatch (`/.well-known/openid-configuration`) — configuration-state observation with no live exploit path while OAuth providers disabled.
+[FINAL]
+[NEXT] HUMAN: obtain two invited test accounts (user A, user B) on kurs.onecode.de and execute the read-only BOLA probe set described in HYP 1 (GET `/api/courses/{id_b}`, `/api/resources/{id_b}`, `/api/enrollments?user_id={id_b}`, and authenticated PostgREST `enrollments?select=*&user_id=eq.{id_b}` with Bearer token A), diffing against session B control.
+[LEARN] ACCEPTED IDOR @ kurs.onecode.de: post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); no cheap second authenticated principal exists (anonymous login 404 at router, signup disabled, admin plane 401, ES256-only verifier) — two invited accounts confirmed as only execution path.
+[LEARN] REJECTED AUTH @ kurs.onecode.de: forged/null session cookies (5 variants), CVE-2025-29927 bypass, PKCE `?code=` injection, reflected `?error=<script>` zero-byte, 10 path-normalization variants, 4 header-desync variants, RSC segment negotiation all 307→/login; middleware auth gate intact.
+[LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → `cname.perspective-dns.com.` stable 60+ days; HTTP 409 `error code:1001` + TLS handshake-fail; zero verification TXT; unbound/reclaimable; conf 58; HUMAN_ONLY claim-attempt only proof path.
+[RISK] OneCode: 60 — residual risk concentrated in post-auth cross-tenant BOLA via RLS gap (High, AUTH_HELPED, blocked on two invited accounts) and cto.onecode.de dangling-CNAME takeover (Medium, HUMAN_ONLY, blocked on owner-side claim attempt); all other leads parked/closed.
