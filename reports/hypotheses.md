@@ -4834,3 +4834,5 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; `/sso/saml/acs` behind same `saml_provider_disabled` gate; su
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: `saml_private_key_next_configured=true` alongside `saml_enabled=false` — SAML signing ma
+
+## RANKED HYPOTHESES 2026-10-17 20:59:41 UTC

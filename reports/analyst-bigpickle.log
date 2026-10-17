@@ -57027,3 +57027,84 @@ cto.onecode.de.		3600	IN	CNAME	cname.perspective-dns.com.
 **[RISK]** OneCode: 60 (unchanged; no new surface touched).
 
 **Status:** stopped here — continuing would mean either re-running closed probes or probing without authorization. Please provide the invited test accounts (or confirm you'll run the cto claim), and I'll execute the corresponding [NEXT] step.
+===== ANALYST bigpickle 2026-10-17 20:59:41 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS -I --max-time 15 https://kurs.onecode.de/login | head -20; echo "---"; curl -sS --max-time 20 https://kurs.onecode.de/login | sha256sum; echo "---"; dig +short @1.1.1.1 cto.onecode.de CNAME; dig +short @1.1.1.1 cto.onecode.de TXT; echo "---"; curl -sS -o /dev/null -w "%{http_code}" --max-time 15 --resolve cto.onecode.de:80:104.18.2.73 http://cto.onecode.de/
+HTTP/2 200 
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+content-type: text/html; charset=utf-8
+date: Sat, 17 Oct 2026 20:57:28 GMT
+link: </_next/static/media/75affa71d1e2f6a7-s.p.17-aodiw50953.woff2>; rel=preload; as="font"; crossorigin=""; type="font/woff2"
+server: railway-hikari
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+x-powered-by: Next.js
+x-railway-request-id: gzh6xhlvRcqV9Q7M0-QtfA
+x-hikari-trace: lax1.e74w
+x-railway-edge: lax1
+
+---
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  -
+---
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+---
+409
+[0m
+## Objective
+- Act as a senior bug bounty analyst for the OneCode GmbH program (report channel: bugs.olivermaicher.eu), probing only in-scope assets (*.onecode.de, kurs.onecode.de, related company infra) and emitting structured 8-step output: DELTA → PRIORITIZE → HYPOTHESES → SELF-CRITIQUE → NEXT → LEARN → RISK.
+- Advance the three surviving hypotheses or discover new exploitable surface; current phase=POC, target=api.
+
+## Important Details
+- In-scope hosts: `kurs.onecode.de` (Railway/Next.js app), `onecode.de`, `www.onecode.de` (Webflow/Cloudflare), `mta-sts.onecode.de`, `cto.onecode.de`, `mail.onecode.de` (non-web); Supabase project `aygnpacdkgtsfnhgcyjc.supabase.co` + `aygnpacdkgtsfnhgcyjc.storage.supabase.co`.
+- Publishable key: `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the older `870cf518…` digest was a newline artifact — all PoCs must cite `43ccb834…`).
+- kurs.onecode.de `/login` sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18702 B); main chunk `0-mbmp1iqb6hj.js` sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` (154581 B); sink chunk `1a4tqdnsy9k1l.js` sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (13880 B). No deploy since 2026-09-19 11:33Z (day-22+); build-diffing is event-triggered only.
+- Pre-auth surface of kurs.onecode.de frozen: `{/login, /passwort-vergessen, /datenschutz, /rechtliches}` 200; all `/api/*`, `/v1`, `/admin`, `/dashboard`, `/courses`, `/einladung`, `/passwort-neu` → 307→/login.
+- Auth stack: Supabase (GoTrue v2.197.0), ES256-only verifier, `SITE_URL=https://kurs.onecode.de`, signup disabled, email-only, anonymous login not routed (404), no external OAuth. GoTrue redirect allowlist exact-origin (15+ off-origin shapes tested, zero bypass). JWT alg confusion comprehensively closed (38 probes). Session cookie `sb-aygnpacdkgtsfnhgcyjc-auth-token` (base64url, @supabase/ssr).
+- `cto.onecode.de`: CNAME → `cname.perspective-dns.com.` (A 104.18.2.73/104.18.3.73), HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT; day-60+; conf 58; HUMAN_ONLY claim-attempt is the only proof path.
+- Supabase REST anon monitor formally closed 09-17 (27 probes 503↔401, never 200+rows); storage bucket-existence oracle route-table-complete (10 GET classes, 81 names excluded, no bucket found); storage/v1/bucket returns `[]` with publishable key; realtime anon WS upgrade 101 but postgres_changes denied; functions uniform 404.
+- CORS: gateway-wide auth-state discriminator (unauthenticated → `ACAO:*` no ACAC; apikey-bearing → reflected Origin + `ACAC:true`), plus pre-gate reflecting routes on `.well-known/*` and `/auth/v1/{jwks.json, openid-configuration, oauth-authorization-server, oauth/authorize, oauth/token, oauth/userinfo, verify}` — reflection only as simple request via `?apikey=` query (preflight never reflects); no ambient cookie credential on that origin (GoTrue Bearer-only) caps impact LOW-MEDIUM.
+- `saml_enabled=false` but `saml_private_key_next_configured=true` — SAML signing material provisioned; `/auth/v1/sso/*` gated by `saml_provider_disabled`.
+- Out-of-scope REJECTED classes are enumerated in the program brief (DoS, descriptive errors, OPTIONS/TRACE, CSRF on logout, cookie flags, self-XSS, username enumeration, brute-force, TLS best practice, mail config, etc.).
+- Standing methodological rule: route-table/subtree claims require a counter-example probe; re-derive all hashes live with 64-hex assertion before recording; time-cadence probing is request-cost with no value absent a deploy/DNS delta.
+
+## Work State
+### Completed
+- 75+ days of passive/active read-only probing: pre-auth surface of kurs.onecode.de fully characterized and re-validated (forged cookies, CVE-2025-29927, PKCE injection, path-normalization, header desync, XSS reflection, `_next/image` SSRF — all negative).
+- Supabase planes fully mapped: GoTrue, PostgREST, Storage, Storage-S3, Realtime, Functions, Analytics(404). JWT confusion, open redirect, host-header, SAML/SSO assertion injection — all closed.
+- Subdomain inventory complete (crt.sh/Certspotter: 5 names; 26 DNS guesses negative). GitHub org scan clean.
+- Three parked/deferred findings: GoTrue credentialed CORS reflection (no ambient credential), S3 SigV4 plane differential (needs owner keys), OIDC discovery-doc mismatch (no live exploit path).
+
+### Active
+- Three surviving hypotheses all blocked on external access:
+  - BOLA/IDOR via Supabase RLS gap @ kurs.onecode.de (conf 65, High, AUTH_HELPED) — needs two invited test accounts.
+  - cto.onecode.de subdomain takeover via dangling Perspective CNAME (conf 58, Medium, HUMAN_ONLY) — needs owner/claim attempt.
+  - Forced-login session injection via HashSessionHandoff fragment sink @ kurs.onecode.de/login (conf 45, Low, AUTH_HELPED) — needs one valid invited-account token pair.
+
+### Blocked
+- No cheap second `authenticated` principal: anonymous login unrouted, signup disabled, admin plane 401, ES256 verifier with all confusion/secret-guessing probes negative.
+- All unattended probe classes exhausted; only event-triggered watching (kurs deploy chunk-hash change, cto CNAME/TXT delta) remains productive.
+
+## Next Move
+1. HUMAN: obtain two invited test accounts (user A, user B) on kurs.onecode.de and run the read-only BOLA probe set (GET `/api/courses/{id_b}`, `/api/resources/{id_b}`, `/api/enrollments?user_id={id_b}`, and authenticated PostgREST `enrollments?select=*&user_id=eq.{id_b}` with Bearer token A) diffing against session B control.
+2. HUMAN: attempt to claim `cto.onecode.de` in the Perspective SaaS dashboard; if claimed, verify with read-only GET `https://cto.onecode.de/` for served content + valid TLS cert.
+
+## Relevant Files
+- `inventory/onecode.md`: host inventory (10 entries incl. hostmaster.* artifacts) and per-host scan history.
+- `art/lead_bigpickle.txt`, `art/lead_nemotron3.txt`, `art/hypotheses-*.txt`: ranked hypothesis sources referenced in RANKED HYPOTHESES blocks.
+- Chunk artifacts (live, not local): `/_next/static/chunks/0-mbmp1iqb6hj.js` (main), `1a4tqdnsy9k1l.js` (HashSessionHandoff sink, module 34891), `2-fsf9vi38mzv.js` (route chunk for /passwort-vergessen).
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mcurl -sS --max-time 20 https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js | sha256sum; dig +short @1.1.1.1 www.onecode.de CNAME; dig +short @1.1.1.1 onecode.de A
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  -
+cdn.webflow.com.
+198.202.211.1
+[0m
+**DELTA (2026-10-17 20:57Z):** zero movement — no deploy (login hash `99798c7d…`, main chunk `f916f314…` unchanged since day-22+), CNAME still dangling (`cname.perspective-dns.com.`), origin still 409/error-1001, no TXT.
+
+All unattended probe classes remain closed; every surviving hypothesis is blocked on access I cannot create from here. I'm stopping rather than re-running closed surfaces. To proceed I need one or both of these from you:
+
+1. **Two invited test accounts** on kurs.onecode.de (any email/password you control, invited via their admin). That unblocks both BOLA probes (`/api/courses/{id_b}` etc. as user A vs B) and the HashSessionHandoff forced-login check (inject user A's fragment token into B's browser).
+2. **A claim attempt on `cto.onecode.de`** — sign up / claim the hostname in the Perspective SaaS dashboard (perspective-dns.com) and tell me the result. If it succeeds, I verify with a read-only GET; that's the whole proof for the takeover.
+
+Either one alone is enough to write a report. If neither is available, say so and I'll file the two lower-confidence items as closed-with-blocker and wrap up the engagement with the findings we can still stand behind (the parked LOW/MEDIUM items: credentialed CORS reflection, S3 differential, OIDC doc mismatch — worth a final risk-rated writeup only).
