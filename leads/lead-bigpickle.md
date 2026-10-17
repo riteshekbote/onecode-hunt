@@ -8883,3 +8883,11 @@ testability: AUTH_HELPED
 [LEARN] REJECTED AUTH @ kurs.onecode.de: forged/null session cookies (5 variants), CVE-2025-29927 bypass, PKCE ?code= injection, ?error=<script> zero-byte reflection, 10 path-normalization variants, 4 header-desync variants, RSC segment negotiation all 307→/login; middleware auth gate intact.
 [LEARN] ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 60+ days; HTTP 409 error code:1001 + TLS handshake-fail; zero verification TXT; unbound/reclaimable; conf 58; HUMAN_ONLY claim-attempt only proof path.
 [RISK] OneCode: 60 — residual risk concentrated in post-auth cross-tenant BOLA via RLS gap (High, AUTH_HELPED, blocked on two invited accounts) and cto.onecode.de dangling-CNAME takeover (Medium, HUMAN_ONLY, blocked on owner-side claim attempt); all other leads parked/closed.
+## 2026-10-17 03:55:34 UTC [target] (model bigpickle)
+[HYP]
+[HYP]
+[HYP]
+[PARKED]
+[NEXT]
+[LEARN]
+[RISK] onecode: 60 — unchanged; no new exposure, no state change, three standing leads all access-gated; residual risk dominated by untested post-auth plane (HYP-01) plus a stale DNS delegation (HYP-02).
