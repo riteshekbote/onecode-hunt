@@ -1,8 +1,10 @@
-## 2026-10-17 03:55:34 UTC [target] (model bigpickle)
-[HYP]
-[HYP]
-[HYP]
-[PARKED]
-[NEXT]
-[LEARN]
-[RISK] onecode: 60 — unchanged; no new exposure, no state change, three standing leads all access-gated; residual risk dominated by untested post-auth plane (HYP-01) plus a stale DNS delegation (HYP-02).
+## 2026-10-17 08:29:19 UTC [target] (model bigpickle)
+[PARKED] kurs.onecode.de /api,/v1 — pre-auth plane closed (307 gate robust, 6 desync vectors neg, PKCE/forged-cookie/CVE-2025-29927 neg). Standing post-auth BOLA hypothesis (conf 65) BLOCKED on two invited test accounts. Cannot self-provision: anonymous login 404, signup disabled, verifier ES256-only.
+[PARKED] cto.onecode.de — dangling Perspective CNAME, conf 58, HUMAN_ONLY (dashboard claim).
+[PARKED] GoTrue credentialed CORS — capped LOW-MEDIUM, no ambient credential exists.
+[PARKED] S3 SigV4 differential — needs owner keys.
+[PARKED] OIDC discovery-doc mismatch — config-toggle class.
+[FINAL] Anonymous access plane of both in-scope hosts: non-permissive, counter-example complete as of 2026-10-17.
+[NEXT] HUMAN (only unblocked paths):
+[LEARN] The binding constraint is access ownership, not enumeration. 74+ days of anonymous probing closed the pre-auth plane; the three surviving hypotheses (BOLA 65, takeover 58, HashSessionHandoff 45) all require a principal or a vendor action we cannot create anonymously. Event-triggered watching (deploy hash, CNAME/TXT delta) is the only probe class that remains productive unattended.
+[RISK] 60/100. No claim in this cycle relies on scope over-generalization or unverified digests.

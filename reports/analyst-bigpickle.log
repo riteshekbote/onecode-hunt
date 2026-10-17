@@ -55543,3 +55543,96 @@ REASON: cycle produced NO_DELTA across all sentinels; every remaining FINAL lead
 - Gate-ordering on GoTrue means unauthenticated GETs surface the apikey gate (401) before route state (404/405); router-level disables are only observable with a valid apikey on the same method — record auth context alongside every status code.
 
 [RISK] onecode: 60 — unchanged; no new exposure, no state change, three standing leads all access-gated; residual risk dominated by untested post-auth plane (HYP-01) plus a stale DNS delegation (HYP-02).
+===== ANALYST bigpickle 2026-10-17 08:29:28 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /tmp/opencode/login.html -w "%{http_code} %{size_download}\n" --max-time 15 https://kurs.onecode.de/login && sha256sum /tmp/opencode/login.html
+200 18702
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450  /tmp/opencode/login.html
+[0m
+[0m$ [0mcurl -s --max-time 10 -o /dev/null -w "%{http_code}\n" http://cto.onecode.de/ ; dig +short @1.1.1.1 cto.onecode.de CNAME
+409
+cname.perspective-dns.com.
+[0m
+## Objective
+- Act as senior bug-bounty analyst for OneCode GmbH (report channel: bugs.olivermaicher.eu), running an 8-step hypothesis/prioritization loop over in-scope assets `*.onecode.de` and `kurs.onecode.de` to find real, reportable vulnerabilities (broken auth, IDOR/BOLA, SSRF, JWT confusion, subdomain takeover).
+- Produce only structured blocks: [PRIO], [HYP] (strict field schema), [PARKED]/[FINAL], [NEXT], [LEARN], [RISK].
+
+## Important Details
+- Probe rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only for live probes; no auth-bypass or mutating tests against live customer data; sha256 any secret; facts vs hypotheses strictly separated.
+- Out-of-scope classes (long list): descriptive errors, OPTIONS/TRACE, username enumeration, brute-force/lockout, TLS best-practice, clickjacking w/o exploit, mail config, known-vuln library w/o program-specific exploit, etc.
+- Current state: `{"phase": "POC", "target": "api"}`; program risk = 60.
+- Binding constraint is ACCESS (auth principals / vendor ownership), not enumeration — pre-auth surface exhausted and non-permissive ~74+ days.
+- Publishable key `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 (key bytes) = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the `870cf518…` digest was a trailing-newline artifact; PoCs must cite `43ccb834…`).
+- kurs.onecode.de: main chunk `0-mbmp1iqb6hj.js` (154 581 B, sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`), sink chunk `1a4tqdnsy9k1l.js` (13 880 B, sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`), `/login` page sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (18 702 B). No deploy since 2026-09-19 11:33Z — build-diffing is EVENT-TRIGGERED, not time-based.
+- Hash discipline: re-derive every hash from live fetch and assert 64-hex length before recording (two malformed digests occurred previously).
+- Claim discipline: any claim about a subtree/route set needs its own counter-example negative control (scope over-generalization happened 4+ times).
+- CORS model (current): three tiers keyed on route registration/gate ordering — (A) registered well-known + OAuth-router pre-gate paths reflect Origin with ACAC:true regardless of apikey; (B) `/auth/v1/*` resource paths reflect with ACAC:true only when apikey present, else `ACAO:*` no ACAC; (C) fallthrough → `401 No API key found` + `ACAO:*`. Preflight never reflects anywhere (`ACAO:*`, 9-method list). Mechanism = GoTrue global apikey gate runs before routing; 6 pre-gate route names + `/auth/v1/verify` (7th, keyless, exact-matched).
+- CORS impact capped LOW-MEDIUM: GoTrue is Bearer-only (no auth cookie on origin), kurs.onecode.de emits no `access-control-*` on foreign Origin; no ambient credential.
+- JWT: ES256-only verifier (JWKS kid `4f59d46f-c3e6-47c7-a717-fabf016650c9`); 38+ alg/key-confusion probes + embedded JWK injection all negative; OIDC discovery doc overstates algorithms (RS256/HS256 advertised).
+- Rest monitor closed 09-17 (27 probes 503↔401, never 200+rows); REST root now 401 "Secret API key required"; table paths 503 PGRST002.
+- cto.onecode.de: CNAME `cname.perspective-dns.com.` (A 104.18.2.73/104.18.3.73), HTTP 409 "error code:1001", zero verification TXT, day-60+; conf 58, HUMAN_ONLY.
+
+## Work State
+### Completed
+- Full pre-auth surface of kurs.onecode.de characterized: 4 pages 200 = `/login`, `/passwort-vergessen`, `/datenschutz`, `/rechtliches`; all `/api/*`, `/v1`, `/admin`, `/dashboard` → 307→/login; middleware gate robust (CVE-2025-29927 neg, path-normalization neg, header-desync neg, forged-cookie neg, PKCE neg, XSS reflection neg, `_next/image` SSRF neg).
+- HashSessionHandoff (module 34891) confirmed mounted on `/login` RSC row 18 — fragment→setSession with no state/nonce/PKCE; forced-login (CWE-384) but needs valid invited token pair; no open redirect (fixed next map `{invite,recovery}` → `/`).
+- Supabase pre-auth planes closed: REST anon-blocked, storage bucket oracle route-table-complete (10 GET classes, 81 names excluded, no bucket found), functions 404 (18 names), realtime postgres_changes denied, S3 SigV4-enforced (3-state key-ID oracle only), GraphQL 503, no anonymous signup/admin access.
+- GoTrue redirect_to allowlist: 15+ off-origin shapes across 5 verify types, host headers, token encodings — zero off-origin redirects.
+- CORS finding characterized (three tiers, gate-ordering mechanism); cache amplification falsified (`vary: Origin`, `cf-cache-status: DYNAMIC`).
+- Subdomain inventory complete (5 CT names + 26 DNS brute-force negatives); GitHub orgs scanned (no secrets); cto takeover lead stable.
+- Latest cycle (2026-10-17): ACCEPTED IDOR post-auth BOLA (conf 65), ACCEPTED cto CNAME takeover (conf 58), REJECTED forged-cookie/CVE-2025-29927/PKCE/XSS auth class.
+
+### Active
+- [HYP] Post-auth cross-tenant BOLA via Supabase RLS policy gap — conf 65, AUTH_HELPED, High.
+- [HYP] Subdomain takeover of cto.onecode.de via dangling Perspective CNAME — conf 58, HUMAN_ONLY, Medium.
+- [HYP] Forced-login session injection via HashSessionHandoff fragment sink — conf 45, AUTH_HELPED, Low.
+- PARKED: GoTrue credentialed CORS (no ambient credential), S3 SigV4 differential (needs owner keys), OIDC discovery-doc mismatch (config-toggle class).
+- Ranked priorities: `aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1` 7.0; `kurs.onecode.de (/api,/v1 post-auth)` 6.4; `cto.onecode.de` 5.6.
+
+### Blocked
+- BOLA test requires two invited test accounts on kurs.onecode.de (AUTH_HELPED) — anonymous login 404 at router, signup disabled, admin plane 401, ES256-only verifier ⇒ no free second principal.
+- cto.onecode.de takeover requires owner-side Perspective dashboard claim (HUMAN_ONLY).
+
+## Next Move
+1. [NEXT] HUMAN: obtain two invited test accounts (A, B) for kurs.onecode.de and run read-only BOLA set — with session A: `GET /api/courses/{id_b}`, `GET /api/resources/{id_b}`, `GET /api/enrollments?user_id={id_b}`, `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments?select=*` (Bearer A), diff vs session B control.
+2. Alternative HUMAN path: Perspective dashboard claim for `cto.onecode.de`, then read-only `GET https://cto.onecode.de/`; until one is granted, only event-triggered probes (deploy signal on kurs, DNS change on cto) warrant live requests.
+
+## Relevant Files
+- `inventory/onecode.md`: host inventory (10 hosts, 5 CT-confirmed live names) and passive recon history.
+- `art/lead_bigpickle.txt`, `art/lead_nemotron3.txt`, `art/hypotheses-*.txt`: aggregated hypothesis/ranking feeds referenced by the KB.
+- Knowledge base (in-conversation, dated 2026-09-02 → 2026-10-17): all ACCEPTED/REJECTED/NEW/CHANGED findings and self-corrections.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+Both event-triggered probes returned **NO_DELTA**:
+
+- `kurs.onecode.de/login` — 18 702 B, sha256 `99798c7d…d21d9450` → **byte-identical** to 2026-09-19 baseline. No deploy.
+[0m$ [0mcurl -s --max-time 15 -o /tmp/opencode/c1.js "https://kurs.onecode.de/_next/static/chunks/0-mbmp1iqb6hj.js" && curl -s --max-time 15 -o /tmp/opencode/c2.js "https://kurs.onecode.de/_next/static/chunks/1a4tqdnsy9k1l.js" && sha256sum /tmp/opencode/c1.js /tmp/opencode/c2.js && wc -c /tmp/opencode/c1.js /tmp/opencode/c2.js
+f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca  /tmp/opencode/c1.js
+5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0  /tmp/opencode/c2.js
+154581 /tmp/opencode/c1.js
+ 13880 /tmp/opencode/c2.js
+168461 total
+[0m
+**NO_DELTA** — both event triggers clean:
+
+- `kurs.onecode.de` deploy signal: `/login` (18 702 B) + both app chunks (`0-mbmp1iqb6hj.js` 154 581 B, `1a4tqdnsy9k1l.js` 13 880 B) **byte-identical** to 2026-09-19 baseline. No deploy in 28 days. Build-diffing stays event-triggered.
+- `cto.onecode.de` takeover signal: still `cname.perspective-dns.com.`, HTTP 409 error:1001, zero verification TXT. State unchanged, day 60+.
+
+**No further live probing is warranted this cycle.** Per the KB's own discipline (passive-first, ~74 days of pre-auth exhaustion, claim-every-subtree errors already paid for), issuing new requests against a surface we've characterized to counter-example completeness would manufacture noise, not signal.
+
+```
+[PARKED] kurs.onecode.de /api,/v1 — pre-auth plane closed (307 gate robust, 6 desync vectors neg, PKCE/forged-cookie/CVE-2025-29927 neg). Standing post-auth BOLA hypothesis (conf 65) BLOCKED on two invited test accounts. Cannot self-provision: anonymous login 404, signup disabled, verifier ES256-only.
+[PARKED] cto.onecode.de — dangling Perspective CNAME, conf 58, HUMAN_ONLY (dashboard claim).
+[PARKED] GoTrue credentialed CORS — capped LOW-MEDIUM, no ambient credential exists.
+[PARKED] S3 SigV4 differential — needs owner keys.
+[PARKED] OIDC discovery-doc mismatch — config-toggle class.
+[FINAL] Anonymous access plane of both in-scope hosts: non-permissive, counter-example complete as of 2026-10-17.
+[NEXT] HUMAN (only unblocked paths):
+  1. Two invited test accounts (A, B) on kurs.onecode.de → read-only BOLA set: with session A, `GET /api/courses/{id_b}`, `GET /api/resources/{id_b}`, `GET /api/enrollments?user_id={id_b}`, `GET https://aygnpacdkgtsfnhgcyjc.supabase.co/rest/v1/enrollments` (Bearer A); diff vs session-B control.
+  2. Perspective dashboard claim for cto.onecode.de → `GET https://cto.onecode.de/`.
+[LEARN] The binding constraint is access ownership, not enumeration. 74+ days of anonymous probing closed the pre-auth plane; the three surviving hypotheses (BOLA 65, takeover 58, HashSessionHandoff 45) all require a principal or a vendor action we cannot create anonymously. Event-triggered watching (deploy hash, CNAME/TXT delta) is the only probe class that remains productive unattended.
+[RISK] 60/100. No claim in this cycle relies on scope over-generalization or unverified digests.
+```
+
+Stopping here — both next steps need you (test accounts or the Perspective claim). Give me either and I'll run the corresponding probe set immediately.
