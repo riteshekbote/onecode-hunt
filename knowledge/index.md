@@ -1408,3 +1408,4 @@
 - 2026-10-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; `/sso/saml/acs` behind same `saml_provider_disabled` gate; subtree bounded-root / segment-delimited / unbounded-depth
 - 2026-10-17 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: `saml_private_key_next_configured=true` alongside `saml_enabled=false` — SAML signing material already provisioned while feature flag off; enabling is single config toggle
 - 2026-10-17 NO_DELTA ...
+- 2026-10-17 Event-triggered build-diffing confirmed operational: three consecutive cycles (16:19, 18:24, 20:59Z, now 21:xx) returned byte-identical hashes. The passive attack surface of both in-scope hosts is fully mapped; every remaining lead requires ownership or a second principal, not more enumeration.

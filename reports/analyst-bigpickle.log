@@ -57108,3 +57108,96 @@ All unattended probe classes remain closed; every surviving hypothesis is blocke
 2. **A claim attempt on `cto.onecode.de`** — sign up / claim the hostname in the Perspective SaaS dashboard (perspective-dns.com) and tell me the result. If it succeeds, I verify with a read-only GET; that's the whole proof for the takeover.
 
 Either one alone is enough to write a report. If neither is available, say so and I'll file the two lower-confidence items as closed-with-blocker and wrap up the engagement with the findings we can still stand behind (the parked LOW/MEDIUM items: credentialed CORS reflection, S3 differential, OIDC doc mismatch — worth a final risk-rated writeup only).
+===== ANALYST bigpickle 2026-10-17 23:03:28 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}\n" https://kurs.onecode.de/login --max-time 15; curl -s https://kurs.onecode.de/login --max-time 15 | grep -oE '/_next/static/chunks/[a-z0-9._-]+\.js' | sort -u | head -20
+200 18702
+/_next/static/chunks/0-lpao5_i9htd.js
+/_next/static/chunks/0-mbmp1iqb6hj.js
+/_next/static/chunks/08ttfj81-47mu.js
+/_next/static/chunks/0cz1d0mv5g_q7.js
+/_next/static/chunks/1a4tqdnsy9k1l.js
+/_next/static/chunks/1ymt1shyhmu-4.js
+/_next/static/chunks/2i51e627rllld.js
+/_next/static/chunks/2n1zydk_92chn.js
+/_next/static/chunks/2ufbqzbeyam3w.js
+/_next/static/chunks/3fntmmi971322.js
+/_next/static/chunks/3mc6dra1m0098.js
+/_next/static/chunks/4310-_brt1a3g.js
+/_next/static/chunks/turbopack-2a8cgfwu75lsu.js
+[0m
+[0m$ [0mdig +short CNAME cto.onecode.de @1.1.1.1; dig +short TXT cto.onecode.de @1.1.1.1; echo "---"; curl -s -o /dev/null -w "%{http_code}\n" --resolve cto.onecode.de:80:104.18.2.73 http://cto.onecode.de/ --max-time 10
+cname.perspective-dns.com.
+cname.perspective-dns.com.
+---
+409
+[0m
+## Objective
+- Act as senior bug-bounty ANALYST for OneCode GmbH (report channel: bugs.olivermaicher.eu), running a 7-step cycle (DELTA→PRIORITIZE→HYPOTHESES→SELF-CRITIQUE→NEXT→LEARNING→RISK) over in-scope assets: `*.onecode.de`, `kurs.onecode.de`.
+- Emit only structured blocks ([HYP]/[PRIO]/[NEXT]/[LEARN]/[RISK]) driven by passive, read-only probes; find real logic flaws in scoped assets.
+
+## Important Details
+- Scope IN: `*.onecode.de`, `kurs.onecode.de`, OneCode-operated infra. Out-of-scope classes list is long and must be honored (no DoS, no username enumeration, no rate-limit/lockout, no TLS best-practice, no clickjack w/o exploit, no mail-config, no descriptive-errors-only, etc.).
+- Probe rules: passive-first, ≤1 rps, GET/HEAD/OPTIONS only, no mutating/auth-bypass tests against live customer data; sha256 any secret; ≤1 [NEXT] action per cycle; hypotheses schema has 9 fixed fields, one per line.
+- State: `{"phase": "POC", "target": "api"}`; last cycle timestamps: 2026-10-17 18:24Z & 20:59Z (model bigpickle).
+- Publishable key plaintext: `sb_publishable_g48Bd8qEtLesgk0zgzTRig_eZ6j9w30`; correct sha256 of key bytes = `43ccb834cf7f4cbce3e9e4f8365b819cc36909350ab1e68173c1a47675ea034a` (the `870cf518…` digest was a trailing-newline artifact — all PoCs must cite `43ccb834…`).
+- Hash discipline: re-derive every sha256 from live fetch, assert 64-hex before recording (two malformed digests occurred: 66-char sink hash and a duplicated page-hash fragment).
+- Methodology lessons recorded: any route/subtree scope claim needs a counter-example/negative control; when new evidence contradicts a KB model, state whether it survives or dies, don't soften into "an exception".
+
+## Work State
+### Completed
+- Pre-auth surface on `kurs.onecode.de` fully characterized: 200 = {/login, /passwort-vergessen, /datenschutz, /rechtliches}; all else 307→/login. Middleware gate survives forged cookies (5 variants), CVE-2025-29927, PKCE `?code=`, path-normalization (10), header-desync (4), RSC negotiation, `?error=<script>` (zero bytes reflected).
+- Supabase project `aygnpacdkgtsfnhgcyjc` fully mapped: GoTrue/PostgREST/Storage/Realtime/Functions/GraphQL/S3 planes; JWT verifier is ES256-only (38 alg/key-confusion probes, embedded JWK, HS256 secrets — all negative); REST anon monitor CLOSED 09-17 (27 probes 503↔401, never 200+rows).
+- CORS model settled: three tiers keyed on route registration — (A) 6 pre-gate names (`.well-known/jwks.json`, `.well-known/openid-configuration`, `.well-known/oauth-authorization-server`, `oauth/authorize`, `oauth/token`, `oauth/userinfo`) + `/auth/v1/verify` reflect with `ACAC: true` keyless; (B) `/auth/v1/*` resource paths reflect only with apikey (header or `?apikey=` query); (C) fallthrough = `ACAO: *` 9-method, no ACAC. Preflight never reflects anywhere. Mechanism = gate ordering (GoTrue apikey gate before routing; Kong routes pre-gate). Impact capped: GoTrue Bearer-only, no cookie on origin, app session cookie host CORS-clean → LOW.
+- Storage bucket-existence oracle route-table-complete: 10 mounted GET route classes → byte-identical `400 {"code":"NoSuchBucket"}`; 81 candidate names excluded; bucket name unrecoverable pre-auth. S3 plane (`aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3`, also mounted on main host) enforces SigV4 — no oracle, no public read (PARKED: untestable without owner keys).
+- Realtime closed: anon WS 101 + phx_join ok but `postgres_changes` denied; Edge Functions uniform 404 (18 names); `/analytics/v1` 404; OIDC discovery doc provably inaccurate (advertises RS256/HS256, only ES256; `/oauth/*` feature_disabled; `plain` PKCE advertised).
+- `redirect_to` allowlist closed: 15 off-origin shapes × 5 verify types × 2 token encodings, plus X-Forwarded-Host, all land on `https://kurs.onecode.de`; `SITE_URL = https://kurs.onecode.de`.
+- `kurs.onecode.de` no deploy since 2026-09-19 11:33Z: main chunk `0-mbmp1iqb6hj.js` 154 581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca`; sink chunk `1a4tqdnsy9k1l.js` 13 880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0`; `/login` page 18 702 B sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450`. Build-diff stays event-triggered.
+- `cto.onecode.de`: CNAME→`cname.perspective-dns.com.` (104.18.2.73/104.18.3.73), HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT, 60+ days — HUMAN_ONLY, conf 58.
+- Subdomain inventory complete (Certspotter + crt.sh + 26 DNS brute = exactly 5 CT names); GitHub orgs `OneCodeDevs`/`OneCode` scanned, zero secrets.
+
+### Active
+- Phase POC, target `api`; 3 ranked hypotheses standing: [65] post-auth BOLA via RLS gap (AUTH_HELPED), [58] cto subdomain takeover (HUMAN_ONLY), [45] HashSessionHandoff forced-login (AUTH_HELPED).
+- PARKED: GoTrue credentialed CORS (no ambient credential), S3 SigV4 differential (needs owner keys), OIDC discovery-doc mismatch (no live exploit path).
+
+### Blocked
+- BOLA test requires two invited test accounts on kurs.onecode.de — no cheap second `authenticated` principal exists (anonymous login 404 at router, signup disabled, admin plane 401, ES256-only verifier).
+- cto takeover requires owner/HUMAN claim attempt in Perspective dashboard.
+- HashSessionHandoff PoC requires a valid invited token pair (AUTH_HELPED).
+- Binding constraint is access/ownership, not enumeration; 74+ days of anonymous probing exhausted the pre-auth plane.
+
+## Next Move
+1. `[NEXT] HUMAN:` obtain two invited test accounts (user A, user B) on kurs.onecode.de and run the read-only BOLA probe set: GET `/api/courses/{id_b}`, `/api/resources/{id_b}`, `/api/enrollments?user_id={id_b}`, and authenticated PostgREST `enrollments?select=*&user_id=eq.{id_b}` with Bearer token A, diffed against session B control.
+2. Continue event-triggered watching only: kurs chunk/page hash delta (deploy), cto CNAME/TXT delta (takeover signal); time-cadence probing has no remaining value.
+
+## Relevant Files
+- `inventory/onecode.md`: 10-host inventory + passive recon + deep service scan records.
+- `scope.yml`: program scope source (referenced, not shown).
+- `art/lead_bigpickle.txt`, `art/lead_nemotron3.txt`, `art/hypotheses-bigpickle.txt`, `art/hypotheses-nemotron3.txt`: ranked-hypothesis inputs referenced by the ranking output.
+Continue if you have next steps, or stop and ask for clarification if you are unsure how to proceed.
+[0m$ [0mfor u in "0-mbmp1iqb6hj" "1a4tqdnsy9k1l"; do printf "%s " "$u"; curl -s "https://kurs.onecode.de/_next/static/chunks/$u.js" --max-time 15 | sha256sum | cut -d' ' -f1; curl -s "https://kurs.onecode.de/_next/static/chunks/$u.js" --max-time 15 | wc -c; done; curl -s https://kurs.onecode.de/login --max-time 15 | sha256sum | cut -d' ' -f1
+0-mbmp1iqb6hj f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca
+154581
+1a4tqdnsy9k1l 5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0
+13880
+99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450
+[0m
+[DELTA] NO-CHANGE: kurs.onecode.de /login 200/18702 sha256 `99798c7d94a15abf93ec349b0b221a89dfba756cb21fc581a09d37acd21d9450` (byte-identical). Main chunk `0-mbmp1iqb6hj.js` 154581 B sha256 `f916f314ea61a8c58a055707fc63c251f38e8412ae7a08e6abd7500ec375abca` (byte-identical). Sink chunk `1a4tqdnsy9k1l.js` 13880 B sha256 `5a72d2cd8738ecadfd9ef271f062b3f2ba799617dabddf32987c2883c6dcedd0` (byte-identical). No deploy since 2026-09-19 11:33Z. cto.onecode.de: CNAME still `cname.perspective-dns.com.`, no TXT, HTTP 409 error 1001 — takeover preconditions unchanged. 13 chunk names identical to inventory.
+
+[PRIO]
+1. BOLA post-auth (RLS gap) — conf 65, AUTH_HELPED, POC
+2. cto subdomain takeover — conf 58, HUMAN_ONLY
+3. HashSessionHandoff forced-login — conf 45, AUTH_HELPED
+
+[HYP] (unchanged — no new evidence this cycle)
+- [65] IDOR/BOLA on `kurs.onecode.de` authenticated API: any invited user reads another user's enrollments/resources via object-ID enumeration once RLS is verified absent on the `enrollments`/`resources` table (GoTrue anon plane closed, so this is the remaining viable authz class).
+- [58] cto.onecode.de takeover: CNAME→Perspective with no verification TXT and 60+ days of 409 is a live unclaimed-target condition.
+- [45] HashSessionHandoff: Next.js middleware can be coerced into trusting a hash-only session handoff, forcing a login for a victim's account.
+
+[NEXT] HUMAN: (1) obtain two invited test accounts (A, B) on kurs.onecode.de and run the read-only BOLA probe set — GET `/api/courses/{id_b}`, `/api/resources/{id_b}`, `/api/enrollments?user_id={id_b}`, plus authenticated PostgREST `enrollments?select=*&user_id=eq.{id_b}` with Bearer token A, diffed against session B control. (2) Claim/verify cto.onecode.de in the Perspective dashboard to confirm or kill H-58. Passive plane is exhausted; further anonymous probes against either host will not move any hypothesis.
+
+[LEARN] Event-triggered build-diffing confirmed operational: three consecutive cycles (16:19, 18:24, 20:59Z, now 21:xx) returned byte-identical hashes. The passive attack surface of both in-scope hosts is fully mapped; every remaining lead requires ownership or a second principal, not more enumeration.
+
+[RISK] LOW for both live leads. BOLA needs an invited account to even reach the object layer. cto takeover needs a human claim action in a third-party dashboard. Time-cadence probing has no remaining value on this target set; the correct next action is a human gate, not another probe cycle.

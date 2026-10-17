@@ -1700,3 +1700,15 @@ www.onecode.de
 ## 2026-10-17 18:24:20 UTC
 
 ## 2026-10-17 20:59:41 UTC
+
+## 2026-10-17 23:03:28 UTC
+- NEW S3-compatible storage plane `aygnpacdkgtsfnhgcyjc.storage.supabase.co/storage/v1/s3` confirmed live (403 Missing signature), independent SigV4 authz bypassing Supabase RLS, access-key-ID oracle verifi
+- NEW GoTrue gateway CORS auth-state discriminator re-verified live: unauthenticated→wildcard ACAO:* no ACAC; apikey-bearing→reflected Origin with ACAC:true (router-wide on 200/401/404/405)
+- NEW Supabase Storage bucket-existence oracle now route-table-complete (10 GET classes, 81 names excluded) — closed by counter-example routes failing before bucket lookup (/object/sign, /storage/v1/s3)
+- CHANGED No deploy on `kurs.onecode.de` day-22+; main chunk `f916f314ea61a8c5...` byte-identical since 2026-09-19 11:33Z; pre-auth surface frozen at `{/login,/passwort-vergessen,/datenschutz,/rechtliches}` 200
+- CHANGED `cto.onecode.de` CNAME→`cname.perspective-dns.com` day-60+, HTTP 409 "error code:1001", TLS handshake-fail, zero verification TXT — passive probing fully converged, HUMAN_ONLY claim path
+- CHANGED Supabase REST `/rest/v1/` root flipped 503→401 "Secret API key required" at 2026-10-12 (table paths unchanged at 503); gateway oscillation continues, no permissive state
+- CHANGED Realtime WS tested: anon phx_join ok but postgres_changes denied ("Unable to subscribe... Realtime is enabled") — no anon data stream
+- CHANGED Edge Functions uniform 404 for 18 names — absent, no name oracle
+- CHANGED GitHub org scan complete: `OneCodeDevs` (compass, Kotlin nav lib) + `OneCode` (hello-guide test); zero secrets/internal endpoints/CI leaks
+- CHANGED crt.sh re-query 2026-10-09 00:43Z: exactly 5 names (onecode.de, www, kurs, cto, mta-sts) — subdomain inventory confirmed complete, zero new surface

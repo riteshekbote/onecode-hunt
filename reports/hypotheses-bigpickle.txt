@@ -1,1 +1,6 @@
-## 2026-10-17 20:59:30 UTC [target] (model bigpickle)
+## 2026-10-17 23:03:19 UTC [target] (model bigpickle)
+[PRIO]
+[HYP] (unchanged — no new evidence this cycle)
+[NEXT] HUMAN: (1) obtain two invited test accounts (A, B) on kurs.onecode.de and run the read-only BOLA probe set — GET `/api/courses/{id_b}`, `/api/resources/{id_b}`, `/api/enrollments?user_id={id_b}`, plus authenticated PostgREST `enrollments?select=*&user_id=eq.{id_b}` with Bearer token A, diffed against session B control. (2) Claim/verify cto.onecode.de in the Perspective dashboard to confirm or kill H-58. Passive plane is exhausted; further anonymous probes against either host will not move any hypothesis.
+[LEARN] Event-triggered build-diffing confirmed operational: three consecutive cycles (16:19, 18:24, 20:59Z, now 21:xx) returned byte-identical hashes. The passive attack surface of both in-scope hosts is fully mapped; every remaining lead requires ownership or a second principal, not more enumeration.
+[RISK] LOW for both live leads. BOLA needs an invited account to even reach the object layer. cto takeover needs a human claim action in a third-party dashboard. Time-cadence probing has no remaining value on this target set; the correct next action is a human gate, not another probe cycle.
