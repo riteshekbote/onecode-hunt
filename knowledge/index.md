@@ -1407,3 +1407,4 @@
 - 2026-10-17 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/storage/v1/bucket: list endpoint returns `[]` with publishable key — zero anon-visible buckets, closes bucket-enumeration avenue
 - 2026-10-17 REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; `/sso/saml/acs` behind same `saml_provider_disabled` gate; subtree bounded-root / segment-delimited / unbounded-depth
 - 2026-10-17 ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: `saml_private_key_next_configured=true` alongside `saml_enabled=false` — SAML signing material already provisioned while feature flag off; enabling is single config toggle
+- 2026-10-17 NO_DELTA ...

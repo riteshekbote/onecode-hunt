@@ -4806,3 +4806,14 @@
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/verify: token-state differential is out-of-scope descriptive-error class
 - LEARN: REJECTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/sso: no assertion-injection surface; `/sso/saml/acs` behind same `saml_provider_disabled` gate; su
 - LEARN: ACCEPTED MISCONFIG @ aygnpacdkgtsfnhgcyjc.supabase.co/auth/v1/settings: `saml_private_key_next_configured=true` alongside `saml_enabled=false` — SAML signing ma
+
+## RANKED HYPOTHESES 2026-10-17 16:11:30 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: obtain two invited test accounts (user A, user B) on kurs.onecode.de and execute the read-only BOLA probe set described in HYP 1 (GET `/api/courses/{id_b
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); no cheap second authenticated principal exists (anonymous 
+- LEARN: REJECTED AUTH @ kurs.onecode.de: forged/null session cookies (5 variants), CVE-2025-29927 bypass, PKCE `?code=` injection, reflected `?error=<script>` zero-byte
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → `cname.perspective-dns.com.` stable 60+ days; HTTP 409 `error code:1001` + TLS handshake-fail; zero verification TX
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); no cheap second authenticated principal exists (anonymous 
+- LEARN: REJECTED AUTH @ kurs.onecode.de: forged/null session cookies (5 variants), CVE-2025-29927 bypass, PKCE `?code=` injection, reflected `?error=<script>` zero-byte
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → `cname.perspective-dns.com.` stable 60+ days; HTTP 409 `error code:1001` + TLS handshake-fail; zero verification TX
+- LEARN: NO_DELTA ...
