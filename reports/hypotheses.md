@@ -4756,3 +4756,10 @@
 - LEARN: Confirmed again: after full pre-auth surface convergence, the binding constraint is access (auth principals / vendor ownership), not enumeration. Re-derive-hash
 
 ## RANKED HYPOTHESES 2026-10-16 21:42:19 UTC
+
+## RANKED HYPOTHESES 2026-10-17 00:12:36 UTC
+- [65] kurs.onecode.de: Post-auth cross-tenant BOLA via Supabase RLS policy gap (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: obtain two invited test accounts for kurs.onecode.de and execute the BOLA probe set — with session A: GET /api/courses/{id_b}, GET /api/resources/{id_b},
+- LEARN: ACCEPTED IDOR @ kurs.onecode.de: post-auth BOLA via Supabase RLS gap remains highest-value (conf 65); no cheap second authenticated principal exists (anonymous 
+- LEARN: REJECTED AUTH @ kurs.onecode.de: forged/null session cookies (5 variants), CVE-2025-29927 bypass, PKCE ?code= injection, ?error=<script> zero-byte reflection, 1
+- LEARN: ACCEPTED MISCONFIG @ cto.onecode.de: CNAME → cname.perspective-dns.com stable 60+ days; HTTP 409 error code:1001 + TLS handshake-fail; zero verification TXT; un
